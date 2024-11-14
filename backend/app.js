@@ -1,5 +1,8 @@
 import express from "express";
 import dotenv from "dotenv";
+import { crawlData } from "./utils/crawl.util.js";
+const url = "https://study4.com/";
+crawlData(url);
 dotenv.config();
 
 const app = express();
