@@ -56,3 +56,46 @@ export const crawlData = async (url) => {
   await browser.close();
   // return getExamList;
 };
+export const crawlDataFromVietJack = async (url) => {
+  const browser = await puppeteer.launch({
+    headless: true,
+  });
+  const page = await browser.newPage();
+  await page.goto(url, { waitUntil: "domcontentloaded" });
+
+  const getVietJackExamList = await page.evaluate(() => {
+    let items = document.querySelectorAll(".vietjack-exam-item");
+    let examList = [];
+
+    items.forEach((item) => {
+      const titleElement = item.querySelector(".vietjack-exam-title");
+      const title = titleElement ? titleElement.innerText : "";
+
+      const infoElements = item.querySelectorAll(
+        ".vietjack-exam-info-wrapper .vietjack-exam-info"
+      );
+      const level = infoElements[0]
+        ? infoElements[0].innerText.split(":")[1].trim()
+        : "";
+      const subject = infoElements[1]
+        ? infoElements[1].innerText.split(":")[1].trim()
+        : "";
+      const totalQuestions = infoElements[2]
+        ? infoElements[2].innerText.split(":")[1].trim()
+        : "";
+
+      examList.push({
+        title,
+        level,
+        subject,
+        totalQuestions,
+      });
+    });
+    console.log(examList);
+    return examList;
+  });
+
+  console.log(getVietJackExamList);
+  await browser.close();
+  // return getVietJackExamList;
+};
