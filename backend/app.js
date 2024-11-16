@@ -6,6 +6,8 @@ import { connect } from "./config/db.config.js";
 
 import { ENV_VARS } from "./config/envVars.config.js";
 
+import cookieParser from "cookie-parser";
+
 connect();
 
 // const url = "https://study4.com/";
@@ -16,6 +18,7 @@ crawlDataFromVietJack(url);
 const app = express();
 
 app.use(express.json());
+app.use(cookieParser());
 
 const port = ENV_VARS.PORT;
 
