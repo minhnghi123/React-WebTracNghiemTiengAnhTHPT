@@ -9,3 +9,5 @@ export const connect = async () => {
     process.exit(1);
   }
 };
+
+

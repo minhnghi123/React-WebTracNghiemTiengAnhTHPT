@@ -1,0 +1,94 @@
+.navbar {
+    background-color: #2c3e50; /* Màu nền đậm */
+    padding: 10px 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Logo */
+.navbar-brand img {
+    height: 50px; /* Điều chỉnh kích thước logo */
+    margin-right: 15px;
+}
+
+/* Các liên kết trong Navbar */
+.navbar-nav .nav-link {
+    color: #ecf0f1 !important; /* Màu chữ trắng sáng */
+    font-weight: 500;
+    margin-right: 15px;
+    transition: color 0.3s ease;
+}
+
+.navbar-nav .nav-link:hover {
+    color: #3498db !important; /* Màu xanh khi hover */
+}
+
+/* Toggle Button */
+.navbar-toggler {
+    border-color: #ecf0f1;
+}
+
+/* Form tìm kiếm */
+.form-inline .search-bar {
+    border-radius: 20px;
+    padding: 5px 15px;
+    border: none;
+}
+
+.form-inline .btn-outline-secondary {
+    border-radius: 50%;
+    padding: 6px 10px;
+    margin-left: -40px; /* Đặt nút tìm kiếm lên trên thanh nhập */
+    background-color: #3498db;
+    border: none;
+    color: #fff;
+    transition: background-color 0.3s ease;
+}
+
+.form-inline .btn-outline-secondary:hover {
+    background-color: #2980b9;
+    color: #fff;
+}
+
+/* Các nút đăng nhập và đăng xuất */
+.navbar-nav .nav-item .nav-link {
+    display: flex;
+    align-items: center;
+}
+
+    .navbar-nav .nav-item .nav-link .fas {
+        margin-right: 5px;
+    }
+
+
+/* Bảng xếp hạng và các phần tử khác */
+.table-ranking {
+    background-color: #ecf0f1;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+    .navbar-nav li {
+        display: inline-block;
+        position: relative;
+    }
+        .navbar-nav li::before,
+        .navbar-nav li::after {
+            content: "";
+            position: absolute;
+            height: 3px;
+            width: 0;
+            background: linear-gradient(90.57deg, rgb(62, 101, 254) 0%, rgb(210, 60, 255) 100%);
+            transition: .5s;
+        }
+        .navbar-nav li::after {
+            left: 0;
+            bottom: 0px;
+        }
+        .navbar-nav li::before {
+            right: 0;
+            top: 0px;
+        }
+        .navbar-nav li:hover::after,
+        .navbar-nav li:hover::before {
+            width: 100%;
+        }

@@ -1,6 +1,6 @@
 import express from "express";
 
-import { crawlData, crawlDataFromVietJack } from "./utils/crawl.util.js";
+// import { crawlData, crawlDataFromVietJack } from "./utils/crawl.util.js";
 
 import { connect } from "./config/db.config.js";
 
@@ -13,7 +13,7 @@ connect();
 // const url = "https://study4.com/";
 const url = "https://vietjack.com/trac-nghiem-tieng-anh-12/";
 // crawlData(url);
-crawlDataFromVietJack(url);
+// crawlDataFromVietJack(url);
 
 const app = express();
 

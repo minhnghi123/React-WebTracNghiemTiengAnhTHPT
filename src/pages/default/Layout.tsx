@@ -1,7 +1,7 @@
 import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
 import { Outlet } from "react-router-dom";
-
+import "./Layout.css";
 const Layout = () => {
   return (
     <div className="mx-auto min-h-screen px-5 pt-2 desktop:max-w-[1512px]">
