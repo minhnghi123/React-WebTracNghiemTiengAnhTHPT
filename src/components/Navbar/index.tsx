@@ -8,20 +8,62 @@ export const Navbar = () => {
         <div id="logo">
           <img src="/src/assets/img/P2N 1.svg" alt="Logo"></img>
         </div>
-    
-        <ul className="nav">
-          <li><a href="#">Trang Chủ</a></li>
-          <li><a href="/src/pages/default/KyThi/index.tsx">Khám Phá</a></li>
-          <li><a href="/src/pages/default/OnTap/index.tsx">Ôn Tập</a></li>   
-          <li><a href="/src/pages/default/Home">Lớp Học</a></li>
-          <li><a href="/src/pages/default/VeChungToi/index.tsx">Về Chúng Tôi</a></li>
-          <li><a href="/src/pages/default/LienHe/index.tsx">Liên Hệ</a></li>
-        </ul>
-        
-        <ul className="login">
-          <li><a href="/src/pages/default/DangNhap/index.tsx">Đăng Nhập</a></li>
-          <li><a href="/src/pages/default/DangKy/index.tsx">Đăng Ký</a></li>
-        </ul>
+        {isLoggedIn ? (
+          <ul className="navbar-nav ml-auto">
+            <li className="nav-item">
+              <a
+                className="nav-link"
+                href="/hocsinh/ThongTinCaNhan/Index"
+                style={{ color: "#007bff", fontWeight: "bold" }}
+              >
+                <span className="fas fa-user"></span> {userName}
+              </a>
+            </li>
+            <li className="nav-item">
+              <a
+                className="nav-link"
+                href="/admin/Login/Logout"
+                style={{ color: "#007bff", fontWeight: "bold" }}
+              >
+                <span className="fas fa-sign-in-alt"></span> Log Out
+              </a>
+            </li>
+          </ul>
+        ) : (
+          <ul
+            className="nav nav-pills nav-justified gap-2"
+            id="ex1"
+            role="tablist"
+          >
+            <li
+              className="nav-item bg-secondary rounded-pill"
+              role="presentation"
+            >
+              <a
+                className="nav-link text-danger"
+                id="tab-login"
+                href="/Login"
+                role="tab"
+                aria-controls="pills-login"
+                aria-selected="true"
+              >
+                Đăng nhập
+              </a>
+            </li>
+            <li className="nav-item" role="presentation">
+              <a
+                className="nav-link bg-primary text-white rounded-pill"
+                id="tab-register"
+                href="/SignUp"
+                role="tab"
+                aria-controls="pills-register"
+                aria-selected="false"
+              >
+                Đăng ký
+              </a>
+            </li>
+          </ul>
+        )}
       </div>
     </div>
   );
