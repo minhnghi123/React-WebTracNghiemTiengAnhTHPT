@@ -90,24 +90,24 @@ export const Navbar = () => {
               <a
                 className="nav-link text-danger"
                 id="tab-login"
-                href="/admin/Login/Login"
+                href="/Login"
                 role="tab"
                 aria-controls="pills-login"
                 aria-selected="true"
               >
-                Login
+                Đăng nhập
               </a>
             </li>
             <li className="nav-item" role="presentation">
               <a
                 className="nav-link bg-primary text-white rounded-pill"
                 id="tab-register"
-                href="/admin/SignUp/SignUp"
+                href="/SignUp"
                 role="tab"
                 aria-controls="pills-register"
                 aria-selected="false"
               >
-                Register
+                Đăng ký
               </a>
             </li>
           </ul>

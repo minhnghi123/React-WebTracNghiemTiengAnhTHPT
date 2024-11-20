@@ -1,10 +1,10 @@
-
 import axios from "axios";
 
 export const request = axios.create({
-    headers: {
-    "content-type": "application/json; charset=UTF-8",
-    },
-    baseURL: import.meta.env.VITE_APP_BASE_URL,
-    timeout: 50000,
+  baseURL: "http://localhost:5000",
+  timeout: 50000,
+  headers: {
+    "Content-Type": "application/json; charset=utf-8",
+  },
+  withCredentials: true, // Include this if you need to send cookies with requests
 });

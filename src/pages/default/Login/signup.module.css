@@ -1,0 +1,197 @@
+.body {
+    font-family: "Poppins", sans-serif;
+    height: 100vh;
+    background-color: #eef2f3; /* Softer light background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #333;
+    margin: 0;
+    margin: auto;
+}
+
+.container {
+    width: 100%;
+    max-width: 400px;
+    background-color: #ffffff;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15); /* Softer shadow for depth */
+    border-radius: 12px; /* Rounded corners */
+    padding: 30px;
+    overflow: hidden;
+    position: relative;
+    animation: slideIn 0.8s ease-out;
+}
+
+@keyframes slideIn {
+    0% {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+h2 {
+    margin-bottom: 20px;
+    color: #333;
+    font-size: 28px;
+    font-weight: 700; /* Bolder text for headers */
+    text-align: center; /* Centered header */
+}
+
+h2:before {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 4px;
+    background-color: #007bff; /* Primary color */
+    bottom: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    transition: width 0.4s ease;
+}
+
+h2:hover:before {
+    width: 100%;
+}
+
+.input-group {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+label {
+    font-size: 14px;
+    color: #555;
+    display: block;
+    margin-bottom: 5px;
+    transition: color 0.3s;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+    width: 95%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.5); /* Softer shadow */
+}
+
+input[type="text"]:focus + label,
+input[type="email"]:focus + label,
+input[type="password"]:focus + label {
+    color: #007bff;
+}
+
+.btn-submit {
+    width: 100%;
+    padding: 12px;
+    background-color: #007bff;
+    color: #ffffff;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.btn-submit:hover {
+    background-color: #0056b3;
+    transform: scale(1.05);
+    box-shadow: 0 4px 20px rgba(0, 123, 255, 0.3);
+}
+
+p {
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+p a {
+    color: #007bff;
+    text-decoration: none;
+    position: relative;
+    transition: color 0.3s;
+}
+
+p a:hover {
+    color: #0056b3;
+}
+
+p a:after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 1px;
+    background-color: #007bff;
+    bottom: -2px;
+    left: 0;
+    transition: width 0.3s ease;
+}
+
+p a:hover:after {
+    width: 100%;
+}
+
+/* Alert styles */
+.alert {
+    padding: 15px;
+    margin-top: 10px;
+    border: 1px solid transparent;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    font-size: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    background-color:orangered ;
+    color:white ;
+    position: fixed;
+    z-index: 99999;
+    top: 50px;
+    right: 30px;
+    animation: fadeIn 0.8s ease-in-out forwards;
+}
+
+.alert i {
+    font-size: 24px;
+    margin-right: 10px;
+}
+
+.alert span {
+    font-weight: bold;
+}
+
+/* Fade-in effect */
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Additional styles for smooth transitions */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+.btn-submit {
+    transition: all 0.3s ease; /* Unified transition for smoother effect */
+}
+
+.alert {
+    transition: all 0.4s ease; /* Smooth transition for alert appearance */
+}

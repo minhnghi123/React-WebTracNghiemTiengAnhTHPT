@@ -7,6 +7,8 @@ import {
 } from "@/components/ProtectedRoute";
 import Layout from "@/pages/default/Layout";
 import Home from "@/pages/default/Home";
+import { Login } from "@/pages/default/Login";
+import { SignUp } from "@/pages/default/Login/SignUp";
 
 export enum ERolePath {
   ADMIN = 2,
@@ -42,6 +44,13 @@ export const router = [
     element: <Layout />,
     children: [createRoute("/", <Home />, ERolePath.USER)],
   },
+  {
+    path: "/",
+    children: [
+      createRoute("/Login", <Login />, ERolePath.USER),
+      createRoute("/SignUp", <SignUp />, ERolePath.USER),
+    ],
+  },
 ];
 
 const paths = {
@@ -49,6 +58,8 @@ const paths = {
   "/profile": ["/profile/:id", "/profile/:id/edit"],
   "/about": ["/about"],
   "/contact": ["/contact"],
+  "/Login": ["/Login"],
+  "/SignUp": ["/SignUp"],
 } as const;
 
 export type TRoutePaths = (typeof paths)[keyof typeof paths][number] &
