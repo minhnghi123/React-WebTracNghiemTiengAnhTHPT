@@ -4,12 +4,9 @@ import { Outlet } from "react-router-dom";
 import "./Layout.css";
 const Layout = () => {
   return (
-    <div className="mx-auto min-h-screen px-5 pt-2 desktop:max-w-[1512px]">
+    <div id="main">
       <Navbar />
-
-      <div className="flex-1 pb-[155px] pt-[45px]">
-        <Outlet />
-      </div>
+      <Outlet />
       <Footer />
     </div>
   );

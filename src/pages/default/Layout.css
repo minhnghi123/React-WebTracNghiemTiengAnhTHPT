@@ -1,94 +1,93 @@
-.navbar {
-    background-color: #2c3e50; /* Màu nền đậm */
-    padding: 10px 20px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
 }
-
-/* Logo */
-.navbar-brand img {
-    height: 50px; /* Điều chỉnh kích thước logo */
-    margin-right: 15px;
+  
+#main {
+    width: 100%;
+    background-color: #f4f4f4;
 }
-
-/* Các liên kết trong Navbar */
-.navbar-nav .nav-link {
-    color: #ecf0f1 !important; /* Màu chữ trắng sáng */
-    font-weight: 500;
-    margin-right: 15px;
-    transition: color 0.3s ease;
-}
-
-.navbar-nav .nav-link:hover {
-    color: #3498db !important; /* Màu xanh khi hover */
-}
-
-/* Toggle Button */
-.navbar-toggler {
-    border-color: #ecf0f1;
-}
-
-/* Form tìm kiếm */
-.form-inline .search-bar {
-    border-radius: 20px;
-    padding: 5px 15px;
-    border: none;
-}
-
-.form-inline .btn-outline-secondary {
-    border-radius: 50%;
-    padding: 6px 10px;
-    margin-left: -40px; /* Đặt nút tìm kiếm lên trên thanh nhập */
-    background-color: #3498db;
-    border: none;
-    color: #fff;
-    transition: background-color 0.3s ease;
-}
-
-.form-inline .btn-outline-secondary:hover {
-    background-color: #2980b9;
-    color: #fff;
-}
-
-/* Các nút đăng nhập và đăng xuất */
-.navbar-nav .nav-item .nav-link {
+  
+#header {
     display: flex;
-    align-items: center;
+    justify-content: space-between; 
+    align-items: center;           
+    padding: 10px 20px;            
+    background-color: #ffffff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); 
+}
+  
+
+#logo img {
+    width: 120px;  
+    height: auto;
+}
+  
+.nav {
+    display: flex;
+    list-style-type: none;  
+    padding: 0;
+    margin: 0;
+}
+.nav a {
+    text-decoration: none; /* Bỏ gạch chân */
+    color: #333; /* Màu chữ mặc định */
+    font-size: 18px; /* Cỡ chữ */
+    font-weight: bold;
+    padding: 10px 15px; /* Khoảng cách xung quanh chữ */
+    border-radius: 5px; /* Bo góc cho các liên kết */
+    transition: all 0.3s ease; /* Hiệu ứng mượt mà khi hover */
+
+}
+.nav a:hover {
+    background-color: #007bff; /* Màu nền khi hover */
+    color: white; /* Màu chữ khi hover */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Thêm bóng đổ khi hover */
+    transform: scale(1.1); /* Tăng kích thước một chút khi hover */
+  }
+  
+  .nav a::before {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #62a3ff, #ff63b0);
+    transition: width 0.3s ease;
+  }
+  
+.nav a:hover::before {
+    width: 100%; 
+}
+.nav li {
+    margin: 0 15px;
 }
 
-    .navbar-nav .nav-item .nav-link .fas {
-        margin-right: 5px;
-    }
-
-
-/* Bảng xếp hạng và các phần tử khác */
-.table-ranking {
-    background-color: #ecf0f1;
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+.login {
+    display: flex;
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
 }
-    .navbar-nav li {
-        display: inline-block;
-        position: relative;
-    }
-        .navbar-nav li::before,
-        .navbar-nav li::after {
-            content: "";
-            position: absolute;
-            height: 3px;
-            width: 0;
-            background: linear-gradient(90.57deg, rgb(62, 101, 254) 0%, rgb(210, 60, 255) 100%);
-            transition: .5s;
-        }
-        .navbar-nav li::after {
-            left: 0;
-            bottom: 0px;
-        }
-        .navbar-nav li::before {
-            right: 0;
-            top: 0px;
-        }
-        .navbar-nav li:hover::after,
-        .navbar-nav li:hover::before {
-            width: 100%;
-        }
+  
+.login li {
+    margin: 0 10px;  
+}
+  
+.login a {
+    text-decoration: none;
+    color: #007bff;
+    font-size: 16px;
+    font-weight: bold;
+    padding: 8px 16px;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+}
+  
+.login a:hover {
+    background-color: #007bff;
+    color: #fff;
+}
+  
