@@ -1,6 +1,8 @@
+import { useState } from "react";
+
 export const Navbar = () => {
-  const isLoggedIn = false; // Replace with actual login check
-  const userName = "User"; // Replace with actual user name
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [userName, setUserName] = useState<string>("");
 
   return (
     <div id="main">
@@ -22,44 +24,31 @@ export const Navbar = () => {
             <li className="nav-item">
               <a
                 className="nav-link"
-                href="/admin/Login/Logout"
-                style={{ color: "#007bff", fontWeight: "bold" }}
+                href="/logout"
+                style={{ color: "#007bff" }}
               >
-                <span className="fas fa-sign-in-alt"></span> Log Out
+                <span className="fas fa-sign-out-alt"></span> Logout
               </a>
             </li>
           </ul>
         ) : (
-          <ul
-            className="nav nav-pills nav-justified gap-2"
-            id="ex1"
-            role="tablist"
-          >
-            <li
-              className="nav-item bg-secondary rounded-pill"
-              role="presentation"
-            >
+          <ul className="navbar-nav ml-auto">
+            <li className="nav-item">
               <a
-                className="nav-link text-danger"
-                id="tab-login"
-                href="/Login"
-                role="tab"
-                aria-controls="pills-login"
-                aria-selected="true"
+                className="nav-link"
+                href="/login"
+                style={{ color: "#007bff" }}
               >
-                Đăng nhập
+                <span className="fas fa-sign-in-alt"></span> Login
               </a>
             </li>
-            <li className="nav-item" role="presentation">
+            <li className="nav-item">
               <a
-                className="nav-link bg-primary text-white rounded-pill"
-                id="tab-register"
-                href="/SignUp"
-                role="tab"
-                aria-controls="pills-register"
-                aria-selected="false"
+                className="nav-link"
+                href="/signup"
+                style={{ color: "#007bff" }}
               >
-                Đăng ký
+                <span className="fas fa-user-plus"></span> Sign Up
               </a>
             </li>
           </ul>
@@ -68,3 +57,10 @@ export const Navbar = () => {
     </div>
   );
 };
+
+// Utility function to get cookie value
+export function getCookie(name: string) {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop()?.split(";").shift();
+}

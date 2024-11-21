@@ -1,32 +1,16 @@
-import React, { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import React, { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import styles from "./login.module.css";
 import { AuthApi } from "@/services/Auth";
 
 export const Login = () => {
-  const location = useLocation();
   const [message, setMessage] = useState<string | null>(null);
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
 
-  useEffect(() => {
-    if (location.state && location.state.message) {
-      setMessage(location.state.message);
-    }
-  }, [location.state]);
-
-  // Hide the success message after 2 seconds
-  if (message) {
-    setTimeout(() => {
-      setMessage(null);
-    }, 2000);
-  }
-
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    // Handle form submission logic here
     console.log("Username:", username);
     console.log("Password:", password);
 
@@ -37,22 +21,13 @@ export const Login = () => {
     try {
       const rq = await AuthApi.login({ email: email, password: pass });
       console.log(rq);
-      setMessage(rq?.message);
-      if (rq?.success) {
-        // alert("Đăng nhập thành công");
-        // setMessage(rq?.data?.message);
-      } else {
-        // setMessage("Login failed");
-      }
+      setMessage(rq?.data.message);
     } catch (error: any) {
       if (error.response) {
-        // Server responded with a status other than 200 range
         setMessage(`Login failed: ${error.response.data.message}`);
       } else if (error.request) {
-        // Request was made but no response was received
         setMessage("Network error: Please check your connection.");
       } else {
-        // Something else happened while setting up the request
         setMessage(`Error: ${error.message}`);
       }
     }
