@@ -3,16 +3,16 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import styles from "./login.module.css";
 import { AuthApi } from "@/services/Auth";
+import { useAuthContext } from "@/contexts/AuthProvider";
 
 export const Login = () => {
   const [message, setMessage] = useState<string | null>(null);
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const { handleLogin } = useAuthContext();
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    console.log("Username:", username);
-    console.log("Password:", password);
 
     getUser(username, password);
   };
@@ -22,6 +22,9 @@ export const Login = () => {
       const rq = await AuthApi.login({ email: email, password: pass });
       console.log(rq);
       setMessage(rq?.data.message);
+      if (rq?.status === 200) {
+        handleLogin(rq?.data.user);
+      }
     } catch (error: any) {
       if (error.response) {
         setMessage(`Login failed: ${error.response.data.message}`);

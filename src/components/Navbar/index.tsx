@@ -1,9 +1,28 @@
-import { useState } from "react";
+import { useAuthContext } from "@/contexts/AuthProvider";
+import { AuthApi } from "@/services/Auth";
+import { useEffect, useState } from "react";
 
 export const Navbar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [userName, setUserName] = useState<string>("");
-
+  const { user, handleLogout } = useAuthContext();
+  const handleBTNLogout = async () => {
+    handleLogout();
+    setIsLoggedIn(false);
+    setUserName("");
+    try {
+      const rq = await AuthApi.logout();
+      console.log(rq?.data.message);
+    } catch (error: any) {
+      console.log(error);
+    }
+  };
+  useEffect(() => {
+    if (user) {
+      setIsLoggedIn(true);
+      setUserName(user.username);
+    }
+  }, []);
   return (
     <div id="main">
       <div id="header">
@@ -23,11 +42,12 @@ export const Navbar = () => {
             </li>
             <li className="nav-item">
               <a
+                onClick={() => handleBTNLogout()}
                 className="nav-link"
-                href="/logout"
+                href="#"
                 style={{ color: "#007bff" }}
               >
-                <span className="fas fa-sign-out-alt"></span> Logout
+                <span className="fas fa-sign-out-alt"></span> Đăng xuất
               </a>
             </li>
           </ul>

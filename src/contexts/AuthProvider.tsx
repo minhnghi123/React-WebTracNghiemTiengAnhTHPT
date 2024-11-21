@@ -1,11 +1,12 @@
 import React, { PropsWithChildren, useContext } from "react";
 
 export type TUser = {
-  id: string;
-
-  userName: string;
-  PhanQuyen?: string;
-  email?: string;
+  _id: string;
+  username: string;
+  email: string;
+  avatar: string;
+  role: "student" | "teacher" | "admin" | "user";
+  __v: number;
 };
 type TContext = {
   user: TUser | undefined;
@@ -41,7 +42,7 @@ const AuthProvider = ({ children }: TAuthProviderProps) => {
   );
 };
 
-const useAuthContext = () => {
+const useAuthContext = (): TContext => {
   const auth = useContext(AuthContext);
   if (auth === undefined)
     throw new Error("useAuthContext must be used within a AuthProvider");

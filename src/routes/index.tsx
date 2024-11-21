@@ -16,7 +16,7 @@ export enum ERolePath {
   ADMIN = 2,
   GIAOVIEN = 3,
   USER = 1,
-  GUEST = 0,
+  STUDENT = 0,
 }
 
 // const isCorrectPath = (path: string) => {
