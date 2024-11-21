@@ -2,14 +2,12 @@ import { TaiKhoan } from "../../models/Taikhoan.model.js";
 import bcryptjs from "bcryptjs";
 import { generateTokenAndSetToken } from "../../utils/generateToken.util.js";
 export async function signup(req, res) {
-  
   try {
     const { username, email, password } = req.body;
     if (!username || !email || !password) {
       return res.status(400).json({ message: "All fields are required" });
     }
     if (password.length < 6) {
-
       return res
         .status(400)
         .json({ message: "Password must be at least 6 characters" });
@@ -64,7 +62,10 @@ export async function login(req, res) {
       return res.status(400).json({ message: "Invalid password" });
     }
     generateTokenAndSetToken(user._id, res); //jwt
-    res.status(200).json({ message: "Logged in successfully" });
+    res.status(200).json({
+      message: "Logged in successfully",
+      user: user,
+    });
   } catch (error) {
     res.status(400).json({ message: "Internal server error" });
   }
