@@ -6,14 +6,15 @@ export const protectedRoute = async (req, res, next) => {
   try {
     const token = req.cookies["jwt-token"];
     if (!token) {
-      return res.status(401).json({
-        success: false,
+      return res.status(400).json({
+        code: 400,
         message: "Not found any token",
       });
     }
     const decoded = await jwt.verify(token, ENV_VARS.JWT_SECRET);
     if (!decoded) {
-      return res.status(401).json({
+      return res.status(400).json({
+        code: 400,
         success: false,
         message: "Unauthorized-Invalid token !",
       });
@@ -22,7 +23,8 @@ export const protectedRoute = async (req, res, next) => {
       _id: decoded.userId,
     });
     if (!user) {
-      return res.status(401).json({
+      return res.status(400).json({
+        code: 400,
         success: false,
         message: "Unauthorized-User not found",
       });
@@ -31,8 +33,8 @@ export const protectedRoute = async (req, res, next) => {
     next();
   } catch (error) {
     console.error(error);
-    res.status(500).json({
-      success: false,
+    res.status(400).json({
+      code: 400,
       message: "Internal server error",
     });
   }
