@@ -7,6 +7,10 @@ import {
 } from "@/components/ProtectedRoute";
 import Layout from "@/pages/default/Layout";
 import Home from "@/pages/default/Home";
+import { Login } from "@/pages/default/Login";
+import { SignUp } from "@/pages/default/Login/SignUp";
+import { VeChungToi } from "@/pages/default/VeChungToi";
+import { LienHe } from "@/pages/default/LienHe";
 
 export enum ERolePath {
   ADMIN = 2,
@@ -40,15 +44,29 @@ export const router = [
   {
     path: "/",
     element: <Layout />,
-    children: [createRoute("/", <Home />, ERolePath.USER)],
+    children: [
+      createRoute("/", <Home />, ERolePath.USER),
+      createRoute("/About", <VeChungToi />, ERolePath.USER),
+      createRoute("/Contact", <LienHe />, ERolePath.USER),
+    ],
+  },
+  {
+    path: "/",
+    element: <Layout />,
+    children: [
+      createRoute("/Login", <Login />, ERolePath.USER),
+      createRoute("/SignUp", <SignUp />, ERolePath.USER),
+    ],
   },
 ];
 
 const paths = {
   "/": ["/"],
   "/profile": ["/profile/:id", "/profile/:id/edit"],
-  "/about": ["/about"],
-  "/contact": ["/contact"],
+  "/About": ["/About"],
+  "/Contact": ["/Contact"],
+  "/Login": ["/Login"],
+  "/SignUp": ["/SignUp"],
 } as const;
 
 export type TRoutePaths = (typeof paths)[keyof typeof paths][number] &

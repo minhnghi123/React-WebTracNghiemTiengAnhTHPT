@@ -8,7 +8,7 @@ const NotFound = () => {
         }}
       >
         404 không tìm thấy
-      </span>
+      </span>{" "}
     </div>
   );
 };

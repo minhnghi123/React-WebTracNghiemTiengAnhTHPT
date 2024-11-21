@@ -1,0 +1,93 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+}
+  
+#main {
+    width: 100%;
+    background-color: #f4f4f4;
+}
+  
+#header {
+    display: flex;
+    justify-content: space-between; 
+    align-items: center;           
+    padding: 10px 20px;            
+    background-color: #ffffff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); 
+}
+  
+
+#logo img {
+    width: 120px;  
+    height: auto;
+}
+  
+.nav {
+    display: flex;
+    list-style-type: none;  
+    padding: 0;
+    margin: 0;
+}
+.nav a {
+    text-decoration: none; /* Bỏ gạch chân */
+    color: #333; /* Màu chữ mặc định */
+    font-size: 18px; /* Cỡ chữ */
+    font-weight: bold;
+    padding: 10px 15px; /* Khoảng cách xung quanh chữ */
+    border-radius: 5px; /* Bo góc cho các liên kết */
+    transition: all 0.3s ease; /* Hiệu ứng mượt mà khi hover */
+
+}
+.nav a:hover {
+    background-color: #007bff; /* Màu nền khi hover */
+    color: white; /* Màu chữ khi hover */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Thêm bóng đổ khi hover */
+    transform: scale(1.1); /* Tăng kích thước một chút khi hover */
+  }
+  
+  .nav a::before {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #62a3ff, #ff63b0);
+    transition: width 0.3s ease;
+  }
+  
+.nav a:hover::before {
+    width: 100%; 
+}
+.nav li {
+    margin: 0 15px;
+}
+
+.login {
+    display: flex;
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+  
+.login li {
+    margin: 0 10px;  
+}
+  
+.login a {
+    text-decoration: none;
+    color: #007bff;
+    font-size: 16px;
+    font-weight: bold;
+    padding: 8px 16px;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+}
+  
+.login a:hover {
+    background-color: #007bff;
+    color: #fff;
+}
+  
