@@ -1,19 +1,29 @@
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import styles from "./login.module.css";
 import { AuthApi } from "@/services/Auth";
 
 export const Login = () => {
+  const location = useLocation();
   const [message, setMessage] = useState<string | null>(null);
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+
+  useEffect(() => {
+    if (location.state && location.state.message) {
+      setMessage(location.state.message);
+    }
+  }, [location.state]);
+
   // Hide the success message after 2 seconds
   if (message) {
     setTimeout(() => {
       setMessage(null);
     }, 2000);
   }
+
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     // Handle form submission logic here
@@ -28,7 +38,7 @@ export const Login = () => {
       const rq = await AuthApi.login({ email: email, password: pass });
       console.log(rq);
       setMessage(rq?.message);
-      if (rq?.data?.success) {
+      if (rq?.success) {
         // alert("Đăng nhập thành công");
         // setMessage(rq?.data?.message);
       } else {
@@ -47,18 +57,18 @@ export const Login = () => {
       }
     }
   };
+
   return (
-    <div>
+    <div className="wrapper fadeInDown">
       {message && (
-        <div
-          className={`${styles.alert} alert-danger alert-fade alert-success`}
-        >
-          <i className="bi bi-exclamation-triangle-fill"></i>
+        <div className="alert alert-success alert-fade">
+          <i className="bi bi-check-circle-fill"></i>
           <span>{message}</span>
         </div>
       )}
-      <div className={styles.wrapper}>
-        <div className={styles.formContent}>
+      <div className="formContent">
+        <h2>Đăng Nhập</h2>
+        <div>
           {/* Tabs Titles */}
           {/* Icon */}
           <div className={`${styles.fadeIn} ${styles.first}`}>

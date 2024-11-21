@@ -5,15 +5,19 @@ export interface User {
   email: string;
   password: string;
 }
-
+export interface UserDK {
+  username: string;
+  email: string;
+  password: string;
+}
 export const AuthApi = {
   getUser: async () => {
     const response = await axios.get("http://localhost:5000/");
     return response.data;
   },
-  createUser: async (data: User) => {
-    const response = await request.post(`/api/v1/user/createUser`, data);
-    return response.data;
+  createUser: async (data: UserDK) => {
+    const response = await request.post(`/auth/signup`, data);
+    return response;
   },
 
   login: async (data: User) => {

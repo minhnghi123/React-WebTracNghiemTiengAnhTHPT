@@ -46,6 +46,7 @@ export const router = [
   },
   {
     path: "/",
+    element: <Layout />,
     children: [
       createRoute("/Login", <Login />, ERolePath.USER),
       createRoute("/SignUp", <SignUp />, ERolePath.USER),
