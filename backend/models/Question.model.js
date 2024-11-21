@@ -4,7 +4,6 @@ const QuestionSchema = new mongoose.Schema({
   level: {
     type: String,
     enum: ["easy", "medium", "hard"],
-    required: true,
     default: "easy",
   },
   answers: [
@@ -19,4 +18,4 @@ const QuestionSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
-module.exports = mongoose.model("Question", QuestionSchema);
+export const Question = mongoose.model("Question", QuestionSchema);

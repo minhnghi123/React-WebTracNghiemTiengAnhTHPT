@@ -53,7 +53,7 @@ import StealthPlugin from "puppeteer-extra-plugin-stealth";
 //     return examList;
 //   });
 
-  console.log(getExamList);
-  await browser.close();
-  // return getExamList;
-};
+//   console.log(getExamList);
+//   await browser.close();
+//   // return getExamList;
+// };
