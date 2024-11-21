@@ -1,44 +1,81 @@
 const questionWrappers = document.querySelectorAll(".question-wrapper");
 
-const questionsData = Array.from(questionWrappers).map((questionWrapper) => {
-  const questionId = questionWrapper.getAttribute("data-qid");
-  const questionNumber = questionWrapper.querySelector(
-    ".question-number strong"
-  ).textContent;
-  const questionText = questionWrapper
-    .querySelector(".question-text p")
-    .textContent.trim();
+const questionsData = [];
+const getExplanation = () => {
+  const explanation = document.querySelectorAll(
+    ".question-explanation-wrapper .answer-result"
+  );
+  let knowledge, explanations, translation;
+  let explanationObj = [];
+  explanation.forEach((ex) => {
+    const paragraphs = ex.querySelectorAll("p");
 
-  const answers = Array.from(
-    questionWrapper.querySelectorAll(".form-check")
-  ).map((answer) => {
-    const answerLabel = answer
-      .querySelector(".form-check-label")
-      .textContent.trim();
-    const answerValue = answer.querySelector("input").value;
+    paragraphs.forEach((p) => {
+      const text = p.textContent.trim();
 
-    return { answerValue, answerLabel };
+      if (text.startsWith("Kiến thức:")) {
+        knowledge = text.replace("Kiến thức:", "").trim();
+      } else if (text.startsWith("Giải thích:")) {
+        explanations = text.replace("Giải thích:", "").trim();
+      } else if (text.startsWith("Tạm dịch:")) {
+        translation = text.replace("Tạm dịch:", "").trim();
+      }
+    });
+    explanationObj.push({
+      knowledge,
+      explanations,
+      translation,
+    });
+  });
+  return explanationObj;
+};
+const explanationData = getExplanation();
+questionWrappers.forEach((wrapper) => {
+  const qid = wrapper.getAttribute("data-qid");
+
+  const content = wrapper.querySelector(".question-content");
+  const questionElement = content.querySelector(".question-text");
+  const isCorrectHTML = content.querySelector(".text-success").innerHTML;
+  const str = isCorrectHTML.split(" ")[2];
+  const str2 = str.split(":");
+
+  const trueAnswer = str2[1];
+
+  let questionText = "";
+  questionElement.childNodes.forEach((node) => {
+    if (node.nodeType === Node.ELEMENT_NODE) {
+      questionText += node.textContent.trim() + "\n";
+    }
   });
 
-  return {
-    questionId,
-    questionNumber,
+  const answers = [];
+  content.querySelectorAll(".form-check").forEach((answer) => {
+    const value = answer.querySelector("input").value;
+    const label = answer.querySelector("label").innerText;
+    answers.push({
+      value,
+      label,
+    });
+  });
+  for (const ans of answers) {
+    // console.log(ans.value, trueAnswer);
+    ans["isCorrect"] = ans.value === trueAnswer ? true : false;
+  }
+  questionsData.push({
+    id: qid,
     questionText,
     answers,
-  };
+  });
 });
-console.log(questionsData);
+
+questionsData.forEach((q, idx) => {
+  q["explanationData"] = explanationData[idx];
+});
+
 fetch("http://localhost:5000/question/post", {
   method: "POST",
   headers: {
     "Content-Type": "application/json",
   },
   body: JSON.stringify(questionsData),
-})
-  .then((response) => response.json())
-  .then((data) => {
-    console.log("Success:", data);
-  })
-  .catch((error) => {
-    console.error("Error:", error);
-  });
+});

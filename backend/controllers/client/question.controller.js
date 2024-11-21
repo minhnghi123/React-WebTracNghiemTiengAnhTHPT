@@ -4,17 +4,20 @@ import fs from "fs";
 import path from "path";
 
 // Convert questions data to Excel format
-const convertToExcelData = (questionsData) => {
+const convertToExcelData = async (questionsData) => {
   const data = [];
   questionsData.forEach((question) => {
     const row = {
-      QuestionId: question.questionId,
-      QuestionNumber: question.questionNumber,
+      QuestionId: question.id,
       QuestionText: question.questionText,
+      QuestionKnowledge: question.explanationData.knowledge,
+      QuestionExplanation: question.explanationData.explanations,
+      QuestionTranslation: question.explanationData.translation,
     };
 
     question.answers.forEach((answer) => {
-      row[`Answer${answer.answerValue}`] = answer.answerLabel;
+      row[`Answer${answer.value}`] =
+        answer.isCorrect == true ? answer.label + "*" : answer.label;
     });
 
     data.push(row);
@@ -25,26 +28,26 @@ const convertToExcelData = (questionsData) => {
 export const questionPost = async (req, res) => {
   try {
     const questions = req.body;
+    // console.log(questions);
     if (!questions || questions.length === 0) {
       return res.status(400).json({
         message: "No questions provided to save.",
       });
     }
-    const excelData = convertToExcelData(questions);
+    const excelData = await convertToExcelData(questions);
+    // console.log(excelData);
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.json_to_sheet(excelData);
     XLSX.utils.book_append_sheet(wb, ws, "Questions");
-    const filePath = path.join("..", "excels", "questionsData.xlsx");
+
+    const filePath = path.join("/backend", "excels", "questionsDataNEW.xlsx");
     const dirPath = path.dirname(filePath);
+
     if (!fs.existsSync(dirPath)) {
       fs.mkdirSync(dirPath, { recursive: true });
     }
     XLSX.writeFile(wb, filePath);
     console.log(`File has been saved to ${filePath}`);
-    res.json({
-      message: "Questions have been successfully saved to an Excel file",
-      filePath,
-    });
   } catch (error) {
     console.error("Error saving questions to Excel:", error);
     res.status(500).json({
