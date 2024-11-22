@@ -11,6 +11,7 @@ import { Login } from "@/pages/default/Login";
 import { SignUp } from "@/pages/default/Login/SignUp";
 import { VeChungToi } from "@/pages/default/VeChungToi";
 import { LienHe } from "@/pages/default/LienHe";
+import { PhongThi } from "@/pages/default/PhongThi";
 
 export enum ERolePath {
   ADMIN = 2,
@@ -48,6 +49,7 @@ export const router = [
       createRoute("/", <Home />, ERolePath.USER),
       createRoute("/About", <VeChungToi />, ERolePath.USER),
       createRoute("/Contact", <LienHe />, ERolePath.USER),
+      createRoute("/PhongThi", <PhongThi />, ERolePath.USER),
     ],
   },
   {
@@ -67,6 +69,7 @@ const paths = {
   "/Contact": ["/Contact"],
   "/Login": ["/Login"],
   "/SignUp": ["/SignUp"],
+  "/PhongThi": ["/PhongThi"],
 } as const;
 
 export type TRoutePaths = (typeof paths)[keyof typeof paths][number] &

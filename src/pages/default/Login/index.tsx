@@ -4,13 +4,14 @@ import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import styles from "./login.module.css";
 import { AuthApi } from "@/services/Auth";
 import { useAuthContext } from "@/contexts/AuthProvider";
+import { useNavigate } from "react-router-dom";
 
 export const Login = () => {
   const [message, setMessage] = useState<string | null>(null);
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const { handleLogin } = useAuthContext();
-
+  const navigate = useNavigate();
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -22,8 +23,9 @@ export const Login = () => {
       const rq = await AuthApi.login({ email: email, password: pass });
       console.log(rq);
       setMessage(rq?.data.message);
-      if (rq?.status === 200) {
+      if (rq?.status === 201) {
         handleLogin(rq?.data.user);
+        navigate("/");
       }
     } catch (error: any) {
       if (error.response) {

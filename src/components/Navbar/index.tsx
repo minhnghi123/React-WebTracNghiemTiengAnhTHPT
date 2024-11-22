@@ -1,6 +1,6 @@
 import { useAuthContext } from "@/contexts/AuthProvider";
 import { AuthApi } from "@/services/Auth";
-import { useEffect, useState } from "react";
+import { useLayoutEffect, useState } from "react";
 
 export const Navbar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
@@ -17,12 +17,12 @@ export const Navbar = () => {
       console.log(error);
     }
   };
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (user) {
       setIsLoggedIn(true);
       setUserName(user.username);
     }
-  }, []);
+  }, [user]);
   return (
     <div id="main">
       <div id="header">
@@ -38,6 +38,15 @@ export const Navbar = () => {
                 style={{ color: "#007bff", fontWeight: "bold" }}
               >
                 <span className="fas fa-user"></span> {userName}
+              </a>
+            </li>
+            <li className="nav-item">
+              <a
+                className="nav-link"
+                href="#"
+                style={{ color: "#007bff", fontWeight: "bold" }}
+              >
+                <span className="fas fa-user"></span> {user?.role}
               </a>
             </li>
             <li className="nav-item">
