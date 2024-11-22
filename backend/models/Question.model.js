@@ -13,8 +13,21 @@ const QuestionSchema = new mongoose.Schema({
     },
   ],
   subject: { type: String, default: "English" },
-  author: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-  isApproved: { type: Boolean, default: false },
+  knowledge: {
+    type: String,
+    default: "General Knowledge",
+  },
+  translation: {
+    type: String,
+    default: "",
+  },
+  explanation: {
+    type: String,
+    default: "",
+  },
+  // author: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  // isApproved: { type: Boolean, default: false },
+  deleted: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now },
 });
 
