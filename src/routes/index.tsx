@@ -18,6 +18,7 @@ import { QuanLyCauHoi } from "@/pages/giaovien/QuanLyCauHoi";
 import LayoutAdmin from "@/pages/admin/DashBoard/LayoutGiaoVien";
 import { DashBoarAdmin } from "@/pages/admin/DashBoard";
 import NotFound from "@/pages/NotFound";
+import { OnTap } from "@/pages/default/OnTap";
 
 export enum ERolePath {
   ADMIN = 2,
@@ -56,6 +57,7 @@ export const router = [
       createRoute("/About", <VeChungToi />, ERolePath.USER),
       createRoute("/Contact", <LienHe />, ERolePath.USER),
       createRoute("/PhongThi", <PhongThi />, ERolePath.USER),
+      createRoute("/OnTap", <OnTap />, ERolePath.USER),
     ],
   },
   {
@@ -97,6 +99,7 @@ const paths = {
   "/NganHangCauHoi": ["/NganHangCauHoi"],
   "/giaovien/NganHangCauHoi": ["/giaovien/NganHangCauHoi"],
   "/Admin": ["/Admin"],
+  "/OnTap": ["/OnTap"],
 } as const;
 
 export type TRoutePaths = (typeof paths)[keyof typeof paths][number] &
