@@ -1,14 +1,17 @@
+import "bootstrap/dist/css/bootstrap.min.css"; // Import Bootstrap CSS
+
 const NotFound = () => {
   return (
-    <div className="flex flex-1 flex-col items-center justify-center">
+    <div className="d-flex flex-column align-items-center justify-content-center vh-100">
       <span
-        className="text-[192px] text-secondary"
+        className="display-1 text-danger "
         style={{
-          textShadow: "0px 0px 44px hsla(var(--secondary), 0.35)",
+          textShadow: "0px 0px 44px rgba(108, 117, 125, 0.35)", // Adjusted to match Bootstrap's secondary color
+          fontWeight: "bold",
         }}
       >
         404 không tìm thấy
-      </span>{" "}
+      </span>
     </div>
   );
 };

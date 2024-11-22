@@ -2,7 +2,7 @@ import type { Question } from "@/services/teacher";
 import { cleanString } from "@/utils/cn";
 import { Divider, Flex, Tag } from "antd";
 import clsx from "clsx";
-
+import "./cauhoi.css";
 const QuestionComponent: React.FC<Question> = ({
   content,
   level,
@@ -17,11 +17,11 @@ const QuestionComponent: React.FC<Question> = ({
       <h3 className="text-xl font-bold mb-2" style={{ whiteSpace: "pre-wrap" }}>
         {cleanString(content)}
       </h3>{" "}
-      <div className="mt-4">
+      <div className="mt-1">
         {answers.map((answer) => (
           <div
             key={answer._id}
-            className={`p-2 rounded mb-2 ${
+            className={`ml-2 rounded mb-2 ${
               answer.isCorrect ? "bg-green-100" : "bg-red-100"
             }`}
             style={{ whiteSpace: "pre-wrap" }}

@@ -1,8 +1,41 @@
 import { useAuthContext } from "@/contexts/AuthProvider";
 import { AuthApi } from "@/services/Auth";
 import { useLayoutEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button, Dropdown, Space, MenuProps } from "antd";
 
 export const Navbar = () => {
+  const items: MenuProps["items"] = [
+    {
+      key: "1",
+      label: (
+        <a rel="noopener noreferrer" href="#">
+          Thông tin cá nhân
+        </a>
+      ),
+    },
+    {
+      key: "2",
+      label: (
+        <a rel="noopener noreferrer" href="/GiaoVien">
+          Vào giao diện giáo viên
+        </a>
+      ),
+    },
+    {
+      key: "3",
+      label: (
+        <a
+          onClick={() => handleBTNLogout()}
+          className="nav-link"
+          href="#"
+          style={{ color: "#007bff" }}
+        >
+          <span className="fas fa-sign-out-alt"></span> Đăng xuất
+        </a>
+      ),
+    },
+  ];
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [userName, setUserName] = useState<string>("");
   const { user, handleLogout } = useAuthContext();
@@ -23,42 +56,37 @@ export const Navbar = () => {
       setUserName(user.username);
     }
   }, [user]);
+  const navigator = useNavigate();
   return (
     <div id="main">
       <div id="header">
-        <div id="logo">
+        <div
+          onClick={() => navigator("/")}
+          id="logo"
+          className="cursor-pointer"
+          style={{ cursor: "pointer" }}
+        >
           <img src="/src/assets/img/P2N 1.svg" alt="Logo"></img>
         </div>
         {isLoggedIn ? (
           <ul className="navbar-nav ml-auto">
-            <li className="nav-item">
+            <Dropdown menu={{ items }} placement="bottomRight">
               <a
+                onClick={(e) => e.preventDefault()}
                 className="nav-link"
                 href="/hocsinh/ThongTinCaNhan/Index"
                 style={{ color: "#007bff", fontWeight: "bold" }}
               >
-                <span className="fas fa-user"></span> {userName}
+                <li className="nav-item">
+                  <span className="fas fa-user"></span> {userName}
+                </li>
+                <li className="nav-item">
+                  {" "}
+                  <span className="fas fa-user"></span>{" "}
+                  {user?.role === "student" ? "Học sinh" : "Giáo viên"}
+                </li>
               </a>
-            </li>
-            <li className="nav-item">
-              <a
-                className="nav-link"
-                href="#"
-                style={{ color: "#007bff", fontWeight: "bold" }}
-              >
-                <span className="fas fa-user"></span> {user?.role}
-              </a>
-            </li>
-            <li className="nav-item">
-              <a
-                onClick={() => handleBTNLogout()}
-                className="nav-link"
-                href="#"
-                style={{ color: "#007bff" }}
-              >
-                <span className="fas fa-sign-out-alt"></span> Đăng xuất
-              </a>
-            </li>
+            </Dropdown>
           </ul>
         ) : (
           <ul className="navbar-nav ml-auto">

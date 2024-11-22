@@ -32,7 +32,7 @@ export const QuanLyCauHoi = () => {
   }, []);
   return (
     <div className="">
-      <h1 className="text-3xl font-bold text-center">Ngân hàng cua hỏi</h1>
+      <h1 className="text-3xl font-bold text-center">Ngân hàng câu hỏi</h1>
       {data
         ? data.map((item) => (
             <div key={item._id}>
