@@ -27,7 +27,10 @@ const convertToExcelData = async (questionsData) => {
 
 export const questionPost = async (req, res) => {
   try {
-    const questions = req.body;
+    const questions = req.body.questionsData;
+    let examTitle = req.body.examTitle;
+    examTitle = examTitle.replace(/\[\d{4}-\d{4}\]/, "").trim();
+    examTitle = examTitle.trim().split(/\s+/).join("-");
     // console.log(questions);
     if (!questions || questions.length === 0) {
       return res.status(400).json({
@@ -40,7 +43,7 @@ export const questionPost = async (req, res) => {
     const ws = XLSX.utils.json_to_sheet(excelData);
     XLSX.utils.book_append_sheet(wb, ws, "Questions");
 
-    const filePath = path.join("/backend", "excels", "questionsDataNEW.xlsx");
+    const filePath = path.join("/backend", "excels", `${examTitle}.xlsx`);
     const dirPath = path.dirname(filePath);
 
     if (!fs.existsSync(dirPath)) {

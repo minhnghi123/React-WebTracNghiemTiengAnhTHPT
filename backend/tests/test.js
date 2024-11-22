@@ -1,34 +1,58 @@
 const questionWrappers = document.querySelectorAll(".question-wrapper");
-
+const h1 = document.querySelector("h1");
+// console.log(h1.textContent.split(":"));
+const examTitle = h1.textContent.split(":")[1];
 const questionsData = [];
 const getExplanation = () => {
   const explanation = document.querySelectorAll(
     ".question-explanation-wrapper .answer-result"
   );
-  let knowledge, explanations, translation;
-  let explanationObj = [];
+
+  const explanationObj = [];
+
   explanation.forEach((ex) => {
     const paragraphs = ex.querySelectorAll("p");
+
+    let knowledge = "";
+    let explanations = "";
+    let translation = "";
+
+    let checkknow = false,
+      checkex = false,
+      checktrans = false;
 
     paragraphs.forEach((p) => {
       const text = p.textContent.trim();
 
-      if (text.startsWith("Kiến thức:")) {
-        knowledge = text.replace("Kiến thức:", "").trim();
-      } else if (text.startsWith("Giải thích:")) {
-        explanations = text.replace("Giải thích:", "").trim();
-      } else if (text.startsWith("Tạm dịch:")) {
-        translation = text.replace("Tạm dịch:", "").trim();
+      if (text.startsWith("Kiến thức:") && !checkknow) {
+        knowledge += text.replace("Kiến thức:", "").trim();
+        checkknow = true;
+      } else if (text.startsWith("Giải thích:") && !checkex) {
+        explanations += text.replace("Giải thích:", "").trim();
+        checkex = true;
+      } else if (text.startsWith("Tạm dịch:") && !checktrans) {
+        translation += text.replace("Tạm dịch:", "").trim();
+        checktrans = true;
+      } else {
+        if (!checkex && checkknow) {
+          knowledge += "\n" + text;
+        } else if (!checktrans && checkex) {
+          explanations += "\n" + text;
+        } else if (checktrans) {
+          translation += "\n" + text;
+        }
       }
     });
     explanationObj.push({
-      knowledge,
-      explanations,
-      translation,
+      knowledge: knowledge.trim(),
+      explanations: explanations.trim(),
+      translation: translation.trim(),
     });
   });
+
   return explanationObj;
 };
+
 const explanationData = getExplanation();
 questionWrappers.forEach((wrapper) => {
   const qid = wrapper.getAttribute("data-qid");
@@ -77,5 +101,8 @@ fetch("http://localhost:5000/question/post", {
   headers: {
     "Content-Type": "application/json",
   },
-  body: JSON.stringify(questionsData),
+  body: JSON.stringify({
+    examTitle,
+    questionsData,
+  }),
 });
