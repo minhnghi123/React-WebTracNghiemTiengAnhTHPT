@@ -27,6 +27,7 @@ const QuestionSchema = new mongoose.Schema({
   },
   // author: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   // isApproved: { type: Boolean, default: false },
+  deleted: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now },
 });
 
