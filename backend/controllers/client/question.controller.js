@@ -25,6 +25,42 @@ const convertToExcelData = async (questionsData) => {
   return data;
 };
 
+//Read the file excel
+const importQuestion = async (filePath) => {
+  const workbook = XLSX.readFile(filePath);
+  const sheetName = workbook.SheetNames[0];
+  const data = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+  try {
+    data.forEach(async (questionData) => {
+      const {
+        QuestionText: content,
+        AnswerA,
+        AnswerB,
+        AnswerC,
+        AnswerD,
+        QuestionKnowledge: knowledge,
+        QuestionTranslation: translation,
+        QuestionExplanation: explanation,
+      } = questionData;
+      const answers = [AnswerA, AnswerB, AnswerC, AnswerD].map((answer) => ({
+        text: answer.replace("*", "").trim(),
+        isCorrect: answer.includes("*"),
+      }));
+      const newQuestion = new Question({
+        content: content,
+        answers: answers,
+        knowledge: knowledge,
+        translation: translation,
+        explanation: explanation,
+      });
+      await newQuestion.save();
+    });
+    console.log("All questions have been saved successfully.");
+  } catch (error) {
+    console.log("Error saving question", error);
+  }
+};
+
 export const questionPost = async (req, res) => {
   try {
     const questions = req.body.questionsData;
@@ -51,6 +87,8 @@ export const questionPost = async (req, res) => {
     }
     XLSX.writeFile(wb, filePath);
     console.log(`File has been saved to ${filePath}`);
+    //read the excel file ,then save data to db
+    importQuestion(filePath);
   } catch (error) {
     console.error("Error saving questions to Excel:", error);
     res.status(500).json({
