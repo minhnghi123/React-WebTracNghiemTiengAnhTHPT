@@ -28,3 +28,88 @@ export const questionManagement = async (req, res) => {
     hasNextPage: currentPage < totalPage,
   });
 };
+export const detail = async (req, res) => {
+  const question = await Question.findById(req.params.id);
+  if (!question) {
+    return res.status(400).json({
+      code: 400,
+      message: "Question not found",
+    });
+  }
+  res.status(200).json({
+    code: 200,
+    message: "Get question detail successfully",
+    question: question,
+  });
+};
+export const update = async (req, res) => {
+  try {
+    const question = await Question.findById(req.params.id);
+    if (!question) {
+      return res.status(400).json({
+        code: 400,
+        message: "Question not found",
+      });
+    }
+    res.status(200).json({
+      code: 200,
+      message: "Get question detail successfully",
+      question: question,
+    });
+  } catch (error) {
+    console.error(error);
+    return res
+      .status(400)
+      .json({ code: 400, message: "Internal server error" });
+  }
+};
+export const createPost = async (req, res) => {
+  const newQuestion = new Question(req.body);
+  await newQuestion.save();
+  res.status(200).json({
+    code: 200,
+    message: "Created a new question",
+    id: newQuestion._id,
+  });
+};
+
+export const deletePatch = async (req, res) => {
+  try {
+    await Question.updateOne(
+      {
+        _id: req.params.id,
+      },
+      {
+        deleted: true,
+      }
+    );
+    res.status(200).json({
+      code: 200,
+      message: "Deleted question successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    return res
+      .status(400)
+      .json({ code: 400, message: "Internal server error" });
+  }
+};
+export const updatePatch = async (req, res) => {
+  try {
+    await Question.updateOne(
+      {
+        _id: req.params.id,
+      },
+      req.body
+    );
+    res.status(200).json({
+      code: 200,
+      message: "Updated question successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    return res
+      .status(400)
+      .json({ code: 400, message: "Internal server error" });
+  }
+};
