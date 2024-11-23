@@ -31,4 +31,17 @@ export const Teacher = {
 
     return response.data;
   },
+  getQuestion: async (id: string) => {
+    const response = await request.get(`/teacher/question/detail/${id}`);
+
+    return response.data;
+  },
+  UpdateQuestion: async (question: Question, _id: string) => {
+    const response = await request.patch(
+      `/teacher/question/update/${_id}`,
+      question
+    );
+
+    return response.data;
+  },
 };
