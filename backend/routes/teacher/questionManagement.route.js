@@ -3,4 +3,5 @@ import { questionManagement } from "../../controllers/teacher/questionManagement
 
 const router = express.Router();
 router.get("/question-management", questionManagement);
+
 export default router;
