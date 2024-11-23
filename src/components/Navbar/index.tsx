@@ -2,7 +2,7 @@ import { useAuthContext } from "@/contexts/AuthProvider";
 import { AuthApi } from "@/services/Auth";
 import { useLayoutEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button, Dropdown, Space, MenuProps } from "antd";
+import { Dropdown, MenuProps } from "antd";
 
 export const Navbar = () => {
   const items: MenuProps["items"] = [
