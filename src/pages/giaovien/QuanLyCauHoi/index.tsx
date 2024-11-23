@@ -14,6 +14,9 @@ export const QuanLyCauHoi = () => {
     try {
       const rq = await Teacher.getAllQuestions(page);
       console.log(rq);
+
+      console.log(page);
+      console.log(total);
       if (rq?.code === 200) {
         setData(rq?.questions);
         setTotal(rq?.totalPage);
@@ -62,7 +65,8 @@ export const QuanLyCauHoi = () => {
           current={page}
           total={total}
           onChange={onPageChange}
-          pageSize={10}
+          pageSize={1}
+          style={{ display: "flex", justifyContent: "center" }}
         />
       </div>
       <CreateQuestionModal

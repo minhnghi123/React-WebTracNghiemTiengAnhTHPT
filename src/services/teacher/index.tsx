@@ -23,17 +23,14 @@ export const Teacher = {
     const response = await request.get(
       `teacher/question-management?page=${page}`
     );
-
     return response.data;
   },
   creteQuestion: async (question: Question) => {
     const response = await request.post("/teacher/question/create", question);
-
     return response.data;
   },
   getQuestion: async (id: string) => {
     const response = await request.get(`/teacher/question/detail/${id}`);
-
     return response.data;
   },
   UpdateQuestion: async (question: Question, _id: string) => {
@@ -41,7 +38,10 @@ export const Teacher = {
       `/teacher/question/update/${_id}`,
       question
     );
-
+    return response.data;
+  },
+  deleteQuestion: async (id: string) => {
+    const response = await request.patch(`/teacher/question/delete/${id}`);
     return response.data;
   },
 };

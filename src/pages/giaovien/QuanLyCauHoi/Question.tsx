@@ -1,6 +1,6 @@
-import type { Question } from "@/services/teacher";
+import { Teacher, type Question } from "@/services/teacher";
 import { cleanString } from "@/utils/cn";
-import { Divider, Flex, Tag } from "antd";
+import { Divider, Flex, Modal, Tag } from "antd";
 import clsx from "clsx";
 import "./cauhoi.css";
 import { useState } from "react";
@@ -14,6 +14,31 @@ const QuestionComponent: React.FC<QuestionComponentProps> = ({
   onUpdateSuccess,
   question,
 }) => {
+  const [open, setOpen] = useState(false);
+
+  const handleOk = () => {
+    handleDeleteQuestion(question._id || "");
+
+    setOpen(false);
+  };
+
+  const handleCancel = () => {
+    setOpen(false);
+  };
+  const handleDeleteQuestion = async (id: string) => {
+    try {
+      const rq = await Teacher.deleteQuestion(id);
+      if (rq?.code === 200) {
+        alert("Xóa câu hỏi thành công");
+        onUpdateSuccess();
+      }
+    } catch (error: any) {
+      if (error.response) {
+        console.log(error.response.data.message);
+      }
+    }
+  };
+
   const [openModal, setOpenModal] = useState<boolean>(false);
   return (
     <div className="bg-white p-4 rounded shadow mb-4">
@@ -69,12 +94,29 @@ const QuestionComponent: React.FC<QuestionComponentProps> = ({
       <button className="btn btn-primary" onClick={() => setOpenModal(true)}>
         Sửa câu hỏi
       </button>
+      <button className=" btn-w   my-3 mx-3" onClick={() => setOpen(true)}>
+        Xóa câu hỏi
+      </button>
       <UpdateQuestionModal
         onUpdateSuccess={onUpdateSuccess}
         visible={openModal}
         handleClose={() => setOpenModal(false)}
         question2={question}
       />
+      <Modal
+        open={open}
+        title="Xóa câu hỏi"
+        onOk={handleOk}
+        onCancel={handleCancel}
+        footer={(_, { OkBtn, CancelBtn }) => (
+          <>
+            <CancelBtn />
+            <OkBtn />
+          </>
+        )}
+      >
+        <p>Bạn có chắc chắn muốn xóa câu hỏi này</p>
+      </Modal>
     </div>
   );
 };

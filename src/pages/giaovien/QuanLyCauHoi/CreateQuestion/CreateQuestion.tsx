@@ -98,6 +98,7 @@ const CreateQuestionModal: React.FC<CreateQuestionModalProps> = ({
       const rq = await Teacher.creteQuestion(q);
       if (rq?.code === 200) {
         console.log("Thêm câu hỏi thành công");
+        console.log(rq);
         setQuestion({
           content: "",
           level: "easy",
