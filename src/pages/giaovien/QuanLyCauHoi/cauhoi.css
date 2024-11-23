@@ -12,7 +12,9 @@
   padding: 10px 20px;
   font-size: 1rem;
   border-radius: 8px;
+  color: white;
 }
 .btn-w:hover {
   color: white;
+  font-weight: bold;
 }

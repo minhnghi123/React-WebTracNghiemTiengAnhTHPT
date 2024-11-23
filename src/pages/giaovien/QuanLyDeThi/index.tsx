@@ -1,8 +1,9 @@
 import { Exam, ExamAPI } from "@/services/teacher/Teacher";
-import { Pagination, Tag } from "antd";
+import { Button, Pagination, Space, Tag } from "antd";
 import Table, { ColumnsType } from "antd/es/table";
-import { Key } from "antd/es/table/interface";
+
 import { useEffect, useState } from "react";
+import CreateExamModal from "./DeThi/CreateExam";
 
 const columns: ColumnsType<Exam> = [
   {
@@ -49,6 +50,9 @@ const columns: ColumnsType<Exam> = [
   },
 ];
 export const QuanLyDeThi = () => {
+  const handleCreateSuccess = () => {
+    getAllExam(page);
+  };
   const [page, setPage] = useState<number>(1);
   const [total, setTotal] = useState<number>(0);
   const [data, setData] = useState<Exam[]>();
@@ -93,7 +97,7 @@ export const QuanLyDeThi = () => {
     setPage(page);
   };
   const handleUpdateSuccess = () => {
-    getAllQuestions(page);
+    getAllExam(page);
   };
 
   return (
@@ -146,6 +150,28 @@ export const QuanLyDeThi = () => {
                 </center>
               ),
             },
+
+            {
+              title: "",
+              key: "action",
+              render: (_, record) => (
+                <Space size="small">
+                  <Button
+                    color="default"
+                    variant="outlined"
+                    style={{ backgroundColor: "orange" }}
+                  >
+                    Sửa
+                  </Button>
+                  <Button color="primary" variant="solid">
+                    Chi tiết
+                  </Button>
+                  <Button color="danger" variant="solid">
+                    Xóa
+                  </Button>
+                </Space>
+              ),
+            },
           ]}
           pagination={false}
         />
@@ -159,6 +185,12 @@ export const QuanLyDeThi = () => {
           style={{ display: "flex", justifyContent: "center" }}
         />
       </div>
+
+      <CreateExamModal
+        visible={showModal}
+        handleClose={() => setShowModal(false)}
+        onCreateSuccess={handleCreateSuccess}
+      />
     </div>
   );
 };

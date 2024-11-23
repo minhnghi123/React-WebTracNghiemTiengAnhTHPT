@@ -68,8 +68,8 @@ export const ExamAPI = {
     );
     return response.data;
   },
-  creteQuestion: async (question: Question) => {
-    const response = await request.post("/teacher/question/create", question);
+  creteExam: async (question: Exam) => {
+    const response = await request.post("/teacher/exam/create", question);
     return response.data;
   },
   getQuestion: async (id: string) => {
