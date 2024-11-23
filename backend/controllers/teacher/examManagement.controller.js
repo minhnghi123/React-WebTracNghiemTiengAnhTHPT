@@ -266,3 +266,61 @@ export const deleteExam = async (req, res) => {
       });
     }
 };
+
+// [PATCH]: teacher/exam/schedule/:id
+export const setExamSchedule = async (req, res) => {
+  try {
+    const { id } = req.params; // Lấy ID của đề thi từ URL
+    const { startTime, endTime } = req.body; // Lấy thời gian từ request body
+
+    // Kiểm tra dữ liệu đầu vào
+    if (!startTime || !endTime) {
+      return res.status(400).json({
+        success: false,
+        message: "Thiếu thông tin thời gian! Cần có cả startTime và endTime.",
+      });
+    }
+
+    // Kiểm tra logic thời gian
+    if (new Date(startTime) >= new Date(endTime)) {
+      return res.status(400).json({
+        success: false,
+        message: "Thời gian bắt đầu phải nhỏ hơn thời gian kết thúc!",
+      });
+    }
+
+    // Tìm và cập nhật thời gian của đề thi
+    const updatedExam = await Exam.findByIdAndUpdate(
+      id,
+      {
+        startTime: new Date(startTime),
+        endTime: new Date(endTime),
+      },
+      { new: true, runValidators: true } // Trả về tài liệu sau khi cập nhật và kiểm tra ràng buộc
+    );
+
+    // Nếu không tìm thấy đề thi, trả về lỗi 404
+    if (!updatedExam) {
+      return res.status(404).json({
+        success: false,
+        message: "Đề thi không tồn tại!",
+      });
+    }
+
+    // Phản hồi thành công
+    return res.status(200).json({
+      success: true,
+      message: "Lịch thi đã được cập nhật thành công!",
+      data: updatedExam,
+    });
+  } catch (error) {
+    // Xử lý lỗi server
+    console.error("Error setting exam schedule:", error.message);
+    return res.status(500).json({
+      success: false,
+      message: "Lỗi server! Không thể đặt lịch thi.",
+      error: error.message,
+    });
+  }
+};
+

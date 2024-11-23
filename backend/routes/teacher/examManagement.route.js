@@ -1,5 +1,5 @@
 import express from "express";
-import { createExam, deleteExam, getAllExams, getExamDetail, toggleExamVisibility, updateExam } from "../../controllers/teacher/examManagement.controller.js";
+import { createExam, deleteExam, getAllExams, getExamDetail, setExamSchedule, toggleExamVisibility, updateExam } from "../../controllers/teacher/examManagement.controller.js";
 
 const router = express.Router();
 
@@ -14,5 +14,7 @@ router.patch("/update/:slug", updateExam);
 router.delete("/delete/:id", deleteExam);
 
 router.patch("/toggle-visibility/:id", toggleExamVisibility);
+
+router.patch("/schedule/:id", setExamSchedule);
 
 export default router;
