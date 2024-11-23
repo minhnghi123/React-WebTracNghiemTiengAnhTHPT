@@ -55,7 +55,7 @@ const LayoutGiaoVien = () => {
                   >
                     <li>
                       <a
-                        href="/admin/Home"
+                        href="/GiaoVien/QuanLyDeThi"
                         className="nav-link px-0"
                         style={{
                           color: "#495057",
@@ -94,7 +94,7 @@ const LayoutGiaoVien = () => {
                     </li>
                     <li>
                       <a
-                        href="/admin/QuanLyDangBai"
+                        href="/GiaoVien/QuanLyBaoLoi"
                         className="nav-link px-0"
                         style={{
                           color: "#495057",

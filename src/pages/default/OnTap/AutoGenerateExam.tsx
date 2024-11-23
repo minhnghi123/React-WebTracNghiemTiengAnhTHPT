@@ -28,7 +28,7 @@ const AutoGenerateExamForm: React.FC<Props> = ({
     const select = document.getElementById("dangBaiList") as HTMLSelectElement;
     const value = select.value;
     const text = select.options[select.selectedIndex].text;
-
+    console.log(event, text);
     if (selectedTypes.length < maxTypes && !selectedTypes.includes(value)) {
       setSelectedTypes([...selectedTypes, value]);
     } else {

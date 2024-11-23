@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Modal, Button, Input, Select, Form } from "antd";
 import { CloseCircleOutlined } from "@ant-design/icons";
 import clsx from "clsx";
-import { Question, Teacher } from "@/services/teacher";
+import { Question, QuestionAPI } from "@/services/teacher/Teacher";
 
 const { Option } = Select;
 
@@ -95,7 +95,7 @@ const CreateQuestionModal: React.FC<CreateQuestionModalProps> = ({
   };
   const createQuestion = async (q: Question) => {
     try {
-      const rq = await Teacher.creteQuestion(q);
+      const rq = await QuestionAPI.createQuestion(q);
       if (rq?.code === 200) {
         console.log("Thêm câu hỏi thành công");
         console.log(rq);

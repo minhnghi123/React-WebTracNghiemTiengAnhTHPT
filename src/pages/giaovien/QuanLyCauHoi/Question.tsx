@@ -1,4 +1,4 @@
-import { Teacher, type Question } from "@/services/teacher";
+import { QuestionAPI, Question } from "@/services/teacher/Teacher";
 import { cleanString } from "@/utils/cn";
 import { Divider, Flex, Modal, Tag } from "antd";
 import clsx from "clsx";
@@ -27,7 +27,7 @@ const QuestionComponent: React.FC<QuestionComponentProps> = ({
   };
   const handleDeleteQuestion = async (id: string) => {
     try {
-      const rq = await Teacher.deleteQuestion(id);
+      const rq = await QuestionAPI.deleteQuestion(id);
       if (rq?.code === 200) {
         alert("Xóa câu hỏi thành công");
         onUpdateSuccess();

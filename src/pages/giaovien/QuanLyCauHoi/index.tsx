@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Pagination } from "antd";
 import QuestionComponent from "./Question";
 import CreateQuestionModal from "./CreateQuestion/CreateQuestion"; // Import the modal component
-import { Question, Teacher } from "@/services/teacher";
+import { Question, QuestionAPI } from "@/services/teacher/Teacher";
 
 export const QuanLyCauHoi = () => {
   const [page, setPage] = useState<number>(1);
@@ -12,7 +12,7 @@ export const QuanLyCauHoi = () => {
 
   const getAllQuestions = async (page: number) => {
     try {
-      const rq = await Teacher.getAllQuestions(page);
+      const rq = await QuestionAPI.getAllQuestions(page);
       console.log(rq);
 
       console.log(page);

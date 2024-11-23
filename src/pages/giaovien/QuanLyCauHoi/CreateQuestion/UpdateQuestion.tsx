@@ -1,11 +1,9 @@
-import React, { useState } from "react";
-import { Modal, Button, Input, Select, Form } from "antd";
-import { CloseCircleOutlined } from "@ant-design/icons";
+import { Question, QuestionAPI } from "@/services/teacher/Teacher";
+import { Button, Form, Input, Modal, Select } from "antd";
+import { Option } from "antd/es/mentions";
+import { useState } from "react";
 import clsx from "clsx";
-import { Question, Teacher } from "@/services/teacher";
-
-const { Option } = Select;
-
+import { CloseCircleOutlined } from "@ant-design/icons";
 interface UpdateQuestionModalProps {
   visible: boolean;
   handleClose: () => void;
@@ -93,7 +91,7 @@ const UpdateQuestionModal: React.FC<UpdateQuestionModalProps> = ({
     try {
       console.log("123123");
       if (!q._id) return;
-      const rq = await Teacher.UpdateQuestion(q, q._id);
+      const rq = await QuestionAPI.UpdateQuestion(q, q._id);
       console.log(rq);
       if (rq?.code === 200) {
         alert("Sửa câu hỏi thành công");
