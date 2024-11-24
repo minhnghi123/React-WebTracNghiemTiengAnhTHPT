@@ -9,12 +9,23 @@ import Layout from "@/pages/default/Layout";
 import Home from "@/pages/default/Home";
 import { Login } from "@/pages/default/Login";
 import { SignUp } from "@/pages/default/Login/SignUp";
+import { VeChungToi } from "@/pages/default/VeChungToi";
+import { LienHe } from "@/pages/default/LienHe";
+import { PhongThi } from "@/pages/default/PhongThi";
+import LayoutGiaoVien from "@/pages/giaovien/LayoutGiaoVien";
+import { DashBoardGiaoVien } from "@/pages/giaovien/DashBoard";
+import { QuanLyCauHoi } from "@/pages/giaovien/QuanLyCauHoi";
+import LayoutAdmin from "@/pages/admin/DashBoard/LayoutGiaoVien";
+import { DashBoarAdmin } from "@/pages/admin/DashBoard";
+import NotFound from "@/pages/NotFound";
+import { OnTap } from "@/pages/default/OnTap";
+import { QuanLyDeThi } from "@/pages/giaovien/QuanLyDeThi";
 
 export enum ERolePath {
   ADMIN = 2,
   GIAOVIEN = 3,
   USER = 1,
-  GUEST = 0,
+  STUDENT = 0,
 }
 
 // const isCorrectPath = (path: string) => {
@@ -42,24 +53,56 @@ export const router = [
   {
     path: "/",
     element: <Layout />,
-    children: [createRoute("/", <Home />, ERolePath.USER)],
+    children: [
+      createRoute("/", <Home />, ERolePath.USER),
+      createRoute("/About", <VeChungToi />, ERolePath.USER),
+      createRoute("/Contact", <LienHe />, ERolePath.USER),
+      createRoute("/PhongThi", <PhongThi />, ERolePath.USER),
+      createRoute("/OnTap", <OnTap />, ERolePath.USER),
+    ],
   },
   {
     path: "/",
+    element: <Layout />,
     children: [
       createRoute("/Login", <Login />, ERolePath.USER),
       createRoute("/SignUp", <SignUp />, ERolePath.USER),
     ],
+  },
+  {
+    path: "/",
+    element: <LayoutGiaoVien />,
+    children: [
+      createRoute("/GiaoVien", <DashBoardGiaoVien />, ERolePath.USER),
+      createRoute("/giaovien/NganHangCauHoi", <QuanLyCauHoi />, ERolePath.USER),
+      createRoute("/giaovien/QuanLyDeThi", <QuanLyDeThi />, ERolePath.USER),
+    ],
+  },
+  {
+    path: "/",
+    element: <LayoutAdmin />,
+    children: [createRoute("/Admin", <DashBoarAdmin />, ERolePath.USER)],
+  },
+  {
+    path: "*",
+    element: <NotFound />,
   },
 ];
 
 const paths = {
   "/": ["/"],
   "/profile": ["/profile/:id", "/profile/:id/edit"],
-  "/about": ["/about"],
-  "/contact": ["/contact"],
+  "/About": ["/About"],
+  "/Contact": ["/Contact"],
   "/Login": ["/Login"],
   "/SignUp": ["/SignUp"],
+  "/PhongThi": ["/PhongThi"],
+  "/GiaoVien": ["/GiaoVien"],
+  "/NganHangCauHoi": ["/NganHangCauHoi"],
+  "/giaovien/NganHangCauHoi": ["/giaovien/NganHangCauHoi"],
+  "/Admin": ["/Admin"],
+  "/OnTap": ["/OnTap"],
+  "/giaovien/QuanLyDeThi": ["/giaovien/QuanLyDeThi"],
 } as const;
 
 export type TRoutePaths = (typeof paths)[keyof typeof paths][number] &

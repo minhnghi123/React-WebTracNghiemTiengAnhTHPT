@@ -23,6 +23,7 @@ const taiKhoanSchema = new mongoose.Schema({
   phone: String,
   role: {
     type: String,
+    enum: ["student", "teacher", "admin"],
     default: "student",
   },
 });
