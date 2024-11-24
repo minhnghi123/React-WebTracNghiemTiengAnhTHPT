@@ -15,11 +15,12 @@ import { PhongThi } from "@/pages/default/PhongThi";
 import LayoutGiaoVien from "@/pages/giaovien/LayoutGiaoVien";
 import { DashBoardGiaoVien } from "@/pages/giaovien/DashBoard";
 import { QuanLyCauHoi } from "@/pages/giaovien/QuanLyCauHoi";
-import LayoutAdmin from "@/pages/admin/DashBoard/LayoutGiaoVien";
+import LayoutAdmin from "@/pages/admin/DashBoard/LayoutAdmin";
 import { DashBoarAdmin } from "@/pages/admin/DashBoard";
 import NotFound from "@/pages/NotFound";
 import { OnTap } from "@/pages/default/OnTap";
 import { QuanLyDeThi } from "@/pages/giaovien/QuanLyDeThi";
+import { QuanLyDangCauHoi } from "@/pages/admin/QuanLyDangCauHoi";
 
 export enum ERolePath {
   ADMIN = 2,
@@ -81,7 +82,10 @@ export const router = [
   {
     path: "/",
     element: <LayoutAdmin />,
-    children: [createRoute("/Admin", <DashBoarAdmin />, ERolePath.USER)],
+    children: [
+      createRoute("/Admin", <DashBoarAdmin />, ERolePath.USER),
+      createRoute("/Admin/DangCauHoi", <QuanLyDangCauHoi />, ERolePath.USER),
+    ],
   },
   {
     path: "*",
@@ -103,6 +107,7 @@ const paths = {
   "/Admin": ["/Admin"],
   "/OnTap": ["/OnTap"],
   "/giaovien/QuanLyDeThi": ["/giaovien/QuanLyDeThi"],
+  "/Admin/DangCauHoi": ["/Admin/DangCauHoi"],
 } as const;
 
 export type TRoutePaths = (typeof paths)[keyof typeof paths][number] &

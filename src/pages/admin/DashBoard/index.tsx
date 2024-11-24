@@ -7,7 +7,10 @@ export const DashBoarAdmin = () => {
   return (
     <div className="container mb-3 mt-5">
       <div className="row g-4">
-        <div className="col-12 col-md-6 col-lg-3 dashboard-item">
+        <div
+          onClick={() => navigate("/Admin/DangCauHoi")}
+          className="col-12 col-md-6 col-lg-3 dashboard-item"
+        >
           <div className="bg-white p-4 rounded shadow h-100 text-center">
             <img
               src="src/Content/img/img-folder-de-thi.png"

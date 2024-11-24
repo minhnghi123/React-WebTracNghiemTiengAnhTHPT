@@ -55,7 +55,7 @@ const LayoutAdmin = () => {
                   >
                     <li>
                       <a
-                        href="/admin/Home"
+                        href="/admin/DangCauHoi"
                         className="nav-link px-0"
                         style={{
                           color: "#495057",

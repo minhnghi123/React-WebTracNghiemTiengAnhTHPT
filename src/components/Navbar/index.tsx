@@ -111,28 +111,11 @@ export const Navbar = () => {
             </Dropdown>
           </ul>
         ) : (
-          <ul className="navbar-nav ml-auto">
-            <li className="nav-item">
-              <a
-                className="nav-link"
-                href="/login"
-                style={{ color: "#007bff" }}
-              >
-                <span className="fas fa-sign-in-alt"></span> Login
-              </a>
-            </li>
-            <li className="nav-item">
-              <a
-                className="nav-link"
-                href="/signup"
-                style={{ color: "#007bff" }}
-              >
-                <span className="fas fa-sign-in-alt"></span> Log Out
-              </a>
-            </li>
-          </ul>
-        ) : (
-          <ul className="nav nav-pills justify-content-center gap-3" id="ex1" role="tablist">
+          <ul
+            className="nav nav-pills justify-content-center gap-3"
+            id="ex1"
+            role="tablist"
+          >
             <li className="nav-item rounded-pill shadow-sm" role="presentation">
               <a
                 className="nav-dn bg-secondary text-white px-4 py-2 rounded-pill hover-bg-dark"
@@ -145,7 +128,7 @@ export const Navbar = () => {
                 Đăng nhập
               </a>
             </li>
-            
+
             <li className="nav-item rounded-pill shadow-sm" role="presentation">
               <a
                 className="nav-dn bg-primary text-white px-4 py-2 rounded-pill hover-bg-dark"

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Modal, Input, Select, Form, message, DatePicker } from "antd";
-import { CloseCircleOutlined } from "@ant-design/icons";
+
 import { Exam, ExamAPI } from "@/services/teacher/Teacher";
 
 const { Option } = Select;

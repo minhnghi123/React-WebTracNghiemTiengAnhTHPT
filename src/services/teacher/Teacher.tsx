@@ -9,11 +9,15 @@ export interface Question {
   _id?: string;
   content: string;
   level: "easy" | "medium" | "hard";
+  questionType?: string;
+  sourceType?: string;
+  passageId?: string;
   answers: Answer[];
   subject: string;
   knowledge: string;
   translation: string;
   explanation: string;
+  audio?: string;
   deleted?: boolean;
   createdAt?: Date;
 }
@@ -29,7 +33,12 @@ export interface Exam {
   slug: string;
   createdAt: Date;
 }
-
+export interface QuestionType {
+  _id?: string;
+  name: string;
+  description?: string;
+  deleted: boolean;
+}
 export const QuestionAPI = {
   getAllQuestions: async (page: number) => {
     const response = await request.get(
@@ -85,6 +94,36 @@ export const ExamAPI = {
   },
   deleteQuestion: async (id: string) => {
     const response = await request.patch(`/teacher/question/delete/${id}`);
+    return response.data;
+  },
+};
+export const QuestionTypeAPI = {
+  getAllQuestionType: async (page: number) => {
+    const response = await request.get(`/teacher/question-types?page=${page}`);
+    return response.data;
+  },
+  createQuestionType: async (question: QuestionType) => {
+    const response = await request.post(
+      "/teacher/question-types/create",
+      question
+    );
+    return response.data;
+  },
+  getQuestionType: async (id: string) => {
+    const response = await request.get(`/teacher/question-types/update/${id}`);
+    return response.data;
+  },
+  UpdateQuestionType: async (question: QuestionType, _id: string) => {
+    const response = await request.patch(
+      `/teacher/question-types/update/${_id}`,
+      question
+    );
+    return response.data;
+  },
+  deleteQuestionType: async (id: string) => {
+    const response = await request.patch(
+      `/teacher/question-types/delete/${id}`
+    );
     return response.data;
   },
 };

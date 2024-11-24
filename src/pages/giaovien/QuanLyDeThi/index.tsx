@@ -96,9 +96,6 @@ export const QuanLyDeThi = () => {
   const onPageChange = (page: number) => {
     setPage(page);
   };
-  const handleUpdateSuccess = () => {
-    getAllExam(page);
-  };
 
   return (
     <div className="container mx-auto p-4">
