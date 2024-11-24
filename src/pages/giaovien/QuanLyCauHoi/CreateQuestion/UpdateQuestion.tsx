@@ -1,29 +1,23 @@
-import React, { useState } from "react";
-import { Modal, Button, Input, Select, Form } from "antd";
-import { CloseCircleOutlined } from "@ant-design/icons";
+import { Question, QuestionAPI } from "@/services/teacher/Teacher";
+import { Button, Form, Input, Modal, Select } from "antd";
+import { Option } from "antd/es/mentions";
+import { useState } from "react";
 import clsx from "clsx";
-import { Question, Teacher } from "@/services/teacher";
-
-const { Option } = Select;
-
-interface CreateQuestionModalProps {
+import { CloseCircleOutlined } from "@ant-design/icons";
+interface UpdateQuestionModalProps {
   visible: boolean;
   handleClose: () => void;
+  question2: Question;
+  onUpdateSuccess: () => void;
 }
 
-const CreateQuestionModal: React.FC<CreateQuestionModalProps> = ({
+const UpdateQuestionModal: React.FC<UpdateQuestionModalProps> = ({
   visible,
   handleClose,
+  question2,
+  onUpdateSuccess,
 }) => {
-  const [question, setQuestion] = useState<Question>({
-    content: "",
-    level: "easy",
-    answers: [{ text: "", isCorrect: false }],
-    subject: "",
-    knowledge: "",
-    translation: "",
-    explanation: "",
-  });
+  const [question, setQuestion] = useState<Question>(question2);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -91,24 +85,19 @@ const CreateQuestionModal: React.FC<CreateQuestionModalProps> = ({
         title: "Lỗi",
         content: "Cần phải chọn ít nhất 1 đáp án đúng",
       });
-    } else createQuestion(question);
+    } else UpdateQuestion(question);
   };
-  const createQuestion = async (q: Question) => {
+  const UpdateQuestion = async (q: Question) => {
     try {
-      const rq = await Teacher.creteQuestion(q);
+      console.log("123123");
+      if (!q._id) return;
+      const rq = await QuestionAPI.UpdateQuestion(q, q._id);
+      console.log(rq);
       if (rq?.code === 200) {
-        console.log("Thêm câu hỏi thành công");
-        setQuestion({
-          content: "",
-          level: "easy",
-          answers: [{ text: "", isCorrect: false }],
-          subject: "",
-          knowledge: "",
-          translation: "",
-          explanation: "",
-        });
-        alert("Thêm câu hỏi thành công");
+        alert("Sửa câu hỏi thành công");
+
         handleClose();
+        onUpdateSuccess();
       }
     } catch (error: any) {
       if (error.response) {
@@ -116,6 +105,7 @@ const CreateQuestionModal: React.FC<CreateQuestionModalProps> = ({
       }
     }
   };
+
   return (
     <Modal
       title="Thêm câu hỏi"
@@ -227,4 +217,4 @@ const CreateQuestionModal: React.FC<CreateQuestionModalProps> = ({
   );
 };
 
-export default CreateQuestionModal;
+export default UpdateQuestionModal;

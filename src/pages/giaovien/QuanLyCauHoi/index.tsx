@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { Pagination } from "antd";
 import QuestionComponent from "./Question";
-import CreateQuestionModal from "./CreateQuestion"; // Import the modal component
-import { Question, Teacher } from "@/services/teacher";
+import CreateQuestionModal from "./CreateQuestion/CreateQuestion"; // Import the modal component
+import { Question, QuestionAPI } from "@/services/teacher/Teacher";
 
 export const QuanLyCauHoi = () => {
   const [page, setPage] = useState<number>(1);
@@ -12,7 +12,11 @@ export const QuanLyCauHoi = () => {
 
   const getAllQuestions = async (page: number) => {
     try {
-      const rq = await Teacher.getAllQuestions(page);
+      const rq = await QuestionAPI.getAllQuestions(page);
+      console.log(rq);
+
+      console.log(page);
+      console.log(total);
       if (rq?.code === 200) {
         setData(rq?.questions);
         setTotal(rq?.totalPage);
@@ -32,7 +36,9 @@ export const QuanLyCauHoi = () => {
   const onPageChange = (page: number) => {
     setPage(page);
   };
-
+  const handleUpdateSuccess = () => {
+    getAllQuestions(page);
+  };
   return (
     <div className="container mx-auto p-4">
       <center>
@@ -49,17 +55,8 @@ export const QuanLyCauHoi = () => {
       {data
         ? data.map((item) => (
             <QuestionComponent
-              key={item._id}
-              _id={item._id}
-              deleted={item.deleted}
-              createdAt={item.createdAt}
-              content={item.content}
-              level={item.level}
-              answers={item.answers}
-              subject={item.subject}
-              knowledge={item.knowledge}
-              translation={item.translation}
-              explanation={item.explanation}
+              onUpdateSuccess={handleUpdateSuccess}
+              question={item}
             />
           ))
         : null}
@@ -68,7 +65,8 @@ export const QuanLyCauHoi = () => {
           current={page}
           total={total}
           onChange={onPageChange}
-          pageSize={10}
+          pageSize={1}
+          style={{ display: "flex", justifyContent: "center" }}
         />
       </div>
       <CreateQuestionModal

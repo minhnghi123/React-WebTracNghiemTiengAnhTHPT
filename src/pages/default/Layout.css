@@ -31,23 +31,16 @@ body {
     margin: 0;
 }
 .nav a {
-    text-decoration: none; /* Bỏ gạch chân */
-    color: #333; /* Màu chữ mặc định */
-    font-size: 18px; /* Cỡ chữ */
-    font-weight: bold;
-    padding: 10px 15px; /* Khoảng cách xung quanh chữ */
-    border-radius: 5px; /* Bo góc cho các liên kết */
-    transition: all 0.3s ease; /* Hiệu ứng mượt mà khi hover */
-
+    text-decoration: none; 
+    transition: all 0.3s ease; 
 }
 .nav a:hover {
-    background-color: #007bff; /* Màu nền khi hover */
-    color: white; /* Màu chữ khi hover */
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Thêm bóng đổ khi hover */
-    transform: scale(1.1); /* Tăng kích thước một chút khi hover */
-  }
+    color: white; 
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); 
+    transform: scale(1.1); 
+}
   
-  .nav a::before {
+.nav a::before {
     content: "";
     position: absolute;
     bottom: 0;
@@ -56,38 +49,80 @@ body {
     height: 3px;
     background: linear-gradient(90deg, #62a3ff, #ff63b0);
     transition: width 0.3s ease;
-  }
+}
   
 .nav a:hover::before {
     width: 100%; 
 }
-.nav li {
-    margin: 0 15px;
+
+.nav-dn {
+    font-size: 16px; 
+    font-weight: 600; 
+    text-align: center; 
+    transition: background-color 0.3s ease, color 0.3s ease; 
+    background: linear-gradient(90.57deg, rgb(62, 101, 254) 0%, rgb(210, 60, 255) 100%);
 }
 
-.login {
-    display: flex;
+#menu {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
+}
+  
+.dsMenu {
     list-style-type: none;
     padding: 0;
     margin: 0;
+    display: flex;
+    justify-content: space-around;
 }
   
-.login li {
-    margin: 0 10px;  
+.dsMenu li {
+    margin: 0 10px;
+    display: inline-block;
+    position: relative;
 }
   
-.login a {
+.dsMenu a {
     text-decoration: none;
-    color: #007bff;
-    font-size: 16px;
+    color: #333;
     font-weight: bold;
-    padding: 8px 16px;
-    border-radius: 4px;
-    transition: background-color 0.3s;
+    padding: 5px 10px;
+    border-radius: 3px;
+    transition: background-color 0.3s, color 0.3s;
 }
+.dsMenu li::before,
+.dsMenu li::after {
+  content: "";
+  position: absolute;
+  height: 3px;
+  width: 0;
+  background: linear-gradient(90.57deg, rgb(62, 101, 254) 0%, rgb(210, 60, 255) 100%);
+  transition: .5s;
+}
+
+.dsMenu li::after {
+  left: 0;
+  bottom: 0px;
+}
+
+.dsMenu li::before {
+  right: 0;
+  top: 0px;
+}
+
+.dsMenu li:hover::after,
+.dsMenu li:hover::before {
+  width: 100%;
+}
+
+
+
+
   
-.login a:hover {
-    background-color: #007bff;
-    color: #fff;
-}
+
+  
+
+
+  
   

@@ -1,4 +1,4 @@
-import { Space, Table, Tag } from "antd";
+import { Space, Table } from "antd";
 import type { TableProps } from "antd";
 import "bootstrap/dist/css/bootstrap.min.css";
 interface ClassRoom {
@@ -22,7 +22,7 @@ const columns: TableProps<ClassRoom>["columns"] = [
   {
     title: "Action",
     key: "action",
-    render: (_, record) => (
+    render: (_) => (
       <Space size="middle">
         <a>Tham gia lớp</a>
       </Space>
