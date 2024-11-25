@@ -1,6 +1,7 @@
 import { Question } from "../../models/Question.model.js";
 import { QuestionType } from "../../models/QuestionType.model.js";
 import { Audio } from "../../models/Audio.model.js";
+
 export const questionManagement = async (req, res) => {
   // //questionType
   const questionTypes = await QuestionType.find({ deleted: false });
@@ -15,7 +16,7 @@ export const questionManagement = async (req, res) => {
     deleted: false,
   };
   const totalItems = await Question.countDocuments({ deleted: false });
-  const limitItems = 4;
+  let limitItems = 4;
   if (req.query.limit) {
     limitItems = parseInt(req.query.limit);
   }
@@ -45,6 +46,7 @@ export const questionManagement = async (req, res) => {
     hasNextPage: currentPage < totalPage,
   });
 };
+
 export const detail = async (req, res) => {
   const question = await Question.findById(req.params.id);
   if (!question) {
@@ -59,6 +61,7 @@ export const detail = async (req, res) => {
     question: question,
   });
 };
+
 export const update = async (req, res) => {
   try {
     const question = await Question.findById(req.params.id);
@@ -80,14 +83,27 @@ export const update = async (req, res) => {
       .json({ code: 400, message: "Internal server error" });
   }
 };
+
 export const createPost = async (req, res) => {
-  const newQuestion = new Question(req.body);
-  await newQuestion.save();
-  res.status(200).json({
-    code: 200,
-    message: "Created a new question",
-    id: newQuestion._id,
-  });
+  try {
+    const newQuestion = new Question(req.body);
+    if (req.body.audio) {
+      const newAudio = new Audio(req.body.audio);
+      await newAudio.save();
+      newQuestion.audio = newAudio._id;
+    }
+    await newQuestion.save();
+    res.status(200).json({
+      code: 200,
+      message: "Created a new question",
+      id: newQuestion._id,
+    });
+  } catch (error) {
+    console.error(error);
+    return res
+      .status(400)
+      .json({ code: 400, message: "Internal server error" });
+  }
 };
 
 export const deletePatch = async (req, res) => {
@@ -111,13 +127,20 @@ export const deletePatch = async (req, res) => {
       .json({ code: 400, message: "Internal server error" });
   }
 };
+
 export const updatePatch = async (req, res) => {
   try {
+    const updateData = { ...req.body };
+    if (req.body.audio) {
+      const newAudio = new Audio(req.body.audio);
+      await newAudio.save();
+      updateData.audio = newAudio._id;
+    }
     await Question.updateOne(
       {
         _id: req.params.id,
       },
-      req.body
+      updateData
     );
     res.status(200).json({
       code: 200,
