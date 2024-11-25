@@ -1,21 +1,13 @@
 import mongoose from "mongoose";
 const QuestionSchema = new mongoose.Schema({
   content: { type: String, required: true },
-  passageId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Passage",
-    default: "",
-  },
+
   questionType: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "QuestionType",
+    type: String,
+
     required: true,
   },
-  sourceType: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "SourceType",
-    required: true,
-  },
+
   level: {
     type: String,
     enum: ["easy", "medium", "hard"],
@@ -24,11 +16,12 @@ const QuestionSchema = new mongoose.Schema({
   answers: [
     {
       text: { type: String, required: true },
+      correctAnswerForBlank: { type: String, default: "" },
       isCorrect: { type: Boolean, default: false },
     },
   ],
   subject: { type: String, default: "English" },
-  audio: { type: mongoose.Schema.Types.ObjectId, ref: "Audio" },
+  audio: { type: String, default: "" },
   knowledge: {
     type: String,
     default: "General Knowledge",

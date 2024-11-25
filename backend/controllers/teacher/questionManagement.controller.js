@@ -1,11 +1,17 @@
 import { Question } from "../../models/Question.model.js";
+import { QuestionType } from "../../models/QuestionType.model.js";
+import { Audio } from "../../models/Audio.model.js";
 export const questionManagement = async (req, res) => {
+  // //questionType
+  const questionTypes = await QuestionType.find({ deleted: false });
+  const receivedQuestionTypes = req.query.questionType;
   //pagination
   let currentPage = 1;
   if (req.query.page) {
     currentPage = parseInt(req.query.page);
   }
   const condition = {
+    questionType: receivedQuestionTypes,
     deleted: false,
   };
   const totalItems = await Question.countDocuments({ deleted: false });
@@ -17,10 +23,21 @@ export const questionManagement = async (req, res) => {
   const totalPage = Math.ceil(totalItems / limitItems);
   const questions = await Question.find(condition).limit(limitItems).skip(skip);
 
+  const questionsWithAudioInfo = await Promise.all(
+    questions.map(async (element) => {
+      if (element.audio) {
+        const infoAudio = await Audio.findById(element.audio);
+        element = element.toObject();
+        element.audioInfo = infoAudio;
+      }
+      return element;
+    })
+  );
   res.status(200).json({
     code: 200,
     message: "Get all questions successfully !",
-    questions: questions,
+    questions: questionsWithAudioInfo,
+    questionTypes: questionTypes,
     currentPage: currentPage,
     totalItems: totalItems,
     totalPage: totalPage,

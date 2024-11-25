@@ -1,7 +1,8 @@
 import mongoose from "mongoose";
 const AudioSchema = new mongoose.Schema({
-  filePath: { type: String, required: true },
+  filePath: { type: String, default: "" },
   description: { type: String, default: "" },
+  transcription: { type: String, default: "" },
   createdAt: { type: Date, default: Date.now },
 });
 
