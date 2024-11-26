@@ -6,6 +6,40 @@ function shuffleArray(array) {
   }
   return array;
 }
+export const index = async (req, res) => {
+  try {
+    //pagination
+    let currentPage = 1;
+    if (req.query.page) {
+      currentPage = parseInt(req.query.page);
+    }
+    const condition = {
+      isPublic: true,
+    };
+    const totalItems = await Exam.countDocuments({ isPublic: true });
+    let limitItems = 4;
+    if (req.query.limit) {
+      limitItems = parseInt(req.query.limit);
+    }
+    const skip = (currentPage - 1) * limitItems;
+    const totalPage = Math.ceil(totalItems / limitItems);
+    const exams = await Exam.find({})
+      .populate("questions")
+      .limit(limitItems)
+      .skip(skip);
+    res.status(200).json({
+      code: 200,
+      exams,
+      currentPage: currentPage,
+      totalItems: totalItems,
+      totalPage: totalPage,
+      limitItems: limitItems,
+      hasNextPage: currentPage < totalPage,
+    });
+  } catch (error) {
+    res.status(400).json({ code: 400, message: error.message });
+  }
+};
 export const detailExam = async (req, res) => {
   try {
     const { slug } = req.params;
