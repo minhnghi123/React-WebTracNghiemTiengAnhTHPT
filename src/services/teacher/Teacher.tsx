@@ -1,10 +1,19 @@
 import { request } from "@/config/request";
 export interface Answer {
-  text: string;
-  isCorrect: boolean;
   _id?: string;
+  text: string;
+  correctAnswerForBlank?: string;
+  isCorrect: boolean;
 }
-
+export interface Audio {
+  _id?: string;
+  filePath: string;
+  description: string;
+  transcription: string;
+  createdAt: Date;
+  deletedAt?: Date | null;
+  isDeleted: boolean;
+}
 export interface Question {
   _id?: string;
   content: string;
@@ -20,12 +29,13 @@ export interface Question {
   audio?: string;
   deleted?: boolean;
   createdAt?: Date;
+  audioInfo?: Audio;
 }
 export interface Exam {
   _id?: string;
   title: string;
   description?: string;
-  questions: Question[];
+  questions: string[];
   duration: number;
   startTime: Date;
   endTime?: Date;
@@ -42,7 +52,19 @@ export interface QuestionType {
 export const QuestionAPI = {
   getAllQuestions: async (page: number) => {
     const response = await request.get(
-      `teacher/question-management?page=${page}`
+      `teacher/question-management?questionType=6742fb1cd56a2e75dbd817ea&page=${page}`
+    );
+    return response.data;
+  },
+  getAllQuestionsBlank: async (page: number) => {
+    const response = await request.get(
+      `teacher/question-management?questionType=6742fb3bd56a2e75dbd817ec&page=${page}`
+    );
+    return response.data;
+  },
+  getAllQuestionsSpecial: async (page: number) => {
+    const response = await request.get(
+      `teacher/question-management?questionType=6742fb5dd56a2e75dbd817ee&page=${page}`
     );
     return response.data;
   },

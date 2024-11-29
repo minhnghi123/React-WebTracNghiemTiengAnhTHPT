@@ -1,5 +1,5 @@
 import "bootstrap/dist/css/bootstrap.min.css";
-import "./Home.css";
+
 const Home = () => {
   return (
     <div className="container my-5">

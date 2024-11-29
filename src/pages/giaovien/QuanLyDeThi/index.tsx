@@ -4,6 +4,7 @@ import Table, { ColumnsType } from "antd/es/table";
 
 import { useEffect, useState } from "react";
 import CreateExamModal from "./DeThi/CreateExam";
+import { useNavigate } from "react-router-dom";
 
 const columns: ColumnsType<Exam> = [
   {
@@ -96,7 +97,7 @@ export const QuanLyDeThi = () => {
   const onPageChange = (page: number) => {
     setPage(page);
   };
-
+  const navigatetor = useNavigate();
   return (
     <div className="container mx-auto p-4">
       <center>
@@ -105,7 +106,7 @@ export const QuanLyDeThi = () => {
       <div>
         <button
           className="btn btn-primary  my-3"
-          onClick={() => setShowModal(true)}
+          onClick={() => navigatetor("/giaovien/QuanLyDeThi/CreateExam")}
         >
           Tạo đề thi
         </button>
@@ -186,8 +187,8 @@ export const QuanLyDeThi = () => {
       <CreateExamModal
         visible={showModal}
         handleClose={() => setShowModal(false)}
-        onCreateSuccess={handleCreateSuccess}
-      />
+        onCreateSuccess={handleCreateSuccess} 
+        dataQuestion={[]}      />
     </div>
   );
 };

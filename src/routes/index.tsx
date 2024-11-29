@@ -21,6 +21,7 @@ import NotFound from "@/pages/NotFound";
 import { OnTap } from "@/pages/default/OnTap";
 import { QuanLyDeThi } from "@/pages/giaovien/QuanLyDeThi";
 import { QuanLyDangCauHoi } from "@/pages/admin/QuanLyDangCauHoi";
+import { CreateExamQuestion } from "@/pages/giaovien/QuanLyDeThi/DeThi/CreateExamQuestion.tsx";
 
 export enum ERolePath {
   ADMIN = 2,
@@ -77,6 +78,11 @@ export const router = [
       createRoute("/GiaoVien", <DashBoardGiaoVien />, ERolePath.USER),
       createRoute("/giaovien/NganHangCauHoi", <QuanLyCauHoi />, ERolePath.USER),
       createRoute("/giaovien/QuanLyDeThi", <QuanLyDeThi />, ERolePath.USER),
+      createRoute(
+        "/giaovien/QuanLyDeThi/CreateExam",
+        <CreateExamQuestion />,
+        ERolePath.USER
+      ),
     ],
   },
   {
@@ -108,6 +114,7 @@ const paths = {
   "/OnTap": ["/OnTap"],
   "/giaovien/QuanLyDeThi": ["/giaovien/QuanLyDeThi"],
   "/Admin/DangCauHoi": ["/Admin/DangCauHoi"],
+  "/giaovien/QuanLyDeThi/CreateExam": ["/giaovien/QuanLyDeThi/CreateExam"],
 } as const;
 
 export type TRoutePaths = (typeof paths)[keyof typeof paths][number] &

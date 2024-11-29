@@ -1,44 +1,12 @@
 import { useState, useEffect } from "react";
-import { Pagination } from "antd";
-import QuestionComponent from "./Question";
-import CreateQuestionModal from "./CreateQuestion/CreateQuestion"; // Import the modal component
-import { Question, QuestionAPI } from "@/services/teacher/Teacher";
+import ListYesNo from "./listYesNo";
+import { ListBlank } from "./listBlank";
 
 export const QuanLyCauHoi = () => {
-  const [page, setPage] = useState<number>(1);
-  const [total, setTotal] = useState<number>(0);
-  const [data, setData] = useState<Question[]>();
-  const [showModal, setShowModal] = useState<boolean>(false);
+  const [questionType, setQuestionType] = useState<string>(
+    "6742fb1cd56a2e75dbd817ea"
+  );
 
-  const getAllQuestions = async (page: number) => {
-    try {
-      const rq = await QuestionAPI.getAllQuestions(page);
-      console.log(rq);
-
-      console.log(page);
-      console.log(total);
-      if (rq?.code === 200) {
-        setData(rq?.questions);
-        setTotal(rq?.totalPage);
-        setPage(rq?.currentPage);
-      }
-    } catch (error: any) {
-      if (error.response) {
-        console.log(error.response.data.message);
-      }
-    }
-  };
-
-  useEffect(() => {
-    getAllQuestions(page);
-  }, [page]);
-
-  const onPageChange = (page: number) => {
-    setPage(page);
-  };
-  const handleUpdateSuccess = () => {
-    getAllQuestions(page);
-  };
   return (
     <div className="container mx-auto p-4">
       <center>
@@ -46,33 +14,27 @@ export const QuanLyCauHoi = () => {
       </center>
       <div>
         <button
-          className="btn btn-primary  my-3"
-          onClick={() => setShowModal(true)}
+          className="btn btn-primary  my-3 mx-3"
+          onClick={() => {
+            setQuestionType("6742fb1cd56a2e75dbd817ea");
+          }}
         >
-          Thêm câu hỏi
+          Câu hỏi trắc nghiệm đáp án
+        </button>
+        <button
+          className="btn btn-primary  my-3"
+          onClick={() => {
+            setQuestionType("6742fb1cd56a2e75dbd817ec");
+          }}
+        >
+          Câu hỏi điền khuyết
         </button>
       </div>
-      {data
-        ? data.map((item) => (
-            <QuestionComponent
-              onUpdateSuccess={handleUpdateSuccess}
-              question={item}
-            />
-          ))
-        : null}
-      <div className="flex justify-center mt-4">
-        <Pagination
-          current={page}
-          total={total}
-          onChange={onPageChange}
-          pageSize={1}
-          style={{ display: "flex", justifyContent: "center" }}
-        />
-      </div>
-      <CreateQuestionModal
-        visible={showModal}
-        handleClose={() => setShowModal(false)}
-      />
+      {questionType === "6742fb1cd56a2e75dbd817ea" ? (
+        <ListYesNo />
+      ) : (
+        <ListBlank />
+      )}
     </div>
   );
 };
