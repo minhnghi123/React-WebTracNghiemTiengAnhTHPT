@@ -62,6 +62,7 @@ const UpdateBlankQuestionModal: React.FC<UpdateBlankQuestionModalProps> = ({
         handleClose();
       }
     } catch (error: any) {
+      console.log(error);
       if (error.response) {
         console.log(error.response.data.message);
       }

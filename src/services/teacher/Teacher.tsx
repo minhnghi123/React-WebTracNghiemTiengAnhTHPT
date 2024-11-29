@@ -43,6 +43,18 @@ export interface Exam {
   slug: string;
   createdAt: Date;
 }
+export interface DetailExamType {
+  _id?: string;
+  title: string;
+  description?: string;
+  questions: Question[];
+  duration: number;
+  startTime: Date;
+  endTime?: Date;
+  isPublic: boolean;
+  slug: string;
+  createdAt: Date;
+}
 export interface QuestionType {
   _id?: string;
   name: string;
@@ -77,6 +89,7 @@ export const QuestionAPI = {
     return response.data;
   },
   UpdateQuestion: async (question: Question, _id: string) => {
+    console.log(question);
     const response = await request.patch(
       `/teacher/question/update/${_id}`,
       question
@@ -103,19 +116,40 @@ export const ExamAPI = {
     const response = await request.post("/teacher/exam/create", question);
     return response.data;
   },
-  getQuestion: async (id: string) => {
-    const response = await request.get(`/teacher/question/detail/${id}`);
+  getDetailExam: async (slug: string) => {
+    const response = await request.get(`/teacher/exam/detail/${slug}`);
     return response.data;
   },
-  UpdateQuestion: async (question: Question, _id: string) => {
+  UpdateExam: async (question: Exam, slug: string) => {
     const response = await request.patch(
-      `/teacher/question/update/${_id}`,
+      `/teacher/exam/update/${slug}`,
       question
     );
     return response.data;
   },
-  deleteQuestion: async (id: string) => {
-    const response = await request.patch(`/teacher/question/delete/${id}`);
+  deleteExam: async (id: string) => {
+    const response = await request.delete(`/teacher/exam/delete/${id}`);
+    return response.data;
+  },
+  setScheduleExam: async (id: string, startTime: Date, endTime: Date) => {
+    const response = await request.patch(`/teacher/exam/schedule/${id}`, {
+      startTime,
+      endTime,
+    });
+    return response.data;
+  },
+  createExamAuTo: async (
+    level: string,
+    numberOfQuestions: number,
+    duration: number,
+    questionTypes: string[]
+  ) => {
+    const response = await request.post("/teacher/exam/auto-generate-exam", {
+      level,
+      numberOfQuestions,
+      duration,
+      questionTypes,
+    });
     return response.data;
   },
 };

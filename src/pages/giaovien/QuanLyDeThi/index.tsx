@@ -5,6 +5,9 @@ import Table, { ColumnsType } from "antd/es/table";
 import { useEffect, useState } from "react";
 import CreateExamModal from "./DeThi/CreateExam";
 import { useNavigate } from "react-router-dom";
+import CreateExamModalAuTo from "./DeThi/CreateExamQuestion.tsx/CreateExamAuto";
+import CreateExamModalShedule from "./DeThi/CreateExamQuestion.tsx/SetExamModalShedule";
+import { UpdateExamQuestion } from "./DeThi/UpdateExam";
 
 const columns: ColumnsType<Exam> = [
   {
@@ -97,6 +100,25 @@ export const QuanLyDeThi = () => {
   const onPageChange = (page: number) => {
     setPage(page);
   };
+  const hadleDelete = async (id: string) => {
+    confirm("Bạn có chắc chắn muốn xóa đề thi này không?");
+    if (!confirm) return;
+    try {
+      const rq = await ExamAPI.deleteExam(id);
+      console.log(rq);
+      if (rq?.success) {
+        getAllExam(page);
+      }
+    } catch (error: any) {
+      if (error.response) {
+        console.log(error.response.data.message);
+      }
+    }
+  };
+  const [showModalSchedule, setShowModalSchedule] = useState<string | null>(
+    null
+  );
+  const [showModalCreatAuto, setShowModalCreatAuto] = useState<boolean>(false);
   const navigatetor = useNavigate();
   return (
     <div className="container mx-auto p-4">
@@ -105,10 +127,16 @@ export const QuanLyDeThi = () => {
       </center>
       <div>
         <button
-          className="btn btn-primary  my-3"
+          className="btn btn-primary   my-3 mx-3"
           onClick={() => navigatetor("/giaovien/QuanLyDeThi/CreateExam")}
         >
           Tạo đề thi
+        </button>
+        <button
+          className="btn btn-primary  my-3 mx-3"
+          onClick={() => setShowModalCreatAuto(true)}
+        >
+          Tạo đề thi tự động
         </button>
       </div>
       {data ? (
@@ -158,13 +186,26 @@ export const QuanLyDeThi = () => {
                     color="default"
                     variant="outlined"
                     style={{ backgroundColor: "orange" }}
+                    onClick={() => setShowModalSchedule(record._id || "")}
                   >
-                    Sửa
+                    Sửa lịch
                   </Button>
-                  <Button color="primary" variant="solid">
+                  <Button
+                    color="primary"
+                    variant="solid"
+                    onClick={() =>
+                      navigatetor(
+                        "/giaovien/QuanLyDeThi/UpdateExam/" + record.slug
+                      )
+                    }
+                  >
                     Chi tiết
                   </Button>
-                  <Button color="danger" variant="solid">
+                  <Button
+                    color="danger"
+                    variant="solid"
+                    onClick={() => hadleDelete(record._id || "")}
+                  >
                     Xóa
                   </Button>
                 </Space>
@@ -187,8 +228,26 @@ export const QuanLyDeThi = () => {
       <CreateExamModal
         visible={showModal}
         handleClose={() => setShowModal(false)}
-        onCreateSuccess={handleCreateSuccess} 
-        dataQuestion={[]}      />
+        onCreateSuccess={handleCreateSuccess}
+        dataQuestion={[]}
+      />
+      <CreateExamModalAuTo
+        visible={showModalCreatAuto}
+        handleClose={() => {
+          setShowModalCreatAuto(false), getAllExam(page);
+        }}
+      />
+      <CreateExamModalShedule
+        visible={
+          showModalSchedule === null || showModalSchedule === undefined
+            ? false
+            : true
+        }
+        handleClose={() => {
+          setShowModalSchedule(null), getAllExam(page);
+        }}
+        _id={showModalSchedule || ""}
+      />
     </div>
   );
 };

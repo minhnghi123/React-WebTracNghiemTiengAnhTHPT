@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Modal, Input, Select, Form, DatePicker } from "antd";
 
 import { Exam, ExamAPI, Question } from "@/services/teacher/Teacher";
+import { useNavigate } from "react-router-dom";
 
 const { Option } = Select;
 
@@ -10,15 +11,17 @@ interface CreateExamModalProps {
   handleClose: () => void;
   onCreateSuccess: () => void;
   dataQuestion: Question[];
+  slug: string;
 }
 
-const CreateExamModal: React.FC<CreateExamModalProps> = ({
+const UpdateExamModal: React.FC<CreateExamModalProps> = ({
   visible,
   handleClose,
   onCreateSuccess,
   dataQuestion,
+  slug,
 }) => {
-  const [exam, setExam] = useState<Partial<Exam>>({
+  const [exam, setExam] = useState<Exam>({
     title: "",
     description: "",
     questions:
@@ -30,6 +33,7 @@ const CreateExamModal: React.FC<CreateExamModalProps> = ({
     endTime: undefined,
     isPublic: false,
     slug: "",
+    createdAt: new Date(),
   });
 
   const handleChange = (
@@ -46,29 +50,54 @@ const CreateExamModal: React.FC<CreateExamModalProps> = ({
   const handleDateChange = (name: string, date: any) => {
     setExam((prev) => ({ ...prev, [name]: date }));
   };
-
-  const handleSaveClick = async () => {
-    const formattedExam = {
-      ...exam,
-      startTime: exam.startTime
-        ? new Date(exam.startTime).toISOString()
-        : undefined,
-      endTime: exam.endTime ? new Date(exam.endTime).toISOString() : undefined,
+  useEffect(() => {
+    const fetchExamDetails = async () => {
+      if (slug) {
+        const response = await ExamAPI.getDetailExam(slug);
+        if (response?.success === true) {
+          setExam(response.data);
+          console.log(exam);
+        } else {
+          console.log(response);
+        }
+      }
     };
 
-    const response = await ExamAPI.creteExam(formattedExam as unknown as Exam);
+    fetchExamDetails();
+  }, []);
+  const handleSaveClick = async () => {
+    if (!exam.startTime) {
+      alert("Vui lòng chọn thời gian bắt đầu ");
+      return;
+    }
+
+    if (exam.endTime && exam.endTime <= exam.startTime) {
+      alert("Thời gian kết thúc phải lớn hơn thời gian bắt đầu.");
+      return;
+    }
+
+    if (exam.questions) {
+      exam.questions = exam.questions.filter(
+        (id): id is string => id !== undefined
+      );
+    }
+    console.log(exam);
+    const response = await ExamAPI.UpdateExam(exam as Exam, slug);
+
     if (response?.success === true) {
-      alert("Tạo đề thi thành công");
+      alert("Sửa đề thi thành công");
+      navigate("/giaovien/QuanLyDeThi/");
       handleClose();
+
       onCreateSuccess();
     } else {
-      console.log(response);
+      console.log(response?.message);
     }
   };
-
+  const navigate = useNavigate();
   return (
     <Modal
-      title="Tạo kỳ thi"
+      title="Sửa kỳ thi"
       visible={visible}
       onCancel={handleClose}
       onOk={handleSaveClick}
@@ -98,7 +127,10 @@ const CreateExamModal: React.FC<CreateExamModalProps> = ({
         <Form.Item label="Thời gian bắt đầu">
           <DatePicker
             showTime
-            onChange={(date) => handleDateChange("startTime", date)}
+            onChange={(date) => {
+              console.log(date);
+              handleDateChange("startTime", date);
+            }}
           />
         </Form.Item>
         <Form.Item label="Thời gian kết thúc">
@@ -118,4 +150,4 @@ const CreateExamModal: React.FC<CreateExamModalProps> = ({
   );
 };
 
-export default CreateExamModal;
+export default UpdateExamModal;
