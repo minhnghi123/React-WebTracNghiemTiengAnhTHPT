@@ -343,7 +343,7 @@ export const setExamSchedule = async (req, res) => {
 //[POST ]
 export const autoGenerateExam = async (req, res) => {
   try {
-    const { level, numberOfQuestions, duration } = req.body;
+    const { level, numberOfQuestions, duration, questionTypes } = req.body;
     let numberOfEasyQuestions = 0,
       numberOfHardQuestions = 0;
     if (level === "Easy") {
@@ -354,48 +354,49 @@ export const autoGenerateExam = async (req, res) => {
     } else {
       numberOfHardQuestions = numberOfQuestions;
     }
+
     const easyQuestions = await Question.aggregate([
-      { $match: { level: "easy" } },
+      { $match: { level: "easy", questionType: { $in: questionTypes } } },
       { $sample: { size: numberOfEasyQuestions } },
     ]);
     const hardQuestions = await Question.aggregate([
-      { $match: { level: "hard" } },
+      { $match: { level: "hard", questionType: { $in: questionTypes } } },
       { $sample: { size: numberOfHardQuestions } },
     ]);
-    if (easyQuestions < numberOfEasyQuestions) {
+    if (easyQuestions.length < numberOfEasyQuestions) {
       return res.status(400).json({
         code: 400,
-        message: "Not enough easy questions !",
+        message: "Not enough easy questions!",
       });
     }
-    if (hardQuestions < numberOfHardQuestions) {
+    if (hardQuestions.length < numberOfHardQuestions) {
       return res.status(400).json({
         code: 400,
-        message: "Not enough hard questions !",
+        message: "Not enough hard questions!",
       });
     }
     const questions = [...easyQuestions, ...hardQuestions];
-    const randomeCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const randomCode = Math.floor(100000 + Math.random() * 900000).toString();
     const newExam = new Exam({
-      title: `Auto-generated exam(${randomeCode})`,
+      title: `Auto-generated exam(${randomCode})`,
       description: `This is an auto-generated exam with ${numberOfQuestions} questions`,
       questions: questions.map((q) => q._id),
       duration: duration || 90,
       isPublic: true,
       startTime: new Date(),
-      endTime: new Date(Date.now() + 60 * 60 * 1000), // 1 giờ sau
+      endTime: new Date(Date.now() + 60 * 60 * 1000), // 1 hour later
     });
     await newExam.save();
     res.status(200).json({
       code: 200,
-      message: "Create exam successfully !",
+      message: "Create exam successfully!",
       exam: newExam,
     });
   } catch (error) {
     console.log(error.message);
-    res.status(400).json({
-      code: 400,
-      message: "Internal server error !",
+    res.status(500).json({
+      code: 500,
+      message: "Internal server error!",
     });
   }
 };
