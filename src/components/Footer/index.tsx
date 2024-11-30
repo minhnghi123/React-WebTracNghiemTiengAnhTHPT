@@ -35,7 +35,7 @@ export const Footer = () => {
                   </a>
                 </li>
                 <li>
-                  <a className="nav-link" href="/Contests/Index">
+                  <a className="nav-link" href="/KyThi">
                     Tham Gia Kỳ Thi
                   </a>
                 </li>

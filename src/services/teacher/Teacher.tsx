@@ -33,9 +33,9 @@ export interface Question {
 }
 export interface Exam {
   _id?: string;
-  title: string;
+  title?: string;
   description?: string;
-  questions: string[];
+  questions: string[] | Question[];
   duration: number;
   startTime: Date;
   endTime?: Date;

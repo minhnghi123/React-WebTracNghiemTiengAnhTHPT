@@ -23,6 +23,10 @@ import { QuanLyDeThi } from "@/pages/giaovien/QuanLyDeThi";
 import { QuanLyDangCauHoi } from "@/pages/admin/QuanLyDangCauHoi";
 import { CreateExamQuestion } from "@/pages/giaovien/QuanLyDeThi/DeThi/CreateExamQuestion.tsx";
 import { UpdateExamQuestion } from "@/pages/giaovien/QuanLyDeThi/DeThi/UpdateExam";
+import { KyThi } from "@/pages/default/KyThi";
+import { DetailExam } from "@/pages/default/KyThi/BaiLam/DetailExam";
+import { BaiLam } from "@/pages/default/KyThi/BaiLam/BaiLam";
+import { KetQua } from "@/pages/default/KyThi/KetQua";
 
 export enum ERolePath {
   ADMIN = 2,
@@ -62,6 +66,10 @@ export const router = [
       createRoute("/Contact", <LienHe />, ERolePath.USER),
       createRoute("/PhongThi", <PhongThi />, ERolePath.USER),
       createRoute("/OnTap", <OnTap />, ERolePath.USER),
+      createRoute("/KyThi", <KyThi />, ERolePath.USER),
+      createRoute("/KyThi/ChiTiet/:_id", <DetailExam />, ERolePath.USER),
+      createRoute("/KyThi/BaiLam/:_id", <BaiLam />, ERolePath.USER),
+      createRoute("/KetQua", <KetQua />, ERolePath.USER),
     ],
   },
   {
@@ -124,6 +132,10 @@ const paths = {
   "/giaovien/QuanLyDeThi/UpdateExam/:_id": [
     "/giaovien/QuanLyDeThi/UpdateExam/:_id",
   ],
+  "/KyThi/ChiTiet/:_id": ["/KyThi/ChiTiet/:_id"],
+  "/KyThi": ["/KyThi"],
+  "/KyThi/BaiLam/:_id": ["/KyThi/BaiLam/:_id"],
+  "/KetQua": ["/KetQua"],
 } as const;
 
 export type TRoutePaths = (typeof paths)[keyof typeof paths][number] &

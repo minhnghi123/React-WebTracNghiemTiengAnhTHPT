@@ -74,7 +74,7 @@ export const Navbar = () => {
               <a href="/Home">Trang chủ</a>
             </li>
             <li>
-              <a href="/Contests/Index">Khám phá</a>
+              <a href="/KyThi">Khám phá</a>
             </li>
             <li>
               <a href="/Ontap">Ôn tập</a>
