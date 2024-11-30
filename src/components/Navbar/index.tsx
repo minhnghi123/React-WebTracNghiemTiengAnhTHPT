@@ -22,8 +22,17 @@ export const Navbar = () => {
         </a>
       ),
     },
+
     {
       key: "3",
+      label: (
+        <a rel="noopener noreferrer" href="/Admin">
+          Vào giao diện admin
+        </a>
+      ),
+    },
+    {
+      key: "4",
       label: (
         <a
           onClick={() => handleBTNLogout()}

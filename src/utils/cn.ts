@@ -5,5 +5,6 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 export const cleanString = (str: string): string => {
-  return str.replace(/\s+/g, ' ').trim();
+  
+  return str.replace(/\n/g, '<br />').replace(/\s+/g, ' ').trim();
 };

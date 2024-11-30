@@ -131,25 +131,34 @@ export const deletePatch = async (req, res) => {
 export const updatePatch = async (req, res) => {
   try {
     const updateData = { ...req.body };
-    if (req.body.audio) {
-      const newAudio = new Audio(req.body.audio);
-      await newAudio.save();
-      updateData.audio = newAudio._id;
+
+    if (req.body.audioInfo) {
+      const existingAudio = await Audio.findById(updateData.audio);
+
+      if (existingAudio && JSON.stringify(existingAudio) === JSON.stringify(req.body.audioInfo)) {
+        // If the new audioInfo is the same as the existing one, keep the existing _id
+        updateData.audio = existingAudio._id;
+      } else {
+        // If the new audioInfo is different, create a new Audio document
+        const newAudio = new Audio(req.body.audioInfo);
+        await newAudio.save();
+        updateData.audio = newAudio._id;
+      }
     }
+
     await Question.updateOne(
       {
         _id: req.params.id,
       },
       updateData
     );
+
     res.status(200).json({
       code: 200,
       message: "Updated question successfully",
     });
   } catch (error) {
     console.error(error);
-    return res
-      .status(400)
-      .json({ code: 400, message: "Internal server error" });
+    return res.status(400).json({ code: 400, message: "Internal server error" });
   }
 };

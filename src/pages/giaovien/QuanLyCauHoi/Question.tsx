@@ -46,7 +46,9 @@ const QuestionComponent: React.FC<QuestionComponentProps> = ({
   return (
     <div className="bg-white p-4 rounded shadow mb-4">
       <h3 className="text-xl font-bold mb-2" style={{ whiteSpace: "pre-wrap" }}>
-        {cleanString(question.content)}
+        <span
+          dangerouslySetInnerHTML={{ __html: cleanString(question.content) }}
+        />
       </h3>{" "}
       <div className="mt-1">
         {question.answers.map((answer) => (
