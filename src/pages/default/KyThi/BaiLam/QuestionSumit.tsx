@@ -38,12 +38,11 @@ const updateAnswersInLocalStorage = (
 
 type QuestionComponentProps = {
   question: Question;
-  onUpdateSuccess: () => void;
+
   questionType: string;
 };
 
 const QuestionSumit: React.FC<QuestionComponentProps> = ({
-  onUpdateSuccess,
   question,
   questionType,
 }) => {

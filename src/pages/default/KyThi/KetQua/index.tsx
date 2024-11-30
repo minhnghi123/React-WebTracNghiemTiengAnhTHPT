@@ -1,4 +1,3 @@
-import { useAuthContext } from "@/contexts/AuthProvider";
 import { Result, ResultAPI } from "@/services/student";
 import { Button, Table } from "antd";
 
@@ -12,7 +11,7 @@ type KetQuaProps = {
 export const KetQua: React.FC<KetQuaProps> = ({ DeThi }) => {
   const [Detail, setDetail] = useState<Result>();
   const [isDetail, setIsDetail] = useState(false);
-  const { user } = useAuthContext();
+  //const { user } = useAuthContext();
   const [result, setResult] = useState<Result[]>([]);
 
   const fethAllResult = async () => {
@@ -46,7 +45,7 @@ export const KetQua: React.FC<KetQuaProps> = ({ DeThi }) => {
       title: "Điểm",
 
       key: "score",
-      render: (text: string, record: Result) =>
+      render: (record: Result) =>
         ((record.score / record.questions.length) * 10).toFixed(2),
     },
     {

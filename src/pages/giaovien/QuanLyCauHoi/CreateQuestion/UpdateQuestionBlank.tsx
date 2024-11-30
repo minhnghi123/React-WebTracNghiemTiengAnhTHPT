@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Modal, Button, Input, Form, message, Select } from "antd";
+import { Modal, Button, Input, Form, Select } from "antd";
 import { Question, QuestionAPI } from "@/services/teacher/Teacher"; // Adjust the import path as needed
 
 interface UpdateBlankQuestionModalProps {

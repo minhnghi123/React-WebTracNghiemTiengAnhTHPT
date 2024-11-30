@@ -1,20 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Question, QuestionAPI } from "@/services/teacher/Teacher";
-import {
-  Form,
-  InputNumber,
-  Modal,
-  Button,
-  Table,
-  Tag,
-  Input,
-  Space,
-} from "antd";
+import { Form, InputNumber, Modal, Button, Table, Tag } from "antd";
 import {
   PlusOutlined,
   MinusOutlined,
   InfoCircleOutlined,
-  SearchOutlined,
 } from "@ant-design/icons";
 import QuestionComponent from "@/pages/giaovien/QuanLyCauHoi/Question";
 

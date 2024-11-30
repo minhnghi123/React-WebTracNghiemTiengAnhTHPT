@@ -9,7 +9,7 @@ import {
 import QuestionComponent from "@/pages/giaovien/QuanLyCauHoi/Question";
 
 import clsx from "clsx";
-import CreateExamModal from "../CreateExam";
+
 import { useParams } from "react-router-dom";
 import UpdateExamModal from "./UpdateExam";
 

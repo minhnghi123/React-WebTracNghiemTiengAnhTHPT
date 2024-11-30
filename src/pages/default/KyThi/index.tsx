@@ -1,5 +1,5 @@
-import { Exam, ExamAPI } from "@/services/teacher/Teacher";
-import { Button, Pagination, Space, Tag } from "antd";
+import { Exam } from "@/services/teacher/Teacher";
+import { Button, Pagination } from "antd";
 import Table, { ColumnsType } from "antd/es/table";
 
 import { useEffect, useState } from "react";
@@ -30,8 +30,7 @@ const columns: ColumnsType<Exam> = [
     key: "startTime",
     sorter: (a: Exam, b: Exam) =>
       new Date(a.startTime).getTime() - new Date(b.startTime).getTime(),
-    render: (text: string, record: Exam) =>
-      new Date(record.startTime).toLocaleString(),
+    render: (record: Exam) => new Date(record.startTime).toLocaleString(),
   },
   {
     title: "Thời gian kết thúc",
@@ -39,7 +38,7 @@ const columns: ColumnsType<Exam> = [
     key: "endTime",
     sorter: (a: Exam, b: Exam) =>
       new Date(a.endTime || 0).getTime() - new Date(b.endTime || 0).getTime(),
-    render: (text: string, record: Exam) =>
+    render: (record: Exam) =>
       record.endTime ? new Date(record.endTime).toLocaleString() : "N/A",
   },
 
@@ -48,13 +47,10 @@ const columns: ColumnsType<Exam> = [
     dataIndex: "questions",
     key: "questions",
     sorter: (a: Exam, b: Exam) => a.questions.length - b.questions.length,
-    render: (text: string, record: Exam) => record.questions.length,
+    render: (record: Exam) => record.questions.length,
   },
 ];
 export const KyThi = () => {
-  const handleCreateSuccess = () => {
-    getAllExam(page);
-  };
   const [page, setPage] = useState<number>(1);
   const [total, setTotal] = useState<number>(0);
   const [data, setData] = useState<Exam[]>();

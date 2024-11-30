@@ -106,10 +106,10 @@ export const BaiLam = () => {
       setEndTime(undefined);
     }
   };
-  const fetchWrongAnswers = async () => {
-    const response = await ResultAPI.getWrongAnswers(_id);
-    console.log(response);
-  };
+  // const fetchWrongAnswers = async () => {
+  //   const response = await ResultAPI.getWrongAnswers(_id);
+  //   console.log(response);
+  // };
   return (
     <div>
       <center>
@@ -121,7 +121,6 @@ export const BaiLam = () => {
             <div key={index} ref={(el) => (questionRefs.current[index] = el!)}>
               <QuestionSumit
                 question={question}
-                onUpdateSuccess={() => {}}
                 questionType={question.questionType ?? ""}
               />
             </div>

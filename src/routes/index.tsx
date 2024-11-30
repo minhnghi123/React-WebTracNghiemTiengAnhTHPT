@@ -27,6 +27,7 @@ import { KyThi } from "@/pages/default/KyThi";
 import { DetailExam } from "@/pages/default/KyThi/BaiLam/DetailExam";
 import { BaiLam } from "@/pages/default/KyThi/BaiLam/BaiLam";
 import { KetQua } from "@/pages/default/KyThi/KetQua";
+import { QuanLyAudio } from "@/pages/giaovien/QuanLyFileAudio";
 
 export enum ERolePath {
   ADMIN = 2,
@@ -97,6 +98,7 @@ export const router = [
         <UpdateExamQuestion />,
         ERolePath.USER
       ),
+      createRoute("/giaovien/QuanLyAudio", <QuanLyAudio />, ERolePath.USER),
     ],
   },
   {
@@ -136,6 +138,7 @@ const paths = {
   "/KyThi": ["/KyThi"],
   "/KyThi/BaiLam/:_id": ["/KyThi/BaiLam/:_id"],
   "/KetQua": ["/KetQua"],
+  "/giaovien/QuanLyAudio": ["/giaovien/QuanLyAudio"],
 } as const;
 
 export type TRoutePaths = (typeof paths)[keyof typeof paths][number] &

@@ -7,7 +7,6 @@ import CreateExamModal from "./DeThi/CreateExam";
 import { useNavigate } from "react-router-dom";
 import CreateExamModalAuTo from "./DeThi/CreateExamQuestion.tsx/CreateExamAuto";
 import CreateExamModalShedule from "./DeThi/CreateExamQuestion.tsx/SetExamModalShedule";
-import { UpdateExamQuestion } from "./DeThi/UpdateExam";
 
 const columns: ColumnsType<Exam> = [
   {
@@ -32,8 +31,7 @@ const columns: ColumnsType<Exam> = [
     key: "startTime",
     sorter: (a: Exam, b: Exam) =>
       new Date(a.startTime).getTime() - new Date(b.startTime).getTime(),
-    render: (text: string, record: Exam) =>
-      new Date(record.startTime).toLocaleString(),
+    render: (record: Exam) => new Date(record.startTime).toLocaleString(),
   },
   {
     title: "Thời gian kết thúc",
@@ -41,7 +39,7 @@ const columns: ColumnsType<Exam> = [
     key: "endTime",
     sorter: (a: Exam, b: Exam) =>
       new Date(a.endTime || 0).getTime() - new Date(b.endTime || 0).getTime(),
-    render: (text: string, record: Exam) =>
+    render: (record: Exam) =>
       record.endTime ? new Date(record.endTime).toLocaleString() : "N/A",
   },
 
@@ -50,7 +48,7 @@ const columns: ColumnsType<Exam> = [
     dataIndex: "questions",
     key: "questions",
     sorter: (a: Exam, b: Exam) => a.questions.length - b.questions.length,
-    render: (text: string, record: Exam) => record.questions.length,
+    render: (record: Exam) => record.questions.length,
   },
 ];
 export const QuanLyDeThi = () => {
@@ -77,7 +75,7 @@ export const QuanLyDeThi = () => {
   const getAllExam = async (page: number) => {
     try {
       const rq = await ExamAPI.getAllExam(page);
-
+      console.log(rq.data);
       if (rq?.success) {
         setData(rq?.data);
         setTotal(rq?.pagination.totalPages);
@@ -154,7 +152,7 @@ export const QuanLyDeThi = () => {
                 { text: "Riêng", value: false },
               ],
               onFilter: (value, record) => record.isPublic === value,
-              render: (text: string, record: Exam) => (
+              render: (record: Exam) => (
                 <center>
                   {record.isPublic ? (
                     <Tag

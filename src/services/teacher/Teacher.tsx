@@ -10,9 +10,9 @@ export interface Audio {
   filePath: string;
   description: string;
   transcription: string;
-  createdAt: Date;
+  createdAt?: Date;
   deletedAt?: Date | null;
-  isDeleted: boolean;
+  isDeleted?: boolean;
 }
 export interface Question {
   _id?: string;
@@ -180,6 +180,27 @@ export const QuestionTypeAPI = {
     const response = await request.patch(
       `/teacher/question-types/delete/${id}`
     );
+    return response.data;
+  },
+};
+export const AudioAPI = {
+  getAllAudio: async () => {
+    const response = await request.get(`/teacher/audio/`);
+    return response.data;
+  },
+  createAudio: async (question: Audio) => {
+    const response = await request.post("/teacher/audio/upload", question);
+    return response.data;
+  },
+  updateAudio: async (question: Audio, _id: string) => {
+    const response = await request.patch(
+      `/teacher/audio/update/${_id}`,
+      question
+    );
+    return response.data;
+  },
+  deleteAudio: async (id: string) => {
+    const response = await request.patch(`/teacher/audio/delete/${id}`);
     return response.data;
   },
 };
