@@ -21,10 +21,8 @@ const CreateExamModal: React.FC<CreateExamModalProps> = ({
   const [exam, setExam] = useState<Partial<Exam>>({
     title: "",
     description: "",
-    questions:
-      dataQuestion
-        ?.map((item) => item._id)
-        .filter((id): id is string => id !== undefined) || [],
+    questions: dataQuestion,
+
     duration: 90,
     startTime: new Date(),
     endTime: undefined,
@@ -50,6 +48,7 @@ const CreateExamModal: React.FC<CreateExamModalProps> = ({
   const handleSaveClick = async () => {
     const formattedExam = {
       ...exam,
+      questions: dataQuestion,
       startTime: exam.startTime
         ? new Date(exam.startTime).toISOString()
         : undefined,

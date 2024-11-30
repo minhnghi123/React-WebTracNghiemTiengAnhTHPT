@@ -98,7 +98,10 @@ const QuestionComponent: React.FC<QuestionComponentProps> = ({
         style={{ whiteSpace: "pre-wrap" }}
       >
         <span style={{ fontWeight: "bold" }}>Giải thích: </span>
-        {cleanString(question.explanation)}
+        <span
+          dangerouslySetInnerHTML={{ __html: cleanString(question.explanation) }}
+        />
+        
       </p>
       <p
         className="text-sm text-gray-600 mb-2"

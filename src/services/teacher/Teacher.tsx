@@ -30,12 +30,26 @@ export interface Question {
   deleted?: boolean;
   createdAt?: Date;
   audioInfo?: Audio;
+  text?: string;
 }
 export interface Exam {
   _id?: string;
   title?: string;
   description?: string;
   questions: string[] | Question[];
+  duration: number;
+  startTime: Date;
+  endTime?: Date;
+  isPublic: boolean;
+  slug: string;
+  createdAt: Date;
+  updatedAt?: Date;
+}
+export interface ExamInfo {
+  _id?: string;
+  title?: string;
+  description?: string;
+  questions?: Question[];
   duration: number;
   startTime: Date;
   endTime?: Date;
@@ -113,6 +127,7 @@ export const ExamAPI = {
     return response.data;
   },
   creteExam: async (question: Exam) => {
+    console.log(question);
     const response = await request.post("/teacher/exam/create", question);
     return response.data;
   },

@@ -105,7 +105,9 @@ const QuestionSumit: React.FC<QuestionComponentProps> = ({
   return (
     <div className="bg-white p-4 rounded shadow mb-4">
       <h5 className="text-xl font-bold mb-2" style={{ whiteSpace: "pre-wrap" }}>
-        {cleanString(question.content)}
+        <span
+          dangerouslySetInnerHTML={{ __html: cleanString(question.content) }}
+        />
       </h5>
       <div className="mt-1">
         {questionType === "6742fb1cd56a2e75dbd817ea" ? (
@@ -121,7 +123,11 @@ const QuestionSumit: React.FC<QuestionComponentProps> = ({
             {question.answers.map((answer) => (
               <div>
                 <Radio key={answer._id} value={answer._id}>
-                  {cleanString(answer.text)}
+                  <span
+                    dangerouslySetInnerHTML={{
+                      __html: cleanString(answer.text),
+                    }}
+                  />
                 </Radio>
               </div>
             ))}

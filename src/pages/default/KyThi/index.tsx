@@ -29,8 +29,9 @@ const columns: ColumnsType<Exam> = [
     dataIndex: "startTime",
     key: "startTime",
     sorter: (a: Exam, b: Exam) =>
-      new Date(a.startTime).getTime() - new Date(b.startTime).getTime(),
-    render: (record: Exam) => new Date(record.startTime).toLocaleString(),
+      new Date(a.startTime || 0).getTime() -
+      new Date(b.startTime || 0).getTime(),
+    render: (text: string) => (text ? new Date(text).toLocaleString() : "N/A"),
   },
   {
     title: "Thời gian kết thúc",
@@ -38,16 +39,16 @@ const columns: ColumnsType<Exam> = [
     key: "endTime",
     sorter: (a: Exam, b: Exam) =>
       new Date(a.endTime || 0).getTime() - new Date(b.endTime || 0).getTime(),
-    render: (record: Exam) =>
-      record.endTime ? new Date(record.endTime).toLocaleString() : "N/A",
+    render: (text: string) => (text ? new Date(text).toLocaleString() : "N/A"),
   },
 
   {
     title: "Số câu hỏi",
     dataIndex: "questions",
     key: "questions",
-    sorter: (a: Exam, b: Exam) => a.questions.length - b.questions.length,
-    render: (record: Exam) => record.questions.length,
+    sorter: (a: Exam, b: Exam) =>
+      (a.questions?.length ?? 0) - (b.questions?.length ?? 0),
+    render: (record: Exam) => record.questions?.length ?? 0,
   },
 ];
 export const KyThi = () => {
@@ -58,11 +59,12 @@ export const KyThi = () => {
   const getAllExam = async (page: number) => {
     try {
       const rq = await ExamAPIStudent.getAllExam(page);
-
+      console.log(rq);
       if (rq?.code === 200) {
         setData(rq?.exams);
         setTotal(rq?.totalPage);
         setPage(rq?.currentPage);
+
         console.log(data);
         console.log(total);
         console.log(page);

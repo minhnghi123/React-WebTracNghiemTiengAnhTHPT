@@ -31,7 +31,7 @@ const columns: ColumnsType<Exam> = [
     key: "startTime",
     sorter: (a: Exam, b: Exam) =>
       new Date(a.startTime).getTime() - new Date(b.startTime).getTime(),
-    render: (record: Exam) => new Date(record.startTime).toLocaleString(),
+    render: (text: string) => (text ? new Date(text).toLocaleString() : "N/A"),
   },
   {
     title: "Thời gian kết thúc",
@@ -39,16 +39,16 @@ const columns: ColumnsType<Exam> = [
     key: "endTime",
     sorter: (a: Exam, b: Exam) =>
       new Date(a.endTime || 0).getTime() - new Date(b.endTime || 0).getTime(),
-    render: (record: Exam) =>
-      record.endTime ? new Date(record.endTime).toLocaleString() : "N/A",
+    render: (text: string) => (text ? new Date(text).toLocaleString() : "N/A"),
   },
 
   {
     title: "Số câu hỏi",
     dataIndex: "questions",
     key: "questions",
-    sorter: (a: Exam, b: Exam) => a.questions.length - b.questions.length,
-    render: (record: Exam) => record.questions.length,
+    sorter: (a: Exam, b: Exam) =>
+      (a.questions?.length ?? 0) - (b.questions?.length ?? 0),
+    render: (record: Exam) => record.questions?.length ?? 0,
   },
 ];
 export const QuanLyDeThi = () => {
@@ -75,14 +75,25 @@ export const QuanLyDeThi = () => {
   const getAllExam = async (page: number) => {
     try {
       const rq = await ExamAPI.getAllExam(page);
-      console.log(rq.data);
+      //   console.log(rq.data);
       if (rq?.success) {
+        // const exams = rq.data.map((item: any) => ({
+        //   _id: item._id,
+        //   title: item.title,
+        //   description: item.description,
+        //   questions: item.questions,
+        //   duration: item.duration,
+        //   startTime: new Date(item.startTime),
+        //   endTime: item.endTime ? new Date(item.endTime) : undefined,
+        //   isPublic: item.isPublic,
+        //   slug: item.slug,
+        //   createdAt: new Date(item.createdAt),
+        //   updatedAt: item.updatedAt ? new Date(item.updatedAt) : undefined,
+        // }));
         setData(rq?.data);
+        console.log("123", data, "123");
         setTotal(rq?.pagination.totalPages);
         setPage(rq?.pagination.page);
-        console.log(data);
-        console.log(total);
-        console.log(page);
       }
     } catch (error: any) {
       if (error.response) {
@@ -103,7 +114,7 @@ export const QuanLyDeThi = () => {
     if (!confirm) return;
     try {
       const rq = await ExamAPI.deleteExam(id);
-      console.log(rq);
+      //  console.log(rq);
       if (rq?.success) {
         getAllExam(page);
       }

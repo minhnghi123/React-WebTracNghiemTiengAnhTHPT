@@ -21,7 +21,9 @@ const QuestionAnserComponent: React.FC<QuestionComponentProps> = ({
         </Divider>
       )}
       <h3 className="text-xl font-bold mb-2" style={{ whiteSpace: "pre-wrap" }}>
-        {cleanString(question.content)}
+        <span
+          dangerouslySetInnerHTML={{ __html: cleanString(question.content) }}
+        />
       </h3>{" "}
       {question.answers.map((answer) => (
         <div>
