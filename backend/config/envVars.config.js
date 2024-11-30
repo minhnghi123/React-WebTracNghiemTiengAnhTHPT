@@ -5,4 +5,6 @@ export const ENV_VARS = {
   PORT: process.env.PORT || 5000,
   JWT_SECRET: process.env.JWT_SECRET,
   NODE_ENV: process.env.NODE_ENV,
+  USER_EMAIL: process.env.USER_EMAIL,
+  USER_PASS: process.env.USER_PASS,
 };

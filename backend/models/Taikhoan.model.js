@@ -26,5 +26,13 @@ const taiKhoanSchema = new mongoose.Schema({
     enum: ["student", "teacher", "admin"],
     default: "student",
   },
+  deleted: {
+    type: Boolean,
+    default: false,
+  },
+  status: {
+    type: String,
+    default: "false",
+  },
 });
 export const TaiKhoan = mongoose.model("TaiKhoan", taiKhoanSchema, "taikhoans");
