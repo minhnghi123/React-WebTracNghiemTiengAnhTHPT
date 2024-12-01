@@ -25,6 +25,7 @@ router.delete("/delete/:id", deleteExam);
 router.patch("/toggle-visibility/:id", toggleExamVisibility);
 
 router.patch("/schedule/:id", setExamSchedule);
+
 router.post("/auto-generate-exam", autoGenerateExam);
 
 export default router;

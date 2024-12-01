@@ -26,10 +26,6 @@ export const submitExam = async (req, res) => {
   try {
     const { examId, userId, answers } = req.body;
 
-    // Kiểm tra tính hợp lệ của dữ liệu
-    if (!examId || !userId || !answers || !Array.isArray(answers)) {
-      return res.status(400).json({ message: "Invalid input data." });
-    }
 
     // Tìm bài kiểm tra và danh sách câu hỏi liên quan
     const exam = await Exam.findOne({ _id: examId }).populate("questions");
