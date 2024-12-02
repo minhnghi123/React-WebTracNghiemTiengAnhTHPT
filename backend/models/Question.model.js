@@ -1,13 +1,7 @@
 import mongoose from "mongoose";
 const QuestionSchema = new mongoose.Schema({
   content: { type: String, required: true },
-
-  questionType: {
-    type: String,
-
-    required: true,
-  },
-
+  questionType: { type: mongoose.Schema.Types.ObjectId, ref: "QuestionType", require: true },
   level: {
     type: String,
     enum: ["easy", "hard"],
