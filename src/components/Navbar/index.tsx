@@ -131,34 +131,6 @@ export const Navbar = () => {
               </a>
             </li>
           </ul>
-        ) : (
-          <ul className="nav nav-pills justify-content-center gap-3" id="ex1" role="tablist">
-            <li className="nav-item rounded-pill shadow-sm" role="presentation">
-              <a
-                className="nav-dn bg-secondary text-white px-4 py-2 rounded-pill hover-bg-dark"
-                id="tab-login"
-                href="/Login"
-                role="tab"
-                aria-controls="pills-login"
-                aria-selected="true"
-              >
-                Đăng nhập
-              </a>
-            </li>
-            
-            <li className="nav-item rounded-pill shadow-sm" role="presentation">
-              <a
-                className="nav-dn bg-primary text-white px-4 py-2 rounded-pill hover-bg-dark"
-                id="tab-register"
-                href="/SignUp"
-                role="tab"
-                aria-controls="pills-register"
-                aria-selected="false"
-              >
-                Đăng ký
-              </a>
-            </li>
-          </ul>
         )}
       </div>
     </div>

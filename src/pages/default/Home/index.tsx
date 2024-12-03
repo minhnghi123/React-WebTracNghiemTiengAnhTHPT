@@ -12,7 +12,6 @@ const Home = () => {
               className="img-fluid"
               src="src/Content/img/P2N 1.svg"
               alt="Logo"
-              style={{ width: "50%" }}
             />
           </div>
           <p className="lead mt-3">Hành trình rèn luyện tiếng Anh THPT</p>
