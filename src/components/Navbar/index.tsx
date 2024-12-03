@@ -22,8 +22,17 @@ export const Navbar = () => {
         </a>
       ),
     },
+
     {
       key: "3",
+      label: (
+        <a rel="noopener noreferrer" href="/Admin">
+          Vào giao diện admin
+        </a>
+      ),
+    },
+    {
+      key: "4",
       label: (
         <a
           onClick={() => handleBTNLogout()}
@@ -74,7 +83,7 @@ export const Navbar = () => {
               <a href="/Home">Trang chủ</a>
             </li>
             <li>
-              <a href="/Contests/Index">Khám phá</a>
+              <a href="/KyThi">Khám phá</a>
             </li>
             <li>
               <a href="/Ontap">Ôn tập</a>
@@ -111,23 +120,34 @@ export const Navbar = () => {
             </Dropdown>
           </ul>
         ) : (
-          <ul className="navbar-nav ml-auto">
-            <li className="nav-item">
+          <ul
+            className="nav nav-pills justify-content-center gap-3"
+            id="ex1"
+            role="tablist"
+          >
+            <li className="nav-item rounded-pill shadow-sm" role="presentation">
               <a
-                className="nav-link"
-                href="/login"
-                style={{ color: "#007bff" }}
+                className="nav-dn bg-secondary text-white px-4 py-2 rounded-pill hover-bg-dark"
+                id="tab-login"
+                href="/Login"
+                role="tab"
+                aria-controls="pills-login"
+                aria-selected="true"
               >
-                <span className="fas fa-sign-in-alt"></span> Login
+                Đăng nhập
               </a>
             </li>
-            <li className="nav-item">
+
+            <li className="nav-item rounded-pill shadow-sm" role="presentation">
               <a
-                className="nav-link"
-                href="/signup"
-                style={{ color: "#007bff" }}
+                className="nav-dn bg-primary text-white px-4 py-2 rounded-pill hover-bg-dark"
+                id="tab-register"
+                href="/SignUp"
+                role="tab"
+                aria-controls="pills-register"
+                aria-selected="false"
               >
-                <span className="fas fa-sign-in-alt"></span> Log Out
+                Đăng ký
               </a>
             </li>
           </ul>

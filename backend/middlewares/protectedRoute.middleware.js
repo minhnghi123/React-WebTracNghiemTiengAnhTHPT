@@ -19,7 +19,7 @@ export const protectedRoute = async (req, res, next) => {
         message: "Unauthorized-Invalid token !",
       });
     }
-    const user = TaiKhoan.findOne({
+    const user = await TaiKhoan.findOne({
       _id: decoded.userId,
     });
     if (!user) {

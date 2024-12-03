@@ -1,53 +1,52 @@
 import Exam from "../../models/Exam.model.js";
-
-
+import { Question } from "../../models/Question.model.js";
 // [GET]: teacher/exam
-export const  getAllExams = async (req, res) => {
-    try {
-      const { page = 1, limit = 10, title, isPublic } = req.query; // Lấy các tham số từ query
-      
-      // Tạo bộ lọc (filter)
-      const filter = {};
-      if (title) {
-        filter.title = { $regex: title, $options: "i" }; // Lọc theo tiêu đề (không phân biệt hoa thường)
-      }
-      if (isPublic !== undefined) {
-        filter.isPublic = isPublic === "true"; // Lọc theo trạng thái công khai
-      }
-  
-      // Phân trang
-      const skip = (page - 1) * limit;
-  
-      // Lấy danh sách đề thi dựa trên bộ lọc và phân trang
-      const exams = await Exam.find(filter)
-        .skip(skip)
-        .limit(Number(limit))
-        .sort({ createdAt: -1 }); // Sắp xếp giảm dần theo thời gian tạo
-  
-      // Đếm tổng số đề thi thỏa mãn bộ lọc
-      const total = await Exam.countDocuments(filter);
-  
-      // Phản hồi thành công
-      return res.status(200).json({
-        success: true,
-        message: "Lấy danh sách đề thi thành công!",
-        data: exams,
-        pagination: {
-          total,
-          page: Number(page),
-          totalPages: Math.ceil(total / limit),
-        },
-      });
-    } catch (error) {
-      // Xử lý lỗi server
-      console.error("Lỗi khi lấy danh sách đề thi:", error.message);
-  
-      return res.status(500).json({
-        success: false,
-        message: "Lỗi server! Không thể lấy danh sách đề thi.",
-        error: error.message,
-      });
+export const getAllExams = async (req, res) => {
+  try {
+    const { page = 1, limit = 10, title, isPublic } = req.query; // Lấy các tham số từ query
+
+    // Tạo bộ lọc (filter)
+    const filter = {};
+    if (title) {
+      filter.title = { $regex: title, $options: "i" }; // Lọc theo tiêu đề (không phân biệt hoa thường)
     }
+    if (isPublic !== undefined) {
+      filter.isPublic = isPublic === "true"; // Lọc theo trạng thái công khai
+    }
+
+    // Phân trang
+    const skip = (page - 1) * limit;
+
+    // Lấy danh sách đề thi dựa trên bộ lọc và phân trang
+    const exams = await Exam.find(filter)
+      .skip(skip)
+      .limit(Number(limit))
+      .sort({ createdAt: -1 }); // Sắp xếp giảm dần theo thời gian tạo
+
+    // Đếm tổng số đề thi thỏa mãn bộ lọc
+    const total = await Exam.countDocuments(filter);
+
+    // Phản hồi thành công
+    return res.status(200).json({
+      success: true,
+      message: "Lấy danh sách đề thi thành công!",
+      data: exams,
+      pagination: {
+        total,
+        page: Number(page),
+        totalPages: Math.ceil(total / limit),
+      },
+    });
+  } catch (error) {
+    // Xử lý lỗi server
+    console.error("Lỗi khi lấy danh sách đề thi:", error.message);
+
+    return res.status(500).json({
+      success: false,
+      message: "Lỗi server! Không thể lấy danh sách đề thi.",
+      error: error.message,
+    });
+  }
 };
 
 // [GET]: teacher/exam/detail/:slug
@@ -108,7 +107,9 @@ export const toggleExamVisibility = async (req, res) => {
     // Phản hồi thành công
     return res.status(200).json({
       success: true,
-      message: `Đề thi đã được ${exam.isPublic ? "công khai" : "ẩn"} thành công!`,
+      message: `Đề thi đã được ${
+        exam.isPublic ? "công khai" : "ẩn"
+      } thành công!`,
       data: {
         id: exam._id,
         title: exam.title,
@@ -116,10 +117,10 @@ export const toggleExamVisibility = async (req, res) => {
       },
     });
   } catch (error) {
-
     return res.status(500).json({
       success: false,
-      message: "Lỗi server! Không thể cập nhật trạng thái công khai của đề thi.",
+      message:
+        "Lỗi server! Không thể cập nhật trạng thái công khai của đề thi.",
       error: error.message,
     });
   }
@@ -128,7 +129,15 @@ export const toggleExamVisibility = async (req, res) => {
 // [POST]: teacher/exam/create
 export const createExam = async (req, res) => {
   try {
-    const { title, description, questions, duration, isPublic, startTime, endTime} = req.body;
+    const {
+      title,
+      description,
+      questions,
+      duration,
+      isPublic,
+      startTime,
+      endTime,
+    } = req.body;
 
     if (!title || !Array.isArray(questions) || questions.length === 0) {
       return res.status(400).json({
@@ -151,8 +160,8 @@ export const createExam = async (req, res) => {
       questions,
       duration: duration || 90, // Sử dụng giá trị mặc định nếu không có
       isPublic: isPublic || false,
-      startTime: startTime ? new Date(startTime) : undefined, 
-      endTime: endTime ? new Date(endTime) : undefined, 
+      startTime: startTime ? new Date(startTime) : undefined,
+      endTime: endTime ? new Date(endTime) : undefined,
     });
 
     // Lưu vào database
@@ -177,94 +186,102 @@ export const createExam = async (req, res) => {
 
 // [PATCH]: teacher/exam/update/:slug
 export const updateExam = async (req, res) => {
-    try {
-      const { slug } = req.params; // Lấy slug từ URL
-      const { title, description, questions, duration, isPublic, startTime, endTime } = req.body;
-  
-      if (startTime && endTime && new Date(startTime) >= new Date(endTime)) {
-        return res.status(400).json({
-          success: false,
-          message: "Thời gian bắt đầu phải nhỏ hơn thời gian kết thúc!",
-        });
-      }
+  try {
+    const { slug } = req.params; // Lấy slug từ URL
+    const {
+      title,
+      description,
+      questions,
+      duration,
+      isPublic,
+      startTime,
+      endTime,
+    } = req.body;
 
-      if (startTime && new Date(startTime) < new Date()) {
-        return res.status(400).json({
-          success: false,
-          message: "Thời gian bắt đầu không thể là quá khứ!",
-        });
-      }
-
-      if (startTime && new Date(startTime) < new Date()) {
-        return res.status(400).json({
-          success: false,
-          message: "Thời gian bắt đầu không thể là quá khứ!",
-        });
-      }
-      
-      // Cập nhật đề thi dựa trên slug
-      const updatedExam = await Exam.findOneAndUpdate(
-        { slug }, 
-        { title, description, questions, duration, isPublic, startTime, endTime }, 
-        { new: true, runValidators: true } // Trả về tài liệu sau khi cập nhật
-      );
-  
-      // Nếu không tìm thấy đề thi, trả về lỗi 404
-      if (!updatedExam) {
-        return res.status(404).json({
-          success: false,
-          message: "Đề thi không tồn tại!",
-        });
-      }
-  
-      // Phản hồi thành công
-      return res.status(200).json({
-        success: true,
-        message: "Đề thi đã được cập nhật thành công!",
-        data: updatedExam,
-      });
-    } catch (error) {
-      // Xử lý lỗi server
-      return res.status(500).json({
+    if (startTime && endTime && new Date(startTime) >= new Date(endTime)) {
+      return res.status(400).json({
         success: false,
-        message: "Lỗi server! Không thể cập nhật đề thi.",
-        error: error.message,
+        message: "Thời gian bắt đầu phải nhỏ hơn thời gian kết thúc!",
       });
     }
+
+    if (startTime && new Date(startTime) < new Date()) {
+      return res.status(400).json({
+        success: false,
+        message: "Thời gian bắt đầu không thể là quá khứ!",
+      });
+    }
+
+    if (startTime && new Date(startTime) < new Date()) {
+      return res.status(400).json({
+        success: false,
+        message: "Thời gian bắt đầu không thể là quá khứ!",
+      });
+    }
+
+    // Cập nhật đề thi dựa trên slug
+    const updatedExam = await Exam.findOneAndUpdate(
+      { slug },
+      { title, description, questions, duration, isPublic, startTime, endTime },
+      { new: true, runValidators: true } // Trả về tài liệu sau khi cập nhật
+    );
+
+    // Nếu không tìm thấy đề thi, trả về lỗi 404
+    if (!updatedExam) {
+      return res.status(404).json({
+        success: false,
+        message: "Đề thi không tồn tại!",
+      });
+    }
+
+    // Phản hồi thành công
+    return res.status(200).json({
+      success: true,
+      message: "Đề thi đã được cập nhật thành công!",
+      data: updatedExam,
+    });
+  } catch (error) {
+    // Xử lý lỗi server
+    return res.status(500).json({
+      success: false,
+      message: "Lỗi server! Không thể cập nhật đề thi.",
+      error: error.message,
+    });
+  }
 };
 
 // [DELETE]: teacher/exam/delete/:id
 export const deleteExam = async (req, res) => {
-    try {
-      const { id } = req.params; // Lấy id từ URL
-  
-      // Tìm và xóa đề thi dựa trên _id
-      const deletedExam = await Exam.findByIdAndDelete(id);
-  
-      // Nếu không tìm thấy đề thi, trả về lỗi 404
-      if (!deletedExam) {
-        return res.status(404).json({
-          success: false,
-          message: "Đề thi không tồn tại!",
-        });
-      }
-  
-      // Phản hồi thành công
-      return res.status(200).json({
-        success: true,
-        message: "Đề thi đã được xóa thành công!",
-      });
-    } catch (error) {
-      // Xử lý lỗi server
-      console.error("Lỗi khi xóa đề thi:", error.message);
-  
-      // Trả về lỗi 500 cho client
-      return res.status(500).json({
+  try {
+    const { id } = req.params; // Lấy id từ URL
+
+    // Tìm và xóa đề thi dựa trên _id
+    const deletedExam = await Exam.findByIdAndDelete(id);
+
+    // Nếu không tìm thấy đề thi, trả về lỗi 404
+    if (!deletedExam) {
+      return res.status(404).json({
         success: false,
-        message: "Lỗi server! Không thể xóa đề thi.",
-        error: error.message,
+        message: "Đề thi không tồn tại!",
       });
     }
+
+    // Phản hồi thành công
+    return res.status(200).json({
+      success: true,
+      message: "Đề thi đã được xóa thành công!",
+    });
+  } catch (error) {
+    // Xử lý lỗi server
+    console.error("Lỗi khi xóa đề thi:", error.message);
+
+    // Trả về lỗi 500 cho client
+    return res.status(500).json({
+      success: false,
+      message: "Lỗi server! Không thể xóa đề thi.",
+      error: error.message,
+    });
+  }
 };
 
 // [PATCH]: teacher/exam/schedule/:id
@@ -323,4 +340,63 @@ export const setExamSchedule = async (req, res) => {
     });
   }
 };
+//[POST ]
+export const autoGenerateExam = async (req, res) => {
+  try {
+    const { level, numberOfQuestions, duration, questionTypes } = req.body;
+    let numberOfEasyQuestions = 0,
+      numberOfHardQuestions = 0;
+    if (level === "Easy") {
+      numberOfEasyQuestions = numberOfQuestions;
+    } else if (level === "Medium") {
+      numberOfHardQuestions = Math.ceil(numberOfQuestions / 2);
+      numberOfEasyQuestions = numberOfQuestions - numberOfHardQuestions;
+    } else {
+      numberOfHardQuestions = numberOfQuestions;
+    }
 
+    const easyQuestions = await Question.aggregate([
+      { $match: { level: "easy", questionType: { $in: questionTypes } } },
+      { $sample: { size: numberOfEasyQuestions } },
+    ]);
+    const hardQuestions = await Question.aggregate([
+      { $match: { level: "hard", questionType: { $in: questionTypes } } },
+      { $sample: { size: numberOfHardQuestions } },
+    ]);
+    if (easyQuestions.length < numberOfEasyQuestions) {
+      return res.status(400).json({
+        code: 400,
+        message: "Not enough easy questions!",
+      });
+    }
+    if (hardQuestions.length < numberOfHardQuestions) {
+      return res.status(400).json({
+        code: 400,
+        message: "Not enough hard questions!",
+      });
+    }
+    const questions = [...easyQuestions, ...hardQuestions];
+    const randomCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const newExam = new Exam({
+      title: `Auto-generated exam(${randomCode})`,
+      description: `This is an auto-generated exam with ${numberOfQuestions} questions`,
+      questions: questions.map((q) => q._id),
+      duration: duration || 90,
+      isPublic: true,
+      startTime: new Date(),
+      endTime: new Date(Date.now() + 60 * 60 * 1000), // 1 hour later
+    });
+    await newExam.save();
+    res.status(200).json({
+      code: 200,
+      message: "Create exam successfully!",
+      exam: newExam,
+    });
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({
+      code: 500,
+      message: "Internal server error!",
+    });
+  }
+};

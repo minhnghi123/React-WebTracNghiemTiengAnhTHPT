@@ -5,14 +5,17 @@ import clsx from "clsx";
 import "./cauhoi.css";
 import { useState } from "react";
 import UpdateQuestionModal from "./CreateQuestion/UpdateQuestion";
+import UpdateBlankQuestionModal from "./CreateQuestion/UpdateQuestionBlank";
 type QuestionComponentProps = {
   question: Question;
   onUpdateSuccess: () => void;
+  questionType: string;
 };
 
 const QuestionComponent: React.FC<QuestionComponentProps> = ({
   onUpdateSuccess,
   question,
+  questionType,
 }) => {
   const [open, setOpen] = useState(false);
 
@@ -43,18 +46,32 @@ const QuestionComponent: React.FC<QuestionComponentProps> = ({
   return (
     <div className="bg-white p-4 rounded shadow mb-4">
       <h3 className="text-xl font-bold mb-2" style={{ whiteSpace: "pre-wrap" }}>
-        {cleanString(question.content)}
+        <span
+          dangerouslySetInnerHTML={{ __html: cleanString(question.content) }}
+        />
       </h3>{" "}
       <div className="mt-1">
         {question.answers.map((answer) => (
-          <div
-            key={answer._id}
-            className={`ml-2 rounded mb-2 ${
-              answer.isCorrect ? "bg-green-100" : "bg-red-100"
-            }`}
-            style={{ whiteSpace: "pre-wrap" }}
-          >
-            {cleanString(answer.text)}
+          <div>
+            {questionType === "6742fb1cd56a2e75dbd817ea" ? (
+              <div
+                key={answer._id}
+                className={`ml-2 rounded mb-2 ${
+                  answer.isCorrect ? "bg-green-100" : "bg-red-100"
+                }`}
+                style={{ whiteSpace: "pre-wrap" }}
+              >
+                {cleanString(answer.text)}
+              </div>
+            ) : (
+              <div
+                key={answer._id}
+                className="ml-2 rounded mb-2 bg-green-100"
+                style={{ whiteSpace: "pre-wrap" }}
+              >
+                {cleanString(answer.correctAnswerForBlank || "")}
+              </div>
+            )}
           </div>
         ))}
       </div>
@@ -81,7 +98,10 @@ const QuestionComponent: React.FC<QuestionComponentProps> = ({
         style={{ whiteSpace: "pre-wrap" }}
       >
         <span style={{ fontWeight: "bold" }}>Giải thích: </span>
-        {cleanString(question.explanation)}
+        <span
+          dangerouslySetInnerHTML={{ __html: cleanString(question.explanation) }}
+        />
+        
       </p>
       <p
         className="text-sm text-gray-600 mb-2"
@@ -90,6 +110,31 @@ const QuestionComponent: React.FC<QuestionComponentProps> = ({
         <span style={{ fontWeight: "bold" }}>Dịch: </span>
         {cleanString(question.translation)}
       </p>
+      {question.audioInfo && (
+        <div>
+          <Divider orientation="left" style={{ borderColor: "#7cb305" }}>
+            Phần nghe
+          </Divider>
+          <audio controls>
+            <source src={question.audioInfo.filePath} type="audio/mpeg" />
+          </audio>
+
+          <p
+            className="text-sm text-gray-600 mb-2"
+            style={{ whiteSpace: "pre-wrap" }}
+          >
+            <span style={{ fontWeight: "bold" }}>Giải thích: </span>
+            {cleanString(question.audioInfo.description)}
+          </p>
+          <p
+            className="text-sm text-gray-600 mb-2"
+            style={{ whiteSpace: "pre-wrap" }}
+          >
+            <span style={{ fontWeight: "bold" }}>Dịch: </span>
+            {cleanString(question.audioInfo.transcription)}
+          </p>
+        </div>
+      )}
       <hr />
       <button className="btn btn-primary" onClick={() => setOpenModal(true)}>
         Sửa câu hỏi
@@ -97,12 +142,24 @@ const QuestionComponent: React.FC<QuestionComponentProps> = ({
       <button className=" btn-w   my-3 mx-3" onClick={() => setOpen(true)}>
         Xóa câu hỏi
       </button>
-      <UpdateQuestionModal
-        onUpdateSuccess={onUpdateSuccess}
-        visible={openModal}
-        handleClose={() => setOpenModal(false)}
-        question2={question}
-      />
+      {questionType === "6742fb1cd56a2e75dbd817ea" ? (
+        <UpdateQuestionModal
+          visible={openModal}
+          onUpdateSuccess={() => onUpdateSuccess()}
+          handleClose={() => {
+            setOpenModal(false);
+          }}
+          question2={question}
+        />
+      ) : (
+        <UpdateBlankQuestionModal
+          visible={openModal}
+          handleClose={() => {
+            setOpenModal(false), onUpdateSuccess();
+          }}
+          question2={question}
+        />
+      )}
       <Modal
         open={open}
         title="Xóa câu hỏi"

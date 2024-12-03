@@ -105,6 +105,19 @@ const LayoutGiaoVien = () => {
                         Báo lỗi
                       </a>
                     </li>
+                    <li>
+                      <a
+                        href="/giaovien/QuanLyAudio"
+                        className="nav-link px-0"
+                        style={{
+                          color: "#495057",
+                          padding: "8px 0",
+                          textTransform: "capitalize",
+                        }}
+                      >
+                        Quản lý file nghe
+                      </a>
+                    </li>
                   </ul>
                 </li>
               </ul>

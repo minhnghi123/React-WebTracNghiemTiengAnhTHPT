@@ -4,6 +4,9 @@ import Table, { ColumnsType } from "antd/es/table";
 
 import { useEffect, useState } from "react";
 import CreateExamModal from "./DeThi/CreateExam";
+import { useNavigate } from "react-router-dom";
+import CreateExamModalAuTo from "./DeThi/CreateExamQuestion.tsx/CreateExamAuto";
+import CreateExamModalShedule from "./DeThi/CreateExamQuestion.tsx/SetExamModalShedule";
 
 const columns: ColumnsType<Exam> = [
   {
@@ -28,8 +31,7 @@ const columns: ColumnsType<Exam> = [
     key: "startTime",
     sorter: (a: Exam, b: Exam) =>
       new Date(a.startTime).getTime() - new Date(b.startTime).getTime(),
-    render: (text: string, record: Exam) =>
-      new Date(record.startTime).toLocaleString(),
+    render: (text: string) => (text ? new Date(text).toLocaleString() : "N/A"),
   },
   {
     title: "Thời gian kết thúc",
@@ -37,16 +39,16 @@ const columns: ColumnsType<Exam> = [
     key: "endTime",
     sorter: (a: Exam, b: Exam) =>
       new Date(a.endTime || 0).getTime() - new Date(b.endTime || 0).getTime(),
-    render: (text: string, record: Exam) =>
-      record.endTime ? new Date(record.endTime).toLocaleString() : "N/A",
+    render: (text: string) => (text ? new Date(text).toLocaleString() : "N/A"),
   },
 
   {
     title: "Số câu hỏi",
     dataIndex: "questions",
     key: "questions",
-    sorter: (a: Exam, b: Exam) => a.questions.length - b.questions.length,
-    render: (text: string, record: Exam) => record.questions.length,
+    sorter: (a: Exam, b: Exam) =>
+      (a.questions?.length ?? 0) - (b.questions?.length ?? 0),
+    render: (record: Exam) => record.questions?.length ?? 0,
   },
 ];
 export const QuanLyDeThi = () => {
@@ -73,14 +75,25 @@ export const QuanLyDeThi = () => {
   const getAllExam = async (page: number) => {
     try {
       const rq = await ExamAPI.getAllExam(page);
-
+      //   console.log(rq.data);
       if (rq?.success) {
+        // const exams = rq.data.map((item: any) => ({
+        //   _id: item._id,
+        //   title: item.title,
+        //   description: item.description,
+        //   questions: item.questions,
+        //   duration: item.duration,
+        //   startTime: new Date(item.startTime),
+        //   endTime: item.endTime ? new Date(item.endTime) : undefined,
+        //   isPublic: item.isPublic,
+        //   slug: item.slug,
+        //   createdAt: new Date(item.createdAt),
+        //   updatedAt: item.updatedAt ? new Date(item.updatedAt) : undefined,
+        // }));
         setData(rq?.data);
+        console.log("123", data, "123");
         setTotal(rq?.pagination.totalPages);
         setPage(rq?.pagination.page);
-        console.log(data);
-        console.log(total);
-        console.log(page);
       }
     } catch (error: any) {
       if (error.response) {
@@ -96,10 +109,26 @@ export const QuanLyDeThi = () => {
   const onPageChange = (page: number) => {
     setPage(page);
   };
-  const handleUpdateSuccess = () => {
-    getAllExam(page);
+  const hadleDelete = async (id: string) => {
+    confirm("Bạn có chắc chắn muốn xóa đề thi này không?");
+    if (!confirm) return;
+    try {
+      const rq = await ExamAPI.deleteExam(id);
+      //  console.log(rq);
+      if (rq?.success) {
+        getAllExam(page);
+      }
+    } catch (error: any) {
+      if (error.response) {
+        console.log(error.response.data.message);
+      }
+    }
   };
-
+  const [showModalSchedule, setShowModalSchedule] = useState<string | null>(
+    null
+  );
+  const [showModalCreatAuto, setShowModalCreatAuto] = useState<boolean>(false);
+  const navigatetor = useNavigate();
   return (
     <div className="container mx-auto p-4">
       <center>
@@ -107,10 +136,16 @@ export const QuanLyDeThi = () => {
       </center>
       <div>
         <button
-          className="btn btn-primary  my-3"
-          onClick={() => setShowModal(true)}
+          className="btn btn-primary   my-3 mx-3"
+          onClick={() => navigatetor("/giaovien/QuanLyDeThi/CreateExam")}
         >
           Tạo đề thi
+        </button>
+        <button
+          className="btn btn-primary  my-3 mx-3"
+          onClick={() => setShowModalCreatAuto(true)}
+        >
+          Tạo đề thi tự động
         </button>
       </div>
       {data ? (
@@ -128,7 +163,7 @@ export const QuanLyDeThi = () => {
                 { text: "Riêng", value: false },
               ],
               onFilter: (value, record) => record.isPublic === value,
-              render: (text: string, record: Exam) => (
+              render: (record: Exam) => (
                 <center>
                   {record.isPublic ? (
                     <Tag
@@ -160,13 +195,26 @@ export const QuanLyDeThi = () => {
                     color="default"
                     variant="outlined"
                     style={{ backgroundColor: "orange" }}
+                    onClick={() => setShowModalSchedule(record._id || "")}
                   >
-                    Sửa
+                    Sửa lịch
                   </Button>
-                  <Button color="primary" variant="solid">
+                  <Button
+                    color="primary"
+                    variant="solid"
+                    onClick={() =>
+                      navigatetor(
+                        "/giaovien/QuanLyDeThi/UpdateExam/" + record.slug
+                      )
+                    }
+                  >
                     Chi tiết
                   </Button>
-                  <Button color="danger" variant="solid">
+                  <Button
+                    color="danger"
+                    variant="solid"
+                    onClick={() => hadleDelete(record._id || "")}
+                  >
                     Xóa
                   </Button>
                 </Space>
@@ -190,6 +238,24 @@ export const QuanLyDeThi = () => {
         visible={showModal}
         handleClose={() => setShowModal(false)}
         onCreateSuccess={handleCreateSuccess}
+        dataQuestion={[]}
+      />
+      <CreateExamModalAuTo
+        visible={showModalCreatAuto}
+        handleClose={() => {
+          setShowModalCreatAuto(false), getAllExam(page);
+        }}
+      />
+      <CreateExamModalShedule
+        visible={
+          showModalSchedule === null || showModalSchedule === undefined
+            ? false
+            : true
+        }
+        handleClose={() => {
+          setShowModalSchedule(null), getAllExam(page);
+        }}
+        _id={showModalSchedule || ""}
       />
     </div>
   );

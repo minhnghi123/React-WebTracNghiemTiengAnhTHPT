@@ -15,11 +15,19 @@ import { PhongThi } from "@/pages/default/PhongThi";
 import LayoutGiaoVien from "@/pages/giaovien/LayoutGiaoVien";
 import { DashBoardGiaoVien } from "@/pages/giaovien/DashBoard";
 import { QuanLyCauHoi } from "@/pages/giaovien/QuanLyCauHoi";
-import LayoutAdmin from "@/pages/admin/DashBoard/LayoutGiaoVien";
+import LayoutAdmin from "@/pages/admin/DashBoard/LayoutAdmin";
 import { DashBoarAdmin } from "@/pages/admin/DashBoard";
 import NotFound from "@/pages/NotFound";
 import { OnTap } from "@/pages/default/OnTap";
 import { QuanLyDeThi } from "@/pages/giaovien/QuanLyDeThi";
+import { QuanLyDangCauHoi } from "@/pages/admin/QuanLyDangCauHoi";
+import { CreateExamQuestion } from "@/pages/giaovien/QuanLyDeThi/DeThi/CreateExamQuestion.tsx";
+import { UpdateExamQuestion } from "@/pages/giaovien/QuanLyDeThi/DeThi/UpdateExam";
+import { KyThi } from "@/pages/default/KyThi";
+import { DetailExam } from "@/pages/default/KyThi/BaiLam/DetailExam";
+import { BaiLam } from "@/pages/default/KyThi/BaiLam/BaiLam";
+import { KetQua } from "@/pages/default/KyThi/KetQua";
+import { QuanLyAudio } from "@/pages/giaovien/QuanLyFileAudio";
 
 export enum ERolePath {
   ADMIN = 2,
@@ -59,6 +67,10 @@ export const router = [
       createRoute("/Contact", <LienHe />, ERolePath.USER),
       createRoute("/PhongThi", <PhongThi />, ERolePath.USER),
       createRoute("/OnTap", <OnTap />, ERolePath.USER),
+      createRoute("/KyThi", <KyThi />, ERolePath.USER),
+      createRoute("/KyThi/ChiTiet/:_id", <DetailExam />, ERolePath.USER),
+      createRoute("/KyThi/BaiLam/:_id", <BaiLam />, ERolePath.USER),
+      createRoute("/KetQua", <KetQua />, ERolePath.USER),
     ],
   },
   {
@@ -76,12 +88,26 @@ export const router = [
       createRoute("/GiaoVien", <DashBoardGiaoVien />, ERolePath.USER),
       createRoute("/giaovien/NganHangCauHoi", <QuanLyCauHoi />, ERolePath.USER),
       createRoute("/giaovien/QuanLyDeThi", <QuanLyDeThi />, ERolePath.USER),
+      createRoute(
+        "/giaovien/QuanLyDeThi/CreateExam",
+        <CreateExamQuestion />,
+        ERolePath.USER
+      ),
+      createRoute(
+        "/giaovien/QuanLyDeThi/UpdateExam/:_id",
+        <UpdateExamQuestion />,
+        ERolePath.USER
+      ),
+      createRoute("/giaovien/QuanLyAudio", <QuanLyAudio />, ERolePath.USER),
     ],
   },
   {
     path: "/",
     element: <LayoutAdmin />,
-    children: [createRoute("/Admin", <DashBoarAdmin />, ERolePath.USER)],
+    children: [
+      createRoute("/Admin", <DashBoarAdmin />, ERolePath.USER),
+      createRoute("/Admin/DangCauHoi", <QuanLyDangCauHoi />, ERolePath.USER),
+    ],
   },
   {
     path: "*",
@@ -103,6 +129,16 @@ const paths = {
   "/Admin": ["/Admin"],
   "/OnTap": ["/OnTap"],
   "/giaovien/QuanLyDeThi": ["/giaovien/QuanLyDeThi"],
+  "/Admin/DangCauHoi": ["/Admin/DangCauHoi"],
+  "/giaovien/QuanLyDeThi/CreateExam": ["/giaovien/QuanLyDeThi/CreateExam"],
+  "/giaovien/QuanLyDeThi/UpdateExam/:_id": [
+    "/giaovien/QuanLyDeThi/UpdateExam/:_id",
+  ],
+  "/KyThi/ChiTiet/:_id": ["/KyThi/ChiTiet/:_id"],
+  "/KyThi": ["/KyThi"],
+  "/KyThi/BaiLam/:_id": ["/KyThi/BaiLam/:_id"],
+  "/KetQua": ["/KetQua"],
+  "/giaovien/QuanLyAudio": ["/giaovien/QuanLyAudio"],
 } as const;
 
 export type TRoutePaths = (typeof paths)[keyof typeof paths][number] &

@@ -1,18 +1,21 @@
 import mongoose from "mongoose";
 const QuestionSchema = new mongoose.Schema({
   content: { type: String, required: true },
+  questionType: { type: mongoose.Schema.Types.ObjectId, ref: "QuestionType", require: true },
   level: {
     type: String,
-    enum: ["easy", "medium", "hard"],
+    enum: ["easy", "hard"],
     default: "easy",
   },
   answers: [
     {
       text: { type: String, required: true },
+      correctAnswerForBlank: { type: String, default: "" },
       isCorrect: { type: Boolean, default: false },
     },
   ],
   subject: { type: String, default: "English" },
+  audio: { type: String, default: "" },
   knowledge: {
     type: String,
     default: "General Knowledge",

@@ -1,0 +1,4103 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div class="test-content contentblock" id="test-content">
+      <div class="test-controls">
+        <div class="custom-control custom-switch mb-2">
+          <input
+            type="checkbox"
+            class="custom-control-input showtranscript-toggle"
+            id="showtranscript-toggle"
+          />
+          <label
+            class="custom-control-label font-sm"
+            for="showtranscript-toggle"
+            ><i>Hiện toàn bộ transcript/đáp án</i></label
+          >
+        </div>
+
+        <div class="custom-control custom-switch highlight-toggle-box mb-3">
+          <input
+            type="checkbox"
+            checked=""
+            class="custom-control-input highlight-toggle"
+            id="highlight-toggle"
+          />
+          <label class="custom-control-label" for="highlight-toggle"
+            ><i>Highlight nội dung</i></label
+          >
+          <span
+            class="ml-1 far fa-exclamation-circle"
+            data-toggle="tooltip"
+            data-placement="top"
+            title=""
+            data-original-title="Bôi đen text để highlight nội dung. Bạn có thể thay đổi màu sắc hoặc thêm ghi chú."
+          ></span>
+          <div class="btn-group">
+            <button
+              class="ml-2 btn btn-sky btn-sm dropdown-toggle"
+              type="button"
+              data-toggle="dropdown"
+              aria-haspopup="true"
+              aria-expanded="false"
+            >
+              Lưu/khôi phục
+            </button>
+            <div class="dropdown-menu no-toggle">
+              <div class="dropdown-item highlight-clear">
+                <a>Xoá tất cả highlights</a>
+              </div>
+              <div
+                class="dropdown-item highlight-store"
+                data-target="/highlights/store/results/21045743/?"
+              >
+                <a>Lưu highlight</a>
+                <span
+                  class="ml-1 far fa-exclamation-circle"
+                  data-toggle="tooltip"
+                  data-placement="top"
+                  title=""
+                  data-original-title="Click vào đây để lưu lại highlight cho những lần tới."
+                ></span>
+              </div>
+              <div class="dropdown-divider"></div>
+              <div class="text-muted px-4">
+                Khôi phục highlight
+                <span
+                  class="ml-1 far fa-exclamation-circle"
+                  data-toggle="tooltip"
+                  data-placement="top"
+                  title=""
+                  data-original-title="Lựa chọn highlight bạn muốn khôi phục"
+                ></span>
+              </div>
+              <div class="dropdown-item">
+                <select
+                  class="custom-select custom-select-sm highlight-storeditems"
+                  data-target="/highlights/restore/results/21045743/"
+                >
+                  <option value="null" disabled="" selected="">
+                    -- Chọn highlight --
+                  </option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="context-wrapper"></div>
+
+      <ul
+        class="nav nav-pills nav-horizontal mb-4"
+        id="pills-tab"
+        role="tablist"
+      >
+        <li class="nav-item" role="presentation">
+          <a
+            class="nav-link"
+            id="pills-6018-tab"
+            data-toggle="pill"
+            href="#partcontent-6018"
+            role="tab"
+            aria-controls="pills-6018"
+            aria-selected="false"
+            >Recording 1</a
+          >
+        </li>
+
+        <li class="nav-item" role="presentation">
+          <a
+            class="nav-link active"
+            id="pills-6019-tab"
+            data-toggle="pill"
+            href="#partcontent-6019"
+            role="tab"
+            aria-controls="pills-6019"
+            aria-selected="true"
+            >Recording 2</a
+          >
+        </li>
+
+        <li class="nav-item" role="presentation">
+          <a
+            class="nav-link"
+            id="pills-6020-tab"
+            data-toggle="pill"
+            href="#partcontent-6020"
+            role="tab"
+            aria-controls="pills-6020"
+            aria-selected="true"
+            >Recording 3</a
+          >
+        </li>
+
+        <li class="nav-item" role="presentation">
+          <a
+            class="nav-link"
+            id="pills-6021-tab"
+            data-toggle="pill"
+            href="#partcontent-6021"
+            role="tab"
+            aria-controls="pills-6021"
+            aria-selected="true"
+            >Recording 4</a
+          >
+        </li>
+      </ul>
+
+      <div class="tab-content" id="pills-tabContent">
+        <div
+          class="tab-pane show"
+          id="partcontent-6018"
+          role="tabpanel"
+          aria-labelledby="pills-tab"
+        >
+          <div class="context-wrapper"></div>
+
+          <div class="test-questions-wrapper">
+            <div class="question-set-wrapper">
+              <div class="context-wrapper">
+                <div class="context-content context-audio">
+                  <div
+                    tabindex="0"
+                    class="plyr plyr--full-ui plyr--audio plyr--html5 plyr--paused plyr--stopped"
+                  >
+                    <div class="plyr__controls">
+                      <button
+                        class="plyr__controls__item plyr__control"
+                        type="button"
+                        data-plyr="play"
+                        aria-label="Play"
+                      >
+                        <svg
+                          class="icon--pressed"
+                          aria-hidden="true"
+                          focusable="false"
+                        >
+                          <use xlink:href="#plyr-pause"></use></svg
+                        ><svg
+                          class="icon--not-pressed"
+                          aria-hidden="true"
+                          focusable="false"
+                        >
+                          <use xlink:href="#plyr-play"></use></svg
+                        ><span class="label--pressed plyr__tooltip">Pause</span
+                        ><span class="label--not-pressed plyr__tooltip"
+                          >Play</span
+                        >
+                      </button>
+                      <div
+                        class="plyr__controls__item plyr__progress__container"
+                      >
+                        <div class="plyr__progress">
+                          <input
+                            data-plyr="seek"
+                            type="range"
+                            min="0"
+                            max="100"
+                            step="0.01"
+                            value="0"
+                            autocomplete="off"
+                            role="slider"
+                            aria-label="Seek"
+                            aria-valuemin="0"
+                            aria-valuemax="100"
+                            aria-valuenow="0"
+                            id="plyr-seek-7451"
+                            aria-valuetext="00:00 of 00:00"
+                            seek-value="18.083240678121527"
+                            style="--value: 0%"
+                          /><progress
+                            class="plyr__progress__buffer"
+                            min="0"
+                            max="100"
+                            value="0"
+                            role="progressbar"
+                            aria-hidden="true"
+                          >
+                            % buffered</progress
+                          ><span class="plyr__tooltip">00:00</span>
+                        </div>
+                      </div>
+                      <div
+                        class="plyr__controls__item plyr__time--current plyr__time"
+                        aria-label="Current time"
+                      >
+                        00:00
+                      </div>
+                      <div class="plyr__controls__item plyr__volume">
+                        <button
+                          type="button"
+                          class="plyr__control"
+                          data-plyr="mute"
+                        >
+                          <svg
+                            class="icon--pressed"
+                            aria-hidden="true"
+                            focusable="false"
+                          >
+                            <use xlink:href="#plyr-muted"></use></svg
+                          ><svg
+                            class="icon--not-pressed"
+                            aria-hidden="true"
+                            focusable="false"
+                          >
+                            <use xlink:href="#plyr-volume"></use></svg
+                          ><span class="label--pressed plyr__tooltip"
+                            >Unmute</span
+                          ><span class="label--not-pressed plyr__tooltip"
+                            >Mute</span
+                          ></button
+                        ><input
+                          data-plyr="volume"
+                          type="range"
+                          min="0"
+                          max="1"
+                          step="0.05"
+                          value="1"
+                          autocomplete="off"
+                          role="slider"
+                          aria-label="Volume"
+                          aria-valuemin="0"
+                          aria-valuemax="100"
+                          aria-valuenow="100"
+                          id="plyr-volume-7451"
+                          aria-valuetext="100.0%"
+                          style="--value: 100%"
+                        />
+                      </div>
+                      <button
+                        class="plyr__controls__item plyr__control"
+                        type="button"
+                        data-plyr="captions"
+                      >
+                        <svg
+                          class="icon--pressed"
+                          aria-hidden="true"
+                          focusable="false"
+                        >
+                          <use xlink:href="#plyr-captions-on"></use></svg
+                        ><svg
+                          class="icon--not-pressed"
+                          aria-hidden="true"
+                          focusable="false"
+                        >
+                          <use xlink:href="#plyr-captions-off"></use></svg
+                        ><span class="label--pressed plyr__tooltip"
+                          >Disable captions</span
+                        ><span class="label--not-pressed plyr__tooltip"
+                          >Enable captions</span
+                        >
+                      </button>
+                      <div class="plyr__controls__item plyr__menu">
+                        <button
+                          aria-haspopup="true"
+                          aria-controls="plyr-settings-7451"
+                          aria-expanded="false"
+                          type="button"
+                          class="plyr__control"
+                          data-plyr="settings"
+                        >
+                          <svg aria-hidden="true" focusable="false">
+                            <use xlink:href="#plyr-settings"></use></svg
+                          ><span class="plyr__tooltip">Settings</span>
+                        </button>
+                        <div
+                          class="plyr__menu__container"
+                          id="plyr-settings-7451"
+                          hidden=""
+                        >
+                          <div>
+                            <div id="plyr-settings-7451-home">
+                              <div role="menu">
+                                <button
+                                  data-plyr="settings"
+                                  type="button"
+                                  class="plyr__control plyr__control--forward"
+                                  role="menuitem"
+                                  aria-haspopup="true"
+                                  hidden=""
+                                >
+                                  <span
+                                    >Captions<span class="plyr__menu__value"
+                                      >Disabled</span
+                                    ></span
+                                  ></button
+                                ><button
+                                  data-plyr="settings"
+                                  type="button"
+                                  class="plyr__control plyr__control--forward"
+                                  role="menuitem"
+                                  aria-haspopup="true"
+                                  hidden=""
+                                >
+                                  <span
+                                    >Quality<span class="plyr__menu__value"
+                                      >0</span
+                                    ></span
+                                  ></button
+                                ><button
+                                  data-plyr="settings"
+                                  type="button"
+                                  class="plyr__control plyr__control--forward"
+                                  role="menuitem"
+                                  aria-haspopup="true"
+                                >
+                                  <span
+                                    >Speed<span class="plyr__menu__value"
+                                      >Normal</span
+                                    ></span
+                                  >
+                                </button>
+                              </div>
+                            </div>
+                            <div id="plyr-settings-7451-captions" hidden="">
+                              <button
+                                type="button"
+                                class="plyr__control plyr__control--back"
+                              >
+                                <span aria-hidden="true">Captions</span
+                                ><span class="plyr__sr-only"
+                                  >Go back to previous menu</span
+                                >
+                              </button>
+                              <div role="menu"></div>
+                            </div>
+                            <div id="plyr-settings-7451-quality" hidden="">
+                              <button
+                                type="button"
+                                class="plyr__control plyr__control--back"
+                              >
+                                <span aria-hidden="true">Quality</span
+                                ><span class="plyr__sr-only"
+                                  >Go back to previous menu</span
+                                >
+                              </button>
+                              <div role="menu"></div>
+                            </div>
+                            <div id="plyr-settings-7451-speed" hidden="">
+                              <button
+                                type="button"
+                                class="plyr__control plyr__control--back"
+                              >
+                                <span aria-hidden="true">Speed</span
+                                ><span class="plyr__sr-only"
+                                  >Go back to previous menu</span
+                                >
+                              </button>
+                              <div role="menu">
+                                <button
+                                  data-plyr="speed"
+                                  type="button"
+                                  role="menuitemradio"
+                                  class="plyr__control"
+                                  aria-checked="false"
+                                  value="0.5"
+                                >
+                                  <span>0.5×</span></button
+                                ><button
+                                  data-plyr="speed"
+                                  type="button"
+                                  role="menuitemradio"
+                                  class="plyr__control"
+                                  aria-checked="false"
+                                  value="0.8"
+                                >
+                                  <span>0.8×</span></button
+                                ><button
+                                  data-plyr="speed"
+                                  type="button"
+                                  role="menuitemradio"
+                                  class="plyr__control"
+                                  aria-checked="false"
+                                  value="0.9"
+                                >
+                                  <span>0.9×</span></button
+                                ><button
+                                  data-plyr="speed"
+                                  type="button"
+                                  role="menuitemradio"
+                                  class="plyr__control"
+                                  aria-checked="true"
+                                  value="1"
+                                >
+                                  <span>Normal</span></button
+                                ><button
+                                  data-plyr="speed"
+                                  type="button"
+                                  role="menuitemradio"
+                                  class="plyr__control"
+                                  aria-checked="false"
+                                  value="1.1"
+                                >
+                                  <span>1.1×</span></button
+                                ><button
+                                  data-plyr="speed"
+                                  type="button"
+                                  role="menuitemradio"
+                                  class="plyr__control"
+                                  aria-checked="false"
+                                  value="1.25"
+                                >
+                                  <span>1.25×</span></button
+                                ><button
+                                  data-plyr="speed"
+                                  type="button"
+                                  role="menuitemradio"
+                                  class="plyr__control"
+                                  aria-checked="false"
+                                  value="1.5"
+                                >
+                                  <span>1.5×</span></button
+                                ><button
+                                  data-plyr="speed"
+                                  type="button"
+                                  role="menuitemradio"
+                                  class="plyr__control"
+                                  aria-checked="false"
+                                  value="1.75"
+                                >
+                                  <span>1.75×</span></button
+                                ><button
+                                  data-plyr="speed"
+                                  type="button"
+                                  role="menuitemradio"
+                                  class="plyr__control"
+                                  aria-checked="false"
+                                  value="2"
+                                >
+                                  <span>2×</span></button
+                                ><button
+                                  data-plyr="speed"
+                                  type="button"
+                                  role="menuitemradio"
+                                  class="plyr__control"
+                                  aria-checked="false"
+                                  value="4"
+                                >
+                                  <span>4×</span>
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <button
+                        class="plyr__controls__item plyr__control"
+                        type="button"
+                        data-plyr="pip"
+                      >
+                        <svg aria-hidden="true" focusable="false">
+                          <use xlink:href="#plyr-pip"></use></svg
+                        ><span class="plyr__tooltip">PIP</span></button
+                      ><button
+                        class="plyr__controls__item plyr__control"
+                        type="button"
+                        data-plyr="fullscreen"
+                      >
+                        <svg
+                          class="icon--pressed"
+                          aria-hidden="true"
+                          focusable="false"
+                        >
+                          <use xlink:href="#plyr-exit-fullscreen"></use></svg
+                        ><svg
+                          class="icon--not-pressed"
+                          aria-hidden="true"
+                          focusable="false"
+                        >
+                          <use xlink:href="#plyr-enter-fullscreen"></use></svg
+                        ><span class="label--pressed plyr__tooltip"
+                          >Exit fullscreen</span
+                        ><span class="label--not-pressed plyr__tooltip"
+                          >Enter fullscreen</span
+                        >
+                      </button>
+                    </div>
+                    <audio
+                      class="post-audio-item"
+                      preload="none"
+                      no-extra-controls="true"
+                    >
+                      <!-- <source src="/media/simulation_ielts/sim_0101.mp3" type="audio/x-m4a"> -->
+                      <source
+                        src="https://s4-media1.study4.com/media/simulation_ielts/sim_0101.mp3"
+                      />
+                      Your browser does not support the audio element.</audio
+                    ><button
+                      type="button"
+                      class="plyr__control plyr__control--overlaid"
+                      data-plyr="play"
+                      aria-label="Play"
+                    >
+                      <svg aria-hidden="true" focusable="false">
+                        <use xlink:href="#plyr-play"></use></svg
+                      ><span class="plyr__sr-only">Play</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div
+                  class="context-content context-transcript text-highlightable"
+                >
+                  <p>
+                    <a
+                      data-toggle="collapse"
+                      href="#transcript-46d82c74-9d98-4a74-b02c-0b271f1c183e"
+                      aria-expanded="true"
+                      class=""
+                    >
+                      Hiện Transcript
+                      <span class="fas fa-caret-down ml-1"></span>
+                    </a>
+                  </p>
+                  <div
+                    class="collapse show"
+                    id="transcript-46d82c74-9d98-4a74-b02c-0b271f1c183e"
+                    style=""
+                  >
+                    <p>
+                      AGENT: Good morning. Ace Accommodation; how can I help
+                      you?<br />
+                      SYLVIA: Good morning. I'd like to organize some short stay
+                      accommodation on the Gold Coast, please.<br />
+                      AGENT: Certainly. Who am I speaking to?<br />
+                      SYLVIA: Miss Mackinlay. Sylvia Mackinlay.<br />
+                      AGENT: Could you spell your family name for me please?<br />
+                      SYLVIA:
+                      It's&nbsp;<strong>M-A-C-K-I-N-L-A-Y</strong>&nbsp;.<br />
+                      AGENT: Thank you. And your first name is Sylvia?<br />
+                      SYLVIA: Yes.<br />
+                      AGENT: Is that with an 'i' or a 'y'?<br />
+                      SYLVIA: A 'y'—the old fashioned way.
+                      That's&nbsp;<strong>S-Y-L-V-I-A</strong>&nbsp;.<br />
+                      AGENT: Thank you, Miss Mackinlay. Now, just for our
+                      records, can you tell me what country you live in?<br />
+                      SYLVIA: Of
+                      course—it's&nbsp;<strong>England</strong>&nbsp;actually.<br />
+                      AGENT: I thought so. Now, when are you coming?<br />
+                      SYLVIA: Well, at the moment we're planning on arriving on
+                      July 26th.<br />
+                      AGENT: Ooh, the 25th, that's the last day of the public
+                      holiday and it might be difficult to find something
+                      available on that date.<br />
+                      SYLVIA: No, we're coming on the&nbsp;<strong
+                        >26th of July</strong
+                      >&nbsp;.<br />
+                      AGENT: Oh, well that's fine then. We'll have lots of good
+                      places vacant by then although you wouldn't be able to
+                      move in until late afternoon because our cleaning crew
+                      will need time to get everything ready for you.<br />
+                      SYLVIA: That suits us—our flight won't get in until early
+                      evening anyway.<br />
+                      AGENT: How many of you will there be?<br />
+                      SYLVIA: Just&nbsp;<strong>my sister and myself</strong
+                      >&nbsp;.<br />
+                      AGENT: And how long do you intend to stay for?<br />
+                      SYLVIA: Oh, only a couple of weeks, we'd like to stay
+                      longer but we'll have to get back to work.<br />
+                      AGENT: So, you're not coming on business then?<br />
+                      SYLVIA: No, it's just
+                      a&nbsp;<strong>holiday</strong>&nbsp;. Why? What
+                      difference does that make?<br />
+                      AGENT: Oh, you'd be surprised. Business people have
+                      different needs—you know, wireless internet, even fax
+                      machines and photocopiers.<br />
+                      SYLVIA: No, we won't need any of that stuff—we'll be
+                      coming to relax, and get away from all that kind of
+                      thing.<br />
+                      ……………………………………………………………………………………<br />
+                      AGENT: Good. Now, what exactly are you looking for? A
+                      house, a duplex or an apartment?<br />
+                      SYLVIA: What's a duplex?<br />
+                      AGENT: Oh, that's what you might call a townhouse or a
+                      unit—you know, two houses semi-detached on the same
+                      property.<br />
+                      SYLVIA: Oh, I see. I think
+                      an&nbsp;<strong>apartment</strong>&nbsp;will suit us just
+                      fine.<br />
+                      AGENT: And how many bedrooms? Two?<br />
+                      SYLVIA: One or two—it depends on the size. My sister and I
+                      don't mind sharing if it's a decent size bedroom with two
+                      beds.<br />
+                      AGENT: Well, that makes it easier.<br />
+                      AGENT: And car parking? Will you require a lock-up garage?
+                      They're a little harder to find with an apartment.<br />
+                      SYLVIA: We'll have a hire car and as far as I know there
+                      are no regulations concerning car parking. I think as long
+                      as it's not parked on the street and
+                      it's&nbsp;<strong>secure</strong>&nbsp;there shouldn't be
+                      any problems.<br />
+                      AGENT: Okay. Now, I'm assuming you want something by the
+                      beach?<br />
+                      SYLVIA: Yes, that's the idea. We want to enjoy the surf,
+                      sand and sunshine.<br />
+                      AGENT: Okay, but before we settle on an area and discuss
+                      your price range, I'll need to know about other
+                      necessities.<br />
+                      SYLVIA: What do you mean?<br />
+                      AGENT: Well, for example, do you want to be close to a
+                      shopping mall or the casino or the fun parks? Or do you
+                      want to be in a complex with or near a swimming pool?<br />
+                      SYLVIA: No, none of that really matters to us but we'd
+                      like to have reasonable access to
+                      the&nbsp;<strong>motorway</strong>&nbsp;so that we can
+                      drive up to Brisbane to visit friends there.<br />
+                      AGENT: Well, there are quite a few lovely small towns to
+                      choose from. There's Main Beach which is north of Surfers'
+                      Paradise or Mermaid Waters which is a bit further south or
+                      Palm Beach which is quite a bit further south?<br />
+                      SYLVIA: Mermaid Waters sounds delightful. Is it close to
+                      the motorway?<br />
+                      AGENT: Well not really, the M 1 is actually closest
+                      to&nbsp;<strong>Palm Beach</strong>&nbsp;and prices are
+                      likely to be more reasonable there too.<br />
+                      SYLVIA: That's settled then, Palm Beach it is.<br />
+                      AGENT: Now, if you'll just give me your email address, I
+                      can send you information about the town and lots of
+                      photos.<br />
+                      SYLVIA: Well, my email is S-M-A-C 13 at hotmail dot
+                      com.<br />
+                      AGENT: And, one final thing, how much are you looking to
+                      spend per week on accommodation? Do you want something at
+                      the luxury end of the market—you know, newly redecorated,
+                      great views, all the mod cons...<br />
+                      SYLVIA: Not necessarily. Could we get something clean,
+                      comfortable and reasonable for $1200 a week?<br />
+                      AGENT: Could you stretch that to 1500 a week? I've got a
+                      property in mind that you'll absolutely love but you'd
+                      have to go to&nbsp;<strong>1500</strong>&nbsp;—1200
+                      wouldn't cover it.<br />
+                      SYLVIA: Alright, then. But that's our top limit.<br />
+                      AGENT: Good. I'll get on to this straight away and there
+                      should be something in your inbox shortly.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="question-group-wrapper">
+                <div class="question-twocols">
+                  <div class="question-twocols-left">
+                    <div class="context-wrapper">
+                      <div class="context-content text-highlightable">
+                        <div>
+                          <p>
+                            <em>Complete the form below.</em><br />
+                            <em
+                              >Write&nbsp;<strong
+                                >NO MORE THAN TWO WORDS AND/OR A NUMBER</strong
+                              >&nbsp;for each answer.</em
+                            >
+                          </p>
+
+                          <p><strong>SHORT STAY ACCOMMODATION</strong></p>
+
+                          <p>
+                            <strong>Family Name:</strong>&nbsp;Mackinlay<br />
+                            <strong>First Name:</strong>&nbsp;____1____<br />
+                            <strong>Country of Origin:</strong
+                            >&nbsp;____2____<br />
+                            <strong>Date of Arrival:</strong
+                            >&nbsp;____3____<br />
+                            <strong>Number of Tenants:</strong
+                            >&nbsp;____4____<br />
+                            <strong>Length of Stay:</strong>&nbsp;2 weeks<br />
+                            <strong>Purpose of Visit:</strong
+                            >&nbsp;____5____<br />
+                            <strong>Type of Accommodation:</strong
+                            >&nbsp;____6____<br />
+                            <strong>Number of Bedrooms:</strong>&nbsp;one or
+                            two<br />
+                            <strong>Car Parking:</strong>&nbsp;off-street
+                            and&nbsp;____7____<br />
+                            <strong>General Area:</strong>&nbsp;near the
+                            beach<br />
+                            <strong>Other Requirements:</strong
+                            >&nbsp;near&nbsp;____8____<br />
+                            <strong>Name of Town:</strong>&nbsp;____9____<br />
+                            <strong>Client's Email:</strong
+                            >&nbsp;smac13@hotmail.com<br />
+                            <strong>Price Range:</strong>&nbsp;up to
+                            $&nbsp;____10____&nbsp;a week
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="question-twocols-right">
+                    <div class="questions-wrapper">
+                      <div class="context-wrapper"></div>
+
+                      <div
+                        class="question-wrapper"
+                        data-qid="37299"
+                        id="question-wrapper-37299"
+                      >
+                        <div class="question-number" data-qid="37299">
+                          <strong>1</strong>
+                        </div>
+
+                        <div class="question-content text-highlightable">
+                          <div class="question-answers">
+                            <div class="form-group">
+                              <input
+                                data-type="question-answer"
+                                readonly="true"
+                                value="a"
+                                class="form-control wrong"
+                                data-qid="37299"
+                                id="question-37299"
+                                name="question-37299"
+                                type="text"
+                                spellcheck="false"
+                              />
+                            </div>
+                          </div>
+
+                          <div class="mt-2 text-success">
+                            Đáp án đúng:SYLVIA
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="context-wrapper"></div>
+
+                      <div
+                        class="question-wrapper"
+                        data-qid="37300"
+                        id="question-wrapper-37300"
+                      >
+                        <div class="question-number" data-qid="37300">
+                          <strong>2</strong>
+                        </div>
+
+                        <div class="question-content text-highlightable">
+                          <div class="question-answers">
+                            <div class="form-group">
+                              <input
+                                data-type="question-answer"
+                                readonly="true"
+                                class="form-control"
+                                data-qid="37300"
+                                id="question-37300"
+                                name="question-37300"
+                                type="text"
+                                spellcheck="false"
+                              />
+                            </div>
+                          </div>
+
+                          <div class="mt-2 text-success">
+                            Đáp án đúng:ENGLAND
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="context-wrapper"></div>
+
+                      <div
+                        class="question-wrapper"
+                        data-qid="37301"
+                        id="question-wrapper-37301"
+                      >
+                        <div class="question-number" data-qid="37301">
+                          <strong>3</strong>
+                        </div>
+
+                        <div class="question-content text-highlightable">
+                          <div class="question-answers">
+                            <div class="form-group">
+                              <input
+                                data-type="question-answer"
+                                readonly="true"
+                                class="form-control"
+                                data-qid="37301"
+                                id="question-37301"
+                                name="question-37301"
+                                type="text"
+                                spellcheck="false"
+                              />
+                            </div>
+                          </div>
+
+                          <div class="mt-2 text-success">
+                            Đáp án đúng:26TH (OF) JULY [OR] JULY 26(TH) [OR] 26
+                            JULY
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="context-wrapper"></div>
+
+                      <div
+                        class="question-wrapper"
+                        data-qid="37302"
+                        id="question-wrapper-37302"
+                      >
+                        <div class="question-number" data-qid="37302">
+                          <strong>4</strong>
+                        </div>
+
+                        <div class="question-content text-highlightable">
+                          <div class="question-answers">
+                            <div class="form-group">
+                              <input
+                                data-type="question-answer"
+                                readonly="true"
+                                class="form-control"
+                                data-qid="37302"
+                                id="question-37302"
+                                name="question-37302"
+                                type="text"
+                                spellcheck="false"
+                              />
+                            </div>
+                          </div>
+
+                          <div class="mt-2 text-success">Đáp án đúng:TWO/2</div>
+                        </div>
+                      </div>
+
+                      <div class="context-wrapper"></div>
+
+                      <div
+                        class="question-wrapper"
+                        data-qid="37303"
+                        id="question-wrapper-37303"
+                      >
+                        <div class="question-number" data-qid="37303">
+                          <strong>5</strong>
+                        </div>
+
+                        <div class="question-content text-highlightable">
+                          <div class="question-answers">
+                            <div class="form-group">
+                              <input
+                                data-type="question-answer"
+                                readonly="true"
+                                class="form-control"
+                                data-qid="37303"
+                                id="question-37303"
+                                name="question-37303"
+                                type="text"
+                                spellcheck="false"
+                              />
+                            </div>
+                          </div>
+
+                          <div class="mt-2 text-success">
+                            Đáp án đúng:(ON) HOLIDAY
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="context-wrapper"></div>
+
+                      <div
+                        class="question-wrapper"
+                        data-qid="37304"
+                        id="question-wrapper-37304"
+                      >
+                        <div class="question-number" data-qid="37304">
+                          <strong>6</strong>
+                        </div>
+
+                        <div class="question-content text-highlightable">
+                          <div class="question-answers">
+                            <div class="form-group">
+                              <input
+                                data-type="question-answer"
+                                readonly="true"
+                                class="form-control"
+                                data-qid="37304"
+                                id="question-37304"
+                                name="question-37304"
+                                type="text"
+                                spellcheck="false"
+                              />
+                            </div>
+                          </div>
+
+                          <div class="mt-2 text-success">
+                            Đáp án đúng:APARTMENT
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="context-wrapper"></div>
+
+                      <div
+                        class="question-wrapper"
+                        data-qid="37305"
+                        id="question-wrapper-37305"
+                      >
+                        <div class="question-number" data-qid="37305">
+                          <strong>7</strong>
+                        </div>
+
+                        <div class="question-content text-highlightable">
+                          <div class="question-answers">
+                            <div class="form-group">
+                              <input
+                                data-type="question-answer"
+                                readonly="true"
+                                class="form-control"
+                                data-qid="37305"
+                                id="question-37305"
+                                name="question-37305"
+                                type="text"
+                                spellcheck="false"
+                              />
+                            </div>
+                          </div>
+
+                          <div class="mt-2 text-success">
+                            Đáp án đúng:SECURE
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="context-wrapper"></div>
+
+                      <div
+                        class="question-wrapper"
+                        data-qid="37306"
+                        id="question-wrapper-37306"
+                      >
+                        <div class="question-number" data-qid="37306">
+                          <strong>8</strong>
+                        </div>
+
+                        <div class="question-content text-highlightable">
+                          <div class="question-answers">
+                            <div class="form-group">
+                              <input
+                                data-type="question-answer"
+                                readonly="true"
+                                class="form-control"
+                                data-qid="37306"
+                                id="question-37306"
+                                name="question-37306"
+                                type="text"
+                                spellcheck="false"
+                              />
+                            </div>
+                          </div>
+
+                          <div class="mt-2 text-success">
+                            Đáp án đúng:(THE) MOTORWAY [OR] (THE) M1/MOTORWAY
+                            ACCESS
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="context-wrapper"></div>
+
+                      <div
+                        class="question-wrapper"
+                        data-qid="37307"
+                        id="question-wrapper-37307"
+                      >
+                        <div class="question-number" data-qid="37307">
+                          <strong>9</strong>
+                        </div>
+
+                        <div class="question-content text-highlightable">
+                          <div class="question-answers">
+                            <div class="form-group">
+                              <input
+                                data-type="question-answer"
+                                readonly="true"
+                                class="form-control"
+                                data-qid="37307"
+                                id="question-37307"
+                                name="question-37307"
+                                type="text"
+                                spellcheck="false"
+                              />
+                            </div>
+                          </div>
+
+                          <div class="mt-2 text-success">
+                            Đáp án đúng:PALM BEACH
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="context-wrapper"></div>
+
+                      <div
+                        class="question-wrapper"
+                        data-qid="37308"
+                        id="question-wrapper-37308"
+                      >
+                        <div class="question-number" data-qid="37308">
+                          <strong>10</strong>
+                        </div>
+
+                        <div class="question-content text-highlightable">
+                          <div class="question-answers">
+                            <div class="form-group">
+                              <input
+                                data-type="question-answer"
+                                readonly="true"
+                                class="form-control"
+                                data-qid="37308"
+                                id="question-37308"
+                                name="question-37308"
+                                type="text"
+                                spellcheck="false"
+                              />
+                            </div>
+                          </div>
+
+                          <div class="mt-2 text-success">Đáp án đúng:1500</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="nextpart-wrapper mt-5">
+            <a href="#" class="nextpart" data-nextpart_id="6019">
+              TIẾP THEO<span class="fa fa-chevron-right ml-2"></span>
+            </a>
+          </div>
+        </div>
+
+        <div
+          class="tab-pane active"
+          id="partcontent-6019"
+          role="tabpanel"
+          aria-labelledby="pills-tab"
+        >
+          <div class="context-wrapper"></div>
+
+          <div class="test-questions-wrapper">
+            <div class="question-set-wrapper">
+              <div class="context-wrapper">
+                <div class="context-content context-audio">
+                  <div
+                    tabindex="0"
+                    class="plyr plyr--full-ui plyr--audio plyr--html5 plyr--paused plyr--stopped"
+                  >
+                    <div class="plyr__controls">
+                      <button
+                        class="plyr__controls__item plyr__control"
+                        type="button"
+                        data-plyr="play"
+                        aria-label="Play"
+                      >
+                        <svg
+                          class="icon--pressed"
+                          aria-hidden="true"
+                          focusable="false"
+                        >
+                          <use xlink:href="#plyr-pause"></use></svg
+                        ><svg
+                          class="icon--not-pressed"
+                          aria-hidden="true"
+                          focusable="false"
+                        >
+                          <use xlink:href="#plyr-play"></use></svg
+                        ><span class="label--pressed plyr__tooltip">Pause</span
+                        ><span class="label--not-pressed plyr__tooltip"
+                          >Play</span
+                        >
+                      </button>
+                      <div
+                        class="plyr__controls__item plyr__progress__container"
+                      >
+                        <div class="plyr__progress">
+                          <input
+                            data-plyr="seek"
+                            type="range"
+                            min="0"
+                            max="100"
+                            step="0.01"
+                            value="0"
+                            autocomplete="off"
+                            role="slider"
+                            aria-label="Seek"
+                            aria-valuemin="0"
+                            aria-valuemax="100"
+                            aria-valuenow="0"
+                            id="plyr-seek-8101"
+                            aria-valuetext="00:00 of 00:00"
+                            seek-value="45.76114012396896"
+                            style="--value: 0%"
+                          /><progress
+                            class="plyr__progress__buffer"
+                            min="0"
+                            max="100"
+                            value="0"
+                            role="progressbar"
+                            aria-hidden="true"
+                          >
+                            % buffered</progress
+                          ><span class="plyr__tooltip">00:00</span>
+                        </div>
+                      </div>
+                      <div
+                        class="plyr__controls__item plyr__time--current plyr__time"
+                        aria-label="Current time"
+                      >
+                        00:00
+                      </div>
+                      <div class="plyr__controls__item plyr__volume">
+                        <button
+                          type="button"
+                          class="plyr__control"
+                          data-plyr="mute"
+                        >
+                          <svg
+                            class="icon--pressed"
+                            aria-hidden="true"
+                            focusable="false"
+                          >
+                            <use xlink:href="#plyr-muted"></use></svg
+                          ><svg
+                            class="icon--not-pressed"
+                            aria-hidden="true"
+                            focusable="false"
+                          >
+                            <use xlink:href="#plyr-volume"></use></svg
+                          ><span class="label--pressed plyr__tooltip"
+                            >Unmute</span
+                          ><span class="label--not-pressed plyr__tooltip"
+                            >Mute</span
+                          ></button
+                        ><input
+                          data-plyr="volume"
+                          type="range"
+                          min="0"
+                          max="1"
+                          step="0.05"
+                          value="1"
+                          autocomplete="off"
+                          role="slider"
+                          aria-label="Volume"
+                          aria-valuemin="0"
+                          aria-valuemax="100"
+                          aria-valuenow="100"
+                          id="plyr-volume-8101"
+                          aria-valuetext="100.0%"
+                          style="--value: 100%"
+                        />
+                      </div>
+                      <button
+                        class="plyr__controls__item plyr__control"
+                        type="button"
+                        data-plyr="captions"
+                      >
+                        <svg
+                          class="icon--pressed"
+                          aria-hidden="true"
+                          focusable="false"
+                        >
+                          <use xlink:href="#plyr-captions-on"></use></svg
+                        ><svg
+                          class="icon--not-pressed"
+                          aria-hidden="true"
+                          focusable="false"
+                        >
+                          <use xlink:href="#plyr-captions-off"></use></svg
+                        ><span class="label--pressed plyr__tooltip"
+                          >Disable captions</span
+                        ><span class="label--not-pressed plyr__tooltip"
+                          >Enable captions</span
+                        >
+                      </button>
+                      <div class="plyr__controls__item plyr__menu">
+                        <button
+                          aria-haspopup="true"
+                          aria-controls="plyr-settings-8101"
+                          aria-expanded="false"
+                          type="button"
+                          class="plyr__control"
+                          data-plyr="settings"
+                        >
+                          <svg aria-hidden="true" focusable="false">
+                            <use xlink:href="#plyr-settings"></use></svg
+                          ><span class="plyr__tooltip">Settings</span>
+                        </button>
+                        <div
+                          class="plyr__menu__container"
+                          id="plyr-settings-8101"
+                          hidden=""
+                        >
+                          <div>
+                            <div id="plyr-settings-8101-home">
+                              <div role="menu">
+                                <button
+                                  data-plyr="settings"
+                                  type="button"
+                                  class="plyr__control plyr__control--forward"
+                                  role="menuitem"
+                                  aria-haspopup="true"
+                                  hidden=""
+                                >
+                                  <span
+                                    >Captions<span class="plyr__menu__value"
+                                      >Disabled</span
+                                    ></span
+                                  ></button
+                                ><button
+                                  data-plyr="settings"
+                                  type="button"
+                                  class="plyr__control plyr__control--forward"
+                                  role="menuitem"
+                                  aria-haspopup="true"
+                                  hidden=""
+                                >
+                                  <span
+                                    >Quality<span class="plyr__menu__value"
+                                      >0</span
+                                    ></span
+                                  ></button
+                                ><button
+                                  data-plyr="settings"
+                                  type="button"
+                                  class="plyr__control plyr__control--forward"
+                                  role="menuitem"
+                                  aria-haspopup="true"
+                                >
+                                  <span
+                                    >Speed<span class="plyr__menu__value"
+                                      >Normal</span
+                                    ></span
+                                  >
+                                </button>
+                              </div>
+                            </div>
+                            <div id="plyr-settings-8101-captions" hidden="">
+                              <button
+                                type="button"
+                                class="plyr__control plyr__control--back"
+                              >
+                                <span aria-hidden="true">Captions</span
+                                ><span class="plyr__sr-only"
+                                  >Go back to previous menu</span
+                                >
+                              </button>
+                              <div role="menu"></div>
+                            </div>
+                            <div id="plyr-settings-8101-quality" hidden="">
+                              <button
+                                type="button"
+                                class="plyr__control plyr__control--back"
+                              >
+                                <span aria-hidden="true">Quality</span
+                                ><span class="plyr__sr-only"
+                                  >Go back to previous menu</span
+                                >
+                              </button>
+                              <div role="menu"></div>
+                            </div>
+                            <div id="plyr-settings-8101-speed" hidden="">
+                              <button
+                                type="button"
+                                class="plyr__control plyr__control--back"
+                              >
+                                <span aria-hidden="true">Speed</span
+                                ><span class="plyr__sr-only"
+                                  >Go back to previous menu</span
+                                >
+                              </button>
+                              <div role="menu">
+                                <button
+                                  data-plyr="speed"
+                                  type="button"
+                                  role="menuitemradio"
+                                  class="plyr__control"
+                                  aria-checked="false"
+                                  value="0.5"
+                                >
+                                  <span>0.5×</span></button
+                                ><button
+                                  data-plyr="speed"
+                                  type="button"
+                                  role="menuitemradio"
+                                  class="plyr__control"
+                                  aria-checked="false"
+                                  value="0.8"
+                                >
+                                  <span>0.8×</span></button
+                                ><button
+                                  data-plyr="speed"
+                                  type="button"
+                                  role="menuitemradio"
+                                  class="plyr__control"
+                                  aria-checked="false"
+                                  value="0.9"
+                                >
+                                  <span>0.9×</span></button
+                                ><button
+                                  data-plyr="speed"
+                                  type="button"
+                                  role="menuitemradio"
+                                  class="plyr__control"
+                                  aria-checked="true"
+                                  value="1"
+                                >
+                                  <span>Normal</span></button
+                                ><button
+                                  data-plyr="speed"
+                                  type="button"
+                                  role="menuitemradio"
+                                  class="plyr__control"
+                                  aria-checked="false"
+                                  value="1.1"
+                                >
+                                  <span>1.1×</span></button
+                                ><button
+                                  data-plyr="speed"
+                                  type="button"
+                                  role="menuitemradio"
+                                  class="plyr__control"
+                                  aria-checked="false"
+                                  value="1.25"
+                                >
+                                  <span>1.25×</span></button
+                                ><button
+                                  data-plyr="speed"
+                                  type="button"
+                                  role="menuitemradio"
+                                  class="plyr__control"
+                                  aria-checked="false"
+                                  value="1.5"
+                                >
+                                  <span>1.5×</span></button
+                                ><button
+                                  data-plyr="speed"
+                                  type="button"
+                                  role="menuitemradio"
+                                  class="plyr__control"
+                                  aria-checked="false"
+                                  value="1.75"
+                                >
+                                  <span>1.75×</span></button
+                                ><button
+                                  data-plyr="speed"
+                                  type="button"
+                                  role="menuitemradio"
+                                  class="plyr__control"
+                                  aria-checked="false"
+                                  value="2"
+                                >
+                                  <span>2×</span></button
+                                ><button
+                                  data-plyr="speed"
+                                  type="button"
+                                  role="menuitemradio"
+                                  class="plyr__control"
+                                  aria-checked="false"
+                                  value="4"
+                                >
+                                  <span>4×</span>
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <button
+                        class="plyr__controls__item plyr__control"
+                        type="button"
+                        data-plyr="pip"
+                      >
+                        <svg aria-hidden="true" focusable="false">
+                          <use xlink:href="#plyr-pip"></use></svg
+                        ><span class="plyr__tooltip">PIP</span></button
+                      ><button
+                        class="plyr__controls__item plyr__control"
+                        type="button"
+                        data-plyr="fullscreen"
+                      >
+                        <svg
+                          class="icon--pressed"
+                          aria-hidden="true"
+                          focusable="false"
+                        >
+                          <use xlink:href="#plyr-exit-fullscreen"></use></svg
+                        ><svg
+                          class="icon--not-pressed"
+                          aria-hidden="true"
+                          focusable="false"
+                        >
+                          <use xlink:href="#plyr-enter-fullscreen"></use></svg
+                        ><span class="label--pressed plyr__tooltip"
+                          >Exit fullscreen</span
+                        ><span class="label--not-pressed plyr__tooltip"
+                          >Enter fullscreen</span
+                        >
+                      </button>
+                    </div>
+                    <audio
+                      class="post-audio-item"
+                      preload="none"
+                      no-extra-controls="true"
+                    >
+                      <!-- <source src="/media/simulation_ielts/sim_0102.mp3" type="audio/x-m4a"> -->
+                      <source
+                        src="https://s4-media1.study4.com/media/simulation_ielts/sim_0102.mp3"
+                      />
+                      Your browser does not support the audio element.</audio
+                    ><button
+                      type="button"
+                      class="plyr__control plyr__control--overlaid"
+                      data-plyr="play"
+                      aria-label="Play"
+                    >
+                      <svg aria-hidden="true" focusable="false">
+                        <use xlink:href="#plyr-play"></use></svg
+                      ><span class="plyr__sr-only">Play</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div
+                  class="context-content context-transcript text-highlightable"
+                >
+                  <p>
+                    <a
+                      data-toggle="collapse"
+                      href="#transcript-385029f6-1253-4dec-9d1f-2785d5ad6544"
+                      aria-expanded="true"
+                      class=""
+                    >
+                      Hiện Transcript
+                      <span class="fas fa-caret-down ml-1"></span>
+                    </a>
+                  </p>
+                  <div
+                    class="collapse show"
+                    id="transcript-385029f6-1253-4dec-9d1f-2785d5ad6544"
+                    style=""
+                  >
+                    <p>
+                      I'd like to welcome you all to our Active Outdoor Club.
+                      I'll start by telling you a little bit about the history
+                      of the club and all that it can offer and there will be a
+                      chance for you to ask questions over tea and
+                      coffee&nbsp;<strong>in the lobby</strong>&nbsp;afterwards.
+                      You'll also be able to pick up pamphlets from the table at
+                      the back of the hall and, if you wish to purchase any of
+                      our products, Bill will serve you at the front counter.<br />
+                      As most of you probably know, the club was founded by Nick
+                      Noble about 30 years ago. He thought of placing an
+                      advertisement in the local newspaper or erecting a
+                      billboard somewhere but it was&nbsp;<strong
+                        >the radio</strong
+                      >&nbsp;that he decided on to reach the most people—you
+                      know, other people who might be interested in outdoor
+                      pursuits, just basic activities like walking or
+                      tramping—anything active that could take place in some of
+                      the beautiful outdoor settings that this country has to
+                      offer.<br />
+                      Nick was overwhelmed by the response he got and the club
+                      soon grew from&nbsp;<strong>a dozen or so</strong
+                      >&nbsp;friends and enthusiasts to around 200 members 20
+                      years ago, and steadily since then to reach a membership
+                      of over 2,500 now. You don't have to be a hardened athlete
+                      or extreme adventurer—on the contrary, it's a group that
+                      encourages friendship and fellowship through social and
+                      recreational activities. The club tries to cater
+                      for&nbsp;<strong
+                        >all levels of maturity and both genders</strong
+                      >&nbsp;—in fact, anyone who has the physical ability and a
+                      moderate level of health and fitness to participate in
+                      open-air activity on a regular basis. I think our youngest
+                      member is a 5-year-old boy and our oldest member is a
+                      75-year-old man. Of course we have more challenging
+                      opportunities for those who are up to it but all
+                      excursions are graded according to level of difficulty and
+                      there will always be something for those families with
+                      small children. More about that later...<br />
+                      I'm sure you realize that it's part of the focus of the
+                      club to ensure that our natural environment is kept as
+                      pristine as possible. We all have a keen interest in
+                      conservation and many of our members contribute their
+                      time, or give a monetary donation, to organisations that
+                      work to enhance and beautify our natural heritage.<br />
+                      ………………………………………………………………………………………………………………………………<br />
+                      Okay, now going back to the grades of activity...First of
+                      all,&nbsp;<strong>tramping</strong>&nbsp;. This is very
+                      popular with singles and couples without children but is
+                      certainly not restricted to those groups. Tramping is
+                      arranged for Tuesdays and Saturdays throughout the year.
+                      Most tramps are of a duration of 3 to 5 hours depending on
+                      the weather and the terrain, and of course, the time of
+                      year. You would need to check the newsletter or the
+                      website to find out place and time and, if you wish to
+                      participate, phone the coordinator who can give you more
+                      information.<br />
+                      I'll move on now
+                      to&nbsp;<strong>walking</strong>&nbsp;which is very
+                      popular with families but open to everyone and walks are
+                      arranged for every Thursday and every Sunday over the
+                      course of the entire year. Walks last no more than 3
+                      hours, although the Thursday walks might be shorter; and
+                      again, you would have to check the newsletter for details
+                      of the time and area to meet and get in touch with the
+                      walking&nbsp;<strong>organiser</strong>&nbsp;to confirm
+                      your participation.<br />
+                      Now, the Wanderers are what you might call a sub-group of
+                      the Active Outdoor Club. This group was set up to cater
+                      for the less active, more elderly, or families with very
+                      young children who still want to enjoy the great outdoors
+                      but without quite so much exertion. Bear in mind that the
+                      length of these activities
+                      is&nbsp;<strong>variable</strong>&nbsp;but we're always
+                      home before dark. Any member of the club is welcome to
+                      join in their activities on a Sunday which include
+                      visiting some of our more beautiful parks and botanical
+                      gardens, beach walks, picnics and even boat trips to visit
+                      some of the small islands off the coast. Often guided
+                      tours can be arranged if there is enough interest. If
+                      you'd like to see what the Wanderers are up to, check the
+                      website and then phone the leader for more information.<br />
+                      I'll bet you're all ready for that cup of tea now, but
+                      before I finish, I really must mention something that can
+                      be a lot of fun, a great opportunity to form new or
+                      strengthen existing friendships, and a chance to explore a
+                      part of the country that you may never have seen before.
+                      These are our
+                      '&nbsp;<strong>Mystery</strong>&nbsp;Weekends'. The
+                      Committee puts a lot of time and effort into the
+                      organisation of these weekends away not only for health
+                      and safety reasons but also to ensure that everything runs
+                      smoothly and everyone has a good time. There will be a
+                      charge to cover travel and accommodation costs but, apart
+                      from that, it's an affordable and exciting weekend away
+                      from the city. For more information call the chairman of
+                      the committee—you'll find his phone number in the
+                      newsletter.<br />
+                      So, that's all I have to say at this point—please enjoy
+                      the refreshments, chat with others, and feel free to ask
+                      questions. All the committee members are wearing large red
+                      name badges so they're easy to find.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="question-group-wrapper">
+                <div class="context-wrapper">
+                  <div class="context-content text-highlightable">
+                    <div>
+                      <p><em>Choose the correct letter, A, B or C.</em></p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="questions-wrapper two-cols">
+                  <div class="context-wrapper"></div>
+
+                  <div
+                    class="question-wrapper"
+                    data-qid="37309"
+                    id="question-wrapper-37309"
+                  >
+                    <div class="question-number" data-qid="37309">
+                      <strong>11</strong>
+                    </div>
+
+                    <div class="question-content text-highlightable">
+                      <div class="question-text">
+                        Refreshments will be served
+                      </div>
+
+                      <div class="question-answers">
+                        <div class="form-check">
+                          <input
+                            data-type="question-answer"
+                            disabled=""
+                            checked=""
+                            class="form-check-input wrong"
+                            data-qid="37309"
+                            type="radio"
+                            name="question-37309"
+                            id="question-37309-A"
+                            value="A"
+                          />
+                          <label
+                            class="form-check-label"
+                            for="question-37309-A"
+                          >
+                            A. at the front counter.
+                          </label>
+                        </div>
+
+                        <div class="form-check">
+                          <input
+                            data-type="question-answer"
+                            disabled=""
+                            class="form-check-input"
+                            data-qid="37309"
+                            type="radio"
+                            name="question-37309"
+                            id="question-37309-B"
+                            value="B"
+                          />
+                          <label
+                            class="form-check-label"
+                            for="question-37309-B"
+                          >
+                            B. in the lobby.
+                          </label>
+                        </div>
+
+                        <div class="form-check">
+                          <input
+                            data-type="question-answer"
+                            disabled=""
+                            class="form-check-input"
+                            data-qid="37309"
+                            type="radio"
+                            name="question-37309"
+                            id="question-37309-C"
+                            value="C"
+                          />
+                          <label
+                            class="form-check-label"
+                            for="question-37309-C"
+                          >
+                            C. at the back of the hall.
+                          </label>
+                        </div>
+                      </div>
+
+                      <div class="mt-2 text-success">Đáp án đúng:B</div>
+                    </div>
+                  </div>
+
+                  <div class="context-wrapper"></div>
+
+                  <div
+                    class="question-wrapper"
+                    data-qid="37310"
+                    id="question-wrapper-37310"
+                  >
+                    <div class="question-number" data-qid="37310">
+                      <strong>12</strong>
+                    </div>
+
+                    <div class="question-content text-highlightable">
+                      <div class="question-text">Nick Noble advertised</div>
+
+                      <div class="question-answers">
+                        <div class="form-check">
+                          <input
+                            data-type="question-answer"
+                            disabled=""
+                            class="form-check-input"
+                            data-qid="37310"
+                            type="radio"
+                            name="question-37310"
+                            id="question-37310-A"
+                            value="A"
+                          />
+                          <label
+                            class="form-check-label"
+                            for="question-37310-A"
+                          >
+                            A. on the radio.
+                          </label>
+                        </div>
+
+                        <div class="form-check">
+                          <input
+                            data-type="question-answer"
+                            disabled=""
+                            class="form-check-input"
+                            data-qid="37310"
+                            type="radio"
+                            name="question-37310"
+                            id="question-37310-B"
+                            value="B"
+                          />
+                          <label
+                            class="form-check-label"
+                            for="question-37310-B"
+                          >
+                            B. on a billboard.
+                          </label>
+                        </div>
+
+                        <div class="form-check">
+                          <input
+                            data-type="question-answer"
+                            disabled=""
+                            class="form-check-input"
+                            data-qid="37310"
+                            type="radio"
+                            name="question-37310"
+                            id="question-37310-C"
+                            value="C"
+                          />
+                          <label
+                            class="form-check-label"
+                            for="question-37310-C"
+                          >
+                            C. in the newspaper.
+                          </label>
+                        </div>
+                      </div>
+
+                      <div class="mt-2 text-success">Đáp án đúng:A</div>
+                    </div>
+                  </div>
+
+                  <div class="context-wrapper"></div>
+
+                  <div
+                    class="question-wrapper"
+                    data-qid="37311"
+                    id="question-wrapper-37311"
+                  >
+                    <div class="question-number" data-qid="37311">
+                      <strong>13</strong>
+                    </div>
+
+                    <div class="question-content text-highlightable">
+                      <div class="question-text">
+                        The original number of founding members was about
+                      </div>
+
+                      <div class="question-answers">
+                        <div class="form-check">
+                          <input
+                            data-type="question-answer"
+                            disabled=""
+                            class="form-check-input"
+                            data-qid="37311"
+                            type="radio"
+                            name="question-37311"
+                            id="question-37311-A"
+                            value="A"
+                          />
+                          <label
+                            class="form-check-label"
+                            for="question-37311-A"
+                          >
+                            A. 12.
+                          </label>
+                        </div>
+
+                        <div class="form-check">
+                          <input
+                            data-type="question-answer"
+                            disabled=""
+                            class="form-check-input"
+                            data-qid="37311"
+                            type="radio"
+                            name="question-37311"
+                            id="question-37311-B"
+                            value="B"
+                          />
+                          <label
+                            class="form-check-label"
+                            for="question-37311-B"
+                          >
+                            B. 20.
+                          </label>
+                        </div>
+
+                        <div class="form-check">
+                          <input
+                            data-type="question-answer"
+                            disabled=""
+                            class="form-check-input"
+                            data-qid="37311"
+                            type="radio"
+                            name="question-37311"
+                            id="question-37311-C"
+                            value="C"
+                          />
+                          <label
+                            class="form-check-label"
+                            for="question-37311-C"
+                          >
+                            C. 200.
+                          </label>
+                        </div>
+                      </div>
+
+                      <div class="mt-2 text-success">Đáp án đúng:A</div>
+                    </div>
+                  </div>
+
+                  <div class="context-wrapper"></div>
+
+                  <div
+                    class="question-wrapper"
+                    data-qid="37312"
+                    id="question-wrapper-37312"
+                  >
+                    <div class="question-number" data-qid="37312">
+                      <strong>14</strong>
+                    </div>
+
+                    <div class="question-content text-highlightable">
+                      <div class="question-text">
+                        The club provides activities primarily for reasonably
+                        fit
+                      </div>
+
+                      <div class="question-answers">
+                        <div class="form-check">
+                          <input
+                            data-type="question-answer"
+                            disabled=""
+                            class="form-check-input"
+                            data-qid="37312"
+                            type="radio"
+                            name="question-37312"
+                            id="question-37312-A"
+                            value="A"
+                          />
+                          <label
+                            class="form-check-label"
+                            for="question-37312-A"
+                          >
+                            A. males up to 75.
+                          </label>
+                        </div>
+
+                        <div class="form-check">
+                          <input
+                            data-type="question-answer"
+                            disabled=""
+                            class="form-check-input"
+                            data-qid="37312"
+                            type="radio"
+                            name="question-37312"
+                            id="question-37312-B"
+                            value="B"
+                          />
+                          <label
+                            class="form-check-label"
+                            for="question-37312-B"
+                          >
+                            B. females with young children.
+                          </label>
+                        </div>
+
+                        <div class="form-check">
+                          <input
+                            data-type="question-answer"
+                            disabled=""
+                            class="form-check-input"
+                            data-qid="37312"
+                            type="radio"
+                            name="question-37312"
+                            id="question-37312-C"
+                            value="C"
+                          />
+                          <label
+                            class="form-check-label"
+                            for="question-37312-C"
+                          >
+                            C. males and females of any age.
+                          </label>
+                        </div>
+                      </div>
+
+                      <div class="mt-2 text-success">Đáp án đúng:C</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="question-group-wrapper">
+                <div class="question-twocols">
+                  <div class="question-twocols-left">
+                    <div class="context-wrapper">
+                      <div class="context-content text-highlightable">
+                        <div>
+                          <p>
+                            <em>Complete the table below.</em><br />
+                            <em
+                              >Write&nbsp;<strong
+                                >NO MORE THAN ONE WORD AND/OR A NUMBER</strong
+                              >&nbsp;for each answer.</em
+                            >
+                          </p>
+
+                          <table>
+                            <tbody>
+                              <tr>
+                                <td colspan="11">Activity</td>
+                                <td colspan="20">Day(s)</td>
+                                <td colspan="10">Duration</td>
+                                <td colspan="20">Contact person</td>
+                              </tr>
+                              <tr>
+                                <td colspan="11">
+                                  <u><u>15</u></u>
+                                </td>
+                                <td colspan="20">Tuesday &amp; Saturday</td>
+                                <td colspan="10">about 3-5 hours</td>
+                                <td colspan="20">coordinator</td>
+                              </tr>
+                              <tr>
+                                <td colspan="11">
+                                  <u><u>16</u></u>
+                                </td>
+                                <td colspan="20">Thursday &amp; Sunday</td>
+                                <td colspan="10">up to 3 hours</td>
+                                <td colspan="20">
+                                  <u><u>17</u></u>
+                                </td>
+                              </tr>
+                              <tr>
+                                <td colspan="11">Wanderers</td>
+                                <td colspan="20">Sunday</td>
+                                <td colspan="10">
+                                  <u><u>18</u></u>
+                                </td>
+                                <td colspan="20">leader</td>
+                              </tr>
+                              <tr>
+                                <td colspan="11">
+                                  <u><u>19</u></u
+                                  ><br />
+                                  Weekends
+                                </td>
+                                <td colspan="20">Saturday &amp; Sunday</td>
+                                <td colspan="10">all weekend</td>
+                                <td colspan="20">
+                                  <u><u>20</u></u>
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="question-twocols-right">
+                    <div class="questions-wrapper">
+                      <div class="context-wrapper"></div>
+
+                      <div
+                        class="question-wrapper"
+                        data-qid="37313"
+                        id="question-wrapper-37313"
+                      >
+                        <div class="question-number" data-qid="37313">
+                          <strong>15</strong>
+                        </div>
+
+                        <div class="question-content text-highlightable">
+                          <div class="question-answers">
+                            <div class="form-group">
+                              <input
+                                data-type="question-answer"
+                                readonly="true"
+                                class="form-control"
+                                data-qid="37313"
+                                id="question-37313"
+                                name="question-37313"
+                                type="text"
+                                spellcheck="false"
+                              />
+                            </div>
+                          </div>
+
+                          <div class="mt-2 text-success">
+                            Đáp án đúng:TRAMPING
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="context-wrapper"></div>
+
+                      <div
+                        class="question-wrapper"
+                        data-qid="37314"
+                        id="question-wrapper-37314"
+                      >
+                        <div class="question-number" data-qid="37314">
+                          <strong>16</strong>
+                        </div>
+
+                        <div class="question-content text-highlightable">
+                          <div class="question-answers">
+                            <div class="form-group">
+                              <input
+                                data-type="question-answer"
+                                readonly="true"
+                                class="form-control"
+                                data-qid="37314"
+                                id="question-37314"
+                                name="question-37314"
+                                type="text"
+                                spellcheck="false"
+                              />
+                            </div>
+                          </div>
+
+                          <div class="mt-2 text-success">
+                            Đáp án đúng:WALKING/WALKS
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="context-wrapper"></div>
+
+                      <div
+                        class="question-wrapper"
+                        data-qid="37315"
+                        id="question-wrapper-37315"
+                      >
+                        <div class="question-number" data-qid="37315">
+                          <strong>17</strong>
+                        </div>
+
+                        <div class="question-content text-highlightable">
+                          <div class="question-answers">
+                            <div class="form-group">
+                              <input
+                                data-type="question-answer"
+                                readonly="true"
+                                class="form-control"
+                                data-qid="37315"
+                                id="question-37315"
+                                name="question-37315"
+                                type="text"
+                                spellcheck="false"
+                              />
+                            </div>
+                          </div>
+
+                          <div class="mt-2 text-success">
+                            Đáp án đúng:ORGANIZER/ORGANISER
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="context-wrapper"></div>
+
+                      <div
+                        class="question-wrapper"
+                        data-qid="37316"
+                        id="question-wrapper-37316"
+                      >
+                        <div class="question-number" data-qid="37316">
+                          <strong>18</strong>
+                        </div>
+
+                        <div class="question-content text-highlightable">
+                          <div class="question-answers">
+                            <div class="form-group">
+                              <input
+                                data-type="question-answer"
+                                readonly="true"
+                                class="form-control"
+                                data-qid="37316"
+                                id="question-37316"
+                                name="question-37316"
+                                type="text"
+                                spellcheck="false"
+                              />
+                            </div>
+                          </div>
+
+                          <div class="mt-2 text-success">
+                            Đáp án đúng:VARIABLE
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="context-wrapper"></div>
+
+                      <div
+                        class="question-wrapper"
+                        data-qid="37317"
+                        id="question-wrapper-37317"
+                      >
+                        <div class="question-number" data-qid="37317">
+                          <strong>19</strong>
+                        </div>
+
+                        <div class="question-content text-highlightable">
+                          <div class="question-answers">
+                            <div class="form-group">
+                              <input
+                                data-type="question-answer"
+                                readonly="true"
+                                class="form-control"
+                                data-qid="37317"
+                                id="question-37317"
+                                name="question-37317"
+                                type="text"
+                                spellcheck="false"
+                              />
+                            </div>
+                          </div>
+
+                          <div class="mt-2 text-success">
+                            Đáp án đúng:MYSTERY
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="context-wrapper"></div>
+
+                      <div
+                        class="question-wrapper"
+                        data-qid="37318"
+                        id="question-wrapper-37318"
+                      >
+                        <div class="question-number" data-qid="37318">
+                          <strong>20</strong>
+                        </div>
+
+                        <div class="question-content text-highlightable">
+                          <div class="question-answers">
+                            <div class="form-group">
+                              <input
+                                data-type="question-answer"
+                                readonly="true"
+                                class="form-control"
+                                data-qid="37318"
+                                id="question-37318"
+                                name="question-37318"
+                                type="text"
+                                spellcheck="false"
+                              />
+                            </div>
+                          </div>
+
+                          <div class="mt-2 text-success">
+                            Đáp án đúng:CHAIRMAN
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="nextpart-wrapper mt-5">
+            <a href="#" class="nextpart" data-nextpart_id="6020">
+              TIẾP THEO<span class="fa fa-chevron-right ml-2"></span>
+            </a>
+          </div>
+        </div>
+
+        <div
+          class="tab-pane"
+          id="partcontent-6020"
+          role="tabpanel"
+          aria-labelledby="pills-tab"
+        >
+          <div class="context-wrapper"></div>
+
+          <div class="test-questions-wrapper">
+            <div class="question-set-wrapper">
+              <div class="context-wrapper">
+                <div class="context-content context-audio">
+                  <div
+                    tabindex="0"
+                    class="plyr plyr--full-ui plyr--audio plyr--html5 plyr--paused plyr--stopped"
+                  >
+                    <div class="plyr__controls">
+                      <button
+                        class="plyr__controls__item plyr__control"
+                        type="button"
+                        data-plyr="play"
+                        aria-label="Play"
+                      >
+                        <svg
+                          class="icon--pressed"
+                          aria-hidden="true"
+                          focusable="false"
+                        >
+                          <use xlink:href="#plyr-pause"></use></svg
+                        ><svg
+                          class="icon--not-pressed"
+                          aria-hidden="true"
+                          focusable="false"
+                        >
+                          <use xlink:href="#plyr-play"></use></svg
+                        ><span class="label--pressed plyr__tooltip">Pause</span
+                        ><span class="label--not-pressed plyr__tooltip"
+                          >Play</span
+                        >
+                      </button>
+                      <div
+                        class="plyr__controls__item plyr__progress__container"
+                      >
+                        <div class="plyr__progress">
+                          <input
+                            data-plyr="seek"
+                            type="range"
+                            min="0"
+                            max="100"
+                            step="0.01"
+                            value="0"
+                            autocomplete="off"
+                            role="slider"
+                            aria-label="Seek"
+                            aria-valuemin="0"
+                            aria-valuemax="100"
+                            aria-valuenow="0"
+                            id="plyr-seek-432"
+                            aria-valuetext="00:00 of 00:00"
+                            style="--value: 0%"
+                          /><progress
+                            class="plyr__progress__buffer"
+                            min="0"
+                            max="100"
+                            value="0"
+                            role="progressbar"
+                            aria-hidden="true"
+                          >
+                            % buffered</progress
+                          ><span class="plyr__tooltip">00:00</span>
+                        </div>
+                      </div>
+                      <div
+                        class="plyr__controls__item plyr__time--current plyr__time"
+                        aria-label="Current time"
+                      >
+                        00:00
+                      </div>
+                      <div class="plyr__controls__item plyr__volume">
+                        <button
+                          type="button"
+                          class="plyr__control"
+                          data-plyr="mute"
+                        >
+                          <svg
+                            class="icon--pressed"
+                            aria-hidden="true"
+                            focusable="false"
+                          >
+                            <use xlink:href="#plyr-muted"></use></svg
+                          ><svg
+                            class="icon--not-pressed"
+                            aria-hidden="true"
+                            focusable="false"
+                          >
+                            <use xlink:href="#plyr-volume"></use></svg
+                          ><span class="label--pressed plyr__tooltip"
+                            >Unmute</span
+                          ><span class="label--not-pressed plyr__tooltip"
+                            >Mute</span
+                          ></button
+                        ><input
+                          data-plyr="volume"
+                          type="range"
+                          min="0"
+                          max="1"
+                          step="0.05"
+                          value="1"
+                          autocomplete="off"
+                          role="slider"
+                          aria-label="Volume"
+                          aria-valuemin="0"
+                          aria-valuemax="100"
+                          aria-valuenow="100"
+                          id="plyr-volume-432"
+                          aria-valuetext="100.0%"
+                          style="--value: 100%"
+                        />
+                      </div>
+                      <button
+                        class="plyr__controls__item plyr__control"
+                        type="button"
+                        data-plyr="captions"
+                      >
+                        <svg
+                          class="icon--pressed"
+                          aria-hidden="true"
+                          focusable="false"
+                        >
+                          <use xlink:href="#plyr-captions-on"></use></svg
+                        ><svg
+                          class="icon--not-pressed"
+                          aria-hidden="true"
+                          focusable="false"
+                        >
+                          <use xlink:href="#plyr-captions-off"></use></svg
+                        ><span class="label--pressed plyr__tooltip"
+                          >Disable captions</span
+                        ><span class="label--not-pressed plyr__tooltip"
+                          >Enable captions</span
+                        >
+                      </button>
+                      <div class="plyr__controls__item plyr__menu">
+                        <button
+                          aria-haspopup="true"
+                          aria-controls="plyr-settings-432"
+                          aria-expanded="false"
+                          type="button"
+                          class="plyr__control"
+                          data-plyr="settings"
+                        >
+                          <svg aria-hidden="true" focusable="false">
+                            <use xlink:href="#plyr-settings"></use></svg
+                          ><span class="plyr__tooltip">Settings</span>
+                        </button>
+                        <div
+                          class="plyr__menu__container"
+                          id="plyr-settings-432"
+                          hidden=""
+                        >
+                          <div>
+                            <div id="plyr-settings-432-home">
+                              <div role="menu">
+                                <button
+                                  data-plyr="settings"
+                                  type="button"
+                                  class="plyr__control plyr__control--forward"
+                                  role="menuitem"
+                                  aria-haspopup="true"
+                                  hidden=""
+                                >
+                                  <span
+                                    >Captions<span class="plyr__menu__value"
+                                      >Disabled</span
+                                    ></span
+                                  ></button
+                                ><button
+                                  data-plyr="settings"
+                                  type="button"
+                                  class="plyr__control plyr__control--forward"
+                                  role="menuitem"
+                                  aria-haspopup="true"
+                                  hidden=""
+                                >
+                                  <span
+                                    >Quality<span class="plyr__menu__value"
+                                      >0</span
+                                    ></span
+                                  ></button
+                                ><button
+                                  data-plyr="settings"
+                                  type="button"
+                                  class="plyr__control plyr__control--forward"
+                                  role="menuitem"
+                                  aria-haspopup="true"
+                                >
+                                  <span
+                                    >Speed<span class="plyr__menu__value"
+                                      >Normal</span
+                                    ></span
+                                  >
+                                </button>
+                              </div>
+                            </div>
+                            <div id="plyr-settings-432-captions" hidden="">
+                              <button
+                                type="button"
+                                class="plyr__control plyr__control--back"
+                              >
+                                <span aria-hidden="true">Captions</span
+                                ><span class="plyr__sr-only"
+                                  >Go back to previous menu</span
+                                >
+                              </button>
+                              <div role="menu"></div>
+                            </div>
+                            <div id="plyr-settings-432-quality" hidden="">
+                              <button
+                                type="button"
+                                class="plyr__control plyr__control--back"
+                              >
+                                <span aria-hidden="true">Quality</span
+                                ><span class="plyr__sr-only"
+                                  >Go back to previous menu</span
+                                >
+                              </button>
+                              <div role="menu"></div>
+                            </div>
+                            <div id="plyr-settings-432-speed" hidden="">
+                              <button
+                                type="button"
+                                class="plyr__control plyr__control--back"
+                              >
+                                <span aria-hidden="true">Speed</span
+                                ><span class="plyr__sr-only"
+                                  >Go back to previous menu</span
+                                >
+                              </button>
+                              <div role="menu">
+                                <button
+                                  data-plyr="speed"
+                                  type="button"
+                                  role="menuitemradio"
+                                  class="plyr__control"
+                                  aria-checked="false"
+                                  value="0.5"
+                                >
+                                  <span>0.5×</span></button
+                                ><button
+                                  data-plyr="speed"
+                                  type="button"
+                                  role="menuitemradio"
+                                  class="plyr__control"
+                                  aria-checked="false"
+                                  value="0.8"
+                                >
+                                  <span>0.8×</span></button
+                                ><button
+                                  data-plyr="speed"
+                                  type="button"
+                                  role="menuitemradio"
+                                  class="plyr__control"
+                                  aria-checked="false"
+                                  value="0.9"
+                                >
+                                  <span>0.9×</span></button
+                                ><button
+                                  data-plyr="speed"
+                                  type="button"
+                                  role="menuitemradio"
+                                  class="plyr__control"
+                                  aria-checked="true"
+                                  value="1"
+                                >
+                                  <span>Normal</span></button
+                                ><button
+                                  data-plyr="speed"
+                                  type="button"
+                                  role="menuitemradio"
+                                  class="plyr__control"
+                                  aria-checked="false"
+                                  value="1.1"
+                                >
+                                  <span>1.1×</span></button
+                                ><button
+                                  data-plyr="speed"
+                                  type="button"
+                                  role="menuitemradio"
+                                  class="plyr__control"
+                                  aria-checked="false"
+                                  value="1.25"
+                                >
+                                  <span>1.25×</span></button
+                                ><button
+                                  data-plyr="speed"
+                                  type="button"
+                                  role="menuitemradio"
+                                  class="plyr__control"
+                                  aria-checked="false"
+                                  value="1.5"
+                                >
+                                  <span>1.5×</span></button
+                                ><button
+                                  data-plyr="speed"
+                                  type="button"
+                                  role="menuitemradio"
+                                  class="plyr__control"
+                                  aria-checked="false"
+                                  value="1.75"
+                                >
+                                  <span>1.75×</span></button
+                                ><button
+                                  data-plyr="speed"
+                                  type="button"
+                                  role="menuitemradio"
+                                  class="plyr__control"
+                                  aria-checked="false"
+                                  value="2"
+                                >
+                                  <span>2×</span></button
+                                ><button
+                                  data-plyr="speed"
+                                  type="button"
+                                  role="menuitemradio"
+                                  class="plyr__control"
+                                  aria-checked="false"
+                                  value="4"
+                                >
+                                  <span>4×</span>
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <button
+                        class="plyr__controls__item plyr__control"
+                        type="button"
+                        data-plyr="pip"
+                      >
+                        <svg aria-hidden="true" focusable="false">
+                          <use xlink:href="#plyr-pip"></use></svg
+                        ><span class="plyr__tooltip">PIP</span></button
+                      ><button
+                        class="plyr__controls__item plyr__control"
+                        type="button"
+                        data-plyr="fullscreen"
+                      >
+                        <svg
+                          class="icon--pressed"
+                          aria-hidden="true"
+                          focusable="false"
+                        >
+                          <use xlink:href="#plyr-exit-fullscreen"></use></svg
+                        ><svg
+                          class="icon--not-pressed"
+                          aria-hidden="true"
+                          focusable="false"
+                        >
+                          <use xlink:href="#plyr-enter-fullscreen"></use></svg
+                        ><span class="label--pressed plyr__tooltip"
+                          >Exit fullscreen</span
+                        ><span class="label--not-pressed plyr__tooltip"
+                          >Enter fullscreen</span
+                        >
+                      </button>
+                    </div>
+                    <audio
+                      class="post-audio-item"
+                      preload="none"
+                      no-extra-controls="true"
+                    >
+                      <!-- <source src="/media/simulation_ielts/sim_0103.mp3" type="audio/x-m4a"> -->
+                      <source
+                        src="https://s4-media1.study4.com/media/simulation_ielts/sim_0103.mp3"
+                      />
+                      Your browser does not support the audio element.</audio
+                    ><button
+                      type="button"
+                      class="plyr__control plyr__control--overlaid"
+                      data-plyr="play"
+                      aria-label="Play"
+                    >
+                      <svg aria-hidden="true" focusable="false">
+                        <use xlink:href="#plyr-play"></use></svg
+                      ><span class="plyr__sr-only">Play</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div
+                  class="context-content context-transcript text-highlightable"
+                >
+                  <p>
+                    <a
+                      data-toggle="collapse"
+                      href="#transcript-c100507c-d33d-4e08-84bf-0949a4a5245a"
+                      aria-expanded="true"
+                      class=""
+                    >
+                      Hiện Transcript
+                      <span class="fas fa-caret-down ml-1"></span>
+                    </a>
+                  </p>
+                  <div
+                    class="collapse show"
+                    id="transcript-c100507c-d33d-4e08-84bf-0949a4a5245a"
+                    style=""
+                  >
+                    <p>
+                      ED 995 [听力原文]<br />
+                      ADVISOR: Come in and take a seat.<br />
+                      STUDENT: Thank you.<br />
+                      ADVISOR: Now, you've made an appointment to see me with
+                      regard to one of the papers you want to enrol in next
+                      semester.<br />
+                      STUDENT: Yes, that's right. It's the 'Globalisation and
+                      Educational Change' paper, GEC 692.<br />
+                      ADVISOR: Ah, well, I know the one you mean but all the
+                      code numbers are going to change next semester so,
+                      although the course name will stay the same, the code will
+                      be&nbsp;<strong>ED 995</strong>&nbsp;. Now you have to
+                      worry about that.<br />
+                      STUDENT: But the content will be the same, right?<br />
+                      ADVISOR: Oh, yes, to a large extent. The objectives are
+                      still to provide you with the skills and knowledge for
+                      analysing the challenges that globalisation poses for
+                      education.<br />
+                      STUDENT: Yes, that's what I'm really interested in—the
+                      future of education—not where we are now, but where we're
+                      heading.<br />
+                      ADVISOR: Well, you'll most likely enjoy the course because
+                      it'll give you the opportunity not just to explore... but
+                      also to&nbsp;<strong>document</strong>&nbsp;...the
+                      advancement of new educational developments.<br />
+                      STUDENT: And, there'll be quite a lot of analysis
+                      involved?<br />
+                      ADVISOR: Yes, obviously, but once you've examined how
+                      education has been affected by cultural values
+                      and&nbsp;<strong>socio-economic structures</strong>&nbsp;,
+                      you'll go on to debate the pros and cons of the
+                      restructuring of public education in view of rapid
+                      globalisation.<br />
+                      STUDENT: I see but, when you say 'public education', do
+                      you mean worldwide?<br />
+                      ADVISOR: No, no. That would be far too large an
+                      undertaking for just one paper. You'd probably choose to
+                      work with the education system within your own state or
+                      country.<br />
+                      STUDENT: Sounds interesting. But isn't it a bit
+                      restrictive?<br />
+                      ADVISOR: Not at all. From there you'd move on to explore
+                      the&nbsp;<strong>impact</strong>&nbsp;of
+                      internationalisation on curriculum diversity in both
+                      developing and developed countries. Have you had a chance
+                      to look at the assessment criteria yet?<br />
+                      STUDENT: Actually, I have, and it makes me a bit nervous
+                      just thinking about it.<br />
+                      ADVISOR: Why's that?<br />
+                      STUDENT: Well, I see that the first assignment starts with
+                      an illustrated power point presentation to the rest of the
+                      class. I've never done one before.<br />
+                      ADVISOR: No need to worry. You can get help with that.
+                      Anyway, this presentation isn't graded—it's what we call a
+                      formative assessment—the feedback you get will help you to
+                      finalise the&nbsp;<strong>written review</strong
+                      >&nbsp;.<br />
+                      STUDENT: That's a review of those academic articles in the
+                      first part of the reading list, right?<br />
+                      ADVISOR: Yes. But you only have to choose five of them.
+                      That first assignment is worth 30%.<br />
+                      STUDENT: And the second assignment?<br />
+                      ADVISOR: There are two parts to that also and both are
+                      graded. Twenty marks will go towards your participation in
+                      a&nbsp;<strong>seminar</strong>&nbsp;and then there's a
+                      5,000-word essay which will be graded out of 50.<br />
+                      STUDENT: Thanks.<br />
+                      ……………………………………………………………………………………<br />
+                      ADVISOR: Is there anything else I can help you with?<br />
+                      STUDENT: Yes, the reading list is quite long. Where do you
+                      think I should start?<br />
+                      ADVISOR: Well, I'd suggest you leave the articles until
+                      the semester is under way, but a good preparation would be
+                      to look at some of the major texts: these ones here.<br />
+                      STUDENT: In any particular order?<br />
+                      ADVISOR: You could start with this one
+                      by&nbsp;<strong>Tower</strong>&nbsp;here at the bottom of
+                      the page.<br />
+                      STUDENT: Sorry? Who?<br />
+                      ADVISOR: Tower T-O-W-E-R, 2007:&nbsp;<em
+                        >Comparative Education</em
+                      >&nbsp;. That should give you a good basis. Then move on
+                      to Elliot:&nbsp;<em
+                        >Educational Issues of the New Millennium</em
+                      >&nbsp;—but be sure to get
+                      the&nbsp;<strong>2008</strong>&nbsp;edition not the
+                      original 1998 edition because so much has changed since
+                      1998. The new edition has extensive revisions and a lot of
+                      new material.<br />
+                      STUDENT: Okay, so that's Tower first, then Elliot. I think
+                      I could handle a couple more over the summer break.<br />
+                      ADVISOR: Well, in that case, look
+                      for&nbsp;<strong>Brown's</strong>&nbsp;<em
+                        >Education and Globalisation</em
+                      >&nbsp;published in 2009—actually there are quite a few
+                      books by Brown but I'd start with that one and leave his
+                      others till much later...and I'd also really recommend
+                      this one here:&nbsp;<em
+                        >Globalisation and Knowledge Policy</em
+                      >&nbsp;by York published quite recently in fact—2010.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="question-group-wrapper">
+                <div class="question-twocols">
+                  <div class="question-twocols-left">
+                    <div class="context-wrapper">
+                      <div class="context-content text-highlightable">
+                        <div>
+                          <p>
+                            <em>Complete the notes below.</em><br />
+                            <em
+                              >Write&nbsp;<strong>NO MORE THAN TWO WORDS</strong
+                              >&nbsp;for each answer.</em
+                            >
+                          </p>
+
+                          <p>
+                            <strong
+                              >'Globalisation and Educational Change'</strong
+                            >
+                          </p>
+
+                          <p>
+                            ●&nbsp;<del>GEC 692</del>&nbsp;New Code:&nbsp;<u
+                              >__<u>__21__</u>__</u
+                            ><br />
+                            ● Aims—Analysis of educational problems arising from
+                            globalisation<br />
+                            ● Chance to research
+                            and&nbsp;<u>__<u>__22__</u>__</u>&nbsp;progress of
+                            educational change<br />
+                            ● Investigate influence of culture
+                            and&nbsp;<u>__<u>__23__</u>__</u>&nbsp;on
+                            education<br />
+                            ● Argue advantages and disadvantages of
+                            reorganisation of public education in own country
+                            with regard to globalisation<br />
+                            ● Consider the&nbsp;<u>__<u>__24__</u>__</u>&nbsp;of
+                            globalisation on diversity of national curricula
+                            across richer and poorer countries<br />
+                            ● Assignment # 1 = power point presentation
+                            (ungraded)
+                            +&nbsp;<u>__<u>__25__</u>__</u>&nbsp;(30%)<br />
+                            ● Assignment # 2 = take part
+                            in&nbsp;<u>__<u>__26__</u>__</u>&nbsp;(20%) + essay
+                            (50%)
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="question-twocols-right">
+                    <div class="questions-wrapper">
+                      <div class="context-wrapper"></div>
+
+                      <div
+                        class="question-wrapper"
+                        data-qid="37319"
+                        id="question-wrapper-37319"
+                      >
+                        <div class="question-number" data-qid="37319">
+                          <strong>21</strong>
+                        </div>
+
+                        <div class="question-content text-highlightable">
+                          <div class="question-answers">
+                            <div class="form-group">
+                              <input
+                                data-type="question-answer"
+                                readonly="true"
+                                class="form-control"
+                                data-qid="37319"
+                                id="question-37319"
+                                name="question-37319"
+                                type="text"
+                                spellcheck="false"
+                              />
+                            </div>
+                          </div>
+
+                          <div class="mt-2 text-success">
+                            Đáp án đúng:ED( )995
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="context-wrapper"></div>
+
+                      <div
+                        class="question-wrapper"
+                        data-qid="37320"
+                        id="question-wrapper-37320"
+                      >
+                        <div class="question-number" data-qid="37320">
+                          <strong>22</strong>
+                        </div>
+
+                        <div class="question-content text-highlightable">
+                          <div class="question-answers">
+                            <div class="form-group">
+                              <input
+                                data-type="question-answer"
+                                readonly="true"
+                                class="form-control"
+                                data-qid="37320"
+                                id="question-37320"
+                                name="question-37320"
+                                type="text"
+                                spellcheck="false"
+                              />
+                            </div>
+                          </div>
+
+                          <div class="mt-2 text-success">
+                            Đáp án đúng:DOCUMENT
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="context-wrapper"></div>
+
+                      <div
+                        class="question-wrapper"
+                        data-qid="37321"
+                        id="question-wrapper-37321"
+                      >
+                        <div class="question-number" data-qid="37321">
+                          <strong>23</strong>
+                        </div>
+
+                        <div class="question-content text-highlightable">
+                          <div class="question-answers">
+                            <div class="form-group">
+                              <input
+                                data-type="question-answer"
+                                readonly="true"
+                                class="form-control"
+                                data-qid="37321"
+                                id="question-37321"
+                                name="question-37321"
+                                type="text"
+                                spellcheck="false"
+                              />
+                            </div>
+                          </div>
+
+                          <div class="mt-2 text-success">
+                            Đáp án đúng:SOCIO(-)ECONOMIC STRUCTURES
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="context-wrapper"></div>
+
+                      <div
+                        class="question-wrapper"
+                        data-qid="37322"
+                        id="question-wrapper-37322"
+                      >
+                        <div class="question-number" data-qid="37322">
+                          <strong>24</strong>
+                        </div>
+
+                        <div class="question-content text-highlightable">
+                          <div class="question-answers">
+                            <div class="form-group">
+                              <input
+                                data-type="question-answer"
+                                readonly="true"
+                                class="form-control"
+                                data-qid="37322"
+                                id="question-37322"
+                                name="question-37322"
+                                type="text"
+                                spellcheck="false"
+                              />
+                            </div>
+                          </div>
+
+                          <div class="mt-2 text-success">
+                            Đáp án đúng:IMPACT
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="context-wrapper"></div>
+
+                      <div
+                        class="question-wrapper"
+                        data-qid="37323"
+                        id="question-wrapper-37323"
+                      >
+                        <div class="question-number" data-qid="37323">
+                          <strong>25</strong>
+                        </div>
+
+                        <div class="question-content text-highlightable">
+                          <div class="question-answers">
+                            <div class="form-group">
+                              <input
+                                data-type="question-answer"
+                                readonly="true"
+                                class="form-control"
+                                data-qid="37323"
+                                id="question-37323"
+                                name="question-37323"
+                                type="text"
+                                spellcheck="false"
+                              />
+                            </div>
+                          </div>
+
+                          <div class="mt-2 text-success">
+                            Đáp án đúng:WRITTEN REVIEW
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="context-wrapper"></div>
+
+                      <div
+                        class="question-wrapper"
+                        data-qid="37324"
+                        id="question-wrapper-37324"
+                      >
+                        <div class="question-number" data-qid="37324">
+                          <strong>26</strong>
+                        </div>
+
+                        <div class="question-content text-highlightable">
+                          <div class="question-answers">
+                            <div class="form-group">
+                              <input
+                                data-type="question-answer"
+                                readonly="true"
+                                class="form-control"
+                                data-qid="37324"
+                                id="question-37324"
+                                name="question-37324"
+                                type="text"
+                                spellcheck="false"
+                              />
+                            </div>
+                          </div>
+
+                          <div class="mt-2 text-success">
+                            Đáp án đúng:(A) SEMINAR
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="question-group-wrapper">
+                <div class="question-twocols">
+                  <div class="question-twocols-left">
+                    <div class="context-wrapper">
+                      <div class="context-content text-highlightable">
+                        <div>
+                          <p>
+                            <em>Complete the table below.</em><br />
+                            <em
+                              >Write&nbsp;<strong
+                                >NO MORE THAN TWO WORDS AND/OR A NUMBER</strong
+                              >&nbsp;for each answer.</em
+                            >
+                          </p>
+
+                          <table>
+                            <tbody>
+                              <tr>
+                                <td colspan="9">Author</td>
+                                <td colspan="22">Title</td>
+                                <td colspan="11">Date</td>
+                              </tr>
+                              <tr>
+                                <td colspan="9">(27) _________</td>
+                                <td colspan="22">Comparative Education</td>
+                                <td colspan="11">2007</td>
+                              </tr>
+                              <tr>
+                                <td colspan="9">Elliot</td>
+                                <td colspan="22">
+                                  Educational Issues of the New Millennium
+                                </td>
+                                <td colspan="11">(28)__________</td>
+                              </tr>
+                              <tr>
+                                <td colspan="9">(29) _________</td>
+                                <td colspan="22">
+                                  Education and Globalisation
+                                </td>
+                                <td colspan="11">2009</td>
+                              </tr>
+                              <tr>
+                                <td colspan="9">York</td>
+                                <td colspan="22">
+                                  Globalisation and 3<u><u>0</u></u
+                                  >_________
+                                </td>
+                                <td colspan="11">2010</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="question-twocols-right">
+                    <div class="questions-wrapper">
+                      <div class="context-wrapper"></div>
+
+                      <div
+                        class="question-wrapper"
+                        data-qid="37325"
+                        id="question-wrapper-37325"
+                      >
+                        <div class="question-number" data-qid="37325">
+                          <strong>27</strong>
+                        </div>
+
+                        <div class="question-content text-highlightable">
+                          <div class="question-answers">
+                            <div class="form-group">
+                              <input
+                                data-type="question-answer"
+                                readonly="true"
+                                class="form-control"
+                                data-qid="37325"
+                                id="question-37325"
+                                name="question-37325"
+                                type="text"
+                                spellcheck="false"
+                              />
+                            </div>
+                          </div>
+
+                          <div class="mt-2 text-success">Đáp án đúng:TOWER</div>
+                        </div>
+                      </div>
+
+                      <div class="context-wrapper"></div>
+
+                      <div
+                        class="question-wrapper"
+                        data-qid="37326"
+                        id="question-wrapper-37326"
+                      >
+                        <div class="question-number" data-qid="37326">
+                          <strong>28</strong>
+                        </div>
+
+                        <div class="question-content text-highlightable">
+                          <div class="question-answers">
+                            <div class="form-group">
+                              <input
+                                data-type="question-answer"
+                                readonly="true"
+                                class="form-control"
+                                data-qid="37326"
+                                id="question-37326"
+                                name="question-37326"
+                                type="text"
+                                spellcheck="false"
+                              />
+                            </div>
+                          </div>
+
+                          <div class="mt-2 text-success">Đáp án đúng:2008</div>
+                        </div>
+                      </div>
+
+                      <div class="context-wrapper"></div>
+
+                      <div
+                        class="question-wrapper"
+                        data-qid="37327"
+                        id="question-wrapper-37327"
+                      >
+                        <div class="question-number" data-qid="37327">
+                          <strong>29</strong>
+                        </div>
+
+                        <div class="question-content text-highlightable">
+                          <div class="question-answers">
+                            <div class="form-group">
+                              <input
+                                data-type="question-answer"
+                                readonly="true"
+                                class="form-control"
+                                data-qid="37327"
+                                id="question-37327"
+                                name="question-37327"
+                                type="text"
+                                spellcheck="false"
+                              />
+                            </div>
+                          </div>
+
+                          <div class="mt-2 text-success">Đáp án đúng:BROWN</div>
+                        </div>
+                      </div>
+
+                      <div class="context-wrapper"></div>
+
+                      <div
+                        class="question-wrapper"
+                        data-qid="37328"
+                        id="question-wrapper-37328"
+                      >
+                        <div class="question-number" data-qid="37328">
+                          <strong>30</strong>
+                        </div>
+
+                        <div class="question-content text-highlightable">
+                          <div class="question-answers">
+                            <div class="form-group">
+                              <input
+                                data-type="question-answer"
+                                readonly="true"
+                                class="form-control"
+                                data-qid="37328"
+                                id="question-37328"
+                                name="question-37328"
+                                type="text"
+                                spellcheck="false"
+                              />
+                            </div>
+                          </div>
+
+                          <div class="mt-2 text-success">
+                            Đáp án đúng:KNOWLEDGE POLICY
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="nextpart-wrapper mt-5">
+            <a href="#" class="nextpart" data-nextpart_id="6021">
+              TIẾP THEO<span class="fa fa-chevron-right ml-2"></span>
+            </a>
+          </div>
+        </div>
+
+        <div
+          class="tab-pane"
+          id="partcontent-6021"
+          role="tabpanel"
+          aria-labelledby="pills-tab"
+        >
+          <div class="context-wrapper"></div>
+
+          <div class="test-questions-wrapper">
+            <div class="question-set-wrapper">
+              <div class="context-wrapper">
+                <div class="context-content context-audio">
+                  <div
+                    tabindex="0"
+                    class="plyr plyr--full-ui plyr--audio plyr--html5 plyr--paused plyr--stopped"
+                  >
+                    <div class="plyr__controls">
+                      <button
+                        class="plyr__controls__item plyr__control"
+                        type="button"
+                        data-plyr="play"
+                        aria-label="Play"
+                      >
+                        <svg
+                          class="icon--pressed"
+                          aria-hidden="true"
+                          focusable="false"
+                        >
+                          <use xlink:href="#plyr-pause"></use></svg
+                        ><svg
+                          class="icon--not-pressed"
+                          aria-hidden="true"
+                          focusable="false"
+                        >
+                          <use xlink:href="#plyr-play"></use></svg
+                        ><span class="label--pressed plyr__tooltip">Pause</span
+                        ><span class="label--not-pressed plyr__tooltip"
+                          >Play</span
+                        >
+                      </button>
+                      <div
+                        class="plyr__controls__item plyr__progress__container"
+                      >
+                        <div class="plyr__progress">
+                          <input
+                            data-plyr="seek"
+                            type="range"
+                            min="0"
+                            max="100"
+                            step="0.01"
+                            value="0"
+                            autocomplete="off"
+                            role="slider"
+                            aria-label="Seek"
+                            aria-valuemin="0"
+                            aria-valuemax="100"
+                            aria-valuenow="0"
+                            id="plyr-seek-9170"
+                            aria-valuetext="00:00 of 00:00"
+                            style="--value: 0%"
+                          /><progress
+                            class="plyr__progress__buffer"
+                            min="0"
+                            max="100"
+                            value="0"
+                            role="progressbar"
+                            aria-hidden="true"
+                          >
+                            % buffered</progress
+                          ><span class="plyr__tooltip">00:00</span>
+                        </div>
+                      </div>
+                      <div
+                        class="plyr__controls__item plyr__time--current plyr__time"
+                        aria-label="Current time"
+                      >
+                        00:00
+                      </div>
+                      <div class="plyr__controls__item plyr__volume">
+                        <button
+                          type="button"
+                          class="plyr__control"
+                          data-plyr="mute"
+                        >
+                          <svg
+                            class="icon--pressed"
+                            aria-hidden="true"
+                            focusable="false"
+                          >
+                            <use xlink:href="#plyr-muted"></use></svg
+                          ><svg
+                            class="icon--not-pressed"
+                            aria-hidden="true"
+                            focusable="false"
+                          >
+                            <use xlink:href="#plyr-volume"></use></svg
+                          ><span class="label--pressed plyr__tooltip"
+                            >Unmute</span
+                          ><span class="label--not-pressed plyr__tooltip"
+                            >Mute</span
+                          ></button
+                        ><input
+                          data-plyr="volume"
+                          type="range"
+                          min="0"
+                          max="1"
+                          step="0.05"
+                          value="1"
+                          autocomplete="off"
+                          role="slider"
+                          aria-label="Volume"
+                          aria-valuemin="0"
+                          aria-valuemax="100"
+                          aria-valuenow="100"
+                          id="plyr-volume-9170"
+                          aria-valuetext="100.0%"
+                          style="--value: 100%"
+                        />
+                      </div>
+                      <button
+                        class="plyr__controls__item plyr__control"
+                        type="button"
+                        data-plyr="captions"
+                      >
+                        <svg
+                          class="icon--pressed"
+                          aria-hidden="true"
+                          focusable="false"
+                        >
+                          <use xlink:href="#plyr-captions-on"></use></svg
+                        ><svg
+                          class="icon--not-pressed"
+                          aria-hidden="true"
+                          focusable="false"
+                        >
+                          <use xlink:href="#plyr-captions-off"></use></svg
+                        ><span class="label--pressed plyr__tooltip"
+                          >Disable captions</span
+                        ><span class="label--not-pressed plyr__tooltip"
+                          >Enable captions</span
+                        >
+                      </button>
+                      <div class="plyr__controls__item plyr__menu">
+                        <button
+                          aria-haspopup="true"
+                          aria-controls="plyr-settings-9170"
+                          aria-expanded="false"
+                          type="button"
+                          class="plyr__control"
+                          data-plyr="settings"
+                        >
+                          <svg aria-hidden="true" focusable="false">
+                            <use xlink:href="#plyr-settings"></use></svg
+                          ><span class="plyr__tooltip">Settings</span>
+                        </button>
+                        <div
+                          class="plyr__menu__container"
+                          id="plyr-settings-9170"
+                          hidden=""
+                        >
+                          <div>
+                            <div id="plyr-settings-9170-home">
+                              <div role="menu">
+                                <button
+                                  data-plyr="settings"
+                                  type="button"
+                                  class="plyr__control plyr__control--forward"
+                                  role="menuitem"
+                                  aria-haspopup="true"
+                                  hidden=""
+                                >
+                                  <span
+                                    >Captions<span class="plyr__menu__value"
+                                      >Disabled</span
+                                    ></span
+                                  ></button
+                                ><button
+                                  data-plyr="settings"
+                                  type="button"
+                                  class="plyr__control plyr__control--forward"
+                                  role="menuitem"
+                                  aria-haspopup="true"
+                                  hidden=""
+                                >
+                                  <span
+                                    >Quality<span class="plyr__menu__value"
+                                      >0</span
+                                    ></span
+                                  ></button
+                                ><button
+                                  data-plyr="settings"
+                                  type="button"
+                                  class="plyr__control plyr__control--forward"
+                                  role="menuitem"
+                                  aria-haspopup="true"
+                                >
+                                  <span
+                                    >Speed<span class="plyr__menu__value"
+                                      >Normal</span
+                                    ></span
+                                  >
+                                </button>
+                              </div>
+                            </div>
+                            <div id="plyr-settings-9170-captions" hidden="">
+                              <button
+                                type="button"
+                                class="plyr__control plyr__control--back"
+                              >
+                                <span aria-hidden="true">Captions</span
+                                ><span class="plyr__sr-only"
+                                  >Go back to previous menu</span
+                                >
+                              </button>
+                              <div role="menu"></div>
+                            </div>
+                            <div id="plyr-settings-9170-quality" hidden="">
+                              <button
+                                type="button"
+                                class="plyr__control plyr__control--back"
+                              >
+                                <span aria-hidden="true">Quality</span
+                                ><span class="plyr__sr-only"
+                                  >Go back to previous menu</span
+                                >
+                              </button>
+                              <div role="menu"></div>
+                            </div>
+                            <div id="plyr-settings-9170-speed" hidden="">
+                              <button
+                                type="button"
+                                class="plyr__control plyr__control--back"
+                              >
+                                <span aria-hidden="true">Speed</span
+                                ><span class="plyr__sr-only"
+                                  >Go back to previous menu</span
+                                >
+                              </button>
+                              <div role="menu">
+                                <button
+                                  data-plyr="speed"
+                                  type="button"
+                                  role="menuitemradio"
+                                  class="plyr__control"
+                                  aria-checked="false"
+                                  value="0.5"
+                                >
+                                  <span>0.5×</span></button
+                                ><button
+                                  data-plyr="speed"
+                                  type="button"
+                                  role="menuitemradio"
+                                  class="plyr__control"
+                                  aria-checked="false"
+                                  value="0.8"
+                                >
+                                  <span>0.8×</span></button
+                                ><button
+                                  data-plyr="speed"
+                                  type="button"
+                                  role="menuitemradio"
+                                  class="plyr__control"
+                                  aria-checked="false"
+                                  value="0.9"
+                                >
+                                  <span>0.9×</span></button
+                                ><button
+                                  data-plyr="speed"
+                                  type="button"
+                                  role="menuitemradio"
+                                  class="plyr__control"
+                                  aria-checked="true"
+                                  value="1"
+                                >
+                                  <span>Normal</span></button
+                                ><button
+                                  data-plyr="speed"
+                                  type="button"
+                                  role="menuitemradio"
+                                  class="plyr__control"
+                                  aria-checked="false"
+                                  value="1.1"
+                                >
+                                  <span>1.1×</span></button
+                                ><button
+                                  data-plyr="speed"
+                                  type="button"
+                                  role="menuitemradio"
+                                  class="plyr__control"
+                                  aria-checked="false"
+                                  value="1.25"
+                                >
+                                  <span>1.25×</span></button
+                                ><button
+                                  data-plyr="speed"
+                                  type="button"
+                                  role="menuitemradio"
+                                  class="plyr__control"
+                                  aria-checked="false"
+                                  value="1.5"
+                                >
+                                  <span>1.5×</span></button
+                                ><button
+                                  data-plyr="speed"
+                                  type="button"
+                                  role="menuitemradio"
+                                  class="plyr__control"
+                                  aria-checked="false"
+                                  value="1.75"
+                                >
+                                  <span>1.75×</span></button
+                                ><button
+                                  data-plyr="speed"
+                                  type="button"
+                                  role="menuitemradio"
+                                  class="plyr__control"
+                                  aria-checked="false"
+                                  value="2"
+                                >
+                                  <span>2×</span></button
+                                ><button
+                                  data-plyr="speed"
+                                  type="button"
+                                  role="menuitemradio"
+                                  class="plyr__control"
+                                  aria-checked="false"
+                                  value="4"
+                                >
+                                  <span>4×</span>
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <button
+                        class="plyr__controls__item plyr__control"
+                        type="button"
+                        data-plyr="pip"
+                      >
+                        <svg aria-hidden="true" focusable="false">
+                          <use xlink:href="#plyr-pip"></use></svg
+                        ><span class="plyr__tooltip">PIP</span></button
+                      ><button
+                        class="plyr__controls__item plyr__control"
+                        type="button"
+                        data-plyr="fullscreen"
+                      >
+                        <svg
+                          class="icon--pressed"
+                          aria-hidden="true"
+                          focusable="false"
+                        >
+                          <use xlink:href="#plyr-exit-fullscreen"></use></svg
+                        ><svg
+                          class="icon--not-pressed"
+                          aria-hidden="true"
+                          focusable="false"
+                        >
+                          <use xlink:href="#plyr-enter-fullscreen"></use></svg
+                        ><span class="label--pressed plyr__tooltip"
+                          >Exit fullscreen</span
+                        ><span class="label--not-pressed plyr__tooltip"
+                          >Enter fullscreen</span
+                        >
+                      </button>
+                    </div>
+                    <audio
+                      class="post-audio-item"
+                      preload="none"
+                      no-extra-controls="true"
+                    >
+                      <!-- <source src="/media/simulation_ielts/sim_0104.mp3" type="audio/x-m4a"> -->
+                      <source
+                        src="https://s4-media1.study4.com/media/simulation_ielts/sim_0104.mp3"
+                      />
+                      Your browser does not support the audio element.</audio
+                    ><button
+                      type="button"
+                      class="plyr__control plyr__control--overlaid"
+                      data-plyr="play"
+                      aria-label="Play"
+                    >
+                      <svg aria-hidden="true" focusable="false">
+                        <use xlink:href="#plyr-play"></use></svg
+                      ><span class="plyr__sr-only">Play</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div
+                  class="context-content context-transcript text-highlightable"
+                >
+                  <p>
+                    <a
+                      data-toggle="collapse"
+                      href="#transcript-05c3527d-b7fa-4d1a-bd0b-695c1204dc70"
+                      aria-expanded="true"
+                      class=""
+                    >
+                      Hiện Transcript
+                      <span class="fas fa-caret-down ml-1"></span>
+                    </a>
+                  </p>
+                  <div
+                    class="collapse show"
+                    id="transcript-05c3527d-b7fa-4d1a-bd0b-695c1204dc70"
+                    style=""
+                  >
+                    <p>
+                      Good afternoon and thank you for your warm welcome. This
+                      will be the first talk in a series of five
+                      on&nbsp;<em>Health</em>&nbsp;<em
+                        >interventions—protection and prevention</em
+                      >&nbsp;. Could I start by asking for a show of hands—how
+                      many of you had a flu vaccination at the beginning of
+                      winter? Mmm...I thought so. You young ones always think
+                      you're indestructible.<br />
+                      Well, as you are no doubt aware disease-spreading germs or
+                      pathogens are everywhere. On a daily basis the human body
+                      has to ward off&nbsp;<strong>attacks</strong>&nbsp;by
+                      various harmful bacteria and viruses. A healthy body has a
+                      good defence system against many of these germs but the
+                      defence only operates well against micro-organisms that it
+                      has already encountered, in which case it is said to be
+                      immune. There are two ways in which humans acquire natural
+                      immunity: actively, when a person has first suffered and
+                      then recovered from
+                      an&nbsp;<strong>illness</strong>&nbsp;, and passively,
+                      when ready-made protection is transferred into the body,
+                      for example, from the maternal blood via the umbilical
+                      cord to an unborn child, or through breast milk.<br />
+                      Now, artificially acquired immunity can help the body to
+                      fight disease so we can
+                      use&nbsp;<strong>active</strong>&nbsp;immunisation as a
+                      preventative measure. This is when a person is vaccinated
+                      against an illness by injection or oral ingestion of a
+                      tiny amount of weakened or inactive germs—not enough to
+                      actually cause him or her to contract the illness but
+                      sufficient for the body's&nbsp;<strong
+                        >defence system</strong
+                      >&nbsp;to recognise and respond to the threat by forming
+                      antibodies.<br />
+                      Intervention using passive immunlsation, on the other
+                      hand, is a method of curing an illness after it is too
+                      late for prevention. It is less effective than active
+                      immunisation and takes longer to work. It is used when the
+                      body has already been invaded by bacteria and the person
+                      is ill. In this case there is no time for the body to make
+                      antibodies of its own so proteins—usually taken from
+                      the&nbsp;<strong>blood</strong>&nbsp;of animals—are
+                      injected to equip the patient with the essential
+                      antibodies to combat the particular illness.<br />
+                      Let's have a quick look at a bit of history: The discovery
+                      of vaccination to boost the body's immune system by making
+                      it sensitive to particular disease-causing bacteria was
+                      made by an eighteenth-century English doctor called Edward
+                      Jenner. He noticed that survivors of smallpox, a common
+                      but extremely dangerous disease, never contracted the
+                      disease a second time. In other words, they were immune.
+                      He studied a similar disease in cows called cowpox and
+                      realised that people in contact with the&nbsp;<strong
+                        >infected cows</strong
+                      >&nbsp;became ill with symptoms resembling smallpox.
+                      However, this disease was quite mild by comparison and
+                      those who contracted cowpox were then immune to smallpox.
+                      He conducted an&nbsp;<strong>experiment</strong>&nbsp;by
+                      injecting a child with a small amount of pus taken from a
+                      cowpox pustule. The child subsequently became ill but soon
+                      recovered. Later, he injected the child with pus from a
+                      smallpox pustule and the child did not get sick. He had
+                      developed immunity to the more dangerous disease. The
+                      antibodies produced to fight the cowpox bacteria had been
+                      able to fight off the smallpox bacteria.<br />
+                      What are antibodies? Well, antibodies are made by white
+                      blood cells
+                      called&nbsp;<strong>B-lymphocytes</strong>&nbsp;. And this
+                      is done in response to the presence of antigens, or other
+                      bacterial toxins, which have been released by the
+                      micro-organisms (what we commonly refer to as 'germs')
+                      that have invaded the body. These
+                      Y-shaped&nbsp;<strong>antibodies</strong>&nbsp;(or you can
+                      think of them as 'antitoxins') may stop the toxins or
+                      repair the damage they have done by what is known as the
+                      antigen-antibody reaction which takes place within the
+                      plasma of the blood. A correct antibody (for that disease)
+                      clings to a
+                      particular&nbsp;<strong>antigen</strong>&nbsp;in order to
+                      render it harmless. Large numbers of these pairs clump
+                      together to form a bigger unit. This is called
+                      agglutination and is able to be seen by the naked eye
+                      which is very helpful for doctors and other specialists to
+                      determine which illnesses a patient is immune to.<br />
+                      Inoculation, or active vaccination, can protect people
+                      from serious diseases. The vaccine may make a person feel
+                      unwell for a few days when the immune system starts to
+                      produce antibodies to match the introduced antigen. This
+                      is called a primary reaction. If that particular antigen
+                      should ever enter the body again later, a secondary
+                      reaction takes place. The body is then able to produce
+                      large numbers of corresponding antibodies within a short
+                      time so the invading antigens are quickly wiped out
+                      without the person suffering any harm from the disease.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="question-group-wrapper">
+                <div class="question-twocols">
+                  <div class="question-twocols-left">
+                    <div class="context-wrapper">
+                      <div class="context-content text-highlightable">
+                        <div>
+                          <p>
+                            <em>Complete the summary below.</em><br />
+                            <em
+                              >Write&nbsp;<strong>NO MORE THAN TWO WORDS</strong
+                              >&nbsp;for each answer.</em
+                            ><br />
+                            Every day the human body is fighting
+                            off&nbsp;<u>__<u>__31__</u>__</u>&nbsp;by
+                            destructive pathogens. A person in good health has
+                            natural protection in the form of an immune system
+                            which works best against familiar microorganisms
+                            which may have been encountered during a
+                            previous&nbsp;<u>__<u>__32__</u>__</u>&nbsp;or
+                            passed on by the mother before or after birth.<br />
+                            Vaccination is a way to
+                            cause&nbsp;<u>__<u>__33__</u>__</u>&nbsp;immunisation
+                            by introducing a small amount of pathogen into the
+                            body—just enough for the
+                            body's&nbsp;<u>__<u>__34__</u>__</u>&nbsp;to react
+                            by making antibodies. Passive immnnisation can be
+                            used as a way of treating someone who is already
+                            sick. Proteins from
+                            animal&nbsp;<u>__<u>__35__</u>__</u>&nbsp;are
+                            introduced into the patient to give him the
+                            necessary antibodies to fight the disease.<br />
+                            Dr. Edward Jenner observed that people who had
+                            suffered and recovered from a serious disease called
+                            smallpox did not get it again. He also noted that
+                            victims of a milder disease, cowpox, which they
+                            caught from&nbsp;<u>__<u>__36__</u>__</u>&nbsp;,
+                            were immune to smallpox. He carried out a
+                            successful&nbsp;<u>__<u>__37__</u>__</u>&nbsp;by
+                            deliberately giving a child cowpox in order to make
+                            him immune to smallpox.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="question-twocols-right">
+                    <div class="questions-wrapper">
+                      <div class="context-wrapper"></div>
+
+                      <div
+                        class="question-wrapper"
+                        data-qid="37329"
+                        id="question-wrapper-37329"
+                      >
+                        <div class="question-number" data-qid="37329">
+                          <strong>31</strong>
+                        </div>
+
+                        <div class="question-content text-highlightable">
+                          <div class="question-answers">
+                            <div class="form-group">
+                              <input
+                                data-type="question-answer"
+                                readonly="true"
+                                class="form-control"
+                                data-qid="37329"
+                                id="question-37329"
+                                name="question-37329"
+                                type="text"
+                                spellcheck="false"
+                              />
+                            </div>
+                          </div>
+
+                          <div class="mt-2 text-success">
+                            Đáp án đúng:ATTACKS
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="context-wrapper"></div>
+
+                      <div
+                        class="question-wrapper"
+                        data-qid="37330"
+                        id="question-wrapper-37330"
+                      >
+                        <div class="question-number" data-qid="37330">
+                          <strong>32</strong>
+                        </div>
+
+                        <div class="question-content text-highlightable">
+                          <div class="question-answers">
+                            <div class="form-group">
+                              <input
+                                data-type="question-answer"
+                                readonly="true"
+                                class="form-control"
+                                data-qid="37330"
+                                id="question-37330"
+                                name="question-37330"
+                                type="text"
+                                spellcheck="false"
+                              />
+                            </div>
+                          </div>
+
+                          <div class="mt-2 text-success">
+                            Đáp án đúng:ILLNESS/DISEASE
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="context-wrapper"></div>
+
+                      <div
+                        class="question-wrapper"
+                        data-qid="37331"
+                        id="question-wrapper-37331"
+                      >
+                        <div class="question-number" data-qid="37331">
+                          <strong>33</strong>
+                        </div>
+
+                        <div class="question-content text-highlightable">
+                          <div class="question-answers">
+                            <div class="form-group">
+                              <input
+                                data-type="question-answer"
+                                readonly="true"
+                                class="form-control"
+                                data-qid="37331"
+                                id="question-37331"
+                                name="question-37331"
+                                type="text"
+                                spellcheck="false"
+                              />
+                            </div>
+                          </div>
+
+                          <div class="mt-2 text-success">
+                            Đáp án đúng:ACTIVE
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="context-wrapper"></div>
+
+                      <div
+                        class="question-wrapper"
+                        data-qid="37332"
+                        id="question-wrapper-37332"
+                      >
+                        <div class="question-number" data-qid="37332">
+                          <strong>34</strong>
+                        </div>
+
+                        <div class="question-content text-highlightable">
+                          <div class="question-answers">
+                            <div class="form-group">
+                              <input
+                                data-type="question-answer"
+                                readonly="true"
+                                class="form-control"
+                                data-qid="37332"
+                                id="question-37332"
+                                name="question-37332"
+                                type="text"
+                                spellcheck="false"
+                              />
+                            </div>
+                          </div>
+
+                          <div class="mt-2 text-success">
+                            Đáp án đúng:DEFENCE/DEFENSE/IMMUNE SYSTEM
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="context-wrapper"></div>
+
+                      <div
+                        class="question-wrapper"
+                        data-qid="37333"
+                        id="question-wrapper-37333"
+                      >
+                        <div class="question-number" data-qid="37333">
+                          <strong>35</strong>
+                        </div>
+
+                        <div class="question-content text-highlightable">
+                          <div class="question-answers">
+                            <div class="form-group">
+                              <input
+                                data-type="question-answer"
+                                readonly="true"
+                                class="form-control"
+                                data-qid="37333"
+                                id="question-37333"
+                                name="question-37333"
+                                type="text"
+                                spellcheck="false"
+                              />
+                            </div>
+                          </div>
+
+                          <div class="mt-2 text-success">Đáp án đúng:BLOOD</div>
+                        </div>
+                      </div>
+
+                      <div class="context-wrapper"></div>
+
+                      <div
+                        class="question-wrapper"
+                        data-qid="37334"
+                        id="question-wrapper-37334"
+                      >
+                        <div class="question-number" data-qid="37334">
+                          <strong>36</strong>
+                        </div>
+
+                        <div class="question-content text-highlightable">
+                          <div class="question-answers">
+                            <div class="form-group">
+                              <input
+                                data-type="question-answer"
+                                readonly="true"
+                                class="form-control"
+                                data-qid="37334"
+                                id="question-37334"
+                                name="question-37334"
+                                type="text"
+                                spellcheck="false"
+                              />
+                            </div>
+                          </div>
+
+                          <div class="mt-2 text-success">
+                            Đáp án đúng:INFECTED COWS
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="context-wrapper"></div>
+
+                      <div
+                        class="question-wrapper"
+                        data-qid="37335"
+                        id="question-wrapper-37335"
+                      >
+                        <div class="question-number" data-qid="37335">
+                          <strong>37</strong>
+                        </div>
+
+                        <div class="question-content text-highlightable">
+                          <div class="question-answers">
+                            <div class="form-group">
+                              <input
+                                data-type="question-answer"
+                                readonly="true"
+                                class="form-control"
+                                data-qid="37335"
+                                id="question-37335"
+                                name="question-37335"
+                                type="text"
+                                spellcheck="false"
+                              />
+                            </div>
+                          </div>
+
+                          <div class="mt-2 text-success">
+                            Đáp án đúng:EXPERIMENT
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="question-group-wrapper">
+                <div class="question-twocols">
+                  <div class="question-twocols-left">
+                    <div class="context-wrapper">
+                      <div class="context-content text-highlightable">
+                        <div>
+                          <div>
+                            <p>
+                              <em>Complete the diagram below.</em><br />
+                              <em
+                                >Choose your answers from the box below and
+                                write the letters A-F next to questions
+                                38-40.</em
+                              >
+                            </p>
+
+                            <p>
+                              A. antibody<br />
+                              B. agglutination<br />
+                              C. antigen<br />
+                              D. germs<br />
+                              E. plasma<br />
+                              F. B-lymphocyte
+                            </p>
+
+                            <p>
+                              <span style="font-size: 11pt"
+                                ><span style="font-family: Roboto, sans-serif"
+                                  ><span style="color: #222222"
+                                    ><em
+                                      ><img
+                                        src="https://lh4.googleusercontent.com/uX8zbdKjBn1CFKAr6uVnQvFALNvKMzrbxhQ1iapT96z4W31qInguLyCstiYcSoNUCPSOLoEtrx42WKxRN5e_PMqxTChI4TIOl8KngemsxtbV4BCoff8ixI-DuRmFePkhhUvG3VuX"
+                                        style="
+                                          height: 268px;
+                                          width: 314px;
+                                        " /></em></span></span
+                              ></span>
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="question-twocols-right">
+                    <div class="questions-wrapper">
+                      <div class="context-wrapper"></div>
+
+                      <div
+                        class="question-wrapper"
+                        data-qid="37336"
+                        id="question-wrapper-37336"
+                      >
+                        <div class="question-number" data-qid="37336">
+                          <strong>38</strong>
+                        </div>
+
+                        <div class="question-content text-highlightable">
+                          <div class="question-answers">
+                            <div class="form-group">
+                              <input
+                                data-type="question-answer"
+                                readonly="true"
+                                class="form-control"
+                                data-qid="37336"
+                                id="question-37336"
+                                name="question-37336"
+                                type="text"
+                                spellcheck="false"
+                              />
+                            </div>
+                          </div>
+
+                          <div class="mt-2 text-success">Đáp án đúng:F</div>
+                        </div>
+                      </div>
+
+                      <div class="context-wrapper"></div>
+
+                      <div
+                        class="question-wrapper"
+                        data-qid="37337"
+                        id="question-wrapper-37337"
+                      >
+                        <div class="question-number" data-qid="37337">
+                          <strong>39</strong>
+                        </div>
+
+                        <div class="question-content text-highlightable">
+                          <div class="question-answers">
+                            <div class="form-group">
+                              <input
+                                data-type="question-answer"
+                                readonly="true"
+                                class="form-control"
+                                data-qid="37337"
+                                id="question-37337"
+                                name="question-37337"
+                                type="text"
+                                spellcheck="false"
+                              />
+                            </div>
+                          </div>
+
+                          <div class="mt-2 text-success">Đáp án đúng:A</div>
+                        </div>
+                      </div>
+
+                      <div class="context-wrapper"></div>
+
+                      <div
+                        class="question-wrapper"
+                        data-qid="37338"
+                        id="question-wrapper-37338"
+                      >
+                        <div class="question-number" data-qid="37338">
+                          <strong>40</strong>
+                        </div>
+
+                        <div class="question-content text-highlightable">
+                          <div class="question-answers">
+                            <div class="form-group">
+                              <input
+                                data-type="question-answer"
+                                readonly="true"
+                                class="form-control"
+                                data-qid="37338"
+                                id="question-37338"
+                                name="question-37338"
+                                type="text"
+                                spellcheck="false"
+                              />
+                            </div>
+                          </div>
+
+                          <div class="mt-2 text-success">Đáp án đúng:C</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+<script src="./listening.js"></script>

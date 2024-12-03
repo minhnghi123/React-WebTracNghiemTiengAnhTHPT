@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { Modal, Input, Select, Form, message, DatePicker } from "antd";
-import { CloseCircleOutlined } from "@ant-design/icons";
-import { Exam, ExamAPI } from "@/services/teacher/Teacher";
+import { Modal, Input, Select, Form, DatePicker } from "antd";
+
+import { Exam, ExamAPI, Question } from "@/services/teacher/Teacher";
 
 const { Option } = Select;
 
@@ -9,17 +9,20 @@ interface CreateExamModalProps {
   visible: boolean;
   handleClose: () => void;
   onCreateSuccess: () => void;
+  dataQuestion: Question[];
 }
 
 const CreateExamModal: React.FC<CreateExamModalProps> = ({
   visible,
   handleClose,
   onCreateSuccess,
+  dataQuestion,
 }) => {
   const [exam, setExam] = useState<Partial<Exam>>({
     title: "",
     description: "",
-    questions: [],
+    questions: dataQuestion,
+
     duration: 90,
     startTime: new Date(),
     endTime: undefined,
@@ -43,17 +46,22 @@ const CreateExamModal: React.FC<CreateExamModalProps> = ({
   };
 
   const handleSaveClick = async () => {
-    try {
-      const response = await ExamAPI.creteExam(exam as Exam);
-      if (response?.code === 200) {
-        message.success("Tạo đề thi thành công");
-        handleClose();
-        onCreateSuccess();
-      } else {
-        message.error("Failed to create exam.");
-      }
-    } catch (error) {
-      message.error("An error occurred while creating the exam.");
+    const formattedExam = {
+      ...exam,
+      questions: dataQuestion,
+      startTime: exam.startTime
+        ? new Date(exam.startTime).toISOString()
+        : undefined,
+      endTime: exam.endTime ? new Date(exam.endTime).toISOString() : undefined,
+    };
+
+    const response = await ExamAPI.creteExam(formattedExam as unknown as Exam);
+    if (response?.success === true) {
+      alert("Tạo đề thi thành công");
+      handleClose();
+      onCreateSuccess();
+    } else {
+      console.log(response);
     }
   };
 

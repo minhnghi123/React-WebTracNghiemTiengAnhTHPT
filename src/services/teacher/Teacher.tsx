@@ -1,23 +1,63 @@
 import { request } from "@/config/request";
 export interface Answer {
-  text: string;
-  isCorrect: boolean;
   _id?: string;
+  text: string;
+  correctAnswerForBlank?: string;
+  isCorrect: boolean;
 }
-
+export interface Audio {
+  _id?: string;
+  filePath: string;
+  description: string;
+  transcription: string;
+  createdAt?: Date;
+  deletedAt?: Date | null;
+  isDeleted?: boolean;
+}
 export interface Question {
   _id?: string;
   content: string;
   level: "easy" | "medium" | "hard";
+  questionType?: string;
+  sourceType?: string;
+  passageId?: string;
   answers: Answer[];
   subject: string;
   knowledge: string;
   translation: string;
   explanation: string;
+  audio?: string;
   deleted?: boolean;
   createdAt?: Date;
+  audioInfo?: Audio;
+  text?: string;
 }
 export interface Exam {
+  _id?: string;
+  title?: string;
+  description?: string;
+  questions: string[] | Question[];
+  duration: number;
+  startTime: Date;
+  endTime?: Date;
+  isPublic: boolean;
+  slug: string;
+  createdAt: Date;
+  updatedAt?: Date;
+}
+export interface ExamInfo {
+  _id?: string;
+  title?: string;
+  description?: string;
+  questions?: Question[];
+  duration: number;
+  startTime: Date;
+  endTime?: Date;
+  isPublic: boolean;
+  slug: string;
+  createdAt: Date;
+}
+export interface DetailExamType {
   _id?: string;
   title: string;
   description?: string;
@@ -29,11 +69,28 @@ export interface Exam {
   slug: string;
   createdAt: Date;
 }
-
+export interface QuestionType {
+  _id?: string;
+  name: string;
+  description?: string;
+  deleted: boolean;
+}
 export const QuestionAPI = {
   getAllQuestions: async (page: number) => {
     const response = await request.get(
-      `teacher/question-management?page=${page}`
+      `teacher/question-management?questionType=6742fb1cd56a2e75dbd817ea&page=${page}`
+    );
+    return response.data;
+  },
+  getAllQuestionsBlank: async (page: number) => {
+    const response = await request.get(
+      `teacher/question-management?questionType=6742fb3bd56a2e75dbd817ec&page=${page}`
+    );
+    return response.data;
+  },
+  getAllQuestionsSpecial: async (page: number) => {
+    const response = await request.get(
+      `teacher/question-management?questionType=6742fb5dd56a2e75dbd817ee&page=${page}`
     );
     return response.data;
   },
@@ -46,6 +103,7 @@ export const QuestionAPI = {
     return response.data;
   },
   UpdateQuestion: async (question: Question, _id: string) => {
+    console.log(question);
     const response = await request.patch(
       `/teacher/question/update/${_id}`,
       question
@@ -69,22 +127,95 @@ export const ExamAPI = {
     return response.data;
   },
   creteExam: async (question: Exam) => {
+    console.log(question);
     const response = await request.post("/teacher/exam/create", question);
     return response.data;
   },
-  getQuestion: async (id: string) => {
-    const response = await request.get(`/teacher/question/detail/${id}`);
+  getDetailExam: async (slug: string) => {
+    const response = await request.get(`/teacher/exam/detail/${slug}`);
     return response.data;
   },
-  UpdateQuestion: async (question: Question, _id: string) => {
+  UpdateExam: async (question: Exam, slug: string) => {
     const response = await request.patch(
-      `/teacher/question/update/${_id}`,
+      `/teacher/exam/update/${slug}`,
       question
     );
     return response.data;
   },
-  deleteQuestion: async (id: string) => {
-    const response = await request.patch(`/teacher/question/delete/${id}`);
+  deleteExam: async (id: string) => {
+    const response = await request.delete(`/teacher/exam/delete/${id}`);
+    return response.data;
+  },
+  setScheduleExam: async (id: string, startTime: Date, endTime: Date) => {
+    const response = await request.patch(`/teacher/exam/schedule/${id}`, {
+      startTime,
+      endTime,
+    });
+    return response.data;
+  },
+  createExamAuTo: async (
+    level: string,
+    numberOfQuestions: number,
+    duration: number,
+    questionTypes: string[]
+  ) => {
+    const response = await request.post("/teacher/exam/auto-generate-exam", {
+      level,
+      numberOfQuestions,
+      duration,
+      questionTypes,
+    });
+    return response.data;
+  },
+};
+export const QuestionTypeAPI = {
+  getAllQuestionType: async (page: number) => {
+    const response = await request.get(`/teacher/question-types?page=${page}`);
+    return response.data;
+  },
+  createQuestionType: async (question: QuestionType) => {
+    const response = await request.post(
+      "/teacher/question-types/create",
+      question
+    );
+    return response.data;
+  },
+  getQuestionType: async (id: string) => {
+    const response = await request.get(`/teacher/question-types/update/${id}`);
+    return response.data;
+  },
+  UpdateQuestionType: async (question: QuestionType, _id: string) => {
+    const response = await request.patch(
+      `/teacher/question-types/update/${_id}`,
+      question
+    );
+    return response.data;
+  },
+  deleteQuestionType: async (id: string) => {
+    const response = await request.patch(
+      `/teacher/question-types/delete/${id}`
+    );
+    return response.data;
+  },
+};
+export const AudioAPI = {
+  getAllAudio: async () => {
+    const response = await request.get(`/teacher/audio/`);
+    return response.data;
+  },
+  createAudio: async (question: Audio) => {
+    const response = await request.post("/teacher/audio/upload", question);
+    return response.data;
+  },
+  updateAudio: async (question: Audio, _id: string) => {
+    const response = await request.patch(
+      `/teacher/audio/update/${_id}`,
+      question
+    );
+    return response.data;
+  },
+  deleteAudio: async (id: string) => {
+    const response = await request.patch(`/teacher/audio/delete/${id}`);
     return response.data;
   },
 };
