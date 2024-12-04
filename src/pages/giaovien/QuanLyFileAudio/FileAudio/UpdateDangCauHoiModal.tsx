@@ -15,7 +15,7 @@ export const UpdateAudioModal: React.FC<UpdateAudioProps> = ({
   audioData,
 }) => {
   const [question, setQuestion] = useState<Audio>(audioData);
-  const [file, setFile] = useState<File | null>(null);
+  //const [file, setFile] = useState<File | null>(null);
 
   useEffect(() => {
     setQuestion(audioData);
@@ -32,7 +32,7 @@ export const UpdateAudioModal: React.FC<UpdateAudioProps> = ({
     const file = info.file.originFileObj;
     console.log(file);
     if (file) {
-      setFile(file);
+      //setFile(file);
       const reader = new FileReader();
       reader.onload = () => {
         const filePath = `../Audio/${file.name}`; // Path at the same level as 'src'

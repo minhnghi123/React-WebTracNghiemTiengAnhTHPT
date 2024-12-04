@@ -90,11 +90,11 @@ export const CreateAudioModal: React.FC<CreateAudioProps> = ({
     }
     const rq = await AudioAPI.createAudio(question);
     if (rq.success) {
-      saveAudio(question);
+      saveAudio();
     } else console.log(rq.message);
   };
 
-  const saveAudio = (audio: Audio) => {
+  const saveAudio = () => {
     //console.log("Lưu thông tin file nghe:", audio);
 
     // Reset state after saving
