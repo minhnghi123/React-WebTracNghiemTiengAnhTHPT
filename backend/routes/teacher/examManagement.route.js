@@ -8,6 +8,7 @@ import {
   toggleExamVisibility,
   updateExam,
   autoGenerateExam,
+  exportExamIntoWord,
 } from "../../controllers/teacher/examManagement.controller.js";
 
 const router = express.Router();
@@ -27,5 +28,8 @@ router.patch("/toggle-visibility/:id", toggleExamVisibility);
 router.patch("/schedule/:id", setExamSchedule);
 
 router.post("/auto-generate-exam", autoGenerateExam);
+
+router.post("/export-exam", exportExamIntoWord);
+
 
 export default router;
