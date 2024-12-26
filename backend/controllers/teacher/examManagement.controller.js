@@ -167,7 +167,6 @@ export const createExam = async (req, res) => {
         message: "Thời gian bắt đầu phải nhỏ hơn thời gian kết thúc!",
       });
     }
-    console.log(res.locals.user);
     // Tạo đối tượng Exam mới
     const newExam = new Exam({
       title,
@@ -448,6 +447,38 @@ export const exportExamIntoWord = async (req, res) => {
     res.download(filePath, "exam_template.docx");
   } catch (error) {
     console.error("Lỗi:", error);
+    res.status(500).send({ error: error.message });
+  }
+};
+
+//Copy exam from other teacher
+export const copyExamFromOthers = async (req, res) => {
+  try {
+    const { examId } = req.body;
+    const exam = await Exam.findById(examId);
+    if (!exam) {
+      return res.status(404).json({
+        success: false,
+        message: "Đề thi không tồn tại!",
+      });
+    }
+    const newExam = new Exam({
+      title: exam.title,
+      description: exam.description,
+      questions: exam.questions,
+      duration: exam.duration,
+      isPublic: exam.isPublic,
+      startTime: exam.startTime,
+      endTime: exam.endTime,
+      createdBy: res.locals.user.id,
+    });
+    await newExam.save();
+    return res.status(200).json({
+      success: true,
+      message: "Sao chép đề thi thành công!",
+      data: newExam,
+    });
+  } catch (error) {
     res.status(500).send({ error: error.message });
   }
 };
