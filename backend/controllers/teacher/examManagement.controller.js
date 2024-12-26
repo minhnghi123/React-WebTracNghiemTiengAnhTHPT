@@ -1,17 +1,19 @@
 import Exam from "../../models/Exam.model.js";
 import { Question } from "../../models/Question.model.js";
 import { formatExamHeader } from "../../utils/examHeader.helper.js";
-import { formatExamQuestions,formatFillInBlankQuestions,formatListeningQuestions } from "../../utils/examQuestions.helper.js";
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import { Packer, Document } from 'docx';
-
+import {
+  formatExamQuestions,
+  formatFillInBlankQuestions,
+  formatListeningQuestions,
+} from "../../utils/examQuestions.helper.js";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+import { Packer, Document } from "docx";
 
 // Tạo __dirname thủ công
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
 
 // [GET]: teacher/exam
 export const getAllExams = async (req, res) => {
@@ -165,7 +167,7 @@ export const createExam = async (req, res) => {
         message: "Thời gian bắt đầu phải nhỏ hơn thời gian kết thúc!",
       });
     }
-
+    console.log(res.locals.user);
     // Tạo đối tượng Exam mới
     const newExam = new Exam({
       title,
@@ -175,6 +177,7 @@ export const createExam = async (req, res) => {
       isPublic: isPublic || false,
       startTime: startTime ? new Date(startTime) : undefined,
       endTime: endTime ? new Date(endTime) : undefined,
+      createdBy: res.locals.user.id,
     });
 
     // Lưu vào database
@@ -414,12 +417,12 @@ export const autoGenerateExam = async (req, res) => {
   }
 };
 
-
 // 📚 Hàm Export Exam Into Word
 export const exportExamIntoWord = async (req, res) => {
   try {
     const data = req.body;
-    const { questionsMultichoice,questionsFillInBlank,questionsListening  } = req.body;
+    const { questionsMultichoice, questionsFillInBlank, questionsListening } =
+      req.body;
     const doc = new Document({
       sections: [
         {
@@ -434,18 +437,17 @@ export const exportExamIntoWord = async (req, res) => {
     });
 
     const buffer = await Packer.toBuffer(doc);
-    const filePath = path.join(__dirname, 'export', 'exam_template.docx');
-    
+    const filePath = path.join(__dirname, "export", "exam_template.docx");
+
     // Tạo thư mục nếu chưa tồn tại
     if (!fs.existsSync(path.dirname(filePath))) {
       fs.mkdirSync(path.dirname(filePath), { recursive: true });
     }
 
     fs.writeFileSync(filePath, buffer);
-    res.download(filePath, 'exam_template.docx');
-
+    res.download(filePath, "exam_template.docx");
   } catch (error) {
-    console.error('Lỗi:', error);
+    console.error("Lỗi:", error);
     res.status(500).send({ error: error.message });
   }
 };

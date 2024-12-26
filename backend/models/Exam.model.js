@@ -12,11 +12,11 @@ const ExamSchema = new mongoose.Schema({
   startTime: { type: Date, required: true },
   endTime: { type: Date },
   isPublic: { type: Boolean, default: false },
-  // createdBy: {
-  //   type: mongoose.Schema.Types.ObjectId,
-  //   ref: "User",
-  //   required: true,
-  // },
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Taikhoan",
+    required: true,
+  },
   slug: {
     type: String,
     slug: "title",
