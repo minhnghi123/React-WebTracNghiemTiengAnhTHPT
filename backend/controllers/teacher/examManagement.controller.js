@@ -436,15 +436,23 @@ export const exportExamIntoWord = async (req, res) => {
     });
 
     const buffer = await Packer.toBuffer(doc);
-    const filePath = path.join(__dirname, "export", "exam_template.docx");
-
+    let downloadPath = path.join(process.env.USERPROFILE, "Downloads", data.title +".docx");
+    
     // Tạo thư mục nếu chưa tồn tại
-    if (!fs.existsSync(path.dirname(filePath))) {
-      fs.mkdirSync(path.dirname(filePath), { recursive: true });
+    if (!fs.existsSync(path.dirname(downloadPath))) {
+      fs.mkdirSync(path.dirname(downloadPath), { recursive: true });
     }
-
-    fs.writeFileSync(filePath, buffer);
-    res.download(filePath, "exam_template.docx");
+    
+    // Kiểm tra và thêm số vào tên file nếu đã tồn tại
+    let counter = 1;
+    while (fs.existsSync(downloadPath)) {
+      const parsedPath = path.parse(downloadPath);
+      downloadPath = path.join(parsedPath.dir, `${parsedPath.name}(${counter})${parsedPath.ext}`);
+      counter++;
+    }
+    
+    fs.writeFileSync(downloadPath, buffer);
+    res.download(downloadPath, path.basename(downloadPath));
   } catch (error) {
     console.error("Lỗi:", error);
     res.status(500).send({ error: error.message });

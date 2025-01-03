@@ -7,6 +7,7 @@ import CreateExamModal from "./DeThi/CreateExam";
 import { useNavigate } from "react-router-dom";
 import CreateExamModalAuTo from "./DeThi/CreateExamQuestion.tsx/CreateExamAuto";
 import CreateExamModalShedule from "./DeThi/CreateExamQuestion.tsx/SetExamModalShedule";
+import ExportWordModal from "./DeThi/ExportWord/ExportWordModal";
 
 const columns: ColumnsType<Exam> = [
   {
@@ -59,6 +60,8 @@ export const QuanLyDeThi = () => {
   const [total, setTotal] = useState<number>(0);
   const [data, setData] = useState<Exam[]>();
   const [showModal, setShowModal] = useState<boolean>(false);
+  const [showModalExport, setShowModalExport] = useState<boolean>(false);
+ const [currentSlug, setCurrentSlug] = useState<string>("");
   const changeSatusExam = async (id: string) => {
     try {
       const rq = await ExamAPI.changePublic(id);
@@ -211,6 +214,16 @@ export const QuanLyDeThi = () => {
                     Chi tiết
                   </Button>
                   <Button
+                    color="primary"
+                    variant="solid"
+                    onClick={() => {
+                      setCurrentSlug(record.slug);
+                      setShowModalExport(true);
+                    }}
+                  >
+                    Xuất file
+                  </Button>
+                  <Button
                     color="danger"
                     variant="solid"
                     onClick={() => hadleDelete(record._id || "")}
@@ -256,6 +269,11 @@ export const QuanLyDeThi = () => {
           setShowModalSchedule(null), getAllExam(page);
         }}
         _id={showModalSchedule || ""}
+      />
+      <ExportWordModal
+       visible={showModalExport}
+       handleClose={() => setShowModalExport(false)}
+        examId={ currentSlug|| ""}
       />
     </div>
   );
