@@ -5,6 +5,36 @@ import { useNavigate } from "react-router-dom";
 import { Dropdown, MenuProps } from "antd";
 
 export const Navbar = () => {
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [userName, setUserName] = useState<string>("");
+  const { user, handleLogout } = useAuthContext();
+  const logout = async () => {
+    try {
+      const rq = await AuthApi.logout();
+      console.log(rq?.data.message);
+    } catch (error: any) {
+      console.log(error);
+    }
+  }; // Add this closing brace to fix the error
+  const handleBTNLogout = async () => {
+    handleLogout();
+    // logout();
+    setIsLoggedIn(false);
+    setUserName("");
+    try {
+      const rq = await AuthApi.logout();
+      console.log(rq?.data.message);
+    } catch (error: any) {
+      console.log(error);
+    }
+  };
+  useLayoutEffect(() => {
+    if (user) {
+      setIsLoggedIn(true);
+      setUserName(user.username);
+    }
+  }, [user]);
+  const navigator = useNavigate();
   const items: MenuProps["items"] = [
     {
       key: "1",
@@ -45,27 +75,6 @@ export const Navbar = () => {
       ),
     },
   ];
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
-  const [userName, setUserName] = useState<string>("");
-  const { user, handleLogout } = useAuthContext();
-  const handleBTNLogout = async () => {
-    handleLogout();
-    setIsLoggedIn(false);
-    setUserName("");
-    try {
-      const rq = await AuthApi.logout();
-      console.log(rq?.data.message);
-    } catch (error: any) {
-      console.log(error);
-    }
-  };
-  useLayoutEffect(() => {
-    if (user) {
-      setIsLoggedIn(true);
-      setUserName(user.username);
-    }
-  }, [user]);
-  const navigator = useNavigate();
   return (
     <div id="main">
       <div id="header">

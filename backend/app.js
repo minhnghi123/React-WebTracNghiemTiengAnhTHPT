@@ -11,7 +11,6 @@ import cookieParser from "cookie-parser";
 import indexClient from "./routes/client/index.route.js";
 import indexTeacher from "./routes/teacher/index.route.js";
 connect();
-
 const app = express();
 // Configure CORS
 
@@ -33,8 +32,9 @@ app.use((req, res, next) => {
   next();
 });
 
-const port = ENV_VARS.PORT;
+const port = ENV_VARS.PORT || 5000;
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
+  
 });
