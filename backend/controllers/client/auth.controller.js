@@ -4,6 +4,10 @@ import { generateTokenAndSetToken } from "../../utils/generateToken.util.js";
 import { ForgotPassword } from "../../models/Forgot-Password.model.js";
 import { generateRandomString } from "../../helpers/generateNumber.helper.js";
 import { sendMail } from "../../helpers/sendMail.helper.js";
+import jwt from 'jsonwebtoken';
+import { ENV_VARS } from "../../config/envVars.config.js";
+
+
 export async function signup(req, res) {
   try {
     const { username, email, password } = req.body;
@@ -159,10 +163,24 @@ export async function resetPassword(req, res) {
   try {
     const salt = bcryptjs.genSaltSync(10);
     const hashedPassword = await bcryptjs.hash(req.body.newPassword, salt);
-    console.log(req.user);
+   
+    const token = req.cookies["jwt-token"];
+
+    if (!token) {
+      return res.status(401).send({ message: 'No token, authorization denied' });
+    }
+
+    // Giải mã token và kiểm tra người dùng
+    const decoded = jwt.verify(token, ENV_VARS.JWT_SECRET); 
+    const user = await TaiKhoan.findOne({ _id: decoded.userId });
+    
+    if (!user) {
+      return res.status(404).send({ message: 'User not found'  });
+    }
+    console.log(user);
     await TaiKhoan.updateOne(
       {
-        _id: req.user._id,
+        _id: user._id,
       },
       {
         password: hashedPassword,

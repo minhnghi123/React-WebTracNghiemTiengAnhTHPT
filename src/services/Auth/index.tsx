@@ -22,4 +22,17 @@ export const AuthApi = {
     const response = await request.post("/auth/logout");
     return response;
   },
+  forgetPassword: async (email: string) => {
+    const response = await request.post(`/auth/forgot-password`, { email });
+    return response.data;
+  },
+  verifyOtp: async (email: string, otp: string) => {
+    const response = await request.post(`/auth/send-otp`, { email, otp });
+    return response.data;
+  },
+  resetPassword: async ( newPassword: string, rePassword: string,) => {
+    const response = await request.post(`/auth/reset-password`, {  newPassword ,rePassword});
+    console.log(response);
+    return response.data;
+  },
 };

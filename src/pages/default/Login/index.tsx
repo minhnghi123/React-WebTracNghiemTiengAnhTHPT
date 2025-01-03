@@ -87,8 +87,8 @@ export const Login = () => {
 
           {/* Remind Password */}
           <div className={styles.formFooter}>
-            <a className={styles.underlineHover} href="#">
-              Forgot Password?
+            <a className={styles.underlineHover} href="/forgetPassword">
+              Quên mật khẩu?
             </a>
           </div>
         </div>

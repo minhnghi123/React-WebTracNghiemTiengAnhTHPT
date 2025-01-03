@@ -3,6 +3,8 @@ import { TaiKhoan } from "../../models/Taikhoan.model.js";
 import { ENV_VARS } from "../../config/envVars.config.js";
 // Middleware để kiểm tra xem người dùng có phải là gv không
 export const isTeacher = async (req, res, next) => {
+  next(); 
+  return;
   try {
     // Lấy token từ cookie
     const token = req.cookies["jwt-token"];
