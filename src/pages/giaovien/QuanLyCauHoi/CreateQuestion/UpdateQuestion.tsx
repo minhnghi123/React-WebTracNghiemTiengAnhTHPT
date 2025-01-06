@@ -3,7 +3,8 @@ import { Button, Form, Input, Modal, Select } from "antd";
 import { Option } from "antd/es/mentions";
 import { useState } from "react";
 import clsx from "clsx";
-import { CloseCircleOutlined } from "@ant-design/icons";
+import { CloseCircleOutlined, QuestionOutlined } from "@ant-design/icons";
+import { translateEnglishToVietnamese } from "@/services/GropApi";
 interface UpdateQuestionModalProps {
   visible: boolean;
   handleClose: () => void;
@@ -105,7 +106,43 @@ const UpdateQuestionModal: React.FC<UpdateQuestionModalProps> = ({
       }
     }
   };
-
+  const handleTranslate = async (text: string) => {
+    const confirm = window.confirm(
+      "Bạn có muốn dịch câu hỏi không? Sẽ xóa dữ liệu dịch cũ"
+    );
+    if (!confirm) return;
+    try {
+      const rq = await translateEnglishToVietnamese(text);
+      console.log(rq);
+      if (rq) {
+        setQuestion((prev) => ({ ...prev, translation: rq }));
+      }
+    } catch (error: any) {
+      if (error.response) {
+        console.log(error.response.data.message);
+      }
+    }
+  };
+  const handleExplain = async () => {
+    const text = `${question.content}\n${question.answers
+      .map((answer, index) => `$ ${answer.text}`)
+      .join("\n")}`;
+    const confirm = window.confirm(
+      "Bạn có muốn giải thích câu hỏi không? Sẽ xóa dữ liệu giải thích cũ"
+    );
+    if (!confirm) return;
+    try {
+      const rq = await translateEnglishToVietnamese(text);
+      console.log(rq);
+      if (rq) {
+        setQuestion((prev) => ({ ...prev, explanation: rq }));
+      }
+    } catch (error: any) {
+      if (error.response) {
+        console.log(error.response.data.message);
+      }
+    }
+  };
   return (
     <Modal
       title="Thêm câu hỏi"
@@ -197,20 +234,46 @@ const UpdateQuestionModal: React.FC<UpdateQuestionModalProps> = ({
           </Button>
         </Form.Item>
         <Form.Item label="Dịch">
-          <Input
-            name="translation"
-            value={question.translation}
-            onChange={handleChange}
-            style={{ width: "95% " }}
-          />
+          <div className="d-flex">
+            <Input.TextArea
+              name="translation"
+              value={question.translation}
+              onChange={handleChange}
+              style={{ width: "95% " }}
+            />
+            <div className=" align-items-center d-flex flex-column justify-content-center">
+              <Button
+                type="link"
+                icon={
+                  <img
+                    src="/src/Content/img/Google_Translate_Icon.png"
+                    height="16px"
+                  />
+                }
+                onClick={() => handleTranslate(question.content)}
+                style={{ color: "#FF0000" }}
+              />
+            </div>
+          </div>
         </Form.Item>
+
         <Form.Item label="Giải thích">
-          <Input
-            name="explanation"
-            value={question.explanation}
-            onChange={handleChange}
-            style={{ width: "95% " }}
-          />
+          <div className="d-flex">
+            <Input.TextArea
+              name="explanation"
+              value={question.explanation}
+              onChange={handleChange}
+              style={{ width: "95% " }}
+            />
+            <div className=" align-items-center d-flex flex-column justify-content-center">
+              <Button
+                type="link"
+                icon={<QuestionOutlined />}
+                onClick={() => handleExplain()}
+                style={{ color: "#FF0000" }}
+              />
+            </div>
+          </div>
         </Form.Item>
       </Form>
     </Modal>

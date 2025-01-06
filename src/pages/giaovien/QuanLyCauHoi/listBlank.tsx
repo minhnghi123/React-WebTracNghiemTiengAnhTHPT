@@ -13,7 +13,7 @@ export const ListBlank = () => {
   const getAllQuestionsBlank = async (page: number) => {
     try {
       const rq = await QuestionAPI.getAllQuestionsBlank(page);
-
+      console.log(rq);
       if (rq?.code === 200) {
         setData(rq?.questions);
         console.log(rq?.questions);
