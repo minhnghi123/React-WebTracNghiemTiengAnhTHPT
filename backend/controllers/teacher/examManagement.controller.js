@@ -10,7 +10,7 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { Packer, Document } from "docx";
-
+import { redisService } from "../../config/redis.config.js";
 // Tạo __dirname thủ công
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -40,7 +40,6 @@ export const getAllExams = async (req, res) => {
 
     // Đếm tổng số đề thi thỏa mãn bộ lọc
     const total = await Exam.countDocuments(filter);
-
     // Phản hồi thành công
     return res.status(200).json({
       success: true,
@@ -436,21 +435,28 @@ export const exportExamIntoWord = async (req, res) => {
     });
 
     const buffer = await Packer.toBuffer(doc);
-    let downloadPath = path.join(process.env.USERPROFILE, "Downloads", data.title +".docx");
-    
+    let downloadPath = path.join(
+      process.env.USERPROFILE,
+      "Downloads",
+      data.title + ".docx"
+    );
+
     // Tạo thư mục nếu chưa tồn tại
     if (!fs.existsSync(path.dirname(downloadPath))) {
       fs.mkdirSync(path.dirname(downloadPath), { recursive: true });
     }
-    
+
     // Kiểm tra và thêm số vào tên file nếu đã tồn tại
     let counter = 1;
     while (fs.existsSync(downloadPath)) {
       const parsedPath = path.parse(downloadPath);
-      downloadPath = path.join(parsedPath.dir, `${parsedPath.name}(${counter})${parsedPath.ext}`);
+      downloadPath = path.join(
+        parsedPath.dir,
+        `${parsedPath.name}(${counter})${parsedPath.ext}`
+      );
       counter++;
     }
-    
+
     fs.writeFileSync(downloadPath, buffer);
     res.download(downloadPath, path.basename(downloadPath));
   } catch (error) {
