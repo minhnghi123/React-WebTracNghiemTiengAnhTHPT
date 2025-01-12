@@ -7,7 +7,7 @@ import fs from "fs";
 export const questionManagement = async (req, res) => {
   // //questionType
   const questionTypes = await QuestionType.find({ deleted: false });
-  const receivedQuestionTypes = req.query.questionType;
+  const receivedQuestionTypes = req.query.questionType || { $exists: true };
   //pagination
   let currentPage = 1;
   if (req.query.page) {
@@ -216,19 +216,21 @@ export const importExcel = async (req, res) => {
         const multiChoice = await QuestionType.findOne({
           name: "Multiple Choice Questions",
         });
-        
-        const correctAnswers = CorrectAnswer.split(',').map(answer => answer.toUpperCase().trim());
+
+        const correctAnswers = CorrectAnswer.split(",").map((answer) =>
+          answer.toUpperCase().trim()
+        );
         const answers = [
-          { text: AnswerA, isCorrect: correctAnswers.includes('A') },
-          { text: AnswerB, isCorrect: correctAnswers.includes('B') },
-          { text: AnswerC, isCorrect: correctAnswers.includes('C') },
-          { text: AnswerD, isCorrect: correctAnswers.includes('D') }
+          { text: AnswerA, isCorrect: correctAnswers.includes("A") },
+          { text: AnswerB, isCorrect: correctAnswers.includes("B") },
+          { text: AnswerC, isCorrect: correctAnswers.includes("C") },
+          { text: AnswerD, isCorrect: correctAnswers.includes("D") },
         ];
         const newQuestion = new Question({
           content: QuestionText,
           questionType: multiChoice.id,
           level: Level,
-          answers:answers,
+          answers: answers,
           knowledge: Knowledge,
           translation: Translation,
         });
