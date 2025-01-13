@@ -5,7 +5,6 @@ const vocabSchema = new mongoose.Schema(
     term: {
       type: String,
       required: true,
-      unique: true,
     },
     definition: {
       type: String,
