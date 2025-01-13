@@ -25,9 +25,9 @@ app.use(
 app.use(express.json());
 app.use(cookieParser());
 await redisService.connect();
-indexTeacher(app);
 
 indexClient(app);
+indexTeacher(app);
 
 app.use((req, res, next) => {
   res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
