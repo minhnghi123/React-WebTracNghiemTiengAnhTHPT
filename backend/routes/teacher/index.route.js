@@ -2,8 +2,15 @@ import questionManagementRoute from "./questionManagement.route.js";
 import examManagementRoute from "./examManagement.route.js";
 import questionTypeManagementRoute from "./questionTypeManagement.route.js";
 import audioManagementRoute from "./audioManagement.route.js";
-import { isTeacher } from "../../middlewares/teacher/isTeacherMiddleware.js";
+import {
+  protectedRoute,
+  isStudent,
+  isAdmin,
+  isTeacher,
+} from "../../middlewares/protectedRoute.middleware.js";
+
 const indexTeacher = (app) => {
+  app.use(protectedRoute);
   app.use(isTeacher);
   app.use("/teacher", questionManagementRoute);
 

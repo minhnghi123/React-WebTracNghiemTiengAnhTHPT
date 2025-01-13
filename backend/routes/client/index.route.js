@@ -8,10 +8,11 @@ import { protectedRoute } from "../../middlewares/protectedRoute.middleware.js";
 
 const indexClient = (app) => {
   app.use("/auth", authRoute);
+  app.use(protectedRoute);
   app.use("/question", questionRoute);
   app.use("/exam", examRoute);
   app.use("/result", resultRoute);
   app.use("/flashcard", flashCardRoute);
-  app.use("/", protectedRoute, homeRoute);
+  app.use("/", homeRoute);
 };
 export default indexClient;
