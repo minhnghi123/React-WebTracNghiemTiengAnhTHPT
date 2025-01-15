@@ -57,7 +57,17 @@ export const updateSet = async (req, res) => {
   try {
     const idSet = req.params.idSet;
     const updatedSet = req.body;
+    const checkExisted = await FlashCardSet.findById(idSet);
+    if (!checkExisted) {
+      return res.status(404).json({ message: "Flash card set not found" });
+    }
+    if (!checkExisted.createdBy.equals(req.user.id)) {
+      return res
+        .status(404)
+        .json({ message: "You don't have permission to update this card set" });
+    }
     await FlashCardSet.findByIdAndUpdate(idSet, updatedSet, { new: true });
+
     res.status(200).json({ message: "Updated successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });
