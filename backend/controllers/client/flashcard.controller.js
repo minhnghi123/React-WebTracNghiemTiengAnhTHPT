@@ -52,3 +52,24 @@ export const createPost = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+export const detailSet = async (req, res) => {
+  try {
+    const idSet = req.params.idSet;
+    const flashCardSet = await FlashCardSet.findOne({
+      _id: idSet,
+      deleted: false,
+    }).populate("vocabs");
+    if (!flashCardSet) {
+      return res.status(404).json({ message: "Flash card set not found" });
+    }
+    if (!flashCardSet.public && !flashCardSet.createdBy.equals(req.user.id)) {
+      return res
+        .status(404)
+        .json({ message: "You don't have permission to view this card set" });
+    }
+    res.status(200).json({ flashCardSet });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
