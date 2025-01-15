@@ -53,6 +53,17 @@ export const createPost = async (req, res) => {
   }
 };
 
+export const updateSet = async (req, res) => {
+  try {
+    const idSet = req.params.idSet;
+    const updatedSet = req.body;
+    await FlashCardSet.findByIdAndUpdate(idSet, updatedSet, { new: true });
+    res.status(200).json({ message: "Updated successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 export const detailSet = async (req, res) => {
   try {
     const idSet = req.params.idSet;
