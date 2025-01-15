@@ -1,5 +1,17 @@
 import { Vocab } from "../../models/Vocab.model.js";
 import { FlashCardSet } from "../../models/FlashCardSet.model.js";
+export const index = async (req, res) => {
+  try {
+    const flashCardSets = await FlashCardSet.find({
+      deleted: false,
+      createdBy: req.user._id,
+    }).populate("vocabs");
+    res.status(200).json({ flashCardSets });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 export const createPost = async (req, res) => {
   try {
     const vocabs = req.body.vocabs;
@@ -38,5 +50,66 @@ export const createPost = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+};
+
+export const updateSet = async (req, res) => {
+  try {
+    const idSet = req.params.idSet;
+    const updatedSet = req.body;
+    const checkExisted = await FlashCardSet.findById(idSet);
+    if (!checkExisted) {
+      return res.status(404).json({ message: "Flash card set not found" });
+    }
+    if (!checkExisted.createdBy.equals(req.user.id)) {
+      return res
+        .status(404)
+        .json({ message: "You don't have permission to update this card set" });
+    }
+    await FlashCardSet.findByIdAndUpdate(idSet, updatedSet, { new: true });
+
+    res.status(200).json({ message: "Updated successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const detailSet = async (req, res) => {
+  try {
+    const idSet = req.params.idSet;
+    const flashCardSet = await FlashCardSet.findOne({
+      _id: idSet,
+      deleted: false,
+    }).populate("vocabs");
+    if (!flashCardSet) {
+      return res.status(404).json({ message: "Flash card set not found" });
+    }
+    if (!flashCardSet.public && !flashCardSet.createdBy.equals(req.user.id)) {
+      return res
+        .status(404)
+        .json({ message: "You don't have permission to view this card set" });
+    }
+    res.status(200).json({ flashCardSet });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+export const deleteSet = async (req, res) => {
+  try {
+    const idSet = req.params.idSet;
+    const flashCardSet = await FlashCardSet.findById(idSet);
+    if (!flashCardSet) {
+      return res.status(404).json({ message: "Flash card set not found" });
+    }
+    if (!flashCardSet.createdBy.equals(req.user.id)) {
+      return res
+        .status(404)
+        .json({ message: "You don't have permission to delete this card set" });
+    }
+    await FlashCardSet.findByIdAndUpdate(idSet, { deleted: true });
+    res.status(200).json({ message: "Deleted successfully" });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
   }
 };
