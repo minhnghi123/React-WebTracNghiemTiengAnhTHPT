@@ -1,5 +1,17 @@
 import { Vocab } from "../../models/Vocab.model.js";
 import { FlashCardSet } from "../../models/FlashCardSet.model.js";
+export const index = async (req, res) => {
+  try {
+    const flashCardSets = await FlashCardSet.find({
+      deleted: false,
+      createdBy: req.user._id,
+    }).populate("vocabs");
+    res.status(200).json({ flashCardSets });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 export const createPost = async (req, res) => {
   try {
     const vocabs = req.body.vocabs;
