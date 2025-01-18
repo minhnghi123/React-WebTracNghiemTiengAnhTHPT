@@ -1,292 +1,184 @@
-/* BASIC */
-
-a {
-  color: #92badd;
-  display: inline-block;
-  text-decoration: none;
-  font-weight: 400;
-}
-
-h2 {
-  text-align: center;
-  font-size: 16px;
-  font-weight: 600;
-  text-transform: uppercase;
-  display: inline-block;
-  margin: 40px 8px 10px 8px;
-  color: #cccccc;
-}
-
-/* STRUCTURE */
-
-.wrapper {
+/* Login Container */
+.loginContainer {
   display: flex;
   align-items: center;
-  flex-direction: column;
   justify-content: center;
+  background: #f7f8fc;
+}
+
+/* Left Panel */
+.leftPanel {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #6a11cb, #2575fc);
+}
+
+.illustration {
+  max-width: 100%;
+  height: auto;
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Form */
+.form {
+  flex: 1;
+  max-width: 400px;
+  background: #ffffff;
+  padding: 30px 25px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Form Title */
+.formTitle {
+  font-size: 28px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 15px;
+  background: linear-gradient(90deg, #ff0000, #ff00f3, #0033ff, #ff00c4, #ff0000);
+  word-spacing: 5px;
+  -webkit-text-fill-color: transparent;
+  -webkit-background-clip: text;
+  animation: animate 10s linear infinite;
+}
+
+/* Input Group */
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.label {
+  font-size: 20px;
+  background: linear-gradient(90deg, #ff0000, #ff00f3, #0033ff, #ff00c4, #ff0000);
+  -webkit-text-fill-color: transparent;
+  -webkit-background-clip: text;
+  animation: animate 10s linear infinite;
+  font-weight: 500;
+}
+.input[type="text"],
+.input[type="password"]{
+  border: 2px solid #ddd;
+
+}
+.input {
   width: 100%;
-  min-height: 100%;
-  padding: 20px;
-}
-
-.formContent {
-  -webkit-border-radius: 10px 10px 10px 10px;
-  border-radius: 10px 10px 10px 10px;
-  background: #fff;
-  padding: 30px;
-  width: 90%;
-  max-width: 450px;
-  position: relative;
-  -webkit-box-shadow: 0 30px 60px 0 rgba(0, 0, 0, 0.3);
-  box-shadow: 0 30px 60px 0 rgba(0, 0, 0, 0.3);
-  text-align: center;
-}
-
-.formFooter {
-  background-color: #f6f6f6;
-  border-top: 1px solid #dce8f1;
-  padding: 25px;
-  text-align: center;
-  -webkit-border-radius: 0 0 10px 10px;
-  border-radius: 0 0 10px 10px;
-}
-
-/* TABS */
-
-h2.inactive {
-  color: #cccccc;
-}
-
-h2.active {
-  color: #0d0d0d;
-  border-bottom: 2px solid #5fbae9;
-}
-
-/* FORM TYPOGRAPHY */
-
-input[type='button'],
-input[type='submit'],
-input[type='reset'] {
-  background-color: #56baed;
-  border: none;
-  color: white;
-  padding: 15px 80px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  text-transform: uppercase;
-  font-size: 13px;
-  -webkit-box-shadow: 0 10px 30px 0 rgba(95, 186, 233, 0.4);
-  box-shadow: 0 10px 30px 0 rgba(95, 186, 233, 0.4);
-  -webkit-border-radius: 5px 5px 5px 5px;
-  border-radius: 5px 5px 5px 5px;
-  margin: 5px 20px 40px 20px;
-  -webkit-transition: all 0.3s ease-in-out;
-  -moz-transition: all 0.3s ease-in-out;
-  -ms-transition: all 0.3s ease-in-out;
-  -o-transition: all 0.3s ease-in-out;
-  transition: all 0.3s ease-in-out;
-}
-
-input[type='button']:hover,
-input[type='submit']:hover,
-input[type='reset']:hover {
-  background-color: #39ace7;
-}
-
-input[type='button']:active,
-input[type='submit']:active,
-input[type='reset']:active {
-  -moz-transform: scale(0.95);
-  -webkit-transform: scale(0.95);
-  -o-transform: scale(0.95);
-  -ms-transform: scale(0.95);
-  transform: scale(0.95);
-}
-
-input[type='text'] {
-  background-color: #f6f6f6;
-  border: none;
-  color: #0d0d0d;
-  padding: 15px 32px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  font-size: 16px;
-  margin: 5px;
-  width: 85%;
-  border: 2px solid #f6f6f6;
-  -webkit-transition: all 0.5s ease-in-out;
-  -moz-transition: all 0.5s ease-in-out;
-  -ms-transition: all 0.5s ease-in-out;
-  -o-transition: all 0.5s ease-in-out;
-  transition: all 0.5s ease-in-out;
-  -webkit-border-radius: 5px 5px 5px 5px;
-  border-radius: 5px 5px 5px 5px;
-}
-
-input[type='text']:focus {
-  background-color: #fff;
-  border-bottom: 2px solid #5fbae9;
-}
-
-input[type='text']:placeholder {
-  color: #cccccc;
-}
-
-/* ANIMATIONS */
-
-/* Simple CSS3 Fade-in-down Animation */
-.fadeInDown {
-  -webkit-animation-name: fadeInDown;
-  animation-name: fadeInDown;
-  -webkit-animation-duration: 1s;
-  animation-duration: 1s;
-  -webkit-animation-fill-mode: both;
-  animation-fill-mode: both;
-}
-
-@-webkit-keyframes fadeInDown {
-  0% {
-    opacity: 0;
-    -webkit-transform: translate3d(0, -100%, 0);
-    transform: translate3d(0, -100%, 0);
-  }
-  100% {
-    opacity: 1;
-    -webkit-transform: none;
-    transform: none;
-  }
-}
-
-@keyframes fadeInDown {
-  0% {
-    opacity: 0;
-    -webkit-transform: translate3d(0, -100%, 0);
-    transform: translate3d(0, -100%, 0);
-  }
-  100% {
-    opacity: 1;
-    -webkit-transform: none;
-    transform: none;
-  }
-}
-
-/* Simple CSS3 Fade-in Animation */
-@-webkit-keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-@-moz-keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-.fadeIn {
-  opacity: 0;
-  -webkit-animation: fadeIn ease-in 1;
-  -moz-animation: fadeIn ease-in 1;
-  animation: fadeIn ease-in 1;
-
-  -webkit-animation-fill-mode: forwards;
-  -moz-animation-fill-mode: forwards;
-  animation-fill-mode: forwards;
-
-  -webkit-animation-duration: 1s;
-  -moz-animation-duration: 1s;
-  animation-duration: 1s;
-}
-
-.fadeIn.first {
-  -webkit-animation-delay: 0.4s;
-  -moz-animation-delay: 0.4s;
-  animation-delay: 0.4s;
-}
-
-.fadeIn.second {
-  -webkit-animation-delay: 0.6s;
-  -moz-animation-delay: 0.6s;
-  animation-delay: 0.6s;
-}
-
-.fadeIn.third {
-  -webkit-animation-delay: 0.8s;
-  -moz-animation-delay: 0.8s;
-  animation-delay: 0.8s;
-}
-
-.fadeIn.fourth {
-  -webkit-animation-delay: 1s;
-  -moz-animation-delay: 1s;
-  animation-delay: 1s;
-}
-
-/* Simple CSS3 Fade-in Animation */
-.underlineHover:after {
-  display: block;
-  left: 0;
-  bottom: -10px;
-  width: 0;
-  height: 2px;
-  background-color: #56baed;
-  content: '';
-  transition: width 0.2s;
-}
-
-.underlineHover:hover {
-  color: #0d0d0d;
-}
-
-.underlineHover:hover:after {
-  width: 100%;
-}
-
-/* OTHERS */
-
-*:focus {
+  padding: 12px 16px;
+  border: 5px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #333;
   outline: none;
+  background-color: #f9f9f9;
+  transition: all 0.3s ease;
 }
 
-#icon {
-  width: 60%;
+.input:focus {
+  border-color: #6a11cb;
+  box-shadow: 0 0 5px rgba(106, 17, 203, 0.3);
+  background-color: #ffffff;
 }
 
-/* Alert styles */
-.alert {
-  padding: 15px;
-  margin-top: 10px;
-  border-radius: 5px;
+/* Password Wrapper */
+.passwordWrapper {
   display: flex;
   align-items: center;
+  position: relative;
+}
+
+.togglePassword {
+  position: absolute;
+  right: 10px;
   font-size: 16px;
-  position: fixed;
-  z-index: 99999;
-  top: 50px;
-  right: 30px;
-  animation: fadeIn 0.8s ease-in-out forwards;
+  color: #999;
+  cursor: pointer;
+  transition: color 0.3s ease;
 }
 
-.alert i {
-  font-size: 24px;
-  margin-right: 10px;
+.togglePassword:hover {
+  color: #6a11cb;
 }
 
-.alert span {
+.linkGroup {
+  display: flex;
+  justify-content: space-between; 
+  margin-top: 1rem; 
+}
+
+.register {
+  font-size: 17px; 
+  color: #007BFF; 
+  text-decoration: none; 
+}
+
+.register:hover {
+  text-decoration: underline; 
+}
+
+.forgotPassword {
+  font-size: 17px; 
+  color: #007BFF;
+  text-decoration: none;
+}
+
+.forgotPassword:hover {
+  text-decoration: underline;
+}
+
+
+/* Submit Button */
+.submitButton {
+  padding: 12px;
+  background: linear-gradient(90deg, #6a11cb, #2575fc);
+  color: #ffffff;
+  font-size: 16px;
   font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.submitButton:hover {
+  background: linear-gradient(90deg, #5d0cbf, #1d5dfb);
+  transform: scale(1.02);
+}
+
+.submitButton:active {
+  transform: scale(0.98);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .loginContainer {
+    flex-direction: column;
+    padding: 20px;
+  }
+
+  .leftPanel {
+    display: none; /* Hide left panel on smaller screens */
+  }
+
+  .form {
+    width: 100%;
+  }
+
+  .formTitle {
+    font-size: 22px;
+  }
+
+  .input {
+    font-size: 14px;
+  }
+
+  .submitButton {
+    font-size: 14px;
+  }
 }

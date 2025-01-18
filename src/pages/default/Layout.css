@@ -18,12 +18,30 @@ body {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); 
 }
   
+@media (min-width: 1400px) {
+    .container {
+      max-width: 100%;
+    }
+}
+.fw-bold{
+  font-weight: bold;
+  font-size: 3rem; /* Tăng kích thước tiêu đề */
+  background: linear-gradient(90deg, #ff0000, #ffff00, #ff00f3, #0033ff, #ff00c4, #ff0000);
+  word-spacing: 5px;
+  -webkit-text-fill-color: transparent;
+  -webkit-background-clip: text;
+  animation: animate 10s linear infinite;
+}
 
+.my-5{
+    margin-top: 10px !important; 
+    margin-bottom: 0px !important;
+}
 #logo img {
     width: 120px;  
     height: auto;
 }
-  
+
 .nav {
     display: flex;
     list-style-type: none;  
@@ -60,7 +78,7 @@ body {
     font-weight: 600; 
     text-align: center; 
     transition: background-color 0.3s ease, color 0.3s ease; 
-    background: linear-gradient(90.57deg, rgb(62, 101, 254) 0%, rgb(210, 60, 255) 100%);
+    background: linear-gradient(90deg, #62a3ff, #ff63b0);
 }
 
 #menu {
@@ -97,7 +115,7 @@ body {
   position: absolute;
   height: 3px;
   width: 0;
-  background: linear-gradient(90.57deg, rgb(62, 101, 254) 0%, rgb(210, 60, 255) 100%);
+  background: linear-gradient(90deg, #62a3ff, #ff63b0);
   transition: .5s;
 }
 
@@ -115,7 +133,463 @@ body {
 .dsMenu li:hover::before {
   width: 100%;
 }
+/* General Section Styling */
+.p2n-section {
+    padding: 40px;
+    margin-bottom: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    background-color: #ffffff;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  /* Styling for Images */
+  .p2n-images {
+    flex: 1;
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    position: relative;
+    cursor: pointer;
+  }
+  
+  .phone-image {
+    width: 350px;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transform: rotate(-5deg);
+    transition: transform 0.3s ease;
+  }
+  
+  .phone-image:nth-child(2) {
+    position: absolute;
+    top: 20px;
+    left: 30px;
+    transform: rotate(5deg);
+  }
+  
+  .phone-image:hover {
+    transform: rotate(0deg);
+  }
+  
+  /* Content Section */
+  .p2n-content {
+    flex: 1;
+    text-align: left;
+    margin-left: 20px;
+  }
+  
+  .p2n-content h2 {
+    font-size: 22px;
+    color: #4a4a4a;
+    margin-bottom: 20px;
+    font-weight: bold;
+  }
+  
+  .p2n-content ul {
+    list-style-type: none;
+    padding-left: 0;
+  }
+  
+  .p2n-content ul li {
+    font-size: 22px;
+    color: #555;
+    margin-bottom: 15px;
+    line-height: 1.6;
+    display: flex;
+    align-items: flex-start;
+  }
+  
+  .p2n-content ul li::before {
+    content: "";
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    margin-right: 10px;
+    background: url('https://cdn-icons-png.flaticon.com/512/847/847969.png') no-repeat center center;
+    background-size: cover;
+  }
+  .card-img-top{
+    cursor: pointer;
+  }
+  .hover-card {
+    overflow: hidden; /* Đảm bảo hình ảnh không vượt ra ngoài card */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .hover-card:hover {
+    transform: translateY(-10px); /* Đẩy toàn bộ card lên khi hover */
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); /* Tạo hiệu ứng đổ bóng */
+  }
+  
+  .hover-image {
+    transition: transform 0.5s ease, opacity 0.3s ease;
+  }
+  
+  .hover-card:hover .hover-image {
+    transform: scale(1.05); /* Phóng to hình ảnh nhẹ khi hover */
+    opacity: 0.9; /* Giảm độ sáng để tạo cảm giác huyền bí */
+  }
+  
+  .container {
+    padding: 20px;
+    background-color: #f9f9f9; /* Light background for contrast */
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+}
+  /* Buttons */
+  .btn {
+    display: inline-block;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 6px;
+    color: #fff;
+    background: linear-gradient(90deg, #62a3ff, #ff63b0);
+    transition: background 0.3s ease-in-out, transform 0.3s ease-in-out;
+  }
+  
+  .btn:hover {
+    background: linear-gradient(135deg, #2575fc 0%, #6a11cb 100%);
+    transform: scale(1.05);
+  }
+  
+  /* Responsive Styling */
+  @media (max-width: 768px) {
+    section {
+      flex-direction: column;
+      align-items: center;
+    }
+  
+    .p2n-images {
+      flex-direction: column;
+      gap: 10px;
+    }
+  
+    .p2n-content {
+      margin: 20px 0;
+      text-align: center;
+    }
+  
+    .phone-image {
+      width: 200px;
+      transform: none;
+    }
+  }
 
+  .container.text-center {
+    padding-top: 0px !important;  
+  }
+  /* Image container */
+.image-container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+  cursor: pointer;
+}
+
+.main-image {
+  max-width: 100%;
+  height: auto;
+  border-radius: 10px; /* Rounded corners for the image */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Add subtle shadow */
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.main-image:hover {
+  transform: scale(1.05);
+  opacity: 0.9;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .feature-heading {
+      font-size: 24px;
+  }
+
+  .row {
+      flex-direction: column; /* Stack columns vertically */
+  }
+
+  .col-md-6 {
+      max-width: 100%; /* Full width on small screens */
+      text-align: center;
+  }
+
+  .feature-title {
+      font-size: 20px;
+  }
+
+  .feature-description {
+      font-size: 14px;
+  }
+
+  .image-container {
+      margin-top: 20px;
+  }
+}
+
+@media (max-width: 576px) {
+  .badge {
+      font-size: 14px;
+      padding: 8px 16px;
+  }
+
+  .feature-title {
+      font-size: 18px;
+  }
+
+  .feature-description {
+      font-size: 13px;
+  }
+
+  .btn {
+      padding: 10px 20px;
+      font-size: 14px;
+  }
+}
+.text-center.mb-4{
+  font-size: 30px;
+  font-weight: 600;
+  background: linear-gradient(90deg, #ff0000, #ffff00, #ff00f3, #0033ff, #ff00c4, #ff0000);
+  word-spacing: 5px;
+    -webkit-text-fill-color: transparent;
+    -webkit-background-clip: text;
+    animation: animate 10s linear infinite;
+}
+  .feature-heading {
+    font-size: 30px;
+    font-weight: 600;
+    background: linear-gradient(90deg, #ff0000, #ff00f3, #0033ff, #ff00c4, #ff0000);
+    word-spacing: 5px;
+    -webkit-text-fill-color: transparent;
+    -webkit-background-clip: text;
+    animation: animate 10s linear infinite;
+  }
+
+.badge{
+  display: inline-block;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
+  border-radius: 6px;
+  color: #fff;
+  background: #61cbff;
+}
+
+.badge:hover {
+  transform: scale(1.05);
+}
+  
+.feature-title{
+  font-size: 22px;
+    font-weight: bold;
+    margin-top: 20px;
+    color: #4a4a4a;
+}
+
+.feature-description{
+  font-size: 25px;
+    color: #555;
+    line-height: 1.6;
+    margin-top: 10px;
+}
+/* Dành cho màn hình nhỏ */
+@media (max-width: 768px) {
+  .dsMenu {
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .dsMenu.visible {
+    display: flex;
+  }
+
+  .menu-toggle-btn {
+    display: block; 
+  }
+
+  .navbar-nav {
+    display: none;
+  }
+}
+
+/* Điều chỉnh menu dropdown */
+.ant-dropdown-menu {
+  min-width: 200px;
+}
+
+/* Scoped container for the section */
+.container1 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 40px;
+  background-color: #f4f4f4;
+}
+
+/* Info Section */
+.info-section {
+  flex: 1;
+  text-align: left;
+}
+
+.info-section h2 {
+  font-size: 28px;
+  font-weight: bold;
+  color: #4a4a4a;
+}
+
+.info-section p {
+  font-size: 22px;
+  color: #555;
+  line-height: 1.6;
+  margin-bottom: 15px;
+}
+
+.info-section .btn-primary {
+  display: inline-block;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
+  border-radius: 6px;
+  color: #fff;
+  background: linear-gradient(90deg, #62a3ff, #ff63b0);
+  transition: background 0.3s ease-in-out, transform 0.3s ease-in-out;
+}
+
+.info-section .btn-primary:hover {
+  background: linear-gradient(135deg, #2575fc 0%, #6a11cb 100%);
+  transform: scale(1.05);
+}
+
+/* Main container styling */
+.container1 {
+  display: flex;
+  justify-content: space-between; /* Align sections horizontally */
+  align-items: center; /* Center align vertically */
+  gap: 30px; /* Space between sections */
+  padding: 40px;
+  background-color: #f9f9f9; /* Light background for contrast */
+  border-radius: 10px; /* Rounded corners */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+}
+
+/* Info section styling */
+.info-section {
+  flex: 1; /* Takes up available space proportionally */
+  max-width: 50%; /* Limit width for readability */
+}
+
+.info-section h2 {
+  font-size: 22px;
+  color: #333;
+  margin-bottom: 20px;
+  font-weight: bold;
+}
+
+.info-section p {
+  font-size: 22px;
+  color: #555;
+  margin-bottom: 15px;
+  line-height: 1.6; /* Improve readability */
+}
+
+.info-section .btn {
+  padding: 12px 24px;
+  font-size: 16px;
+  border-radius: 6px;
+  color: #fff;
+  background: linear-gradient(90deg, #62a3ff, #ff63b0); /* Gradient background */
+  text-decoration: none;
+  transition: background 0.3s ease, transform 0.3s ease;
+}
+
+.info-section .btn:hover {
+  background: linear-gradient(135deg, #6a11cb, #2575fc);
+  transform: scale(1.05); /* Slight zoom on hover */
+}
+
+/* Image section styling */
+.image-section {
+  flex: 1; /* Takes up available space proportionally */
+  position: relative;
+  display: flex;
+  justify-content: center; /* Center align images horizontally */
+  align-items: center;
+  gap: 20px; /* Space between images */
+}
+
+.image-section img {
+  border-radius: 10px; /* Rounded corners for all images */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Add subtle shadows */
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.laptop-image {
+  width: 100%; /* Adjust size dynamically */
+  max-width: 500px; /* Limit maximum size */
+}
+
+.phone-image2 {
+  position: absolute;
+  right: 10px;
+  bottom: -50px;
+  width: 150px;
+}
+
+.clock-icon {
+  width: 100px; /* Fixed size for the clock */
+}
+
+/* Hover effects for images */
+.image-section img:hover {
+  transform: scale(1.05); /* Slight zoom on hover */
+  opacity: 0.9; /* Dimming effect */
+}
+
+/* Responsive styling */
+@media (max-width: 768px) {
+  .container1 {
+      flex-direction: column; /* Stack sections vertically */
+      padding: 20px;
+  }
+
+  .info-section {
+      max-width: 100%; /* Full width for small screens */
+      text-align: center; /* Center align text */
+  }
+
+  .image-section {
+      flex-direction: column; /* Stack images vertically */
+      gap: 15px;
+      position: static; /* Reset absolute positioning */
+  }
+
+  .phone-image2 {
+      position: static; /* Reset positioning */
+      bottom: auto;
+      right: auto;
+      width: 120px; /* Adjust size for small screens */
+  }
+
+  .clock-icon {
+      width: 80px; /* Adjust size for small screens */
+  }
+}
 
 
 

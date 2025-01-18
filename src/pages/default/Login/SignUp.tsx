@@ -65,15 +65,7 @@ export const SignUp = () => {
         </div>
       )}
       <div className="formContent">
-        <h2>Đăng Ký Tài Khoản</h2>
-        <center>
-          <img
-            src="src/assets/img/P2N 1.svg"
-            className="icon"
-            alt="User Icon"
-            style={{ display: "block" }}
-          />
-        </center>
+      <h2>Đăng Ký Tài Khoản</h2>
         <form onSubmit={handleSubmit}>
           <div className="input-group">
             <label htmlFor="name">Họ Tên</label>
@@ -110,15 +102,6 @@ export const SignUp = () => {
               onChange={(e) => setPassword(e.target.value)}
               required
             />
-            <button
-              type="button"
-              className="password-toggle"
-              onClick={togglePasswordVisibility}
-            >
-              <i
-                className={`bi ${showPassword ? "bi-eye-slash" : "bi-eye"}`}
-              ></i>
-            </button>
           </div>
           <div className="input-group">
             <label htmlFor="confirm-password">Xác Nhận Mật Khẩu</label>
@@ -138,7 +121,7 @@ export const SignUp = () => {
         </form>
         <div className="formFooter">
           <p>
-            Đã có tài khoản? <a href="/admin/Login/Login">Đăng nhập</a>
+            Đã có tài khoản? <a href="/Login">Đăng nhập</a>
           </p>
         </div>
       </div>

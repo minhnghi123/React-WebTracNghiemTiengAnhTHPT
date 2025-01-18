@@ -46,53 +46,61 @@ export const Login = () => {
           <span>{message}</span>
         </div>
       )}
-      <div className="formContent">
-        <h2>Đăng Nhập</h2>
-        <div>
-          {/* Tabs Titles */}
-          {/* Icon */}
-          <div className={`${styles.fadeIn} ${styles.first}`}>
-            <img
-              src="src/assets/img/P2N 1.svg"
-              className={styles.icon}
-              alt="User Icon"
-            />
-          </div>
-
-          {/* Login Form */}
-          <form onSubmit={(event) => handleSubmit(event)}>
+      <div className={`${styles.loginContainer}`}>
+        <div className={`${styles.leftPanel}`}>
+          <img
+            src="src/assets/img/englishBanner.jpg" 
+            alt="Illustration"
+            className={styles.illustration}
+          />
+        </div>
+        <form onSubmit={(event) => handleSubmit(event)} className={styles.form}>
+          <h2 className={styles.formTitle}>Đăng nhập</h2>
+          
+          {/* Username Input */}
+          <div className={styles.inputGroup}>
+            <label htmlFor="username" className={styles.label}>Tài khoản</label>
             <input
               type="text"
-              id="login"
-              className={`${styles.fadeIn} ${styles.second}`}
+              id="username"
+              className={`${styles.input}`}
               name="username"
-              placeholder="username"
+              placeholder="Nhập tài khoản hoặc email"
               onChange={(e) => setUsername(e.target.value)}
             />
-            <input
-              type="text"
-              id="password"
-              className={`${styles.fadeIn} ${styles.third}`}
-              name="password"
-              placeholder="password"
-              maxLength={30}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            <input
-              type="submit"
-              className={`${styles.fadeIn} ${styles.fourth}`}
-              value="Log In"
-            />
-          </form>
+          </div>
+          
+          {/* Password Input */}
+          <div className={styles.inputGroup}>
+            <label htmlFor="password" className={styles.label}>Mật khẩu</label>
+            <div className={styles.passwordWrapper}>
+              <input
+                type="password"
+                id="password"
+                className={`${styles.input}`}
+                name="password"
+                placeholder="Nhập mật khẩu của bạn"
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              <span className={styles.togglePassword}></span>
+            </div>
+          </div>
 
-          {/* Remind Password */}
-          <div className={styles.formFooter}>
-            <a className={styles.underlineHover} href="#">
-              Forgot Password?
+          <div className={styles.linkGroup}>
+            <a href="#" className={styles.register}>
+              Đăng ký
+            </a>
+            <a href="#" className={styles.forgotPassword}>
+              Quên mật khẩu?
             </a>
           </div>
+          
+          {/* Submit Button */}
+          <button type="submit" className={`${styles.submitButton}`}>
+            Đăng nhập
+          </button> 
+        </form>
         </div>
       </div>
-    </div>
   );
 };

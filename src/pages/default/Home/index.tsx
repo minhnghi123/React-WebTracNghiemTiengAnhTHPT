@@ -4,30 +4,89 @@ const Home = () => {
   return (
     <div className="container my-5">
       {/* Header Section */}
-      <div className="d-flex flex-row">
-        <div className="d-flex flex-fill bg-primary flex-column align-items-center justify-content-center text-center col-6 text-white p-5">
-          <h2>WELCOME TO</h2>
-          <div className="logo">
-            <img
-              className="img-fluid"
-              src="src/Content/img/P2N 1.svg"
-              alt="Logo"
-            />
+      <div className="position-relative">
+        {/* Slideshow */}
+        <div id="carouselExample" className="carousel slide" data-bs-ride="carousel">
+          <div className="carousel-inner">
+            {/* Slide 1 */}
+            <div className="carousel-item active">
+              <div
+                className="bg-image"
+                style={{
+                  backgroundImage: "url('/src/Content/img/englishBanner.jpg')",
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                  height: "600px",
+                  filter: "brightness(80%)",
+                }}
+              ></div>
+            </div>
+            {/* Slide 2 */}
+            <div className="carousel-item">
+              <div
+                className="bg-image"
+                style={{
+                  backgroundImage: "url('/src/Content/img/laptop.png')",
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                  height: "600px",
+                  filter: "brightness(80%)",
+                }}
+              ></div>
+            </div>
+            {/* Slide 3 */}
+            <div className="carousel-item">
+              <div
+                className="bg-image"
+                style={{
+                  backgroundImage: "url('/src/Content/img/giaodien.jpg')",
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                  height: "600px",
+                  filter: "brightness(80%)",
+                }}
+              ></div>
+            </div>
           </div>
-          <p className="lead mt-3">Hành trình rèn luyện tiếng Anh THPT</p>
-          <p className="small">
-            Nâng cao kỹ năng tiếng Anh của bạn mỗi ngày với các bài thi và ôn
-            tập được thiết kế riêng cho học sinh THPT.
-          </p>
+
+          {/* Điều hướng */}
+          <button
+            className="carousel-control-prev"
+            type="button"
+            data-bs-target="#carouselExample"
+            data-bs-slide="prev"
+          >
+            <span className="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span className="visually-hidden">Previous</span>
+          </button>
+          <button
+            className="carousel-control-next"
+            type="button"
+            data-bs-target="#carouselExample"
+            data-bs-slide="next"
+          >
+            <span className="carousel-control-next-icon" aria-hidden="true"></span>
+            <span className="visually-hidden">Next</span>
+          </button>
         </div>
-        <div className="col-6 p-0">
-          <img
-            className="img-fluid w-100 h-100"
-            src="src/Content/img/phan-mem-thi-truc-tuyen-lino 1.png"
-            alt="Online Exam Platform"
-          />
+
+        {/* Nội dung hiển thị */}
+        <div
+          className="position-absolute top-50 start-50 translate-middle text-white text-center p-5"
+          style={{
+            marginTop: "50px",
+          }}
+        >
+          <h1 className="fw-bold">CHÀO MỪNG ĐẾN VỚI P2N</h1>
+          <h2 className="text-warning">Hành Trình Rèn Luyện Tiếng Anh THPT</h2>
+          <p className="mt-3">
+            Tăng cường kỹ năng tiếng Anh mỗi ngày với các bài học và kỳ thi được thiết kế
+            riêng dành cho bạn!
+          </p>
+          <button className="btn btn-warning btn-lg mt-4">Bắt đầu ngay</button>
         </div>
       </div>
+
 
       {/* Main Features Section */}
       <section className="mt-5">
@@ -35,27 +94,29 @@ const Home = () => {
         <div className="row text-center">
           {[
             {
-              image: "/Content/img/thithu.jpg",
+              image: "/src/Content/img/thithu.jpg",
               text: "Tham gia các bài thi thử theo từng cấp độ và chủ đề để đánh giá kiến thức.",
-              link: "/Contests/Index",
+              link: "/kythi",
               buttonText: "Thi ngay",
             },
             {
-              image: "/Content/img/ontap.jpg",
+              image: "/src/Content/img/ontap.jpg",
               text: "Cải thiện kiến thức với các bài ôn tập có hướng dẫn và đáp án chi tiết.",
               link: "/OnTap",
               buttonText: "Vào ôn thi",
             },
             {
-              image: "/Content/img/lophoc.jpg",
+              image: "/src/Content/img/lophoc.jpg",
               text: "Tham gia lớp học để có những kỳ thi sát chủ đề nhất.",
               link: "/PhongThi",
               buttonText: "Vào lớp",
             },
           ].map((feature, index) => (
             <div className="col-md-4 mb-4" key={index}>
-              <div className="card border-0 shadow-sm h-100">
-                <img src={feature.image} className="card-img-top" alt="" />
+              <div className="card border-0 shadow-sm h-100 hover-card">
+                <a href={feature.link}>
+                  <img src={feature.image} className="card-img-top hover-image" alt="" />
+                </a>                
                 <div className="card-body">
                   <p className="card-text">{feature.text}</p>
                   <a href={feature.link} className="btn btn-primary btn-lg">
@@ -164,23 +225,6 @@ const Home = () => {
             src="src/Content/img/neverstop learn.png"
             alt="Laptop Mockup"
             className="laptop-image"
-          />
-          <img
-            src="src/Content/img/laptop.png"
-            alt="Phone Mockup"
-            className="phone-image"
-            style={{
-              position: "absolute",
-              right: "10px",
-              bottom: "-50px",
-              width: "150px",
-            }}
-          />
-          <img
-            src="src/Content/img/maytinhbang.png"
-            alt="Clock Icon"
-            className="clock-icon"
-            style={{ width: "100px" }}
           />
         </section>
       </section>

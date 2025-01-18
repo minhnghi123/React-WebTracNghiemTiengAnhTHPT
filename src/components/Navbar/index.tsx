@@ -89,7 +89,7 @@ export const Navbar = () => {
               <a href="/Ontap">Ôn tập</a>
             </li>
             <li>
-              <a href="/PhongThi/Index">Lớp học</a>
+              <a href="/PhongThi">Lớp học</a>
             </li>
             <li>
               <a href="/About">Về chúng tôi</a>

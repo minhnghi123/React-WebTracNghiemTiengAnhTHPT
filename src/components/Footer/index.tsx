@@ -3,7 +3,7 @@ export const Footer = () => {
   return (
     <div className="mt-auto flex w-full gap-5 py-3 ">
       <footer className="footer">
-        <div className="container">
+        <div className="container3">
           <div className="row footer-content">
             <section
               className="col-md-4 col-12"
