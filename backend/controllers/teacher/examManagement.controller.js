@@ -1,5 +1,20 @@
 import Exam from "../../models/Exam.model.js";
 import { Question } from "../../models/Question.model.js";
+import { formatExamHeader } from "../../utils/examHeader.helper.js";
+import {
+  formatExamQuestions,
+  formatFillInBlankQuestions,
+  formatListeningQuestions,
+} from "../../utils/examQuestions.helper.js";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+import { Packer, Document } from "docx";
+import { redisService } from "../../config/redis.config.js";
+// Tạo __dirname thủ công
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 // [GET]: teacher/exam
 export const getAllExams = async (req, res) => {
   try {
@@ -25,7 +40,6 @@ export const getAllExams = async (req, res) => {
 
     // Đếm tổng số đề thi thỏa mãn bộ lọc
     const total = await Exam.countDocuments(filter);
-
     // Phản hồi thành công
     return res.status(200).json({
       success: true,
@@ -152,7 +166,6 @@ export const createExam = async (req, res) => {
         message: "Thời gian bắt đầu phải nhỏ hơn thời gian kết thúc!",
       });
     }
-
     // Tạo đối tượng Exam mới
     const newExam = new Exam({
       title,
@@ -162,6 +175,7 @@ export const createExam = async (req, res) => {
       isPublic: isPublic || false,
       startTime: startTime ? new Date(startTime) : undefined,
       endTime: endTime ? new Date(endTime) : undefined,
+      createdBy: res.locals.user.id,
     });
 
     // Lưu vào database
@@ -398,5 +412,87 @@ export const autoGenerateExam = async (req, res) => {
       code: 500,
       message: "Internal server error!",
     });
+  }
+};
+
+// 📚 Hàm Export Exam Into Word
+export const exportExamIntoWord = async (req, res) => {
+  try {
+    const data = req.body;
+    const { questionsMultichoice, questionsFillInBlank, questionsListening } =
+      req.body;
+    const doc = new Document({
+      sections: [
+        {
+          children: [
+            ...formatExamHeader(data),
+            ...formatExamQuestions(questionsMultichoice),
+            ...formatFillInBlankQuestions(questionsFillInBlank),
+            ...formatListeningQuestions(questionsListening),
+          ],
+        },
+      ],
+    });
+
+    const buffer = await Packer.toBuffer(doc);
+    let downloadPath = path.join(
+      process.env.USERPROFILE,
+      "Downloads",
+      data.title + ".docx"
+    );
+
+    // Tạo thư mục nếu chưa tồn tại
+    if (!fs.existsSync(path.dirname(downloadPath))) {
+      fs.mkdirSync(path.dirname(downloadPath), { recursive: true });
+    }
+
+    // Kiểm tra và thêm số vào tên file nếu đã tồn tại
+    let counter = 1;
+    while (fs.existsSync(downloadPath)) {
+      const parsedPath = path.parse(downloadPath);
+      downloadPath = path.join(
+        parsedPath.dir,
+        `${parsedPath.name}(${counter})${parsedPath.ext}`
+      );
+      counter++;
+    }
+
+    fs.writeFileSync(downloadPath, buffer);
+    res.download(downloadPath, path.basename(downloadPath));
+  } catch (error) {
+    console.error("Lỗi:", error);
+    res.status(500).send({ error: error.message });
+  }
+};
+
+//Copy exam from other teacher
+export const copyExamFromOthers = async (req, res) => {
+  try {
+    const { examId } = req.body;
+    const exam = await Exam.findById(examId);
+    if (!exam) {
+      return res.status(404).json({
+        success: false,
+        message: "Đề thi không tồn tại!",
+      });
+    }
+    const newExam = new Exam({
+      title: exam.title,
+      description: exam.description,
+      questions: exam.questions,
+      duration: exam.duration,
+      isPublic: exam.isPublic,
+      startTime: exam.startTime,
+      endTime: exam.endTime,
+      createdBy: res.locals.user.id,
+    });
+    await newExam.save();
+    return res.status(200).json({
+      success: true,
+      message: "Sao chép đề thi thành công!",
+      data: newExam,
+    });
+  } catch (error) {
+    res.status(500).send({ error: error.message });
   }
 };

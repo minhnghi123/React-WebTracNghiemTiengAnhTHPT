@@ -86,11 +86,9 @@ export const Login = () => {
             </div>
           </div>
 
-          <div className={styles.linkGroup}>
-            <a href="#" className={styles.register}>
-              Đăng ký
-            </a>
-            <a href="#" className={styles.forgotPassword}>
+          {/* Remind Password */}
+          <div className={styles.formFooter}>
+            <a className={styles.underlineHover} href="/forgetPassword">
               Quên mật khẩu?
             </a>
           </div>

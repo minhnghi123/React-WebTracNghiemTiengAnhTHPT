@@ -159,6 +159,12 @@ export const ExamAPI = {
     duration: number,
     questionTypes: string[]
   ) => {
+    console.log({
+      level,
+      numberOfQuestions,
+      duration,
+      questionTypes,
+    });
     const response = await request.post("/teacher/exam/auto-generate-exam", {
       level,
       numberOfQuestions,

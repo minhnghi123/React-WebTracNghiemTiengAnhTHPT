@@ -28,6 +28,7 @@ import { DetailExam } from "@/pages/default/KyThi/BaiLam/DetailExam";
 import { BaiLam } from "@/pages/default/KyThi/BaiLam/BaiLam";
 import { KetQua } from "@/pages/default/KyThi/KetQua";
 import { QuanLyAudio } from "@/pages/giaovien/QuanLyFileAudio";
+import { ForgetPass } from "@/pages/default/Login/forgetPass";
 
 export enum ERolePath {
   ADMIN = 2,
@@ -79,6 +80,7 @@ export const router = [
     children: [
       createRoute("/Login", <Login />, ERolePath.USER),
       createRoute("/SignUp", <SignUp />, ERolePath.USER),
+      createRoute("/forgetPassword", <ForgetPass />, ERolePath.USER),
     ],
   },
   {
@@ -121,6 +123,7 @@ const paths = {
   "/About": ["/About"],
   "/Contact": ["/Contact"],
   "/Login": ["/Login"],
+  "/forgetPassword": ["/forgetPassword"],
   "/SignUp": ["/SignUp"],
   "/PhongThi": ["/PhongThi"],
   "/GiaoVien": ["/GiaoVien"],
