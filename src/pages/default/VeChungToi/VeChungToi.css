@@ -1,79 +1,38 @@
-/* Main Styles */
-body {
-  font-family: Arial, sans-serif; /* Add a clean font */
-  background-color: #eef2f3; /* Light background for the whole page */
-}
-
-.welcome-text {
-  font-size: 2.5rem; /* Increased font size for emphasis */
-  font-weight: bold;
-  text-align: center;
-  margin-bottom: 0.5rem;
-  letter-spacing: 1px; /* Adds some space between letters */
-}
-
-.tagline {
-  font-size: 1.5rem; /* Increased tagline size */
-  text-align: center;
-  margin-top: 0.5rem; /* Added margin for spacing */
-}
-
-.logo {
-  width: 60px; /* Slightly larger logo */
-  height: auto;
-  transition: transform 0.3s ease; /* Add a hover effect on the logo */
-}
-
-.logo:hover {
-  transform: scale(1.1); /* Logo grows slightly on hover */
-}
-
 .content-wrapper {
-  background-color: #ffffff; /* White background for the content */
-  padding: 30px; /* Increased padding for better spacing */
-  border-radius: 15px; /* More rounded corners */
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15); /* Enhanced shadow for depth */
-  margin: 20px; /* Margin around the content */
+  background-color: #f9f9f9;
+  padding: 20px 0;
 }
 
-.content {
-  font-size: 1.1rem; /* Slightly larger font size for readability */
-  line-height: 1.7; /* Increased line height for better readability */
-  color: #444; /* Darker color for better contrast */
+#vechungtoi {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #333;
 }
 
 .info-title {
-  margin-top: 2rem;
-  font-size: 2rem; /* Increased font size */
-  color: #007bff; /* Primary color */
-  text-align: center;
-  text-transform: uppercase; /* Uppercase for emphasis */
-  letter-spacing: 1px; /* Space between letters */
+  font-size: 1.75rem;
+  font-weight: bold;
+  margin-bottom: 15px;
+  color: #0056b3;
 }
 
 .contact-link {
-  color: #007bff; /* Primary color */
+  color: #007bff;
   text-decoration: none;
-  transition: color 0.3s ease, text-shadow 0.3s ease; /* Added text shadow effect */
 }
 
 .contact-link:hover {
-  color: #0056b3; /* Darker shade for hover */
   text-decoration: underline;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2); /* Adds depth effect */
 }
 
-/* Responsive Styles */
-@media (max-width: 768px) {
-  .welcome-text {
-    font-size: 2rem; /* Adjusted font size for smaller screens */
-  }
+ul {
+  list-style-type: disc;
+  padding-left: 20px;
+}
 
-  .tagline {
-    font-size: 1.2rem; /* Adjusted tagline size for smaller screens */
-  }
-
-  .info-title {
-    font-size: 1.75rem; /* Adjusted info title size */
-  }
+.img-fluid {
+  max-width: 100%;
+  height: auto;
+  border: 2px solid #ddd;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }

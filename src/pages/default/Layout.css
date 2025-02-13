@@ -85,11 +85,13 @@ body {
     background-color: #f8f9fa;
     padding: 15px;
     border-radius: 5px;
+    display: flex;
 }
   
 .dsMenu {
     list-style-type: none;
     padding: 0;
+    gap: 20px;
     margin: 0;
     display: flex;
     justify-content: space-around;
@@ -280,6 +282,52 @@ body {
     .phone-image {
       width: 200px;
       transform: none;
+    }
+    #menu {
+      display: none; /* Hide menu on smaller screens */
+    }
+  
+    #menu-icon {
+      display: flex;
+      cursor: pointer;
+      font-size: 24px;
+      color: #007bff;
+    }
+  
+    /* Dropdown for menu */
+    .dropdown-menu {
+      display: none;
+      flex-direction: column;
+      background-color: #fff;
+      position: absolute;
+      top: 60px;
+      right: 20px;
+      padding: 10px 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      z-index: 999;
+    }
+  
+    .dropdown-menu.show {
+      display: flex;
+    }
+  
+    .dropdown-menu li {
+      margin-bottom: 10px;
+    }
+  
+    .dropdown-menu li:last-child {
+      margin-bottom: 0;
+    }
+  
+    .dropdown-menu li a {
+      color: #333;
+      text-decoration: none;
+      font-weight: 500;
+    }
+  
+    .dropdown-menu li a:hover {
+      color: #007bff;
     }
   }
 
@@ -534,6 +582,7 @@ body {
 }
 
 .image-section img {
+  cursor: pointer;
   border-radius: 10px; /* Rounded corners for all images */
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Add subtle shadows */
   transition: transform 0.3s ease, opacity 0.3s ease;
@@ -561,37 +610,218 @@ body {
   opacity: 0.9; /* Dimming effect */
 }
 
-/* Responsive styling */
-@media (max-width: 768px) {
-  .container1 {
-      flex-direction: column; /* Stack sections vertically */
-      padding: 20px;
+/* Responsive Design */
+@media (min-width: 768px) {
+  .carousel .bg-image {
+    height: 600px; /* Increase height for larger screens */
   }
 
-  .info-section {
-      max-width: 100%; /* Full width for small screens */
-      text-align: center; /* Center align text */
+  .position-absolute {
+    text-align: left;
   }
 
-  .image-section {
-      flex-direction: column; /* Stack images vertically */
-      gap: 15px;
-      position: static; /* Reset absolute positioning */
+  .image-container img {
+    max-width: 600px;
   }
 
-  .phone-image2 {
-      position: static; /* Reset positioning */
-      bottom: auto;
-      right: auto;
-      width: 120px; /* Adjust size for small screens */
-  }
-
-  .clock-icon {
-      width: 80px; /* Adjust size for small screens */
+  .phone-image {
+    max-width: 300px;
   }
 }
 
+@media (min-width: 992px) {
+  .carousel .bg-image {
+    height: 700px;
+  }
 
+  .card-img-top {
+    max-height: 350px;
+  }
+
+  .phone-image {
+    max-width: 350px;
+  }
+
+  .image-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+}
+
+/* Testimonials Section */
+.testimonials-section {
+  background: linear-gradient(135deg, #e3f2fd, #e0f7fa);
+  padding: 50px 15px;
+}
+
+.testimonials-section .card {
+  background: #ffffff;
+  border: none;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border-left: 4px solid #007bff;
+}
+
+.testimonials-section .card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  border-left-color: #ff7043;
+}
+
+.testimonials-section .card img {
+  border: 4px solid #ffffff;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  height: auto;
+  width: 100%;
+  max-height: 180px;
+  object-fit: cover;
+}
+
+.card .icon {
+  margin-bottom: 15px;
+}
+
+.testimonials-section .card-title {
+  color: #007bff;
+  font-weight: bold;
+}
+
+.testimonials-section .card-text {
+  color: #6c757d;
+  font-size: 1rem;
+}
+
+/* Core Values Section */
+.core-values-section {
+  background: linear-gradient(135deg, #ede7f6, #fce4ec);
+  padding: 50px 15px;
+  text-align: center;
+}
+
+.core-values-section .icon {
+  font-size: 2.5rem;
+  color: #ff7043;
+  margin-bottom: 15px;
+  transition: transform 0.3s ease;
+}
+
+.core-values-section .icon:hover {
+  transform: scale(1.2);
+  color: #007bff;
+}
+
+.core-values-section .card-title {
+  color: #007bff;
+  font-weight: bold;
+}
+
+.core-values-section .card-text {
+  color: #6c757d;
+  font-size: 1rem;
+}
+
+.core-values-section .card-img-top {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.core-values-section .card-img-top:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.core-values-section .icon {
+  font-size: 2.5rem;
+  color: #ff7043;
+  transition: transform 0.3s ease;
+}
+
+.core-values-section .icon:hover {
+  transform: scale(1.2);
+  color: #007bff;
+}
+
+
+/* FAQs Section */
+.faqs-section {
+  background-color: #ffffff;
+  padding: 50px 15px;
+}
+
+.faqs-section .accordion-button {
+  font-weight: bold;
+  color: #ffffff;
+  background: linear-gradient(90deg, #42a5f5, #7e57c2);
+  border-radius: 5px;
+}
+
+.faqs-section .accordion-button:not(.collapsed) {
+  background: linear-gradient(90deg, #ff7043, #f06292);
+}
+
+.faqs-section .accordion-item {
+  border: none;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.faqs-section .accordion-body {
+  font-size: 1rem;
+  color: #6c757d;
+}
+
+/* Partners Section */
+.partners-section {
+  background: linear-gradient(135deg, #f3e5f5, #e3f2fd);
+  padding: 50px 15px;
+  text-align: center;
+}
+
+.partners-section img {
+  max-width: 100%;
+  height: auto;
+  transition: transform 0.3s ease, filter 0.3s ease;
+  filter: grayscale(50%);
+}
+
+.partners-section img:hover {
+  transform: scale(1.1);
+  filter: grayscale(0%);
+}
+
+/* General Styling */
+h2.display-4 {
+  font-size: 2.5rem;
+  font-weight: bold;
+  background: linear-gradient(90deg, #42a5f5, #7e57c2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+@media (min-width: 768px) {
+  h2.display-4 {
+    font-size: 3rem;
+  }
+}
+
+/* Buttons */
+.btn-primary {
+  background: linear-gradient(90deg, #42a5f5, #7e57c2);
+  border: none;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(90deg, #ff7043, #f06292);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Testimonials Stars */
+.testimonials-section .stars i {
+  color: #ff7043;
+  margin-right: 5px;
+}
+
+.testimonials-section .stars i:hover {
+  color: #f06292;
+}
 
   
 

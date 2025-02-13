@@ -64,7 +64,7 @@ export const PhongThi = () => {
       <center className="fw-bold my-3"> Danh sách lớp </center>
       <div className="row justify-content-center">
         <div className="col-9 ">
-          <Table<ClassRoom> columns={columns} dataSource={data} />;
+          <Table<ClassRoom> columns={columns} dataSource={data} />
         </div>
       </div>
     </div>
