@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Modal, Input, Form, Upload, Button } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import { Audio, AudioAPI } from "@/services/teacher/Teacher";
+import createTranscription from "@/services/GropApi/createTranscription";
 
 interface UpdateAudioProps {
   visible: boolean;
@@ -15,7 +16,6 @@ export const UpdateAudioModal: React.FC<UpdateAudioProps> = ({
   audioData,
 }) => {
   const [question, setQuestion] = useState<Audio>(audioData);
-  //const [file, setFile] = useState<File | null>(null);
 
   useEffect(() => {
     setQuestion(audioData);
@@ -32,7 +32,6 @@ export const UpdateAudioModal: React.FC<UpdateAudioProps> = ({
     const file = info.file.originFileObj;
     console.log(file);
     if (file) {
-      //setFile(file);
       const reader = new FileReader();
       reader.onload = () => {
         const filePath = `../Audio/${file.name}`; // Path at the same level as 'src'
@@ -68,6 +67,37 @@ export const UpdateAudioModal: React.FC<UpdateAudioProps> = ({
       if (error.response) {
         console.log(error.response.data.message);
       }
+    }
+  };
+
+  const handleSubmit = async () => {
+    const allowedFileTypes = ['flac', 'mp3', 'mp4', 'mpeg', 'mpga', 'm4a', 'ogg', 'opus', 'wav', 'webm'];
+  
+    if (!question.filePath) {
+      console.error('Please select an audio file');
+      return;
+    }
+  
+    try {
+      const response = await fetch(question.filePath);
+      const blob = await response.blob();
+      const file = new File([blob], 'audio.mp3', { type: blob.type });
+  
+      const fileType = file.name.split('.').pop();
+  
+      if (!fileType || !allowedFileTypes.includes(fileType)) {
+        console.error('File must be one of the following types: [flac, mp3, mp4, mpeg, mpga, m4a, ogg, opus, wav, webm]');
+        return;
+      }
+  
+      try {
+        const transcriptionResponse = await createTranscription({ file });
+        setQuestion((prev) => ({ ...prev, transcription: transcriptionResponse as string }));
+      } catch (error) {
+        console.error(error);
+      }
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -109,12 +139,28 @@ export const UpdateAudioModal: React.FC<UpdateAudioProps> = ({
           />
         </Form.Item>
         <Form.Item label="Mô tả">
-          <Input.TextArea
+          <div className="d-flex">
+            <Input.TextArea
             name="transcription"
             value={question.transcription}
-            onChange={handleChange}
-          />
-        </Form.Item>
+              onChange={handleChange}
+              style={{ width: "95% " }}
+            />
+            <div className=" align-items-center d-flex flex-column justify-content-center">
+              <Button
+                type="link"
+                icon={
+                  <img
+                    src="/src/Content/img/Google_Translate_Icon.png"
+                    height="16px"
+                  />
+                }
+                onClick={() => handleSubmit()}
+                style={{ color: "#FF0000" }}
+              />
+            </div>
+          </div>
+          </Form.Item>
       </Form>
     </Modal>
   );

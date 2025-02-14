@@ -1,15 +1,17 @@
+import React from "react";
 import { QuestionAnswerResult, Result } from "@/services/student";
-import QuestionAnserComponent from "./QuestionAnswer";
+import QuestionAnswerComponent from "./QuestionAnswer";
+
 
 interface ChiTietKetQuaProps {
   result: Result;
 }
 
-const ChiTietKetQua = ({ result }: ChiTietKetQuaProps) => {
+const ChiTietKetQua: React.FC<ChiTietKetQuaProps> = ({ result }) => {
   return (
     <div className="container mx-auto p-4">
       <center>
-        <h1 className="text-3xl font-bold ">
+        <h1 className="text-3xl font-bold">
           Chi tiết kết quả{" "}
           {typeof result.examId === "object"
             ? result.examId.title
@@ -17,16 +19,14 @@ const ChiTietKetQua = ({ result }: ChiTietKetQuaProps) => {
         </h1>
       </center>
       <div>
-        {" "}
         {result.score} / {result.questions.length}
       </div>
-      {result.questions
-        ? (result.questions as unknown as QuestionAnswerResult[]).map(
-            (item: QuestionAnswerResult) => (
-              <QuestionAnserComponent question={item} key={item._id} />
-            )
+      {result.questions &&
+        (result.questions as unknown as QuestionAnswerResult[]).map(
+          (item: QuestionAnswerResult) => (
+            <QuestionAnswerComponent question={item} key={item._id} />
           )
-        : null}
+        )}
     </div>
   );
 };
