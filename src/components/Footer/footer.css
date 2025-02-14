@@ -44,15 +44,6 @@
     text-decoration: underline;
 }
 
-/* Contact information styling */
-.contact-info li {
-    display: flex;
-    align-items: center;
-    font-size: 16px;
-    color: #f8f9fa;
-    margin-left: 82px;
-}
-
 .contact-info i {
     margin-right: 8px;
     color: #ffde59;

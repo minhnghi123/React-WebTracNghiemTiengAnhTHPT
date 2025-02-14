@@ -8,6 +8,13 @@ export const Navbar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [userName, setUserName] = useState<string>("");
   const { user, handleLogout } = useAuthContext();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const navigator = useNavigate();
+
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
+
   const logout = async () => {
     try {
       const rq = await AuthApi.logout();
@@ -34,7 +41,6 @@ export const Navbar = () => {
       setUserName(user.username);
     }
   }, [user]);
-  const navigator = useNavigate();
   const items: MenuProps["items"] = [
     {
       key: "1",
@@ -89,7 +95,7 @@ export const Navbar = () => {
         <div id="menu">
           <ul className="dsMenu">
             <li>
-              <a href="/Home">Trang chủ</a>
+              <a href="/">Trang chủ</a>
             </li>
             <li>
               <a href="/KyThi">Khám phá</a>
