@@ -29,6 +29,7 @@ import { BaiLam } from "@/pages/default/KyThi/BaiLam/BaiLam";
 import { KetQua } from "@/pages/default/KyThi/KetQua";
 import { QuanLyAudio } from "@/pages/giaovien/QuanLyFileAudio";
 import { ForgetPass } from "@/pages/default/Login/forgetPass";
+import { ThongTinCaNhan } from "@/pages/thongtincanhan/Thongtincanhan";
 
 export enum ERolePath {
   ADMIN = 2,
@@ -72,6 +73,7 @@ export const router = [
       createRoute("/KyThi/ChiTiet/:_id", <DetailExam />, ERolePath.USER),
       createRoute("/KyThi/BaiLam/:_id", <BaiLam />, ERolePath.USER),
       createRoute("/KetQua", <KetQua />, ERolePath.USER),
+      createRoute("/thongtincanhan", <ThongTinCaNhan />, ERolePath.USER),
     ],
   },
   {
@@ -142,6 +144,7 @@ const paths = {
   "/KyThi/BaiLam/:_id": ["/KyThi/BaiLam/:_id"],
   "/KetQua": ["/KetQua"],
   "/giaovien/QuanLyAudio": ["/giaovien/QuanLyAudio"],
+  "/thongtincanhan": ["/thongtincanhan"],
 } as const;
 
 export type TRoutePaths = (typeof paths)[keyof typeof paths][number] &
