@@ -8,7 +8,11 @@ const ResultSchema = new mongoose.Schema({
   wrongAnswer: { type: Number, required: true },
   questions: [
     {
-      questionId: { type: mongoose.Schema.Types.ObjectId, ref: "Question", required: true },
+      questionId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Question",
+        required: true,
+      },
       content: { type: String, required: true },
       answers: [
         {
@@ -31,6 +35,14 @@ const ResultSchema = new mongoose.Schema({
   ],
   createdAt: { type: Date, default: Date.now },
   isDeleted: { type: Boolean, default: false },
+  suggestionQuestion: {
+    type: Array,
+    default: [],
+  },
+  wrongAnswerByKnowledge: {
+    type: Object,
+    default: {},
+  },
 });
 
 const Result = mongoose.model("Result", ResultSchema);

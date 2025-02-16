@@ -212,6 +212,8 @@ export const submitExam = async (req, res) => {
       correctAnswer,
       wrongAnswer,
       questions: questionDetails,
+      suggestionQuestion,
+      wrongAnswerByKnowledge,
     });
 
     await result.save();
