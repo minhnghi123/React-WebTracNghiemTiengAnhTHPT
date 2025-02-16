@@ -2,6 +2,8 @@ import Result from "../../models/Result.model.js";
 import Exam from "../../models/Exam.model.js";
 import { Question } from "../../models/Question.model.js";
 import { trainModel, predict } from "../../utils/ai.util.js";
+import { getYoutubeVideos } from "../../utils/youtube.util.js";
+
 // [GET]: result/
 export const getAllResults = async (req, res) => {
   try {
@@ -217,7 +219,12 @@ export const submitExam = async (req, res) => {
     });
 
     await result.save();
-
+    // Tim kiem video tren youtube
+    let videos = {};
+    for (const key in wrongAnswerByKnowledge) {
+      const video = await getYoutubeVideos(key);
+      videos[key] = video;
+    }
     // Phản hồi kết quả cho client
     res.status(200).json({
       code: 200,
@@ -230,6 +237,7 @@ export const submitExam = async (req, res) => {
       details: questionDetails,
       wrongAnswerByKnowledge,
       suggestionQuestion,
+      videos,
     });
   } catch (error) {
     console.error("Error processing exam:", error);
