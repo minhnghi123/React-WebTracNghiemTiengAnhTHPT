@@ -7,7 +7,7 @@ export interface Answer {
 }
 export interface Audio {
   _id?: string;
-  filePath: string;
+  filePath: string | File;
   description: string;
   transcription: string;
   createdAt?: Date;
@@ -210,14 +210,22 @@ export const AudioAPI = {
     return response.data;
   },
   createAudio: async (question: Audio) => {
-    const response = await request.post("/teacher/audio/upload", question);
+    const response = await request.post("/teacher/audio/upload", question, {
+      headers: {
+        "Content-Type": "multipart/form-data", 
+      },
+    });
     return response.data;
   },
   updateAudio: async (question: Audio, _id: string) => {
     const response = await request.patch(
       `/teacher/audio/update/${_id}`,
       question
-    );
+      , {
+        headers: {
+          "Content-Type": "multipart/form-data", 
+        },
+      } );
     return response.data;
   },
   deleteAudio: async (id: string) => {

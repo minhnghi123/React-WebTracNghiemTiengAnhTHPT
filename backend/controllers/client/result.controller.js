@@ -1,5 +1,8 @@
 import Result from "../../models/Result.model.js";
 import Exam from "../../models/Exam.model.js";
+import { Question } from "../../models/Question.model.js";
+import { trainModel, predict } from "../../utils/ai.util.js";
+import { getYoutubeVideos } from "../../utils/youtube.util.js";
 
 // [GET]: result/
 export const getAllResults = async (req, res) => {
@@ -23,7 +26,7 @@ export const submitExam = async (req, res) => {
   try {
     const { examId, userId, answers } = req.body;
 
-    // Tìm bài kiểm tra và danh sách câu hỏi liên quan
+    // Tìm bài kiểm tra và các câu hỏi liên quan
     const exam = await Exam.findOne({ _id: examId }).populate({
       path: "questions",
       populate: {
@@ -40,12 +43,13 @@ export const submitExam = async (req, res) => {
     let correctAnswer = 0;
     let wrongAnswer = 0;
     const questionDetails = [];
+    let wrongAnswerByKnowledge = {};
 
-    // Duyệt qua từng câu trả lời
+    // Duyệt qua từng câu trả lời người dùng
     for (const answer of answers) {
       const { questionId, selectedAnswerId, userAnswer } = answer;
 
-      // Tìm câu hỏi tương ứng trong bài kiểm tra
+      // Tìm câu hỏi tương ứng trong bài thi
       const question = exam.questions.find(
         (q) => String(q._id) === String(questionId)
       );
@@ -60,27 +64,45 @@ export const submitExam = async (req, res) => {
       let isCorrect = false;
       let detail = {};
 
-      // Kiểm tra loại câu hỏi
+      // Xử lý dựa theo loại câu hỏi (theo tên của questionType)
       switch (question.questionType.name) {
         case "Fill in the Blanks":
-          if (question.correctAnswerForBlank) {
-            // Câu hỏi điền khuyết thông thường
-            isCorrect =
-              userAnswer &&
-              userAnswer.trim().toLowerCase() ===
-                question.correctAnswerForBlank.trim().toLowerCase();
+          // Nếu là câu hỏi điền khuyết có nhiều blank thì userAnswer phải là mảng
+          if (Array.isArray(userAnswer)) {
+            let correctCount = 0;
+            // Lấy mảng đáp án đúng từ từng phần tử của câu hỏi
+            const correctAnswers = question.answers.map(
+              (ans) => ans.correctAnswerForBlank
+            );
+            // So sánh từng blank
+            const userAnswersDetail = userAnswer.map((ua, index) => {
+              const correctAns = correctAnswers[index]
+                ? correctAnswers[index].trim().toLowerCase()
+                : "";
+              const userAns = ua ? ua.trim().toLowerCase() : "";
+              const answerIsCorrect = correctAns === userAns;
+              if (answerIsCorrect) correctCount++;
+              return {
+                userAnswer: ua,
+                // Nếu cấu trúc luôn theo thứ tự, ta có thể dùng index để tham chiếu đáp án
+                answerId: question.answers[index]?._id,
+                isCorrect: answerIsCorrect,
+              };
+            });
+            isCorrect = correctCount === question.answers.length;
 
             detail = {
               questionId: question._id,
               content: question.content,
-              answers: [],
-              userAnswers: [{ userAnswer }],
-              correctAnswerForBlank: [question.correctAnswerForBlank],
+              answers: question.answers,
+              // Lưu mảng kết quả của từng blank
+              userAnswers: userAnswersDetail,
+              correctAnswerForBlank: correctAnswers,
               audio: question.audio || null,
               isCorrect,
             };
           } else if (question.audio) {
-            // Câu hỏi nghe điền khuyết
+            // Trường hợp câu hỏi nghe điền khuyết
             const correctAnswers = question.answers
               .map((ans) => ({
                 correctAnswer: ans.correctAnswerForBlank,
@@ -100,14 +122,14 @@ export const submitExam = async (req, res) => {
               });
             }
 
-            const userAnswersDetail = userAnswer.map((answer) => {
+            const userAnswersDetail = userAnswer.map((ua) => {
               const matchedAnswer = correctAnswers.find(
                 (correct) =>
-                  answer.trim().toLowerCase() ===
+                  ua.trim().toLowerCase() ===
                   correct.correctAnswer.trim().toLowerCase()
               );
               return {
-                userAnswer: answer,
+                userAnswer: ua,
                 answerId: matchedAnswer ? matchedAnswer.answerId : null,
                 isCorrect: !!matchedAnswer,
               };
@@ -133,14 +155,14 @@ export const submitExam = async (req, res) => {
           break;
 
         case "Multiple Choice Questions":
-          const correctAnswerObj = question.answers.find((ans) => ans.isCorrect);
-
+          const correctAnswerObj = question.answers.find(
+            (ans) => ans.isCorrect
+          );
           if (!correctAnswerObj) {
             return res.status(500).json({
               message: `Question ${questionId} has no correct answer.`,
             });
           }
-
           isCorrect =
             selectedAnswerId &&
             String(correctAnswerObj._id) === String(selectedAnswerId);
@@ -150,6 +172,7 @@ export const submitExam = async (req, res) => {
             content: question.content,
             answers: question.answers,
             selectedAnswerId,
+            // Dành cho câu hỏi trắc nghiệm, lưu userAnswer dưới dạng ID của đáp án đã chọn
             userAnswers: [{ userAnswer: selectedAnswerId }],
             correctAnswerForBlank: null,
             audio: question.audio || null,
@@ -163,18 +186,27 @@ export const submitExam = async (req, res) => {
           });
       }
 
-      // Cập nhật điểm số và chi tiết câu hỏi
+      // Cập nhật điểm số tổng
       if (isCorrect) {
         correctAnswer++;
         score++;
       } else {
         wrongAnswer++;
+        const knowledge = question?.knowledge;
+        if (!wrongAnswerByKnowledge[knowledge]) {
+          wrongAnswerByKnowledge[knowledge] = 0;
+        }
+        wrongAnswerByKnowledge[knowledge]++;
       }
 
       questionDetails.push(detail);
     }
 
-    // Lưu kết quả vào cơ sở dữ liệu
+    // Goi y bai tap ve cau hoi bi lam sai
+    const suggestionQuestion = await Question.find({
+      knowledge: { $in: Object.keys(wrongAnswerByKnowledge) },
+    }).select("_id content");
+    // Lưu kết quả vào CSDL theo schema Result đã cập nhật
     const result = new Result({
       examId,
       userId,
@@ -182,11 +214,18 @@ export const submitExam = async (req, res) => {
       correctAnswer,
       wrongAnswer,
       questions: questionDetails,
+      suggestionQuestion,
+      wrongAnswerByKnowledge,
     });
 
     await result.save();
-
-    // Phản hồi kết quả
+    // Tim kiem video tren youtube
+    let videos = {};
+    for (const key in wrongAnswerByKnowledge) {
+      const video = await getYoutubeVideos(key);
+      videos[key] = video;
+    }
+    // Phản hồi kết quả cho client
     res.status(200).json({
       code: 200,
       message: "Exam submitted successfully!",
@@ -196,6 +235,9 @@ export const submitExam = async (req, res) => {
       correctAnswer,
       wrongAnswer,
       details: questionDetails,
+      wrongAnswerByKnowledge,
+      suggestionQuestion,
+      videos,
     });
   } catch (error) {
     console.error("Error processing exam:", error);
@@ -205,7 +247,6 @@ export const submitExam = async (req, res) => {
     });
   }
 };
-
 
 // [PATCH]: /result/delete/:id
 export const deleteResult = async (req, res) => {

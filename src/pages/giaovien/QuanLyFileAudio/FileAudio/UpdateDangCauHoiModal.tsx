@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { Modal, Input, Form, Upload, Button } from "antd";
-import { UploadOutlined } from "@ant-design/icons";
+import { Modal, Input, Form, Button } from "antd";
 import { Audio, AudioAPI } from "@/services/teacher/Teacher";
+import createTranscription from "@/services/GropApi/createTranscription";
 
 interface UpdateAudioProps {
   visible: boolean;
@@ -15,7 +15,7 @@ export const UpdateAudioModal: React.FC<UpdateAudioProps> = ({
   audioData,
 }) => {
   const [question, setQuestion] = useState<Audio>(audioData);
-  //const [file, setFile] = useState<File | null>(null);
+  const [file, setFile] = useState<File | null>(null);
 
   useEffect(() => {
     setQuestion(audioData);
@@ -28,39 +28,45 @@ export const UpdateAudioModal: React.FC<UpdateAudioProps> = ({
     setQuestion((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleFileChange = (info: any) => {
-    const file = info.file.originFileObj;
-    console.log(file);
-    if (file) {
-      //setFile(file);
-      const reader = new FileReader();
-      reader.onload = () => {
-        const filePath = `../Audio/${file.name}`; // Path at the same level as 'src'
-        setQuestion((prev) => ({ ...prev, filePath }));
-        // Simulate saving the file locally
-        localStorage.setItem(filePath, reader.result as string);
-      };
-      reader.readAsDataURL(file);
+  // Phần xử lý file giống như ở create
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0] || null;
+    if (selectedFile) {
+      // Kiểm tra định dạng file
+      if (
+        !["audio/mp3", "audio/wav", "audio/mpeg"].includes(selectedFile.type)
+      ) {
+        alert("Chỉ chấp nhận các file âm thanh định dạng .mp3 hoặc .wav");
+        return;
+      }
+      setFile(selectedFile);
+      setQuestion((prev) => ({ ...prev, filePath: selectedFile }));
     }
   };
 
-  const handleSaveClick = () => {
-    if (question.description === "") {
+  const handleSaveClick = async () => {
+    if (question.description.trim() === "") {
       alert("Vui lòng nhập mô tả file nghe");
       return;
     }
-    if (question.transcription === "") {
-      alert("Vui lòng nhập dịch file nghe");
-      return;
-    }
 
-    updateQuestion(question);
+    // Tạo FormData để gửi dữ liệu update (bao gồm cả file nếu có)
+    const formData = new FormData();
+    if (file !== null) {
+      console.log("file", file);
+      formData.append("filePath", file); 
+    }
+    formData.append("description", question.description);
+    formData.append("transcription", question.transcription);
+
+    updateQuestion(formData);
   };
 
-  const updateQuestion = async (q: Audio) => {
+  const updateQuestion = async (formData: FormData) => {
     try {
-      const rq = await AudioAPI.updateAudio(q, q._id ?? "");
+      const rq = await AudioAPI.updateAudio(formData as unknown as Audio, question._id ?? "");
       if (rq?.success) {
+        console.log(rq);
         alert("Cập nhật file nghe thành công");
         handleClose();
       }
@@ -68,6 +74,48 @@ export const UpdateAudioModal: React.FC<UpdateAudioProps> = ({
       if (error.response) {
         console.log(error.response.data.message);
       }
+    }
+  };
+
+  const handleSubmit = async () => {
+    const allowedFileTypes = ["mp3", "mp4"];
+
+    let fileToUse: File | null = file;
+    if (
+      !fileToUse &&
+      typeof question.filePath === "string" &&
+      question.filePath
+    ) {
+      try {
+        const response = await fetch(question.filePath);
+        const blob = await response.blob();
+        fileToUse = new File([blob], "audio.mp3", { type: blob.type });
+      } catch (err) {
+        console.error("Lỗi", err);
+        return;
+      }
+    }
+
+    if (!fileToUse) {
+      console.error("Vui lòng chọn file nghe");
+      return;
+    }
+
+    const fileType = fileToUse.name.split(".").pop()?.toLowerCase();
+    if (!fileType || !allowedFileTypes.includes(fileType)) {
+      console.error("File phải có định dạng là: [ mp3, mp4 ]");
+      return;
+    }
+
+    try {
+      // Ví dụ: gọi API tạo transcription
+      // const transcriptionResponse = await createTranscription({ file: fileToUse });
+      // setQuestion((prev) => ({
+      //   ...prev,
+      //   transcription: transcriptionResponse as string,
+      // }));
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -83,18 +131,24 @@ export const UpdateAudioModal: React.FC<UpdateAudioProps> = ({
     >
       <Form layout="vertical">
         <Form.Item label="Upload Audio File">
-          <Upload
-            beforeUpload={() => false}
+          {/* Sử dụng input file thay vì Upload của antd */}
+          <input
+            type="file"
             onChange={handleFileChange}
-            showUploadList={false}
-          >
-            <Button icon={<UploadOutlined />}>Click to Upload</Button>
-          </Upload>
+            accept="audio/*"
+          />
+          {file && <p>Tệp đã chọn: {file.name}</p>}
         </Form.Item>
         <Form.Item label="Đường dẫn file nghe">
           <Input
             name="filePath"
-            value={question.filePath}
+            value={
+              typeof question.filePath === "string"
+                ? question.filePath
+                : question.filePath
+                ? (question.filePath as File).name
+                : ""
+            }
             onChange={handleChange}
             required
             disabled
@@ -109,11 +163,28 @@ export const UpdateAudioModal: React.FC<UpdateAudioProps> = ({
           />
         </Form.Item>
         <Form.Item label="Mô tả">
-          <Input.TextArea
-            name="transcription"
-            value={question.transcription}
-            onChange={handleChange}
-          />
+          <div className="d-flex">
+            <Input.TextArea
+              name="transcription"
+              value={question.transcription}
+              onChange={handleChange}
+              style={{ width: "95%" }}
+            />
+            <div className="align-items-center d-flex flex-column justify-content-center">
+              <Button
+                type="link"
+                icon={
+                  <img
+                    src="/src/Content/img/Google_Translate_Icon.png"
+                    height="16px"
+                    alt="Translate Icon"
+                  />
+                }
+                onClick={handleSubmit}
+                style={{ color: "#FF0000" }}
+              />
+            </div>
+          </div>
         </Form.Item>
       </Form>
     </Modal>

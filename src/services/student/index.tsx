@@ -14,6 +14,7 @@ export interface Result {
 export interface AnswerResult {
   _id: string;
   text: string;
+  correctAnswerForBlank?: string;
   isCorrect: boolean;
 }
 
@@ -23,7 +24,15 @@ export interface QuestionAnswerResult {
   content: string;
   answers: AnswerResult[];
   selectedAnswerId: string;
+  userAnswers: userAnswers[];
   isCorrect: boolean;
+  
+}
+interface userAnswers {
+  userAnswer: string,
+  answerId: string,
+  isCorrect: boolean,
+  _id: string
 }
 export interface SubmitAnswer {
   examId: string;
@@ -32,7 +41,8 @@ export interface SubmitAnswer {
 }
 export interface submitAnswer {
   questionId: string;
-  selectedAnswerId: string;
+  selectedAnswerId?: string;
+  userAnswer?: string[];
 }
 export const ResultAPI = {
   getAllResult: async (page: number) => {

@@ -6,6 +6,7 @@ import QuestionSumit from "./QuestionSumit";
 import "./BaiLam.css";
 import { Button } from "antd";
 import { useAuthContext } from "@/contexts/AuthProvider";
+
 export const BaiLam = () => {
   const { _id } = useParams<{ _id: string }>();
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -14,10 +15,11 @@ export const BaiLam = () => {
   const [remainingTime, setRemainingTime] = useState<number>(0);
   const questionRefs = useRef<HTMLDivElement[]>([]);
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
+  const { user } = useAuthContext();
+
   const fetchJoinExam = async () => {
     let id = localStorage.getItem("_idExam") ?? "";
-    console.log(id);
-    if (id === "" || id === null || id === undefined || id === "undefined") {
+    if (!id || id === "undefined") {
       const fetchJoin = await ExamAPIStudent.joinExam(_id ?? "");
       if (fetchJoin.code === 200) {
         setQuestions(fetchJoin.questions);
@@ -38,33 +40,32 @@ export const BaiLam = () => {
         const newEndTime = localStorage.getItem("endTime")
           ? new Date(localStorage.getItem("endTime") ?? "")
           : now;
-
         setEndTime(newEndTime);
         localStorage.setItem("_idExam", id);
       }
     }
   };
 
+  // Cập nhật thời gian còn lại ngay khi endTime được set
   useEffect(() => {
     if (endTime) {
-      const interval = setInterval(() => {
+      const updateRemaining = () => {
         const now = new Date();
         const timeLeft = Math.max(
           0,
           Math.floor((endTime.getTime() - now.getTime()) / 1000)
         );
-        if (isSubmitted === false) setRemainingTime(timeLeft);
-
-        if (timeLeft <= 0) {
+        setRemainingTime(timeLeft);
+        if (timeLeft <= 0 && !isSubmitted) {
           alert("Hết thời gian làm bài");
           handleQuestionSubmit();
-          clearInterval(interval);
         }
-      }, 1000);
-
+      };
+      updateRemaining(); // Cập nhật ngay lúc đầu
+      const interval = setInterval(updateRemaining, 1000);
       return () => clearInterval(interval);
     }
-  }, [endTime]);
+  }, [endTime, isSubmitted]);
 
   useEffect(() => {
     fetchJoinExam();
@@ -82,13 +83,11 @@ export const BaiLam = () => {
     questionRefs.current[index]?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const { user } = useAuthContext();
   const handleQuestionSubmit = async () => {
-    if (isSubmitted === true) {
+    if (isSubmitted) {
       alert("Bạn đã nộp bài rồi");
       return;
     }
-
     const submitAnswer = {
       examId: localStorage.getItem("_idExam") ?? "",
       userId: user?._id ?? "",
@@ -106,10 +105,7 @@ export const BaiLam = () => {
       setEndTime(undefined);
     }
   };
-  // const fetchWrongAnswers = async () => {
-  //   const response = await ResultAPI.getWrongAnswers(_id);
-  //   console.log(response);
-  // };
+
   return (
     <div>
       <center>
@@ -130,9 +126,10 @@ export const BaiLam = () => {
           <div className={`timer ${remainingTime <= 60 ? "critical" : ""}`}>
             Thời gian còn lại: {formatTime(remainingTime)}
             <hr />
-            <Button onClick={() => handleQuestionSubmit()}>Nộp bài</Button>
+            <Button onClick={handleQuestionSubmit} disabled={isSubmitted}>
+              Nộp bài
+            </Button>
           </div>
-
           <div className="question-nav">
             {questions.map((_, index) => (
               <button key={index} onClick={() => handleQuestionClick(index)}>

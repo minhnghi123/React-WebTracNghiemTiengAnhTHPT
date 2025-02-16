@@ -1,0 +1,48 @@
+.flash-card-link {
+    transition: transform 0.3s;
+  }
+  
+  .flash-card-link:hover {
+    transform: scale(1.05);
+  }
+  .table-container {
+    display: table;
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .table-header, .table-row {
+    display: table-row;
+  }
+  
+  .table-column {
+    display: table-cell;
+    padding: 8px;
+    border: 1px solid #ddd;
+    font-weight: bold;
+    text-align: center;
+  }
+  .table-column-2 {
+    display: table-cell;
+    padding: 8px;
+    border: 1px solid #ddd;
+    text-align: justify;
+  }
+  .flash-card-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: stretch; 
+    justify-content: center;
+  }
+  
+  .flash-card-link {
+    flex: 1 1 300px; 
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; 
+    justify-self:center;
+    margin: auto;
+  }
+  
+  

@@ -27,8 +27,8 @@ export const KetQua: React.FC<KetQuaProps> = ({ DeThi }) => {
       filteredResult.map((item: Result) => {
         console.log(item.examId);
       });
+      filteredResult = filteredResult.reverse();
       setResult(filteredResult);
-      console.log(filteredResult); // Hiển thị dữ liệu sau khi lọc
     }
   };
 

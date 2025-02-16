@@ -6,5 +6,5 @@ router.get("/", controller.index);
 router.post("/create", controller.createPost);
 router.patch("/:idSet", controller.updateSet);
 router.get("/:idSet", controller.detailSet);
-router.get("/:idSet", controller.deleteSet);
+router.delete("/:idSet", controller.deleteSet);
 export default router;

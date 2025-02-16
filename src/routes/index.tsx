@@ -29,7 +29,11 @@ import { BaiLam } from "@/pages/default/KyThi/BaiLam/BaiLam";
 import { KetQua } from "@/pages/default/KyThi/KetQua";
 import { QuanLyAudio } from "@/pages/giaovien/QuanLyFileAudio";
 import { ForgetPass } from "@/pages/default/Login/forgetPass";
-import { ThongTinCaNhan } from "@/pages/thongtincanhan/Thongtincanhan";
+import { FlashCardIndex } from "@/pages/default/OnTap/FlashCardIndex";
+import { FlashCardDetail } from "@/pages/default/OnTap/FlashCardDetail";
+import { FlashCardCreate } from "@/pages/default/OnTap/FlashCardCreate";
+import { FlashCardUpdate } from "@/pages/default/OnTap/FlashCardUpdate";
+import { FlashCardExam } from "@/pages/default/OnTap/FlashCardExam";
 
 export enum ERolePath {
   ADMIN = 2,
@@ -68,12 +72,15 @@ export const router = [
       createRoute("/About", <VeChungToi />, ERolePath.USER),
       createRoute("/Contact", <LienHe />, ERolePath.USER),
       createRoute("/PhongThi", <PhongThi />, ERolePath.USER),
-      createRoute("/OnTap", <OnTap />, ERolePath.USER),
+      createRoute("/OnTap", <FlashCardIndex />, ERolePath.USER),
+      createRoute("/FlashCard/:_id", <FlashCardDetail />, ERolePath.USER),
       createRoute("/KyThi", <KyThi />, ERolePath.USER),
       createRoute("/KyThi/ChiTiet/:_id", <DetailExam />, ERolePath.USER),
       createRoute("/KyThi/BaiLam/:_id", <BaiLam />, ERolePath.USER),
       createRoute("/KetQua", <KetQua />, ERolePath.USER),
-      createRoute("/thongtincanhan", <ThongTinCaNhan />, ERolePath.USER),
+      createRoute("/flashcard/create", <FlashCardCreate />, ERolePath.USER),
+      createRoute("/flashcard/edit/:_id", <FlashCardUpdate />, ERolePath.USER),
+      createRoute("/flashcard/exam/:id", <FlashCardExam />, ERolePath.USER),
     ],
   },
   {
@@ -144,7 +151,10 @@ const paths = {
   "/KyThi/BaiLam/:_id": ["/KyThi/BaiLam/:_id"],
   "/KetQua": ["/KetQua"],
   "/giaovien/QuanLyAudio": ["/giaovien/QuanLyAudio"],
-  "/thongtincanhan": ["/thongtincanhan"],
+  "/FlashCard/:_id": ["/FlashCard/:_id"],
+  "/flashcard/create": ["/flashcard/create"],
+  "/flashcard/edit/:_id": ["/flashcard/edit/:_id"],
+  "/flashcard/exam/:id": ["/flashcard/exam/:id"],
 } as const;
 
 export type TRoutePaths = (typeof paths)[keyof typeof paths][number] &

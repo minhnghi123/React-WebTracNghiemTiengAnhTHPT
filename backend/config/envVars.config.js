@@ -11,4 +11,6 @@ export const ENV_VARS = {
   REDIS_PASSWORD: process.env.REDIS_PASSWORD,
   REDIS_PORT: process.env.REDIS_PORT,
   REDIS_HOST: process.env.REDIS_HOST,
+  YOUTUBE_API_KEY: process.env.YOUTUBE_API_KEY,
+  YOUTUBE_API_URL: process.env.YOUTUBE_API_URL,
 };

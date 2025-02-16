@@ -56,18 +56,40 @@ export const createPost = async (req, res) => {
 export const updateSet = async (req, res) => {
   try {
     const idSet = req.params.idSet;
-    const updatedSet = req.body;
+    let updatedSet = req.body;
     const checkExisted = await FlashCardSet.findById(idSet);
     if (!checkExisted) {
       return res.status(404).json({ message: "Flash card set not found" });
     }
     if (!checkExisted.createdBy.equals(req.user.id)) {
-      return res
-        .status(404)
-        .json({ message: "You don't have permission to update this card set" });
+      return res.status(404).json({ message: "You don't have permission to update this card set" });
     }
-    await FlashCardSet.findByIdAndUpdate(idSet, updatedSet, { new: true });
+    
+    // Xử lý mảng vocabs
+    if (updatedSet.vocabs && Array.isArray(updatedSet.vocabs)) {
+      const processedVocabs = await Promise.all(updatedSet.vocabs.map(async (vocab) => {
+        if (typeof vocab === "object" && !vocab._id) {
+          // Tạo mới Vocab nếu chưa có _id
+          const dataOfVocab = {
+            term: vocab.term,
+            definition: vocab.definition,
+            image: vocab.image || "",
+            createdBy: req.user._id,
+          };
+          const newVocab = new Vocab(dataOfVocab);
+          await newVocab.save();
+          return newVocab._id;
+        } else if (typeof vocab === "object" && vocab._id) {
+          // Nếu đã có _id, trả về _id
+          return vocab._id;
+        }
+        // Nếu vocab là chuỗi (ID), trả về trực tiếp
+        return vocab;
+      }));
+      updatedSet.vocabs = processedVocabs;
+    }
 
+    await FlashCardSet.findByIdAndUpdate(idSet, updatedSet, { new: true });
     res.status(200).json({ message: "Updated successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });

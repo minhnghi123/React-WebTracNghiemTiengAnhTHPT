@@ -25,6 +25,7 @@ const sampleAllDangBais = [
 export const OnTap = () => {
   return (
     <div className="">
+      
       <AutoGenerateExamForm
         totalQuestions={10}
         easyQuestions={4}
