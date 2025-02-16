@@ -1,7 +1,7 @@
 import { request } from "@/config/request";
 export interface Answer {
   _id?: string;
-  text: string;
+  text?: string;
   correctAnswerForBlank?: string;
   isCorrect: boolean;
 }
@@ -77,6 +77,49 @@ export interface QuestionType {
 }
 export interface ExamCopy {
   examId: string;
+}
+export interface ExamResult {
+  examId: string;
+  userId: string;
+  score: number;
+  correctAnswer: number;
+  wrongAnswer: number;
+  details: QuestionDetail[];
+  wrongAnswerByKnowledge: Record<string, number>;
+  suggestionQuestion: SuggestionQuestion[];
+  videos: Record<string, Video[]>;
+}
+
+export interface QuestionDetail {
+  questionId: string;
+  content: string;
+  answers: Answer[];
+  userAnswers: UserAnswer[];
+  correctAnswerForBlank?: string[];
+  audio?: string | null;
+  isCorrect: boolean;
+}
+
+
+
+export interface UserAnswer {
+  userAnswer: string | string[];
+  answerId?: string | null;
+  isCorrect: boolean;
+}
+
+export interface SuggestionQuestion {
+  _id: string;
+  content: string;
+  thumbnail: string;
+  videoId: string;
+}
+
+export interface Video {
+  title: string;
+  linkUrl: string;
+  videoId: string;
+  thumbnail: string;
 }
 export const QuestionAPI = {
   getAllQuestions: async (page: number) => {

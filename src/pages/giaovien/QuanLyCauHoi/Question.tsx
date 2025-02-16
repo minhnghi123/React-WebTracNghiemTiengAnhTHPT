@@ -10,12 +10,14 @@ type QuestionComponentProps = {
   question: Question;
   onUpdateSuccess: () => void;
   questionType: string;
+  editable?: boolean;
 };
 
 const QuestionComponent: React.FC<QuestionComponentProps> = ({
   onUpdateSuccess,
   question,
   questionType,
+  editable = true,
 }) => {
   const [open, setOpen] = useState(false);
 
@@ -43,6 +45,7 @@ const QuestionComponent: React.FC<QuestionComponentProps> = ({
   };
 
   const [openModal, setOpenModal] = useState<boolean>(false);
+
   return (
     <div className="bg-white p-4 rounded shadow mb-4">
       <h3 className="text-xl font-bold mb-2" style={{ whiteSpace: "pre-wrap" }}>
@@ -61,7 +64,7 @@ const QuestionComponent: React.FC<QuestionComponentProps> = ({
                 }`}
                 style={{ whiteSpace: "pre-wrap" }}
               >
-                {cleanString(answer.text)}
+                {cleanString(answer.text || "")}
               </div>
             ) : (
               <div
@@ -116,7 +119,7 @@ const QuestionComponent: React.FC<QuestionComponentProps> = ({
             Phần nghe
           </Divider>
           <audio controls>
-            <source src={question.audioInfo.filePath} type="audio/mpeg" />
+            <source src={typeof question.audioInfo.filePath === 'string' ? question.audioInfo.filePath : ''} type="audio/mpeg" />
           </audio>
 
           <p
@@ -135,7 +138,10 @@ const QuestionComponent: React.FC<QuestionComponentProps> = ({
           </p>
         </div>
       )}
-      <hr />
+      {
+        editable && (
+          <>
+            <hr />
       <button className="btn btn-primary" onClick={() => setOpenModal(true)}>
         Sửa câu hỏi
       </button>
@@ -174,6 +180,10 @@ const QuestionComponent: React.FC<QuestionComponentProps> = ({
       >
         <p>Bạn có chắc chắn muốn xóa câu hỏi này</p>
       </Modal>
+          </>
+        )
+      }
+      
     </div>
   );
 };
