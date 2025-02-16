@@ -6,6 +6,7 @@ import "./cauhoi.css";
 import { useState } from "react";
 import UpdateQuestionModal from "./CreateQuestion/UpdateQuestion";
 import UpdateBlankQuestionModal from "./CreateQuestion/UpdateQuestionBlank";
+import { UpdateAudioModal } from "../QuanLyFileAudio/FileAudio/UpdateDangCauHoiModal";
 type QuestionComponentProps = {
   question: Question;
   onUpdateSuccess: () => void;
@@ -20,7 +21,7 @@ const QuestionComponent: React.FC<QuestionComponentProps> = ({
   editable = true,
 }) => {
   const [open, setOpen] = useState(false);
-
+  const [openAudioUpdate, setOpenAudioUpdate] = useState(false);
   const handleOk = () => {
     handleDeleteQuestion(question._id || "");
 
@@ -43,7 +44,10 @@ const QuestionComponent: React.FC<QuestionComponentProps> = ({
       }
     }
   };
-
+  const handleAudioUpdateSuccess = () => {
+    setOpenAudioUpdate(false);
+    window.location.reload();
+  };
   const [openModal, setOpenModal] = useState<boolean>(false);
 
   return (
@@ -148,6 +152,9 @@ const QuestionComponent: React.FC<QuestionComponentProps> = ({
       <button className=" btn-w   my-3 mx-3" onClick={() => setOpen(true)}>
         Xóa câu hỏi
       </button>
+      {question.audioInfo && <button className=" btn-w   my-3 mx-3" onClick={() => setOpenAudioUpdate(true)}>
+        Sửa file nghe
+      </button> } 
       {questionType === "6742fb1cd56a2e75dbd817ea" ? (
         <UpdateQuestionModal
           visible={openModal}
@@ -183,7 +190,14 @@ const QuestionComponent: React.FC<QuestionComponentProps> = ({
           </>
         )
       }
-      
+      {question.audioInfo && (
+        <UpdateAudioModal
+          audioData={question.audioInfo}
+          visible={openAudioUpdate}
+          handleClose={handleAudioUpdateSuccess}
+
+        />
+      )}
     </div>
   );
 };

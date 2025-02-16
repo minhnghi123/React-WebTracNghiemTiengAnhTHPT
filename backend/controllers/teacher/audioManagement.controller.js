@@ -14,12 +14,14 @@ export const createAudio  = async (req, res) => {
 
       // Lưu đối tượng mới vào MongoDB
       await newAudio.save();
+      console.log('New audio created:', newAudio);
 
       // Trả về thông tin về file đã upload thành công
       return res.status(200).json({
         success: true,
         message: "File uploaded successfully",
         data: {
+          _id: newAudio._id, // ID của audio
           filePath: req.body.filePath, // Đường dẫn file
           description: newAudio.description, // Mô tả
           transcription: newAudio.transcription, // Bản ghi

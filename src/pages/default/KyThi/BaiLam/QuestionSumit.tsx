@@ -195,7 +195,7 @@ const QuestionSubmit: React.FC<QuestionComponentProps> = ({
                 <Radio value={answer._id}>
                   <span
                     dangerouslySetInnerHTML={{
-                      __html: cleanString(answer.text),
+                      __html: cleanString(answer.text || ""),
                     }}
                   />
                 </Radio>
@@ -252,8 +252,9 @@ const QuestionSubmit: React.FC<QuestionComponentProps> = ({
             Phần nghe
           </Divider>
           <audio controls>
-            <source src={question.audioInfo.filePath} type="audio/mpeg" />
+            <source src={typeof question.audioInfo.filePath === 'string' ? question.audioInfo.filePath : ''} type="audio/mpeg" />
           </audio>
+          
           <p
             className="text-sm text-gray-600 mb-2"
             style={{ whiteSpace: "pre-wrap" }}
