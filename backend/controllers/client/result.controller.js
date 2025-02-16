@@ -1,5 +1,8 @@
 import Result from "../../models/Result.model.js";
 import Exam from "../../models/Exam.model.js";
+import { Question } from "../../models/Question.model.js";
+import { trainModel, predict } from "../../utils/ai.util.js";
+import { getYoutubeVideos } from "../../utils/youtube.util.js";
 
 // [GET]: result/
 export const getAllResults = async (req, res) => {
@@ -40,6 +43,7 @@ export const submitExam = async (req, res) => {
     let correctAnswer = 0;
     let wrongAnswer = 0;
     const questionDetails = [];
+    let wrongAnswerByKnowledge = {};
 
     // Duyệt qua từng câu trả lời người dùng
     for (const answer of answers) {
@@ -121,7 +125,8 @@ export const submitExam = async (req, res) => {
             const userAnswersDetail = userAnswer.map((ua) => {
               const matchedAnswer = correctAnswers.find(
                 (correct) =>
-                  ua.trim().toLowerCase() === correct.correctAnswer.trim().toLowerCase()
+                  ua.trim().toLowerCase() ===
+                  correct.correctAnswer.trim().toLowerCase()
               );
               return {
                 userAnswer: ua,
@@ -150,7 +155,9 @@ export const submitExam = async (req, res) => {
           break;
 
         case "Multiple Choice Questions":
-          const correctAnswerObj = question.answers.find((ans) => ans.isCorrect);
+          const correctAnswerObj = question.answers.find(
+            (ans) => ans.isCorrect
+          );
           if (!correctAnswerObj) {
             return res.status(500).json({
               message: `Question ${questionId} has no correct answer.`,
@@ -185,11 +192,20 @@ export const submitExam = async (req, res) => {
         score++;
       } else {
         wrongAnswer++;
+        const knowledge = question?.knowledge;
+        if (!wrongAnswerByKnowledge[knowledge]) {
+          wrongAnswerByKnowledge[knowledge] = 0;
+        }
+        wrongAnswerByKnowledge[knowledge]++;
       }
 
       questionDetails.push(detail);
     }
 
+    // Goi y bai tap ve cau hoi bi lam sai
+    const suggestionQuestion = await Question.find({
+      knowledge: { $in: Object.keys(wrongAnswerByKnowledge) },
+    }).select("_id content");
     // Lưu kết quả vào CSDL theo schema Result đã cập nhật
     const result = new Result({
       examId,
@@ -198,10 +214,17 @@ export const submitExam = async (req, res) => {
       correctAnswer,
       wrongAnswer,
       questions: questionDetails,
+      suggestionQuestion,
+      wrongAnswerByKnowledge,
     });
 
     await result.save();
-
+    // Tim kiem video tren youtube
+    let videos = {};
+    for (const key in wrongAnswerByKnowledge) {
+      const video = await getYoutubeVideos(key);
+      videos[key] = video;
+    }
     // Phản hồi kết quả cho client
     res.status(200).json({
       code: 200,
@@ -212,6 +235,9 @@ export const submitExam = async (req, res) => {
       correctAnswer,
       wrongAnswer,
       details: questionDetails,
+      wrongAnswerByKnowledge,
+      suggestionQuestion,
+      videos,
     });
   } catch (error) {
     console.error("Error processing exam:", error);
@@ -221,8 +247,6 @@ export const submitExam = async (req, res) => {
     });
   }
 };
-
-
 
 // [PATCH]: /result/delete/:id
 export const deleteResult = async (req, res) => {
