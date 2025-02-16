@@ -175,7 +175,7 @@ export const createExam = async (req, res) => {
       isPublic: isPublic || false,
       startTime: startTime ? new Date(startTime) : undefined,
       endTime: endTime ? new Date(endTime) : undefined,
-      createdBy: res.locals.user.id,
+      createdBy: req.user._id,
     });
 
     // Lưu vào database
@@ -484,7 +484,7 @@ export const copyExamFromOthers = async (req, res) => {
       isPublic: exam.isPublic,
       startTime: exam.startTime,
       endTime: exam.endTime,
-      createdBy: res.locals.user.id,
+      createdBy: req.user._id,
     });
     await newExam.save();
     return res.status(200).json({

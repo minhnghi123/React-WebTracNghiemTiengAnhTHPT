@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ExamAPI, Question, QuestionAPI } from "@/services/teacher/Teacher";
+import { ExamAPI, ExamCopy, Question, QuestionAPI } from "@/services/teacher/Teacher";
 import { Form, InputNumber, Modal, Button, Table, Tag } from "antd";
 import {
   PlusOutlined,
@@ -29,7 +29,7 @@ export const UpdateExamQuestion = () => {
     null
   );
   const [openModalCreate, setOpenModalCreate] = useState<boolean>(false);
-
+  const [examID, setExamID] = useState<string>("");
   const [total2, setTotal2] = useState<number>(1);
   const getAllQuestions = async (page: number) => {
     try {
@@ -92,6 +92,7 @@ export const UpdateExamQuestion = () => {
     const rq = await ExamAPI.getDetailExam(_id);
     if (rq?.success) {
       setSelectedQuestions(rq?.data?.questions);
+      setExamID(rq?.data?._id);
     }
   };
   const shuffleArray = (array: Question[]) => {
@@ -151,7 +152,6 @@ export const UpdateExamQuestion = () => {
     setSelectedQuestion(question);
     setOpenInfoModal(true);
   };
-
   const columns = [
     {
       title: "Nội dung",
@@ -239,6 +239,20 @@ export const UpdateExamQuestion = () => {
       ),
     },
   ];
+  const copyExam = async () => {
+    if (!_id) {
+      alert("Không tìm thấy id");
+      return;
+    }
+    const examCopy: ExamCopy = { examId: examID  };
+    const rq = await ExamAPI.copyExam(examCopy);
+    console.log(rq);
+    if (rq?.success) {
+      alert("Sao chép đề thi thành công");
+    } else {
+      alert("Sao chép đề thi thất bại");
+    }
+  }
 
   return (
     <div>
@@ -252,6 +266,7 @@ export const UpdateExamQuestion = () => {
         </Button>
         <Button
           type="default"
+          className="m-3 "
           onClick={() => {
             if (selectedQuestions.length > 0) {
               setOpenModalCreate(true);
@@ -259,6 +274,17 @@ export const UpdateExamQuestion = () => {
           }}
         >
           Sửa đề thi
+        </Button>
+        <Button
+          type="default"
+          className="m-3 "
+          onClick={() => {
+            if (selectedQuestions.length > 0) {
+              copyExam();
+            } else alert("chưa có câu hỏi nào");
+          }}
+        >
+          Sao chép đề thi
         </Button>
       </div>
       <h3>Danh sách câu hỏi hiện có</h3>
@@ -357,6 +383,7 @@ export const UpdateExamQuestion = () => {
         }}
         dataQuestion={selectedQuestions}
       />
+    
     </div>
   );
 };

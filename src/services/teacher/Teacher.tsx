@@ -75,6 +75,9 @@ export interface QuestionType {
   description?: string;
   deleted: boolean;
 }
+export interface ExamCopy {
+  examId: string;
+}
 export const QuestionAPI = {
   getAllQuestions: async (page: number) => {
     const response = await request.get(
@@ -142,6 +145,14 @@ export const ExamAPI = {
     );
     return response.data;
   },
+  copyExam: async (ExamCopy : ExamCopy) => {
+    
+    const response = await request.post(`/teacher/exam/copy-exam/`,ExamCopy);
+    
+
+    return response.data;
+  }
+  ,
   deleteExam: async (id: string) => {
     const response = await request.delete(`/teacher/exam/delete/${id}`);
     return response.data;
