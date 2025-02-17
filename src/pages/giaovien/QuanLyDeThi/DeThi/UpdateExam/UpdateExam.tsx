@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Modal, Input, Select, Form, DatePicker } from "antd";
+import { Modal, Input, Select, Form, DatePicker, message } from "antd";
 
 import { Exam, ExamAPI, Question } from "@/services/teacher/Teacher";
 import { useNavigate } from "react-router-dom";
@@ -91,7 +91,8 @@ const UpdateExamModal: React.FC<CreateExamModalProps> = ({
 
       onCreateSuccess();
     } else {
-      console.log(response?.message);
+      message.error(response?.message);
+  
     }
   };
   const navigate = useNavigate();

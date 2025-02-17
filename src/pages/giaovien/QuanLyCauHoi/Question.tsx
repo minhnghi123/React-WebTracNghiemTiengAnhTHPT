@@ -12,6 +12,7 @@ type QuestionComponentProps = {
   onUpdateSuccess: () => void;
   questionType: string;
   editable?: boolean;
+  deletetalbe?: boolean;
 };
 
 const QuestionComponent: React.FC<QuestionComponentProps> = ({
@@ -19,6 +20,7 @@ const QuestionComponent: React.FC<QuestionComponentProps> = ({
   question,
   questionType,
   editable = true,
+  deletetalbe = true,
 }) => {
   const [open, setOpen] = useState(false);
   const [openAudioUpdate, setOpenAudioUpdate] = useState(false);
@@ -149,9 +151,14 @@ const QuestionComponent: React.FC<QuestionComponentProps> = ({
       <button className="btn btn-primary" onClick={() => setOpenModal(true)}>
         Sửa câu hỏi
       </button>
-      <button className=" btn-w   my-3 mx-3" onClick={() => setOpen(true)}>
-        Xóa câu hỏi
-      </button>
+      {
+        deletetalbe && (
+          <button className="btn btn-danger" onClick={() => setOpen(true)}>
+            Xóa câu hỏi
+          </button>
+        )
+      }
+    
       {question.audioInfo && <button className=" btn-w   my-3 mx-3" onClick={() => setOpenAudioUpdate(true)}>
         Sửa file nghe
       </button> } 

@@ -1,4 +1,4 @@
-import { Exam, ExamAPI } from "@/services/teacher/Teacher";
+import { Exam, ExamAPI, Question } from "@/services/teacher/Teacher";
 import { Button, Pagination, Space, Tag } from "antd";
 import Table, { ColumnsType } from "antd/es/table";
 
@@ -49,7 +49,7 @@ const columns: ColumnsType<Exam> = [
     key: "questions",
     sorter: (a: Exam, b: Exam) =>
       (a.questions?.length ?? 0) - (b.questions?.length ?? 0),
-    render: (record: Exam) => record.questions?.length ?? 0,
+    render: (record: Question[]) => record.length ?? 0,
   },
 ];
 export const QuanLyDeThi = () => {
@@ -69,6 +69,7 @@ export const QuanLyDeThi = () => {
       
       if (rq?.success) {
         getAllExam(page);
+       
       }
     } catch (error: any) {
       if (error.response) {
