@@ -13,4 +13,5 @@ export const ENV_VARS = {
   REDIS_HOST: process.env.REDIS_HOST,
   YOUTUBE_API_KEY: process.env.YOUTUBE_API_KEY,
   YOUTUBE_API_URL: process.env.YOUTUBE_API_URL,
+  GEMINI_API_KEY: process.env.GEMINI_API_KEY,
 };
