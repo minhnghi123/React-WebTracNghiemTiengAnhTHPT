@@ -34,6 +34,7 @@ import { FlashCardDetail } from "@/pages/default/OnTap/FlashCardDetail";
 import { FlashCardCreate } from "@/pages/default/OnTap/FlashCardCreate";
 import { FlashCardUpdate } from "@/pages/default/OnTap/FlashCardUpdate";
 import { FlashCardExam } from "@/pages/default/OnTap/FlashCardExam";
+import {Profile} from "@/pages/default/Profile";
 
 export enum ERolePath {
   ADMIN = 2,
@@ -77,7 +78,8 @@ export const router = [
       createRoute("/KyThi", <KyThi />, ERolePath.USER),
       createRoute("/KyThi/ChiTiet/:_id", <DetailExam />, ERolePath.USER),
       createRoute("/KyThi/BaiLam/:_id", <BaiLam />, ERolePath.USER),
-      createRoute("/KetQua", <KetQua />, ERolePath.USER),
+      createRoute("/KetQua", <KetQua />, ERolePath.USER), 
+      createRoute("/profile", <Profile />, ERolePath.USER),
       createRoute("/flashcard/create", <FlashCardCreate />, ERolePath.USER),
       createRoute("/flashcard/edit/:_id", <FlashCardUpdate />, ERolePath.USER),
       createRoute("/flashcard/exam/:id", <FlashCardExam />, ERolePath.USER),
@@ -128,7 +130,6 @@ export const router = [
 
 const paths = {
   "/": ["/"],
-  "/profile": ["/profile/:id", "/profile/:id/edit"],
   "/About": ["/About"],
   "/Contact": ["/Contact"],
   "/Login": ["/Login"],
@@ -155,6 +156,7 @@ const paths = {
   "/flashcard/create": ["/flashcard/create"],
   "/flashcard/edit/:_id": ["/flashcard/edit/:_id"],
   "/flashcard/exam/:id": ["/flashcard/exam/:id"],
+  "/profile": ["/profile"],
 } as const;
 
 export type TRoutePaths = (typeof paths)[keyof typeof paths][number] &
