@@ -1,13 +1,16 @@
 import { ExamAPIStudent, ResultAPI, SubmitAnswer } from "@/services/student";
-import { Question } from "@/services/teacher/Teacher";
+import { ExamResult, Question, QuestionAPI } from "@/services/teacher/Teacher";
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import QuestionSumit from "./QuestionSumit";
 import "./BaiLam.css";
-import { Button } from "antd";
+import { Button, Card, Collapse } from "antd";
 import { useAuthContext } from "@/contexts/AuthProvider";
+import "bootstrap/dist/css/bootstrap.min.css";
+import QuestionComponent from "@/pages/giaovien/QuanLyCauHoi/Question";
 
 export const BaiLam = () => {
+  const { Panel } = Collapse;
   const { _id } = useParams<{ _id: string }>();
   const [questions, setQuestions] = useState<Question[]>([]);
   const [title, setTitle] = useState<string>("");
@@ -16,6 +19,7 @@ export const BaiLam = () => {
   const questionRefs = useRef<HTMLDivElement[]>([]);
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
   const { user } = useAuthContext();
+  const resultSectionRef = useRef<HTMLDivElement>(null);
 
   const fetchJoinExam = async () => {
     let id = localStorage.getItem("_idExam") ?? "";
@@ -82,7 +86,10 @@ export const BaiLam = () => {
   const handleQuestionClick = (index: number) => {
     questionRefs.current[index]?.scrollIntoView({ behavior: "smooth" });
   };
-
+  const [Examresult, setExamresult] = useState<ExamResult>();
+  const [listSugesstedQuestion, setListSugesstedQuestion] = useState<
+    Question[]
+  >([]);
   const handleQuestionSubmit = async () => {
     if (isSubmitted) {
       alert("Bạn đã nộp bài rồi");
@@ -97,15 +104,38 @@ export const BaiLam = () => {
     const response = await ResultAPI.submitAnswer(submitAnswer);
     if (response.code === 200) {
       alert("Nộp bài thành công");
+      setExamresult(response);
+      setListSugesstedQuestion(response.suggestionQuestion);
       setIsSubmitted(true);
       localStorage.removeItem("endTime");
       localStorage.removeItem("_idExam");
       localStorage.removeItem("answers");
       setRemainingTime(0);
       setEndTime(undefined);
+      resultSectionRef.current?.scrollIntoView({ behavior: "smooth" });
     }
   };
+  useEffect(() => {
+    const fetchSuggestedQuestions = async () => {
+      const updatedQuestions: Question[] = [];
+      for (const suggestion of listSugesstedQuestion) {
+        if (suggestion._id) {
+          const question = await QuestionAPI.getQuestion(suggestion._id);
+          if (question.code === 200) {
+            updatedQuestions.push(question.question);
+          }
+        }
+      }
+      setListSugesstedQuestion(updatedQuestions);
+    };
 
+    if (isSubmitted) {
+      fetchSuggestedQuestions();
+    }
+    console.log(listSugesstedQuestion);
+  }, [isSubmitted]);
+
+  const [showDetails, setShowDetails] = useState<boolean>(false);
   return (
     <div>
       <center>
@@ -139,6 +169,83 @@ export const BaiLam = () => {
           </div>
         </div>
       </div>
+      {Examresult && (
+        <div className="container my-4" ref={resultSectionRef}>
+          <Card className="shadow p-3">
+            <center>
+              <h3 className="text-primary">Kết quả của bạn</h3>
+              <p>
+                Điểm số:{" "}
+                <strong>
+                  {Examresult.correctAnswer} /{" "}
+                  {Examresult.wrongAnswer + Examresult.correctAnswer}
+                </strong>
+              </p>
+            </center>
+            <Button type="primary" onClick={() => setShowDetails(!showDetails)}>
+              {showDetails ? "Ẩn chi tiết" : "Xem chi tiết"}
+            </Button>
+
+            {showDetails && (
+              <Collapse className="mt-3" defaultActiveKey={["1"]}>
+                <Panel header="Video liên quan" key="1">
+                  {Object.keys(Examresult.videos).map((key) => (
+                    <div key={key} className="mb-3">
+                      <h5 className="text-success">{key}</h5>
+                      <div className="list-group">
+                        {Examresult.videos[key].map((video) => (
+                          <a
+                            key={video.videoId}
+                            href={video.linkUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="list-group-item list-group-item-action"
+                          >
+                            <img
+                              src={video.thumbnail}
+                              alt={video.title}
+                              className="img-fluid rounded mb-2"
+                              style={{ maxWidth: "120px" }}
+                            />
+                            <p className="mb-0">{video.title}</p>
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </Panel>
+
+                <Panel header="Câu hỏi đề nghị" key="2">
+                  <ul className="list-group">
+                    {listSugesstedQuestion &&
+                      listSugesstedQuestion.length > 0 && (
+                        <Collapse className="mt-3">
+                          {listSugesstedQuestion.map(
+                            (question: Question, id) => (
+                              <Panel
+                                header={`${id + 1}. ${question.content.length > 200 
+                                  ? question.content.slice(0, 200) + " ..." 
+                                  : question.content}`}
+                                key={question._id ?? id}
+                              >
+                                <QuestionComponent
+                                  editable={false}
+                                  question={question}
+                                  onUpdateSuccess={() => {}}
+                                  questionType={question.questionType ?? ""}
+                                />
+                              </Panel>
+                            )
+                          )}
+                        </Collapse>
+                      )}
+                  </ul>
+                </Panel>
+              </Collapse>
+            )}
+          </Card>
+        </div>
+      )}
     </div>
   );
 };

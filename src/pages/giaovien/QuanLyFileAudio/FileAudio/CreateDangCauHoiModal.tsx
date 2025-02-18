@@ -5,11 +5,13 @@ import { Audio, AudioAPI } from "@/services/teacher/Teacher";
 interface CreateAudioProps {
   visible: boolean;
   handleClose: () => void;
+  onAudioCreated?: (audioId: string) => void;
 }
 
 export const CreateAudioModal: React.FC<CreateAudioProps> = ({
   visible,
   handleClose,
+  onAudioCreated,
 }) => {
   const [question, setQuestion] = useState<Audio>({
     filePath: "",
@@ -56,7 +58,9 @@ export const CreateAudioModal: React.FC<CreateAudioProps> = ({
 
     const rq = await AudioAPI.createAudio(formData as unknown as Audio);
     if (rq.success) {
-      console.log(rq);
+      console.log("Audio created", rq);
+      console.log(rq.data._id);
+      onAudioCreated?.(rq.data._id);
       saveAudio();
     } else {
       console.log(rq.message);

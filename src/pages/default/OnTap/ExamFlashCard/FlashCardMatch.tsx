@@ -69,7 +69,7 @@ const isCorrectEdge = (
   const original = flashCardSet.vocabs.find(
     (v: any) => typeof v !== "string" && v.term === term
   );
-  return original ? original.definition === definition : false;
+  return original && typeof original !== "string" ? original.definition === definition : false;
 };
 
 export const FlashCardMatch: React.FC<FlashCardMatchProps> = ({
@@ -262,3 +262,7 @@ export const FlashCardMatch: React.FC<FlashCardMatchProps> = ({
     </div>
   );
 };
+function setScore(arg0: null) {
+  throw new Error("Function not implemented.");
+}
+

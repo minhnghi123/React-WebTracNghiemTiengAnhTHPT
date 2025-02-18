@@ -17,7 +17,7 @@ export const questionManagement = async (req, res) => {
     questionType: receivedQuestionTypes,
     deleted: false,
   };
-  const totalItems = await Question.countDocuments({ deleted: false });
+  const totalItems = await Question.countDocuments(condition);
   let limitItems = 4;
   if (req.query.limit) {
     limitItems = parseInt(req.query.limit);
