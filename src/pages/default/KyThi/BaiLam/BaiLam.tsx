@@ -96,14 +96,12 @@ export const BaiLam = () => {
       alert("Bạn đã nộp bài rồi");
       return;
     }
-    setLoading(true); // Set loading to true
     const submitAnswer = {
       examId: localStorage.getItem("_idExam") ?? "",
       userId: user?._id ?? "",
       answers: JSON.parse(localStorage.getItem("answers") ?? "[]"),
     } as SubmitAnswer;
     const response = await ResultAPI.submitAnswer(submitAnswer);
-    setLoading(false); // Set loading to false after response
     if (response.code === 200) {
       alert("Nộp bài thành công");
       setExamresult(response);
@@ -210,7 +208,7 @@ export const BaiLam = () => {
           Đang tạo lời khuyên
         </div>
         </center>
-      ):   <p style={{ whiteSpace: "pre-line" }}>{advice}</p>}
+      ):   <p style={{ whiteSpace: "pre-line" , fontSize: "1rem"}}>{advice}</p>}
                 
                   
                 </Panel>

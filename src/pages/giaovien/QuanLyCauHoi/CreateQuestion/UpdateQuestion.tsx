@@ -4,7 +4,7 @@ import { Option } from "antd/es/mentions";
 import { useState, useEffect } from "react";
 import clsx from "clsx";
 import { CloseCircleOutlined, QuestionOutlined, UploadOutlined } from "@ant-design/icons";
-import { translateEnglishToVietnamese } from "@/services/GropApi";
+import { explainInVietnamese, translateEnglishToVietnamese } from "@/services/GropApi";
 
 interface UpdateQuestionModalProps {
   visible: boolean;
@@ -158,7 +158,7 @@ const UpdateQuestionModal: React.FC<UpdateQuestionModalProps> = ({
     );
     if (!confirm) return;
     try {
-      const rq = await translateEnglishToVietnamese(text);
+      const rq = await explainInVietnamese(text);
       if (rq) {
         setQuestion((prev) => ({ ...prev, explanation: rq }));
       }
