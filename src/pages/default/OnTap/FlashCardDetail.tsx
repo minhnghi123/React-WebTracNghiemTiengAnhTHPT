@@ -43,7 +43,7 @@ export const FlashCardDetail: React.FC = () => {
           Flashcard set không tồn tại
         </h2>
         <div className="mt-4 text-center">
-          <Link to="/flashcards" className="text-blue-500 underline">
+          <Link to="/flashcards" className="text-blue-500 underline" style={{fontSize: "1.25rem"}}>
             Quay lại danh sách flashcard
           </Link>
         </div>

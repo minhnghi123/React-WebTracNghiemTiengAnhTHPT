@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { Modal, Input, Form } from "antd";
+import { Modal, Input, Form, Button, Spin } from "antd";
 import { Audio, AudioAPI } from "@/services/teacher/Teacher";
+import createTranscription from "@/services/GropApi/createTranscription";
 
 interface CreateAudioProps {
   visible: boolean;
@@ -18,6 +19,7 @@ export const CreateAudioModal: React.FC<CreateAudioProps> = ({
     description: "",
     transcription: "",
   });
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -76,6 +78,28 @@ export const CreateAudioModal: React.FC<CreateAudioProps> = ({
    
     handleClose();
   };
+  const handleSubmit = async () => {
+    let fileToUse: File = question.filePath as File;
+
+    if (!fileToUse) {
+      console.error("Vui lòng chọn file nghe");
+      return;
+    }
+    setLoading(true);
+    try {
+      const transcriptionResponse = await createTranscription({
+        file: fileToUse,
+      });
+      setQuestion((prev) => ({
+        ...prev,
+        transcription: transcriptionResponse as string,
+      }));
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <Modal
@@ -101,11 +125,29 @@ export const CreateAudioModal: React.FC<CreateAudioProps> = ({
           />
         </Form.Item>
         <Form.Item label="Transcription">
-          <Input.TextArea
-            name="transcription"
-            value={question.transcription}
-            onChange={handleChange}
-          />
+          <div className="d-flex">
+            <Input.TextArea
+              name="transcription"
+              value={question.transcription}
+              onChange={handleChange}
+              style={{ width: "95%" }}
+            />
+            <div className="align-items-center d-flex flex-column justify-content-center">
+              <Button
+                type="link"
+                icon={
+                  <img
+                    src="/src/Content/img/Google_Translate_Icon.png"
+                    height="16px"
+                    alt="Translate Icon"
+                  />
+                }
+                onClick={handleSubmit}
+                style={{ color: "#FF0000" }}
+              />
+            </div>
+          </div>
+          {loading && <Spin />}
         </Form.Item>
       </Form>
     </Modal>

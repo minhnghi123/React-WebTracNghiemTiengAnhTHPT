@@ -9,6 +9,18 @@ interface UpdateAudioProps {
   audioData: Audio;
 }
 
+const allowedFileTypes = [
+  "flac",
+  "mp3",
+  "mp4",
+  "mpeg",
+  "mpga",
+  "m4a",
+  "ogg",
+  "wav",
+  "webm",
+];
+
 export const UpdateAudioModal: React.FC<UpdateAudioProps> = ({
   visible,
   handleClose,
@@ -28,15 +40,14 @@ export const UpdateAudioModal: React.FC<UpdateAudioProps> = ({
     setQuestion((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Phần xử lý file giống như ở create
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0] || null;
     if (selectedFile) {
-      // Kiểm tra định dạng file
-      if (
-        !["audio/mp3", "audio/wav", "audio/mpeg"].includes(selectedFile.type)
-      ) {
-        alert("Chỉ chấp nhận các file âm thanh định dạng .mp3 hoặc .wav");
+      const fileType = selectedFile.name.split(".").pop()?.toLowerCase();
+      if (!fileType || !allowedFileTypes.includes(fileType)) {
+        alert(
+          "Chỉ chấp nhận các file âm thanh định dạng: flac, mp3, mp4, mpeg, mpga, m4a, ogg, wav, webm"
+        );
         return;
       }
       setFile(selectedFile);
@@ -49,12 +60,10 @@ export const UpdateAudioModal: React.FC<UpdateAudioProps> = ({
       alert("Vui lòng nhập mô tả file nghe");
       return;
     }
-
-    // Tạo FormData để gửi dữ liệu update (bao gồm cả file nếu có)
     const formData = new FormData();
     if (file !== null) {
       console.log("file", file);
-      formData.append("filePath", file); 
+      formData.append("filePath", file);
     }
     formData.append("description", question.description);
     formData.append("transcription", question.transcription);
@@ -64,7 +73,10 @@ export const UpdateAudioModal: React.FC<UpdateAudioProps> = ({
 
   const updateQuestion = async (formData: FormData) => {
     try {
-      const rq = await AudioAPI.updateAudio(formData as unknown as Audio, question._id ?? "");
+      const rq = await AudioAPI.updateAudio(
+        formData as unknown as Audio,
+        question._id ?? ""
+      );
       if (rq?.success) {
         console.log(rq);
         alert("Cập nhật file nghe thành công");
@@ -78,9 +90,7 @@ export const UpdateAudioModal: React.FC<UpdateAudioProps> = ({
   };
 
   const handleSubmit = async () => {
-    const allowedFileTypes = ["mp3", "mp4"];
-
-    let fileToUse: File | null = file;
+    let fileToUse: File | null | string = file;
     if (
       !fileToUse &&
       typeof question.filePath === "string" &&
@@ -103,17 +113,20 @@ export const UpdateAudioModal: React.FC<UpdateAudioProps> = ({
 
     const fileType = fileToUse.name.split(".").pop()?.toLowerCase();
     if (!fileType || !allowedFileTypes.includes(fileType)) {
-      console.error("File phải có định dạng là: [ mp3, mp4 ]");
+      console.error(
+        "File phải có định dạng là: flac, mp3, mp4, mpeg, mpga, m4a, ogg, wav, webm"
+      );
       return;
     }
 
     try {
-      // Ví dụ: gọi API tạo transcription
-      // const transcriptionResponse = await createTranscription({ file: fileToUse });
-      // setQuestion((prev) => ({
-      //   ...prev,
-      //   transcription: transcriptionResponse as string,
-      // }));
+      const transcriptionResponse = await createTranscription({
+        file: fileToUse,
+      });
+      setQuestion((prev) => ({
+        ...prev,
+        transcription: transcriptionResponse as string,
+      }));
     } catch (error) {
       console.error(error);
     }
@@ -132,11 +145,7 @@ export const UpdateAudioModal: React.FC<UpdateAudioProps> = ({
       <Form layout="vertical">
         <Form.Item label="Upload Audio File">
           {/* Sử dụng input file thay vì Upload của antd */}
-          <input
-            type="file"
-            onChange={handleFileChange}
-            accept="audio/*"
-          />
+          <input type="file" onChange={handleFileChange} accept="audio/*" />
           {file && <p>Tệp đã chọn: {file.name}</p>}
         </Form.Item>
         <Form.Item label="Đường dẫn file nghe">
