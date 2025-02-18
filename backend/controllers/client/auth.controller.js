@@ -198,7 +198,8 @@ export async function getUserInfo(req, res) {
     if (!token) {
       return res.status(401).json({ code: 401, message: "Bạn chưa đăng nhập" });
     }
-;
+
+    const decoded = jwt.verify(token, ENV_VARS.JWT_SECRET);
     const user = await TaiKhoan.findById(decoded.userId).select("-password");
 
     if (!user) {
@@ -211,5 +212,4 @@ export async function getUserInfo(req, res) {
     res.status(500).json({ code: 500, message: "Lỗi server" });
   }
 }
-    const decoded = jwt.verify(token, ENV_VARS.JWT_SECRET)
 

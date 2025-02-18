@@ -119,11 +119,7 @@ export const FlashCardExamTrueFalse: React.FC<FlashCardExamTrueFalseProps> = ({ 
         </div>
       )}
 
-      <div className="mt-6 text-center">
-        <Button onClick={() => navigate(`/flashcard/${flashCardSet._id}`)}>
-          Quay lại chi tiết flashcard
-        </Button>
-      </div>
+      
     </div>
   );
 };

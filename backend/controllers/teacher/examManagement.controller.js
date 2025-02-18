@@ -219,19 +219,19 @@ export const updateExam = async (req, res) => {
       });
     }
 
-    if (startTime && new Date(startTime) < new Date()) {
-      return res.status(400).json({
-        success: false,
-        message: "Thời gian bắt đầu không thể là quá khứ!",
-      });
-    }
+    // if (startTime && new Date(startTime) < new Date()) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: "Thời gian bắt đầu không thể là quá khứ!",
+    //   });
+    // }
 
-    if (startTime && new Date(startTime) < new Date()) {
-      return res.status(400).json({
-        success: false,
-        message: "Thời gian bắt đầu không thể là quá khứ!",
-      });
-    }
+    // if (startTime && new Date(startTime) < new Date()) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: "Thời gian bắt đầu không thể là quá khứ!",
+    //   });
+    // }
 
     // Cập nhật đề thi dựa trên slug
     const updatedExam = await Exam.findOneAndUpdate(

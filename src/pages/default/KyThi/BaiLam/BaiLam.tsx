@@ -135,7 +135,6 @@ export const BaiLam = () => {
       setLoading(true);
       if (Examresult) {
         const response = await gemini(Examresult.arrResponse);
-        console.log(response);
         setAdvice(response);
       }
       setLoading(false);
@@ -211,7 +210,7 @@ export const BaiLam = () => {
           Đang tạo lời khuyên
         </div>
         </center>
-      ):   <p>{(advice)}</p>}
+      ):   <p style={{ whiteSpace: "pre-line" }}>{advice}</p>}
                 
                   
                 </Panel>
