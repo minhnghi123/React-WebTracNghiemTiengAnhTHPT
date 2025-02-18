@@ -67,6 +67,10 @@ export const ExamAPIStudent = {
     const response = await request.get(`/exam/?page=${page}`);
     return response.data;
   },
+  getAllExam1000: async (page: number) => {
+    const response = await request.get(`/exam/?limit=1000&?page=${page}`);
+    return response.data;
+  },
   getDetailExam: async (slug: string) => {
     const response = await request.get(`/exam/detail/${slug}`);
     return response.data;

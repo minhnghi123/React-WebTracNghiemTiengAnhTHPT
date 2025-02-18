@@ -4,10 +4,11 @@ import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import QuestionSumit from "./QuestionSumit";
 import "./BaiLam.css";
-import { Button, Card, Collapse } from "antd";
+import { Button, Card, Collapse, Spin } from "antd";
 import { useAuthContext } from "@/contexts/AuthProvider";
 import "bootstrap/dist/css/bootstrap.min.css";
 import QuestionComponent from "@/pages/giaovien/QuanLyCauHoi/Question";
+import { gemini } from "@/services/GoogleApi";
 
 export const BaiLam = () => {
   const { Panel } = Collapse;
@@ -20,7 +21,7 @@ export const BaiLam = () => {
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
   const { user } = useAuthContext();
   const resultSectionRef = useRef<HTMLDivElement>(null);
-
+  const [loading, setLoading] = useState<boolean>(false);
   const fetchJoinExam = async () => {
     let id = localStorage.getItem("_idExam") ?? "";
     if (!id || id === "undefined") {
@@ -95,16 +96,18 @@ export const BaiLam = () => {
       alert("Bạn đã nộp bài rồi");
       return;
     }
+    setLoading(true); // Set loading to true
     const submitAnswer = {
       examId: localStorage.getItem("_idExam") ?? "",
       userId: user?._id ?? "",
       answers: JSON.parse(localStorage.getItem("answers") ?? "[]"),
     } as SubmitAnswer;
-    console.log(submitAnswer);
     const response = await ResultAPI.submitAnswer(submitAnswer);
+    setLoading(false); // Set loading to false after response
     if (response.code === 200) {
       alert("Nộp bài thành công");
       setExamresult(response);
+      
       setListSugesstedQuestion(response.suggestionQuestion);
       setIsSubmitted(true);
       localStorage.removeItem("endTime");
@@ -128,16 +131,29 @@ export const BaiLam = () => {
       }
       setListSugesstedQuestion(updatedQuestions);
     };
-
+    const fetchAdvice = async () => {
+      setLoading(true);
+      if (Examresult) {
+        const response = await gemini(Examresult.arrResponse);
+        console.log(response);
+        setAdvice(response);
+      }
+      setLoading(false);
+    }
     if (isSubmitted) {
       fetchSuggestedQuestions();
+      fetchAdvice();
     }
-    console.log(listSugesstedQuestion);
+
+    
   }, [isSubmitted]);
 
   const [showDetails, setShowDetails] = useState<boolean>(false);
+  const [advice,setAdvice] = useState<string>("");
   return (
     <div>
+
+      
       <center>
         <h1 className="text-2xl font-bold mb-4 ">{title}</h1>
       </center>
@@ -156,13 +172,13 @@ export const BaiLam = () => {
           <div className={`timer ${remainingTime <= 60 ? "critical" : ""}`}>
             Thời gian còn lại: {formatTime(remainingTime)}
             <hr />
-            <Button onClick={handleQuestionSubmit} disabled={isSubmitted}>
+            <Button onClick={handleQuestionSubmit} disabled={isSubmitted || loading}>
               Nộp bài
             </Button>
           </div>
           <div className="question-nav">
             {questions.map((_, index) => (
-              <button key={index} onClick={() => handleQuestionClick(index)}>
+              <button key={index} onClick={() => handleQuestionClick(index)} disabled={loading}>
                 {index + 1}
               </button>
             ))}
@@ -188,6 +204,17 @@ export const BaiLam = () => {
 
             {showDetails && (
               <Collapse className="mt-3" defaultActiveKey={["1"]}>
+                <Panel header="Lời khuyên" key="3">
+                {loading ? (
+      <center>  <div className="loading-overlay">
+          <Spin size="large" />
+          Đang tạo lời khuyên
+        </div>
+        </center>
+      ):   <p>{(advice)}</p>}
+                
+                  
+                </Panel>
                 <Panel header="Video liên quan" key="1">
                   {Object.keys(Examresult.videos).map((key) => (
                     <div key={key} className="mb-3">

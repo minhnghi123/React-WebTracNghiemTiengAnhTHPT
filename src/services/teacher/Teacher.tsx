@@ -88,6 +88,7 @@ export interface ExamResult {
   wrongAnswerByKnowledge: Record<string, number>;
   suggestionQuestion: SuggestionQuestion[];
   videos: Record<string, Video[]>;
+  arrResponse: string;
 }
 
 export interface QuestionDetail {

@@ -4,20 +4,45 @@ import Groq from "groq-sdk";
 const configValue: string = import.meta.env.VITE_GROQ_API_KEY || "default_api_key";
 
 const groq = new Groq({ apiKey: configValue, dangerouslyAllowBrowser: true });
+const configValue2: string =
+  import.meta.env.VITE_MYMEMORY_API_KEY || "default_api_key";
 
-export async function translateEnglishToVietnamese(text: string) {
-  console.log(configValue);
-  const translationCompletion = await groq.chat.completions.create({
-    messages: [
-      {
-        role: "user",
-        content: `Dịch "${text}" từ Anh sang Việt`,
-      },
-    ],
-    model: "llama-3.3-70b-versatile",
-  });
-  return translationCompletion.choices[0]?.message?.content || "Không thể dịch từ tiếng Anh sang tiếng Việt";
+export async function translateEnglishToVietnamese(text: string): Promise<string> {
+  console.log("MyMemory API Key:", configValue2);
+  
+  let url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(
+    text
+  )}&langpair=en|vi`;
+  
+  if (configValue !== "default_api_key") {
+    url += `&key=${configValue2}`;
+  }
+
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+    console.log("Dữ liệu dịch:", data.responseData?.translatedText );
+    return data.responseData?.translatedText ||
+      "Không thể dịch từ tiếng Anh sang tiếng Việt";
+  } catch (error) {
+    console.error("Lỗi khi dịch:", error);
+    return "Không thể dịch từ tiếng Anh sang tiếng Việt";
+  }
 }
+
+// export async function translateEnglishToVietnamese(text: string) {
+//   console.log(configValue);
+//   const translationCompletion = await groq.chat.completions.create({
+//     messages: [
+//       {
+//         role: "user",
+//         content: `Dịch "${text}" từ Anh sang Việt`,
+//       },
+//     ],
+//     model: "llama-3.3-70b-versatile",
+//   });
+//   return translationCompletion.choices[0]?.message?.content || "Không thể dịch từ tiếng Anh sang tiếng Việt";
+// }
 
 
 export async function explainInVietnamese(text: string) {
