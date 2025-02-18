@@ -264,6 +264,29 @@ body {
   
   /* Responsive Styling */
   @media (max-width: 768px) {
+    h2.display-4 {
+      font-size: 3rem;
+    }
+    .feature-heading {
+      font-size: 24px;
+  }
+
+  .col-md-6 {
+      max-width: 100%; /* Full width on small screens */
+      text-align: center;
+  }
+
+  .feature-title {
+      font-size: 20px;
+  }
+
+  .feature-description {
+      font-size: 14px;
+  }
+
+  .image-container {
+      margin-top: 20px;
+  }
     section {
       flex-direction: column;
       align-items: center;
@@ -329,6 +352,34 @@ body {
     .dropdown-menu li a:hover {
       color: #007bff;
     }
+    .dsMenu {
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+    }
+  
+    .dsMenu.visible {
+      display: flex;
+    }
+  
+    .menu-toggle-btn {
+      display: block; 
+    }
+  
+    .navbar-nav {
+      display: none;
+    }
+    .carousel .bg-image {
+      height: 600px; /* Increase height for larger screens */
+    }
+  
+    .position-absolute {
+      text-align: left;
+    }
+  
+    .phone-image {
+      max-width: 300px;
+    }
   }
 
   .container.text-center {
@@ -355,34 +406,6 @@ body {
 .main-image:hover {
   transform: scale(1.05);
   opacity: 0.9;
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .feature-heading {
-      font-size: 24px;
-  }
-
-  .row {
-      flex-direction: column; /* Stack columns vertically */
-  }
-
-  .col-md-6 {
-      max-width: 100%; /* Full width on small screens */
-      text-align: center;
-  }
-
-  .feature-title {
-      font-size: 20px;
-  }
-
-  .feature-description {
-      font-size: 14px;
-  }
-
-  .image-container {
-      margin-top: 20px;
-  }
 }
 
 @media (max-width: 576px) {
@@ -452,26 +475,6 @@ body {
     line-height: 1.6;
     margin-top: 10px;
 }
-/* Dành cho màn hình nhỏ */
-@media (max-width: 768px) {
-  .dsMenu {
-    display: none;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .dsMenu.visible {
-    display: flex;
-  }
-
-  .menu-toggle-btn {
-    display: block; 
-  }
-
-  .navbar-nav {
-    display: none;
-  }
-}
 
 /* Điều chỉnh menu dropdown */
 .ant-dropdown-menu {
@@ -534,12 +537,6 @@ body {
   background-color: #f9f9f9; /* Light background for contrast */
   border-radius: 10px; /* Rounded corners */
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
-}
-
-/* Info section styling */
-.info-section {
-  flex: 1; /* Takes up available space proportionally */
-  max-width: 50%; /* Limit width for readability */
 }
 
 .info-section h2 {
@@ -608,25 +605,6 @@ body {
 .image-section img:hover {
   transform: scale(1.05); /* Slight zoom on hover */
   opacity: 0.9; /* Dimming effect */
-}
-
-/* Responsive Design */
-@media (min-width: 768px) {
-  .carousel .bg-image {
-    height: 600px; /* Increase height for larger screens */
-  }
-
-  .position-absolute {
-    text-align: left;
-  }
-
-  .image-container img {
-    max-width: 600px;
-  }
-
-  .phone-image {
-    max-width: 300px;
-  }
 }
 
 @media (min-width: 992px) {
@@ -794,12 +772,6 @@ h2.display-4 {
   background: linear-gradient(90deg, #42a5f5, #7e57c2);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-}
-
-@media (min-width: 768px) {
-  h2.display-4 {
-    font-size: 3rem;
-  }
 }
 
 /* Buttons */

@@ -5,6 +5,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Button } from "antd";
 import { KetQua } from "../KetQua";
+import "./Detail.css";
 export const DetailExam = () => {
   const { _id } = useParams<{ _id: string }>();
   const [exam, setExam] = useState<Exam | null>(null);
