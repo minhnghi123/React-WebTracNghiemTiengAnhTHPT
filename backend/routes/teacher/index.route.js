@@ -12,15 +12,14 @@ import {
 
 const indexTeacher = (app) => {
   app.use(protectedRoute);
-  app.use(isTeacher);
-  app.use("/teacher", questionManagementRoute);
+  app.use("/teacher", isTeacher, questionManagementRoute);
 
-  app.use("/teacher/exam", examManagementRoute);
+  app.use("/teacher/exam", isTeacher, examManagementRoute);
 
-  app.use("/teacher/question-types", questionTypeManagementRoute);
+  app.use("/teacher/question-types", isTeacher, questionTypeManagementRoute);
 
-  app.use("/teacher/audio", audioManagementRoute);
+  app.use("/teacher/audio", isTeacher, audioManagementRoute);
 
-  app.use("/teacher/classroom", classroomManagementRoute);
+  app.use("/teacher/classroom", isTeacher, classroomManagementRoute);
 };
 export default indexTeacher;
