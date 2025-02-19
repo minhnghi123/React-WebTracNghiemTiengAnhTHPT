@@ -192,3 +192,24 @@ export async function resetPassword(req, res) {
     res.status(400).json({ code: 400, message: "Internal server error" });
   }
 }
+export async function getUserInfo(req, res) {
+  try {
+    const token = req.cookies["jwt-token"];
+    if (!token) {
+      return res.status(401).json({ code: 401, message: "Bạn chưa đăng nhập" });
+    }
+
+    const decoded = jwt.verify(token, ENV_VARS.JWT_SECRET);
+    const user = await TaiKhoan.findById(decoded.userId).select("-password");
+
+    if (!user) {
+      return res.status(404).json({ code: 404, message: "Không tìm thấy người dùng" });
+    }
+
+    res.status(200).json({ code: 200, user });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ code: 500, message: "Lỗi server" });
+  }
+}
+

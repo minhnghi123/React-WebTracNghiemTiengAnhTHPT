@@ -45,7 +45,7 @@ export const Navbar = () => {
     {
       key: "1",
       label: (
-        <a rel="noopener noreferrer" href="#">
+        <a rel="noopener noreferrer" href="/profile">
           Thông tin cá nhân
         </a>
       ),

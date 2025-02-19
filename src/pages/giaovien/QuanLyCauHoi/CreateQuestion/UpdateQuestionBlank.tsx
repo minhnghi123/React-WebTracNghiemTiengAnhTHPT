@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { Modal, Button, Input, Form, Select } from "antd";
-import { Question, QuestionAPI } from "@/services/teacher/Teacher"; // Adjust the import path as needed
+import { Modal, Button, Input, Form, Select, Upload } from "antd";
+import { Question, QuestionAPI, AudioAPI, Audio } from "@/services/teacher/Teacher"; // Adjust the import path as needed
+import { UploadOutlined } from "@ant-design/icons";
 
 interface UpdateBlankQuestionModalProps {
   visible: boolean;
@@ -14,15 +15,27 @@ const UpdateBlankQuestionModal: React.FC<UpdateBlankQuestionModalProps> = ({
   question2: initialQuestion,
 }) => {
   const [question, setQuestion] = useState<Question>(initialQuestion);
+  const [audioFile, setAudioFile] = useState<File | null>(null);
+  const [existingAudios, setExistingAudios] = useState<Audio[]>([]);
+
+  useEffect(() => {
+    setQuestion(initialQuestion);
+  }, [initialQuestion]);
+
+  useEffect(() => {
+    const fetchAudios = async () => {
+      const response = await AudioAPI.getAllAudio();
+      setExistingAudios(response);
+    };
+    fetchAudios();
+  }, []);
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
     setQuestion((prev) => ({ ...prev, [name]: value }));
   };
-  useEffect(() => {
-    setQuestion(initialQuestion);
-  }, [initialQuestion]);
 
   const handleAnswerChange = (
     index: number,
@@ -52,6 +65,34 @@ const UpdateBlankQuestionModal: React.FC<UpdateBlankQuestionModalProps> = ({
     const newAnswers = question.answers.filter((_, i) => i !== index);
     setQuestion((prev) => ({ ...prev, answers: newAnswers }));
   };
+
+  const handleAudioChange = (info: any) => {
+    if (info.file.status === "done") {
+      setAudioFile(info.file.originFileObj);
+    }
+  };
+
+  const handleSaveClick = async () => {
+    if (!question.content.trim()) {
+      return Modal.error({
+        title: "Lỗi",
+        content: "Nội dung câu hỏi không được để trống",
+      });
+    }
+
+    if (audioFile) {
+      const formData = new FormData();
+      formData.append("filePath", audioFile);
+      formData.append("description", question.content);
+      const response = await AudioAPI.createAudio(formData as unknown as Audio);
+      if (response.success) {
+        question.audio = response.data._id;
+      }
+    }
+
+    UpdateQuestion(question);
+  };
+
   const UpdateQuestion = async (q: Question) => {
     try {
       if (!q._id) return;
@@ -67,9 +108,6 @@ const UpdateBlankQuestionModal: React.FC<UpdateBlankQuestionModalProps> = ({
         console.log(error.response.data.message);
       }
     }
-  };
-  const handleSaveClick = async () => {
-    UpdateQuestion(question);
   };
 
   return (
@@ -156,6 +194,28 @@ const UpdateBlankQuestionModal: React.FC<UpdateBlankQuestionModalProps> = ({
             onChange={handleChange}
             style={{ width: "95% " }}
           />
+        </Form.Item>
+
+        <Form.Item label="Audio">
+          <Upload
+            beforeUpload={() => false}
+            onChange={handleAudioChange}
+            accept="audio/*"
+          >
+            <Button icon={<UploadOutlined />}>Upload Audio</Button>
+          </Upload>
+          <Select
+            placeholder="Hoặc chọn audio có sẵn"
+            value={question.audio}
+            onChange={(value) => setQuestion((prev) => ({ ...prev, audio: value }))}
+            style={{ width: "100%", marginTop: "10px" }}
+          >
+            {existingAudios.map((audio) => (
+              <Select.Option key={audio._id} value={audio._id}>
+                {audio.description}
+              </Select.Option>
+            ))}
+          </Select>
         </Form.Item>
       </Form>
     </Modal>

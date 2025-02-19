@@ -1,5 +1,5 @@
-import { Exam } from "@/services/teacher/Teacher";
-import { Button, Pagination } from "antd";
+import { Exam, Question } from "@/services/teacher/Teacher";
+import { Button } from "antd";
 import Table, { ColumnsType } from "antd/es/table";
 
 import { useEffect, useState } from "react";
@@ -48,26 +48,28 @@ const columns: ColumnsType<Exam> = [
     key: "questions",
     sorter: (a: Exam, b: Exam) =>
       (a.questions?.length ?? 0) - (b.questions?.length ?? 0),
-    render: (record: Exam) => record.questions?.length ?? 0,
+    render: (record: Question[]) => record.length ?? 0,
   },
 ];
 export const KyThi = () => {
-  const [page, setPage] = useState<number>(1);
-  const [total, setTotal] = useState<number>(0);
   const [data, setData] = useState<Exam[]>();
+  const [total, setTotal] = useState<number>(0);
 
   const getAllExam = async (page: number) => {
     try {
-      const rq = await ExamAPIStudent.getAllExam(page);
-      console.log(rq);
+      const rq = await ExamAPIStudent.getAllExam1000(page);
+      //console.log(rq);
       if (rq?.code === 200) {
-        setData(rq?.exams);
-        setTotal(rq?.totalPage);
-        setPage(rq?.currentPage);
-
-        console.log(data);
-        console.log(total);
-        console.log(page);
+        const now = new Date().getTime();
+        const filteredExams = rq.exams.filter((exam: Exam) => {
+          const startTime = new Date(exam.startTime).getTime();
+          const endTime = exam.endTime
+            ? new Date(exam.endTime).getTime()
+            : Infinity;
+          return startTime <= now && now <= endTime;
+        });
+        setData((prev) => [...(prev || []), ...filteredExams]);
+        setTotal(rq?.total);
       }
     } catch (error: any) {
       if (error.response) {
@@ -77,12 +79,16 @@ export const KyThi = () => {
   };
 
   useEffect(() => {
-    getAllExam(page);
-  }, [page]);
+    if (total > 1) {
+      Promise.all(
+        Array.from({ length: total - 1 }, (_, i) => getAllExam(i + 2))
+      );
+    }
+  }, [total]);
+  useEffect(() => {
+    getAllExam(1);
+  }, []);
 
-  const onPageChange = (page: number) => {
-    setPage(page);
-  };
   const navigator = useNavigate();
   const navagiteToDetail = (id: string) => {
     navigator(`/KyThi/ChiTiet/${id}`);
@@ -116,18 +122,8 @@ export const KyThi = () => {
               ),
             },
           ]}
-          pagination={false}
         />
       ) : null}
-      <div className="flex justify-center mt-4">
-        <Pagination
-          current={page}
-          total={total}
-          onChange={onPageChange}
-          pageSize={1}
-          style={{ display: "flex", justifyContent: "center" }}
-        />
-      </div>
     </div>
   );
 };

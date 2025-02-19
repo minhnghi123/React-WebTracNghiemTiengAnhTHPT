@@ -1,4 +1,4 @@
-import { Exam, ExamAPI } from "@/services/teacher/Teacher";
+import { Exam, ExamAPI, Question } from "@/services/teacher/Teacher";
 import { Button, Pagination, Space, Tag } from "antd";
 import Table, { ColumnsType } from "antd/es/table";
 
@@ -49,7 +49,7 @@ const columns: ColumnsType<Exam> = [
     key: "questions",
     sorter: (a: Exam, b: Exam) =>
       (a.questions?.length ?? 0) - (b.questions?.length ?? 0),
-    render: (record: Exam) => record.questions?.length ?? 0,
+    render: (record: Question[]) => record.length ?? 0,
   },
 ];
 export const QuanLyDeThi = () => {
@@ -63,11 +63,13 @@ export const QuanLyDeThi = () => {
   const [showModalExport, setShowModalExport] = useState<boolean>(false);
  const [currentSlug, setCurrentSlug] = useState<string>("");
   const changeSatusExam = async (id: string) => {
+    
     try {
       const rq = await ExamAPI.changePublic(id);
-
+      
       if (rq?.success) {
         getAllExam(page);
+       
       }
     } catch (error: any) {
       if (error.response) {
@@ -132,6 +134,7 @@ export const QuanLyDeThi = () => {
   );
   const [showModalCreatAuto, setShowModalCreatAuto] = useState<boolean>(false);
   const navigatetor = useNavigate();
+  
   return (
     <div className="container mx-auto p-4">
       <center>
@@ -166,12 +169,13 @@ export const QuanLyDeThi = () => {
                 { text: "Riêng", value: false },
               ],
               onFilter: (value, record) => record.isPublic === value,
-              render: (record: Exam) => (
+              render: (_, record) => (
+              
                 <center>
                   {record.isPublic ? (
                     <Tag
                       color="green"
-                      onClick={() => changeSatusExam(record._id || "")}
+                      onClick={() => changeSatusExam(record._id || "" )}
                       style={{ cursor: "pointer" }}
                     >
                       Công khai
@@ -182,6 +186,7 @@ export const QuanLyDeThi = () => {
                       onClick={() => changeSatusExam(record._id || "")}
                       style={{ cursor: "pointer" }}
                     >
+                     
                       Riêng
                     </Tag>
                   )}
@@ -200,6 +205,7 @@ export const QuanLyDeThi = () => {
                     style={{ backgroundColor: "orange" }}
                     onClick={() => setShowModalSchedule(record._id || "")}
                   >
+                    
                     Sửa lịch
                   </Button>
                   <Button

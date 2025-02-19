@@ -1,10 +1,11 @@
-import { Question, QuestionAPI } from "@/services/teacher/Teacher";
-import { Button, Form, Input, Modal, Select } from "antd";
+import { Question, QuestionAPI, AudioAPI, Audio } from "@/services/teacher/Teacher";
+import { Button, Form, Input, Modal, Select, Upload } from "antd";
 import { Option } from "antd/es/mentions";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import clsx from "clsx";
-import { CloseCircleOutlined, QuestionOutlined } from "@ant-design/icons";
-import { translateEnglishToVietnamese } from "@/services/GropApi";
+import { CloseCircleOutlined, QuestionOutlined, UploadOutlined } from "@ant-design/icons";
+import { explainInVietnamese, translateEnglishToVietnamese } from "@/services/GropApi";
+
 interface UpdateQuestionModalProps {
   visible: boolean;
   handleClose: () => void;
@@ -19,6 +20,16 @@ const UpdateQuestionModal: React.FC<UpdateQuestionModalProps> = ({
   onUpdateSuccess,
 }) => {
   const [question, setQuestion] = useState<Question>(question2);
+  const [audioFile, setAudioFile] = useState<File | null>(null);
+  const [existingAudios, setExistingAudios] = useState<Audio[]>([]);
+
+  useEffect(() => {
+    const fetchAudios = async () => {
+      const response = await AudioAPI.getAllAudio();
+      setExistingAudios(response);
+    };
+    fetchAudios();
+  }, []);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -29,7 +40,6 @@ const UpdateQuestionModal: React.FC<UpdateQuestionModalProps> = ({
 
   const handleLevelChange = (value: "easy" | "medium" | "hard") => {
     setQuestion((prev) => ({ ...prev, level: value }));
-    console.log(question);
   };
 
   const handleAnswerChange = (
@@ -63,8 +73,13 @@ const UpdateQuestionModal: React.FC<UpdateQuestionModalProps> = ({
     setQuestion((prev) => ({ ...prev, answers: newAnswers }));
   };
 
-  const handleSaveClick = () => {
-    console.log(question);
+  const handleAudioChange = (info: any) => {
+    if (info.file.status === "done") {
+      setAudioFile(info.file.originFileObj);
+    }
+  };
+
+  const handleSaveClick = async () => {
     if (!question.content.trim()) {
       return Modal.error({
         title: "Lỗi",
@@ -72,7 +87,7 @@ const UpdateQuestionModal: React.FC<UpdateQuestionModalProps> = ({
       });
     }
 
-    const emptyAnswer = question.answers.some((answer) => !answer.text.trim());
+    const emptyAnswer = question.answers.some((answer) => !answer.text?.trim());
     if (emptyAnswer) {
       return Modal.error({
         title: "Lỗi",
@@ -86,17 +101,27 @@ const UpdateQuestionModal: React.FC<UpdateQuestionModalProps> = ({
         title: "Lỗi",
         content: "Cần phải chọn ít nhất 1 đáp án đúng",
       });
-    } else UpdateQuestion(question);
+    }
+
+    if (audioFile) {
+      const formData = new FormData();
+      formData.append("filePath", audioFile);
+      formData.append("description", question.content);
+      const response = await AudioAPI.createAudio(formData as unknown as Audio);
+      if (response.success) {
+        question.audio = response.data._id;
+      }
+    }
+
+    UpdateQuestion(question);
   };
+
   const UpdateQuestion = async (q: Question) => {
     try {
-      console.log("123123");
       if (!q._id) return;
       const rq = await QuestionAPI.UpdateQuestion(q, q._id);
-      console.log(rq);
       if (rq?.code === 200) {
         alert("Sửa câu hỏi thành công");
-
         handleClose();
         onUpdateSuccess();
       }
@@ -106,6 +131,7 @@ const UpdateQuestionModal: React.FC<UpdateQuestionModalProps> = ({
       }
     }
   };
+
   const handleTranslate = async (text: string) => {
     const confirm = window.confirm(
       "Bạn có muốn dịch câu hỏi không? Sẽ xóa dữ liệu dịch cũ"
@@ -113,7 +139,6 @@ const UpdateQuestionModal: React.FC<UpdateQuestionModalProps> = ({
     if (!confirm) return;
     try {
       const rq = await translateEnglishToVietnamese(text);
-      console.log(rq);
       if (rq) {
         setQuestion((prev) => ({ ...prev, translation: rq }));
       }
@@ -123,6 +148,7 @@ const UpdateQuestionModal: React.FC<UpdateQuestionModalProps> = ({
       }
     }
   };
+
   const handleExplain = async () => {
     const text = `${question.content}\n${question.answers
       .map((answer, index) => `$ ${answer.text}`)
@@ -132,8 +158,7 @@ const UpdateQuestionModal: React.FC<UpdateQuestionModalProps> = ({
     );
     if (!confirm) return;
     try {
-      const rq = await translateEnglishToVietnamese(text);
-      console.log(rq);
+      const rq = await explainInVietnamese(text);
       if (rq) {
         setQuestion((prev) => ({ ...prev, explanation: rq }));
       }
@@ -143,9 +168,10 @@ const UpdateQuestionModal: React.FC<UpdateQuestionModalProps> = ({
       }
     }
   };
+
   return (
     <Modal
-      title="Thêm câu hỏi"
+      title="Sửa câu hỏi"
       visible={visible}
       onCancel={handleClose}
       onOk={handleSaveClick}
@@ -233,6 +259,7 @@ const UpdateQuestionModal: React.FC<UpdateQuestionModalProps> = ({
             Thêm câu trả lời
           </Button>
         </Form.Item>
+
         <Form.Item label="Dịch">
           <div className="d-flex">
             <Input.TextArea
@@ -274,6 +301,28 @@ const UpdateQuestionModal: React.FC<UpdateQuestionModalProps> = ({
               />
             </div>
           </div>
+        </Form.Item>
+
+        <Form.Item label="Audio">
+          <Upload
+            beforeUpload={() => false}
+            onChange={handleAudioChange}
+            accept="audio/*"
+          >
+            <Button icon={<UploadOutlined />}>Upload Audio</Button>
+          </Upload>
+          <Select
+            placeholder="Hoặc chọn audio có sẵn"
+            value={question.audio}
+            onChange={(value) => setQuestion((prev) => ({ ...prev, audio: value }))}
+            style={{ width: "100%", marginTop: "10px" }}
+          >
+            {existingAudios.map((audio) => (
+              <Option key={audio._id} value={audio._id}>
+                {audio.description}
+              </Option>
+            ))}
+          </Select>
         </Form.Item>
       </Form>
     </Modal>

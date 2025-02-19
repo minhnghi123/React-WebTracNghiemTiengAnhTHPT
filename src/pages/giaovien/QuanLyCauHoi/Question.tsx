@@ -6,19 +6,24 @@ import "./cauhoi.css";
 import { useState } from "react";
 import UpdateQuestionModal from "./CreateQuestion/UpdateQuestion";
 import UpdateBlankQuestionModal from "./CreateQuestion/UpdateQuestionBlank";
+import { UpdateAudioModal } from "../QuanLyFileAudio/FileAudio/UpdateDangCauHoiModal";
 type QuestionComponentProps = {
   question: Question;
   onUpdateSuccess: () => void;
   questionType: string;
+  editable?: boolean;
+  deletetalbe?: boolean;
 };
 
 const QuestionComponent: React.FC<QuestionComponentProps> = ({
   onUpdateSuccess,
   question,
   questionType,
+  editable = true,
+  deletetalbe = true,
 }) => {
   const [open, setOpen] = useState(false);
-
+  const [openAudioUpdate, setOpenAudioUpdate] = useState(false);
   const handleOk = () => {
     handleDeleteQuestion(question._id || "");
 
@@ -41,8 +46,12 @@ const QuestionComponent: React.FC<QuestionComponentProps> = ({
       }
     }
   };
-
+  const handleAudioUpdateSuccess = () => {
+    setOpenAudioUpdate(false);
+    window.location.reload();
+  };
   const [openModal, setOpenModal] = useState<boolean>(false);
+
   return (
     <div className="bg-white p-4 rounded shadow mb-4">
       <h3 className="text-xl font-bold mb-2" style={{ whiteSpace: "pre-wrap" }}>
@@ -61,7 +70,7 @@ const QuestionComponent: React.FC<QuestionComponentProps> = ({
                 }`}
                 style={{ whiteSpace: "pre-wrap" }}
               >
-                {cleanString(answer.text)}
+                {cleanString(answer.text || "")}
               </div>
             ) : (
               <div
@@ -116,7 +125,7 @@ const QuestionComponent: React.FC<QuestionComponentProps> = ({
             Phần nghe
           </Divider>
           <audio controls>
-            <source src={question.audioInfo.filePath} type="audio/mpeg" />
+            <source src={typeof question.audioInfo.filePath === 'string' ? question.audioInfo.filePath : ''} type="audio/mpeg" />
           </audio>
 
           <p
@@ -135,13 +144,24 @@ const QuestionComponent: React.FC<QuestionComponentProps> = ({
           </p>
         </div>
       )}
-      <hr />
-      <button className="btn btn-primary" onClick={() => setOpenModal(true)}>
+      {
+        editable && (
+          <>
+            <hr />
+      <button className="btn btn-primary my-3 mx-3" onClick={() => setOpenModal(true)}>
         Sửa câu hỏi
       </button>
-      <button className=" btn-w   my-3 mx-3" onClick={() => setOpen(true)}>
-        Xóa câu hỏi
-      </button>
+      {
+        deletetalbe && (
+          <button className="btn btn-danger my-3 mx-3" onClick={() => setOpen(true)}>
+            Xóa câu hỏi
+          </button>
+        )
+      }
+    
+      {question.audioInfo && <button className=" btn   my-3 mx-3" onClick={() => setOpenAudioUpdate(true)}>
+        Sửa file nghe
+      </button> } 
       {questionType === "6742fb1cd56a2e75dbd817ea" ? (
         <UpdateQuestionModal
           visible={openModal}
@@ -174,6 +194,17 @@ const QuestionComponent: React.FC<QuestionComponentProps> = ({
       >
         <p>Bạn có chắc chắn muốn xóa câu hỏi này</p>
       </Modal>
+          </>
+        )
+      }
+      {question.audioInfo && (
+        <UpdateAudioModal
+          audioData={question.audioInfo}
+          visible={openAudioUpdate}
+          handleClose={handleAudioUpdateSuccess}
+
+        />
+      )}
     </div>
   );
 };

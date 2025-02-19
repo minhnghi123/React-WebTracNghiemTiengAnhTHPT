@@ -8,6 +8,7 @@ import clsx from "clsx";
 interface WrittenQuestion {
   id: string;
   term: string;
+  definition?: string;
   correctAnswer: string;
 }
 
@@ -30,7 +31,9 @@ export const FlashCardExamWritten: React.FC<FlashCardExamWrittenProps> = ({ flas
         .map((vocab: any) => ({
           id: vocab._id || "",
           term: vocab.term,
-          correctAnswer: vocab.definition,
+          correctAnswer: vocab.term,
+          definition: vocab.definition,
+          
         }));
       setQuestions(generatedQuestions);
     }
@@ -76,7 +79,7 @@ export const FlashCardExamWritten: React.FC<FlashCardExamWrittenProps> = ({ flas
               <div className="question-col label-col">
                
                 <p>
-                Câu {index + 1}: Viết định nghĩa của từ <strong>{q.term}</strong>
+                Câu {index + 1}: Viết tiếng Anh của từ <strong>{q.definition}</strong>
                 </p>
               </div>
               <div className="question-col input-col">
