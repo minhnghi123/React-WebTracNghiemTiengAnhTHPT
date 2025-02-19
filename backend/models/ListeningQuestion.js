@@ -55,5 +55,5 @@ const listeningQuestionSchema  = new Schema(
 );
 
 // Tạo model từ schema
-const ListeningQuestion = mongoose.model("ListeningQuetion", listeningQuestionSchema, "listening-questions");
+const ListeningQuestion = mongoose.model("ListeningQuestion", listeningQuestionSchema, "listening-questions");
 export default ListeningQuestion;

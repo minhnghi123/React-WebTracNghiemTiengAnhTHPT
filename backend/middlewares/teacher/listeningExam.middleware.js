@@ -1,4 +1,4 @@
-export const listeningQuestionMiddleware = (req, res, next) => {
+export const listeningExamMiddleware = (req, res, next) => {
     const { teacherId } = req.body;  
     const userId = req.userId;      
   
