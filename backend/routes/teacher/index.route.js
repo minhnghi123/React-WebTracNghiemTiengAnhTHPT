@@ -10,6 +10,7 @@ import {
   isTeacher,
 } from "../../middlewares/protectedRoute.middleware.js";
 
+
 const indexTeacher = (app) => {
   app.use(protectedRoute);
   app.use(isTeacher);

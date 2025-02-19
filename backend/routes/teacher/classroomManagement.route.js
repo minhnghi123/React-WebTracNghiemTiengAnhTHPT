@@ -4,10 +4,12 @@ import {
     addStudentsToClassroom, removeStudentFromClassroom, addExamToClassroom, removeExamFromClassroom, removeStudentsFromClassroom
   } from "../../controllers/teacher/classroomManagement.controller.js";
 
+import { validateClassroom } from "../../validate/teacher/classroom.validate.js"
+
 const router = express.Router();
 
 // Route để tạo lớp học mới
-router.post('/create', createClassroom);
+router.post('/create', validateClassroom, createClassroom);
 
 // Route để lấy danh sách tất cả lớp học
 router.get('/all', getAllClassrooms);
