@@ -10,6 +10,7 @@ import { ENV_VARS } from "./config/envVars.config.js";
 import cookieParser from "cookie-parser";
 import indexClient from "./routes/client/index.route.js";
 import indexTeacher from "./routes/teacher/index.route.js";
+import indexAdmin from "./routes/admin/index.route.js";
 connect();
 const app = express();
 // Configure CORS
@@ -28,6 +29,7 @@ await redisService.connect();
 
 indexClient(app);
 indexTeacher(app);
+indexAdmin(app);
 
 app.use((req, res, next) => {
   res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
