@@ -13,9 +13,9 @@ router.get('/my-self', getAllListeningExamsOfMyselfController);
 
 router.post('/create', createListeningExamController);
 
-router.patch('/update/:examId', updateListeningExamController);
+router.patch('/update/:examId', listeningExamMiddleware, updateListeningExamController);
 
-router.delete('/delete/:examId', deleteExamController);
+router.delete('/delete/:examId',listeningExamMiddleware,  deleteExamController);
 
 
 export default router;

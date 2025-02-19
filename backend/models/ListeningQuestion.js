@@ -48,6 +48,9 @@ const listeningQuestionSchema  = new Schema(
       required: true,
     },
     isDeleted: { type: Boolean, default: false },
+    blankAnswer: {
+      type: String
+    },
   },
   {
     timestamps: true,

@@ -24,7 +24,6 @@ export const getAllListeningQuestionsController = async (req, res) => {
 export const getListeningQuestionController = async (req, res) => {
   try {
     const { id } = req.params;
-   
 
     const question = await ListeningQuestion.findOne({
       _id: id,
@@ -50,25 +49,38 @@ export const getListeningQuestionController = async (req, res) => {
 export const createListeningQuestion = async (req, res) => {
   try {
     const data = req.body;
+    let newQuestion;
+    if (data.questionType == "6742fb3bd56a2e75dbd817ec") {
+      const newQuestionFillTheBlank = new ListeningQuestion({
+        teacherId: data.teacherId,
+        questionText: data.questionText,
+        questionType: data.questionType,
+        difficulty: data.difficulty,
+        blankAnswer: data.blankAnswer,
+      });
+      newQuestion = newQuestionFillTheBlank
 
-    const options = data.options.map((optionText, index) => ({
-      option_id: new mongoose.Types.ObjectId(),
-      optionText,
-    }));
+    } else {
+      const options = data.options.map((optionText, index) => ({
+        option_id: new mongoose.Types.ObjectId(),
+        optionText,
+      }));
 
-    const correctAnswer = data.correctAnswer.map((index) => ({
-      answer_id: options[index].option_id,
-      answer: options[index].optionText,
-    }));
+      const correctAnswer = data.correctAnswer.map((index) => ({
+        answer_id: options[index].option_id,
+        answer: options[index].optionText,
+      }));
 
-    const newQuestion = new ListeningQuestion({
-      teacherId: data.teacherId,
-      questionText: data.questionText,
-      questionType: data.questionType,
-      options,
-      correctAnswer,
-      difficulty: data.difficulty,
-    });
+      const newRestingQuestion = new ListeningQuestion({
+        teacherId: data.teacherId,
+        questionText: data.questionText,
+        questionType: data.questionType,
+        options,
+        correctAnswer,
+        difficulty: data.difficulty,
+      });
+      newQuestion = newRestingQuestion
+    }
 
     await newQuestion.save();
 
@@ -91,22 +103,20 @@ export const updateListeningQuestion = async (req, res) => {
     const { id } = req.params;
     const data = req.body;
 
-
     const options =
       data.options?.map((optionText) => ({
         option_id: new mongoose.Types.ObjectId(),
         optionText,
       })) || [];
 
-
     const correctAnswer =
       data.correctAnswer?.map((index) => ({
-        answer_id: options[index]?.option_id, 
+        answer_id: options[index]?.option_id,
         answer: options[index]?.optionText,
       })) || [];
 
     const updatedQuestion = await ListeningQuestion.findByIdAndUpdate(
-      id, 
+      id,
       {
         ...data,
         options,
@@ -193,28 +203,30 @@ export const createMultipleListeningQuestions = async (req, res) => {
 };
 
 export const deleteListeningQuestion = async (req, res) => {
-    try {
-      const { id } = req.params;  
+  try {
+    const { id } = req.params;
 
-      const deletedQuestion = await ListeningQuestion.findByIdAndUpdate(
-        id, 
-        { isDeleted: true }, 
-        { new: true } 
-      );
+    const deletedQuestion = await ListeningQuestion.findByIdAndUpdate(
+      id,
+      { isDeleted: true },
+      { new: true }
+    );
 
-      if (!deletedQuestion) {
-        return res.status(404).json({ message: `Không tìm thấy câu hỏi với ID ${id}` });
-      }
-  
-      return res.status(200).json({
-        message: "Câu hỏi đã được xóa thành công!",
-        data: deletedQuestion,
-      });
-    } catch (error) {
-      console.error("Lỗi khi xóa câu hỏi:", error);
-      return res.status(500).json({
-        message: "Không thể xóa câu hỏi. Vui lòng thử lại sau.",
-        error: error.message,
-      });
+    if (!deletedQuestion) {
+      return res
+        .status(404)
+        .json({ message: `Không tìm thấy câu hỏi với ID ${id}` });
     }
-  };
+
+    return res.status(200).json({
+      message: "Câu hỏi đã được xóa thành công!",
+      data: deletedQuestion,
+    });
+  } catch (error) {
+    console.error("Lỗi khi xóa câu hỏi:", error);
+    return res.status(500).json({
+      message: "Không thể xóa câu hỏi. Vui lòng thử lại sau.",
+      error: error.message,
+    });
+  }
+};
