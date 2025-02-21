@@ -1,7 +1,16 @@
 import mongoose from "mongoose";
 const QuestionSchema = new mongoose.Schema({
+  passageId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Passage",
+    default: null,
+  }, // Liên kết bài đọc (nếu có)
   content: { type: String, required: true },
-  questionType: { type: mongoose.Schema.Types.ObjectId, ref: "QuestionType", require: true },
+  questionType: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "QuestionType",
+    require: true,
+  },
   level: {
     type: String,
     enum: ["easy", "hard"],
@@ -9,7 +18,7 @@ const QuestionSchema = new mongoose.Schema({
   },
   answers: [
     {
-      text: { type: String},
+      text: { type: String },
       correctAnswerForBlank: { type: String, default: "" },
       isCorrect: { type: Boolean, default: false },
     },
