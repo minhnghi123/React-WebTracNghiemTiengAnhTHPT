@@ -34,6 +34,7 @@ export const Navbar = () => {
     } catch (error: any) {
       console.log(error);
     }
+    navigator("/login");
   };
   useLayoutEffect(() => {
     if (user) {
@@ -50,25 +51,37 @@ export const Navbar = () => {
         </a>
       ),
     },
+    // Nếu là admin, hiển thị cả "Vào giao diện admin" và "Vào giao diện học sinh"
+    ...(user?.role === "admin"
+      ? [
+          {
+            key: "3",
+            label: (
+              <a rel="noopener noreferrer" href="/Admin">
+                Vào giao diện admin
+              </a>
+            ),
+          },
+          {
+            key: "4",
+            label: (
+              <a rel="noopener noreferrer" href="/">
+                Vào giao diện học sinh
+              </a>
+            ),
+          },
+          {
+            key: "4",
+            label: (
+              <a rel="noopener noreferrer" href="/Giaovien">
+                Vào giao diện giáo viên
+              </a>
+            ),
+          },
+        ]
+      : []),
     {
-      key: "2",
-      label: (
-        <a rel="noopener noreferrer" href="/GiaoVien">
-          Vào giao diện giáo viên
-        </a>
-      ),
-    },
-
-    {
-      key: "3",
-      label: (
-        <a rel="noopener noreferrer" href="/Admin">
-          Vào giao diện admin
-        </a>
-      ),
-    },
-    {
-      key: "4",
+      key: "5",
       label: (
         <a
           onClick={() => handleBTNLogout()}
@@ -80,7 +93,7 @@ export const Navbar = () => {
         </a>
       ),
     },
-  ];
+  ];  
   return (
     <div id="main">
       <div id="header">
@@ -98,19 +111,13 @@ export const Navbar = () => {
               <a href="/">Trang chủ</a>
             </li>
             <li>
-              <a href="/KyThi">Khám phá</a>
+              <a href="/KyThi">Kỳ Thi</a>
             </li>
             <li>
               <a href="/Ontap">Ôn tập</a>
             </li>
             <li>
               <a href="/PhongThi">Lớp học</a>
-            </li>
-            <li>
-              <a href="/About">Về chúng tôi</a>
-            </li>
-            <li>
-              <a href="/Contact">Liên hệ</a>
             </li>
           </ul>
         </div>

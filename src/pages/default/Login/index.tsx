@@ -23,10 +23,22 @@ export const Login = () => {
       const rq = await AuthApi.login({ email: email, password: pass });
       console.log(rq);
       setMessage(rq?.data.message);
+  
       if (rq?.status === 201) {
-        handleLogin(rq?.data.user);
-        navigate("/");
-      }
+        const user = rq?.data.user;
+        handleLogin(user);
+      
+        // Kiểm tra role của user để điều hướng
+        if (user.role === "student") {
+          navigate("/");
+        } else if (user.role === "teacher") {
+          navigate("/GiaoVien");
+        } else if (user.role === "admin") {
+          navigate("/Admin"); 
+        } else {
+          navigate("/"); 
+        }
+      }      
     } catch (error: any) {
       if (error.response) {
         setMessage(`Login failed: ${error.response.data.message}`);
@@ -37,6 +49,7 @@ export const Login = () => {
       }
     }
   };
+  
 
   return (
     <div className="wrapper fadeInDown">

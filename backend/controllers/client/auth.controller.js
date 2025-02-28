@@ -6,7 +6,7 @@ import { generateRandomString } from "../../helpers/generateNumber.helper.js";
 import { sendMail } from "../../helpers/sendMail.helper.js";
 import jwt from 'jsonwebtoken';
 import { ENV_VARS } from "../../config/envVars.config.js";
-
+import axios from "axios";
 
 export async function signup(req, res) {
   try {
@@ -192,24 +192,18 @@ export async function resetPassword(req, res) {
     res.status(400).json({ code: 400, message: "Internal server error" });
   }
 }
-export async function getUserInfo(req, res) {
+export const getUserProfile = async () => {
   try {
-    const token = req.cookies["jwt-token"];
-    if (!token) {
-      return res.status(401).json({ code: 401, message: "Bạn chưa đăng nhập" });
-    }
-;
-    const user = await TaiKhoan.findById(decoded.userId).select("-password");
+    const token = localStorage.getItem("token");
+    if (!token) throw new Error("Bạn chưa đăng nhập!");
 
-    if (!user) {
-      return res.status(404).json({ code: 404, message: "Không tìm thấy người dùng" });
-    }
+    const res = await axios.get(`${API_URL}/profile`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
 
-    res.status(200).json({ code: 200, user });
+    return res.data.user;
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ code: 500, message: "Lỗi server" });
+    throw new Error(error.response?.data?.message || "Lỗi khi lấy dữ liệu!");
   }
-}
-    const decoded = jwt.verify(token, ENV_VARS.JWT_SECRET)
+};
 
