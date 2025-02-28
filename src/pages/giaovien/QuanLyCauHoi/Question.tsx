@@ -148,18 +148,18 @@ const QuestionComponent: React.FC<QuestionComponentProps> = ({
         editable && (
           <>
             <hr />
-      <button className="btn btn-primary" onClick={() => setOpenModal(true)}>
+      <button className="btn btn-primary my-3 mx-3" onClick={() => setOpenModal(true)}>
         Sửa câu hỏi
       </button>
       {
         deletetalbe && (
-          <button className="btn btn-danger" onClick={() => setOpen(true)}>
+          <button className="btn btn-danger my-3 mx-3" onClick={() => setOpen(true)}>
             Xóa câu hỏi
           </button>
         )
       }
     
-      {question.audioInfo && <button className=" btn-w   my-3 mx-3" onClick={() => setOpenAudioUpdate(true)}>
+      {question.audioInfo && <button className=" btn   my-3 mx-3" onClick={() => setOpenAudioUpdate(true)}>
         Sửa file nghe
       </button> } 
       {questionType === "6742fb1cd56a2e75dbd817ea" ? (

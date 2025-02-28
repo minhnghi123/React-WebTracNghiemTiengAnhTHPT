@@ -11,6 +11,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { Packer, Document } from "docx";
 import { redisService } from "../../config/redis.config.js";
+import { request } from "http";
 // Tạo __dirname thủ công
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -219,19 +220,19 @@ export const updateExam = async (req, res) => {
       });
     }
 
-    if (startTime && new Date(startTime) < new Date()) {
-      return res.status(400).json({
-        success: false,
-        message: "Thời gian bắt đầu không thể là quá khứ!",
-      });
-    }
+    // if (startTime && new Date(startTime) < new Date()) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: "Thời gian bắt đầu không thể là quá khứ!",
+    //   });
+    // }
 
-    if (startTime && new Date(startTime) < new Date()) {
-      return res.status(400).json({
-        success: false,
-        message: "Thời gian bắt đầu không thể là quá khứ!",
-      });
-    }
+    // if (startTime && new Date(startTime) < new Date()) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: "Thời gian bắt đầu không thể là quá khứ!",
+    //   });
+    // }
 
     // Cập nhật đề thi dựa trên slug
     const updatedExam = await Exam.findOneAndUpdate(
@@ -358,8 +359,21 @@ export const setExamSchedule = async (req, res) => {
 export const autoGenerateExam = async (req, res) => {
   try {
     const { level, numberOfQuestions, duration, questionTypes } = req.body;
+
+    if (
+      !questionTypes ||
+      !Array.isArray(questionTypes) ||
+      questionTypes.length === 0
+    ) {
+      return res.status(400).json({
+        code: 400,
+        message: "Question types are required!",
+      });
+    }
+
     let numberOfEasyQuestions = 0,
       numberOfHardQuestions = 0;
+
     if (level === "Easy") {
       numberOfEasyQuestions = numberOfQuestions;
     } else if (level === "Medium") {
@@ -369,27 +383,42 @@ export const autoGenerateExam = async (req, res) => {
       numberOfHardQuestions = numberOfQuestions;
     }
 
-    const easyQuestions = await Question.aggregate([
-      { $match: { level: "easy", questionType: { $in: questionTypes } } },
-      { $sample: { size: numberOfEasyQuestions } },
-    ]);
-    const hardQuestions = await Question.aggregate([
+    // Lấy câu hỏi khó trước
+    let hardQuestions = await Question.aggregate([
       { $match: { level: "hard", questionType: { $in: questionTypes } } },
       { $sample: { size: numberOfHardQuestions } },
     ]);
-    if (easyQuestions.length < numberOfEasyQuestions) {
+
+    let remainingHardNeeded = numberOfHardQuestions - hardQuestions.length;
+
+    // Nếu không đủ câu hỏi khó, thì bù bằng câu hỏi dễ
+    let easyQuestions = await Question.aggregate([
+      { $match: { level: "easy", questionType: { $in: questionTypes } } },
+      { $sample: { size: numberOfEasyQuestions + remainingHardNeeded } },
+    ]);
+
+    if (easyQuestions.length < numberOfEasyQuestions + remainingHardNeeded) {
       return res.status(400).json({
         code: 400,
-        message: "Not enough easy questions!",
+        message: `Not enough questions! Found: ${
+          hardQuestions.length + easyQuestions.length
+        }, Required: ${numberOfQuestions}`,
       });
     }
-    if (hardQuestions.length < numberOfHardQuestions) {
-      return res.status(400).json({
-        code: 400,
-        message: "Not enough hard questions!",
-      });
+
+    // Nếu không đủ câu khó, lấy từ câu dễ để bù vào
+    if (remainingHardNeeded > 0) {
+      hardQuestions = [
+        ...hardQuestions,
+        ...easyQuestions.splice(0, remainingHardNeeded),
+      ];
     }
+
     const questions = [...easyQuestions, ...hardQuestions];
+
+    // Xáo trộn danh sách câu hỏi
+    questions.sort(() => Math.random() - 0.5);
+
     const randomCode = Math.floor(100000 + Math.random() * 900000).toString();
     const newExam = new Exam({
       title: `Auto-generated exam(${randomCode})`,
@@ -398,16 +427,19 @@ export const autoGenerateExam = async (req, res) => {
       duration: duration || 90,
       isPublic: true,
       startTime: new Date(),
-      endTime: new Date(Date.now() + 60 * 60 * 1000), // 1 hour later
+      endTime: new Date(Date.now() + 60 * 60 * 1000), // 1 hour sau
+      createdBy: req.user._id,
     });
+
     await newExam.save();
+
     res.status(200).json({
       code: 200,
       message: "Create exam successfully!",
       exam: newExam,
     });
   } catch (error) {
-    console.log(error.message);
+    console.error(error.message);
     res.status(500).json({
       code: 500,
       message: "Internal server error!",

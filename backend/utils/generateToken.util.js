@@ -14,3 +14,21 @@ export const generateTokenAndSetToken = (userId, res) => {
  
   return token;
 };
+
+export const verifyToken = (req, res, next) => {
+  const token = req.cookies['jwt-token'];  
+  
+  if (!token) {
+    return res.status(403).json({ message: "Token không có sẵn!" });
+  }
+
+  // Giải mã token và xác minh
+  jwt.verify(token, ENV_VARS.JWT_SECRET, (err, decoded) => {
+    if (err) {
+      return res.status(403).json({ message: "Token không hợp lệ!" });
+    }
+    
+    req.userId = decoded.userId;
+    next();
+  });
+};

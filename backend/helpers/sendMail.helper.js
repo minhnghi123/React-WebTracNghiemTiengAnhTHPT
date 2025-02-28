@@ -6,13 +6,13 @@ export const sendMail = (email, subject, text) => {
     port: 587,
     secure: false, // use SSL
     auth: {
-      user: ENV_VARS.USER_EMAIL,
-      pass: ENV_VARS.USER_PASS,
+      user: ENV_VARS.SYSTEM_EMAIL,
+      pass: ENV_VARS.SYSTEM_PASS,
     },
   });
 
   const mailOptions = {
-    from: ENV_VARS.USER_EMAIL,
+    from: ENV_VARS.SYSTEM_EMAIL,
     to: email,
     subject: subject,
     html: text,

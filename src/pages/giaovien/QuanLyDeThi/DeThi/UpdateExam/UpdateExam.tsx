@@ -24,10 +24,7 @@ const UpdateExamModal: React.FC<CreateExamModalProps> = ({
   const [exam, setExam] = useState<Exam>({
     title: "",
     description: "",
-    questions:
-      dataQuestion
-        ?.map((item) => item._id)
-        .filter((id): id is string => id !== undefined) || [],
+    questions:    dataQuestion    || [],
     duration: 90,
     startTime: new Date(),
     endTime: undefined,
@@ -56,6 +53,14 @@ const UpdateExamModal: React.FC<CreateExamModalProps> = ({
         const response = await ExamAPI.getDetailExam(slug);
         if (response?.success === true) {
           setExam(response.data);
+          setExam((prev) => ({
+            ...prev,
+            startTime: new Date(response.data.startTime),
+            endTime: response.data.endTime
+              ? new Date(response.data.endTime)
+              : undefined,
+            questions: dataQuestion || [],
+          }));
           console.log(exam);
         } else {
           console.log(response);
@@ -76,11 +81,6 @@ const UpdateExamModal: React.FC<CreateExamModalProps> = ({
       return;
     }
 
-    if (exam.questions) {
-      exam.questions = exam.questions.filter(
-        (id): id is string => id !== undefined
-      );
-    }
     console.log(exam);
     const response = await ExamAPI.UpdateExam(exam as Exam, slug);
 

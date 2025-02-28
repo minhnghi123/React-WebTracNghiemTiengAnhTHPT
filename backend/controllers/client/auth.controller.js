@@ -1,17 +1,17 @@
 import { TaiKhoan } from "../../models/Taikhoan.model.js";
+import { VerificationRequest } from "../../models/VerificationRequest.model.js";
 import bcryptjs from "bcryptjs";
 import { generateTokenAndSetToken } from "../../utils/generateToken.util.js";
 import { ForgotPassword } from "../../models/Forgot-Password.model.js";
 import { generateRandomString } from "../../helpers/generateNumber.helper.js";
 import { sendMail } from "../../helpers/sendMail.helper.js";
-import jwt from 'jsonwebtoken';
+import jwt from "jsonwebtoken";
 import { ENV_VARS } from "../../config/envVars.config.js";
-import axios from "axios";
 
 export async function signup(req, res) {
   try {
-    const { username, email, password } = req.body;
-    if (!username || !email || !password) {
+    const { username, email, password, role } = req.body;
+    if (!username || !email || !password || !role) {
       return res.status(400).json({
         code: 400,
         message: "All fields are required",
@@ -40,19 +40,42 @@ export async function signup(req, res) {
     }
     const salt = bcryptjs.genSaltSync(10);
     const hashedPassword = await bcryptjs.hash(password, salt);
-    // console.log(salt);
-    // console.log(hashedPassword);
-    const newUser = new TaiKhoan({
-      username,
-      email,
-      password: hashedPassword,
-    });
-    if (newUser) {
-      generateTokenAndSetToken(newUser._id, res); //jwt
+
+    if (role === "teacher") {
+      // Create a verification request for the teacher
+      const verificationRequest = new VerificationRequest({
+        username,
+        email,
+        password: hashedPassword,
+        role,
+      });
+      await verificationRequest.save();
+
+      // Send email to admin for approval
+      const adminEmail = ENV_VARS.ADMIN_EMAIL;
+      const subject = "New Teacher Signup Request";
+      const text = `A new teacher has signed up. Please review and approve the request.\n\nUsername: ${username}\nEmail: ${email}`;
+      sendMail(adminEmail, subject, text);
+
+      return res.status(201).json({
+        code: 201,
+        message: "Teacher signup request submitted. Awaiting admin approval.",
+      });
+    } else if (role === "student") {
+      // Proceed with normal signup for students
+      const newUser = new TaiKhoan({
+        username,
+        email,
+        password: hashedPassword,
+        role,
+      });
       await newUser.save();
-      res.status(201).json({ code: 201, message: "User created successfully" });
+      generateTokenAndSetToken(newUser._id, res); //jwt
+      return res
+        .status(201)
+        .json({ code: 201, message: "User created successfully" });
     } else {
-      res.status(400).json({ code: 400, message: "Failed to create user" });
+      return res.status(400).json({ code: 400, message: "Invalid role" });
     }
   } catch (error) {
     console.error(error);
@@ -163,19 +186,21 @@ export async function resetPassword(req, res) {
   try {
     const salt = bcryptjs.genSaltSync(10);
     const hashedPassword = await bcryptjs.hash(req.body.newPassword, salt);
-   
+
     const token = req.cookies["jwt-token"];
 
     if (!token) {
-      return res.status(401).send({ message: 'No token, authorization denied' });
+      return res
+        .status(401)
+        .send({ message: "No token, authorization denied" });
     }
 
     // Giải mã token và kiểm tra người dùng
-    const decoded = jwt.verify(token, ENV_VARS.JWT_SECRET); 
+    const decoded = jwt.verify(token, ENV_VARS.JWT_SECRET);
     const user = await TaiKhoan.findOne({ _id: decoded.userId });
-    
+
     if (!user) {
-      return res.status(404).send({ message: 'User not found'  });
+      return res.status(404).send({ message: "User not found" });
     }
     console.log(user);
     await TaiKhoan.updateOne(
@@ -192,18 +217,25 @@ export async function resetPassword(req, res) {
     res.status(400).json({ code: 400, message: "Internal server error" });
   }
 }
-export const getUserProfile = async () => {
+export async function getUserInfo(req, res) {
   try {
-    const token = localStorage.getItem("token");
-    if (!token) throw new Error("Bạn chưa đăng nhập!");
+    const token = req.cookies["jwt-token"];
+    if (!token) {
+      return res.status(401).json({ code: 401, message: "Bạn chưa đăng nhập" });
+    }
 
-    const res = await axios.get(`${API_URL}/profile`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const decoded = jwt.verify(token, ENV_VARS.JWT_SECRET);
+    const user = await TaiKhoan.findById(decoded.userId).select("-password");
 
-    return res.data.user;
+    if (!user) {
+      return res
+        .status(404)
+        .json({ code: 404, message: "Không tìm thấy người dùng" });
+    }
+
+    res.status(200).json({ code: 200, user });
   } catch (error) {
-    throw new Error(error.response?.data?.message || "Lỗi khi lấy dữ liệu!");
+    console.error(error);
+    res.status(500).json({ code: 500, message: "Lỗi server" });
   }
-};
-
+}

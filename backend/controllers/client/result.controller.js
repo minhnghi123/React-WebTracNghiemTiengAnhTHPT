@@ -257,8 +257,8 @@ export const submitExam = async (req, res) => {
       prompt += q.knowledge + "\n";
       prompt +=
         "Học sinh đã làm sai cầu này, bạn hãy đưa ra lời khuyên, tư vấn lộ trình học để đạt kết quả cao hơn ở câu hỏi chủ đề này";
-      const response = await gemini(prompt);
-      arrResponse.push(response);
+      // const response = await gemini(prompt);
+      arrResponse.push(prompt);
       // console.log(response);
     }
     res.status(200).json({
