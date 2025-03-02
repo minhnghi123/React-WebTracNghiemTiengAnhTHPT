@@ -1,7 +1,8 @@
 import express from "express";
 import {
     createClassroom, getAllClassrooms, getClassroomById, updateClassroom, deleteClassroom, 
-    addStudentsToClassroom, removeStudentFromClassroom, addExamToClassroom, removeExamFromClassroom, removeStudentsFromClassroom
+    addStudentsToClassroom, removeStudentFromClassroom, addExamToClassroom, removeExamFromClassroom, removeStudentsFromClassroom,
+    getAllStudents
   } from "../../controllers/teacher/classroomManagement.controller.js";
 
 import { validateClassroom } from "../../validate/teacher/classroom.validate.js"
@@ -13,6 +14,9 @@ router.post('/create', validateClassroom, createClassroom);
 
 // Route để lấy danh sách tất cả lớp học
 router.get('/all', getAllClassrooms);
+
+// Route để lấy danh sách tất cả học sinh
+router.get('/allStudents', getAllStudents);
 
 // Route để lấy lớp học theo ID
 router.get('/:classroomId', getClassroomById);
@@ -34,6 +38,7 @@ router.delete('/remove_students/:classroomId', removeStudentsFromClassroom);
 router.patch('/add_exam/:classroomId/:examId', addExamToClassroom);
 
 router.delete('/remove_exam/:classroomId/:examId', removeExamFromClassroom);
+
 
 
 

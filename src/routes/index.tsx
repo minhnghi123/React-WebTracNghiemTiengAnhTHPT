@@ -18,7 +18,6 @@ import { QuanLyCauHoi } from "@/pages/giaovien/QuanLyCauHoi";
 import LayoutAdmin from "@/pages/admin/DashBoard/LayoutAdmin";
 import { DashBoarAdmin } from "@/pages/admin/DashBoard";
 import NotFound from "@/pages/NotFound";
-import { OnTap } from "@/pages/default/OnTap";
 import { QuanLyDeThi } from "@/pages/giaovien/QuanLyDeThi";
 import { QuanLyDangCauHoi } from "@/pages/admin/QuanLyDangCauHoi";
 import { CreateExamQuestion } from "@/pages/giaovien/QuanLyDeThi/DeThi/CreateExamQuestion.tsx";
@@ -35,6 +34,9 @@ import { FlashCardCreate } from "@/pages/default/OnTap/FlashCardCreate";
 import { FlashCardUpdate } from "@/pages/default/OnTap/FlashCardUpdate";
 import { FlashCardExam } from "@/pages/default/OnTap/FlashCardExam";
 import {Profile} from "@/pages/default/Profile";
+import VerificationTeacher from "@/pages/admin/QuanLyTaiKhoan/verificationTeacher";
+import { QuanLyLopHoc } from "@/pages/giaovien/QuanLyLopHoc";
+import DetailClass from "@/pages/giaovien/QuanLyLopHoc/detailClass";
 
 export enum ERolePath {
   ADMIN = 2,
@@ -111,6 +113,8 @@ export const router = [
         <UpdateExamQuestion />,
         ERolePath.USER
       ),
+      createRoute("/giaovien/QuanLyLopHoc/:_classroom_id", <DetailClass />, ERolePath.USER),
+      createRoute("/giaovien/QuanLyLopHoc", <QuanLyLopHoc />, ERolePath.USER),
       createRoute("/giaovien/QuanLyAudio", <QuanLyAudio />, ERolePath.USER),
     ],
   },
@@ -120,6 +124,7 @@ export const router = [
     children: [
       createRoute("/Admin", <DashBoarAdmin />, ERolePath.USER),
       createRoute("/Admin/DangCauHoi", <QuanLyDangCauHoi />, ERolePath.USER),
+      createRoute("/Admin/QuanLyTaiKhoan", <VerificationTeacher />, ERolePath.USER),
     ],
   },
   {
@@ -157,6 +162,10 @@ const paths = {
   "/flashcard/edit/:_id": ["/flashcard/edit/:_id"],
   "/flashcard/exam/:id": ["/flashcard/exam/:id"],
   "/profile": ["/profile"],
+  "/Admin/QuanLyTaiKhoan": ["/Admin/QuanLyTaiKhoan"],
+  "/giaovien/QuanLyLopHoc": ["/giaovien/QuanLyLopHoc"],
+  "/giaovien/QuanLyLopHoc/:_classroom_id": ["/giaovien/QuanLyLopHoc/:_classroom_id"],
+
 } as const;
 
 export type TRoutePaths = (typeof paths)[keyof typeof paths][number] &

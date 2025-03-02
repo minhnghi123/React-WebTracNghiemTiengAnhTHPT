@@ -91,7 +91,7 @@ export const FlashCardDetail: React.FC = () => {
         )}
       </div>
 
-      <div className="mt-6 text-center">
+      <div className="mt-6 text-center" style={{marginTop: "6px"}}>
         <Button type="primary" onClick={openExamModal}>
           Làm bài
         </Button>

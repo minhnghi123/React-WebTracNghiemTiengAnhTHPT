@@ -27,7 +27,8 @@ const AuthProvider = ({ children }: TAuthProviderProps) => {
 
   const handleLogin = (user: TUser) => {
     setUser(user);
-    localStorage.setItem("user", JSON.stringify(user));
+    const { _id, avatar, email, role, username } = user;
+    localStorage.setItem("user", JSON.stringify({ _id, avatar, email, role, username }));
   };
 
   const handleLogout = () => {

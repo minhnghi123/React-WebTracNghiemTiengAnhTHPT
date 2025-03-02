@@ -1,5 +1,5 @@
 import { Exam, Question } from "@/services/teacher/Teacher";
-import { Button } from "antd";
+import { Button, Spin } from "antd";
 import Table, { ColumnsType } from "antd/es/table";
 
 import { useEffect, useState } from "react";

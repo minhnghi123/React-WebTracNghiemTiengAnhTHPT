@@ -8,6 +8,7 @@ export interface UserDK {
   username: string;
   email: string;
   password: string;
+  role: string;
 }
 export const AuthApi = {
   createUser: async (data: UserDK) => {

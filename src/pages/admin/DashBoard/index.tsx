@@ -37,7 +37,9 @@ export const DashBoarAdmin = () => {
             </p>
           </div>
         </div>
-        <div className="col-12 col-md-6 col-lg-3 dashboard-item">
+        <div 
+          onClick={() => navigate("/giaovien/QuanLyLopHoc")}
+          className="col-12 col-md-6 col-lg-3 dashboard-item">
           <div className="bg-white p-4 rounded shadow h-100 text-center">
             <img
               src="src/Content/img/img-lop-hoc.jpg"

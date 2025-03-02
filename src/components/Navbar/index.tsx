@@ -3,8 +3,11 @@ import { AuthApi } from "@/services/Auth";
 import { useLayoutEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Dropdown, MenuProps } from "antd";
+interface navbarProps {
+  rule?: boolean;
+}
 
-export const Navbar = () => {
+export const Navbar: React.FC<navbarProps> = ({ rule= true }) => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [userName, setUserName] = useState<string>("");
   const { user, handleLogout } = useAuthContext();
@@ -92,13 +95,14 @@ export const Navbar = () => {
         >
           <img src="/src/assets/img/P2N 1.svg" alt="Logo"></img>
         </div>
-        <div id="menu">
+        
+        { rule &&  <div id="menu">
           <ul className="dsMenu">
             <li>
-              <a href="/">Trang chủ</a>
+              <a href="/">Trang chủ </a>
             </li>
             <li>
-              <a href="/KyThi">Khám phá</a>
+              <a href="/KyThi">Danh sách kỳ thi</a>
             </li>
             <li>
               <a href="/Ontap">Ôn tập</a>
@@ -114,6 +118,7 @@ export const Navbar = () => {
             </li>
           </ul>
         </div>
+        }
         {isLoggedIn ? (
           <ul className="navbar-nav ml-auto">
             <Dropdown menu={{ items }} placement="bottomRight">
@@ -129,7 +134,7 @@ export const Navbar = () => {
                 <li className="nav-item">
                   {" "}
                   <span className="fas fa-user"></span>{" "}
-                  {user?.role === "student" ? "Học sinh" : "Giáo viên"}
+                  {user?.role === "student" ? "Học sinh" : (user?.role === "teacher" ? "Giáo viên" : "Admin")}
                 </li>
               </a>
             </Dropdown>

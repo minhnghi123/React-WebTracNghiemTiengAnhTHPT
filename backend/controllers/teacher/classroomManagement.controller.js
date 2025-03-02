@@ -1,5 +1,5 @@
 import Classroom from "../../models/Classroom.model.js";
-
+import { TaiKhoan } from "../../models/Taikhoan.model.js";
 export const createClassroom = async (req, res) => {
   try {
     const classroomData = req.body;
@@ -312,4 +312,23 @@ export const removeExamFromClassroom = async (req, res) => {
     });
   }
 };
-
+// 12. Lấy danh sách tất cả người dùng lớp học
+export const getAllStudents = async (req, res) => {
+  try {
+    const students = await TaiKhoan.find({ 
+      deleted: false, role: "student" 
+    })
+    return res.status(200).json({
+      success: true,
+      message: "Students retrieved successfully",
+      students,
+    });
+  } catch (error) {
+    console.error("Error retrieving students:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error retrieving students",
+      error: error.message,
+    });
+  }
+};
