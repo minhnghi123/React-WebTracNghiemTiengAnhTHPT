@@ -25,7 +25,13 @@ export const Login = () => {
       setMessage(rq?.data.message);
       if (rq?.status === 201) {
         handleLogin(rq?.data.user);
-        navigate("/");
+        if(rq?.data.user.role === "admin") {
+          navigate("/admin");
+        } else if(rq?.data.user.role === "teacher") {
+          navigate("/giaovien");
+        } else {
+          navigate("/");
+        }
       }
     } catch (error: any) {
       if (error.response) {

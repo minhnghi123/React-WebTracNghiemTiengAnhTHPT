@@ -35,9 +35,15 @@ export const SignUp = () => {
 
       if (response.status === 201) {
         setMessage(response.data.message);
-        navigate("/", {
-          state: { message: "Đăng ký thành công" },
-        });
+        if (selectedRole === "teacher") {
+          alert("Đăng ký thành công. Đang chờ xác nhận từ quản trị viên");
+          navigate("/");
+        } else {
+          navigate("/", {
+            state: { message: "Đăng ký thành công" },
+          });
+        }
+       
       } else {
         setMessage(response.data.message);
       }
@@ -134,12 +140,12 @@ export const SignUp = () => {
         </h2>
         <form onSubmit={handleSubmit}>
           <div className="input-group">
-            <label htmlFor="name">Họ Tên</label>
+            <label htmlFor="name">Username</label>
             <input
               type="text"
               id="name"
               name="name"
-              placeholder="Nhập họ tên"
+              placeholder="Nhập tên đăng nhập"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required

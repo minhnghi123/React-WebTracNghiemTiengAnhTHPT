@@ -29,6 +29,7 @@ export const Navbar: React.FC<navbarProps> = ({ rule= true }) => {
   const handleBTNLogout = async () => {
     handleLogout();
     // logout();
+    navigator("/");
     setIsLoggedIn(false);
     setUserName("");
     try {
