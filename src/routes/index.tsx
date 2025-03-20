@@ -38,6 +38,7 @@ import VerificationTeacher from "@/pages/admin/QuanLyTaiKhoan/verificationTeache
 import { QuanLyLopHoc } from "@/pages/giaovien/QuanLyLopHoc";
 import DetailClass from "@/pages/giaovien/QuanLyLopHoc/detailClass";
 import QuanLyDeThiIndex from "@/pages/giaovien/QuanLyDeThi/indexDeThi";
+import { ClassroomDetail } from "@/pages/default/PhongThi/detailclass";
 
 export enum ERolePath {
   ADMIN = 2,
@@ -76,6 +77,7 @@ export const router = [
       createRoute("/About", <VeChungToi />, ERolePath.USER),
       createRoute("/Contact", <LienHe />, ERolePath.USER),
       createRoute("/PhongThi", <PhongThi />, ERolePath.USER),
+      createRoute("/PhongThi/Detail/:classroomId", <ClassroomDetail />, ERolePath.USER),
       createRoute("/OnTap", <FlashCardIndex />, ERolePath.USER),
       createRoute("/FlashCard/:_id", <FlashCardDetail />, ERolePath.USER),
       createRoute("/KyThi", <KyThi />, ERolePath.USER),
@@ -142,6 +144,7 @@ const paths = {
   "/forgetPassword": ["/forgetPassword"],
   "/SignUp": ["/SignUp"],
   "/PhongThi": ["/PhongThi"],
+  "/PhongThi/Detail/:classroomId": ["/PhongThi/Detail/:classroomId"],
   "/GiaoVien": ["/GiaoVien"],
   "/NganHangCauHoi": ["/NganHangCauHoi"],
   "/giaovien/NganHangCauHoi": ["/giaovien/NganHangCauHoi"],

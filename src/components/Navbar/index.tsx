@@ -2,7 +2,7 @@ import { useAuthContext } from "@/contexts/AuthProvider";
 import { AuthApi } from "@/services/Auth";
 import { useLayoutEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Dropdown, MenuProps } from "antd";
+import { Dropdown, List, MenuProps } from "antd";
 interface navbarProps {
   rule?: boolean;
 }
@@ -127,7 +127,7 @@ export const Navbar: React.FC<navbarProps> = ({ rule= true }) => {
                 className="nav-link"
                 href="/hocsinh/ThongTinCaNhan/Index"
                 style={{ color: "#007bff", fontWeight: "bold" }}
-              >
+              >                                
                 <li className="nav-item">
                   <span className="fas fa-user"></span> {userName}
                 </li>

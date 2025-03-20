@@ -25,7 +25,7 @@ export const joinClassroom = async (req, res) => {
     if (classroom.password !== password) {
       return res.status(401).json({
         success: false,
-        message: "Incorrect password",
+        message: "Sai mật khẩu",
       });
     }
 
@@ -82,7 +82,9 @@ export const getClassroomTests = async (req, res) => {
 
 // Lấy thông tin lớp học cụ thể
 export const getClassroomById = async (req, res) => {
- 
+  const token = req.cookies["jwt-token"];
+  const decoded = await jwt.verify(token, ENV_VARS.JWT_SECRET);
+  const studentId = decoded.userId;
   const { classroomId } = req.params;
 
   try {
@@ -95,6 +97,24 @@ export const getClassroomById = async (req, res) => {
       return res.status(404).json({
         success: false,
         message: "Classroom not found",
+      });
+    }
+
+    const isStudentInClassroom = classroom.students.some(student => student._id.toString() === studentId);
+
+    if (!isStudentInClassroom) {
+      return res.status(200).json({
+        success: true,
+        message: "Classroom retrieved successfully",
+        classroom: {
+          _id: classroom._id,
+          title: classroom.title,
+          teacherId: classroom.teacherId,
+          isDeleted: classroom.isDeleted,
+          status: classroom.status,
+          createdAt: classroom.createdAt,
+          updatedAt: classroom.updatedAt,
+        },
       });
     }
 
