@@ -158,17 +158,17 @@ const DetailClass: React.FC = () => {
     fetchExams();
   }, [_classroom_id]);
 
-  const handleAddStudent = async () => {
-    try {
-      await ClassroomAPI.addStudentsToClassroom(_classroom_id || "", [studentId]);
-      fetchClassroom();
-      setStudentId('');
-      message.success("Thêm học sinh thành công");
-    } catch (err) {
-      setError('Lỗi khi thêm học sinh');
-      message.error("Lỗi khi thêm học sinh");
-    }
-  };
+  // const handleAddStudent = async () => {
+  //   try {
+  //     await ClassroomAPI.addStudentsToClassroom(_classroom_id || "", [studentId]);
+  //     fetchClassroom();
+  //     setStudentId('');
+  //     message.success("Thêm học sinh thành công");
+  //   } catch (err) {
+  //     setError('Lỗi khi thêm học sinh');
+  //     message.error("Lỗi khi thêm học sinh");
+  //   }
+  // };
 
   const handleAddStudentItem = async (id: string) => {
     try {
@@ -191,19 +191,19 @@ const DetailClass: React.FC = () => {
     }
   };
 
-  const handleRemoveStudents = async () => {
-    try {
-      await ClassroomAPI.removeStudentsFromClassroom(
-        _classroom_id || "",
-        classroom?.students.map((student: any) => student._id) || []
-      );
-      fetchClassroom();
-      message.success("Xóa tất cả học sinh thành công");
-    } catch (err) {
-      setError('Lỗi khi xóa tất cả học sinh');
-      message.error("Lỗi khi xóa tất cả học sinh");
-    }
-  };
+  // const handleRemoveStudents = async () => {
+  //   try {
+  //     await ClassroomAPI.removeStudentsFromClassroom(
+  //       _classroom_id || "",
+  //       classroom?.students.map((student: any) => student._id) || []
+  //     );
+  //     fetchClassroom();
+  //     message.success("Xóa tất cả học sinh thành công");
+  //   } catch (err) {
+  //     setError('Lỗi khi xóa tất cả học sinh');
+  //     message.error("Lỗi khi xóa tất cả học sinh");
+  //   }
+  // };
 
   const handleAddExamItem = async (examId: string) => {
     try {

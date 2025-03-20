@@ -23,9 +23,7 @@ export const QuanLyDangCauHoi = () => {
         setData(rq?.questionTypes);
         setTotal(rq?.totalPage);
         setPage(rq?.currentPage);
-        console.log(data);
-        console.log(total);
-        console.log(page);
+  
       }
     } catch (error: any) {
       if (error.response) {

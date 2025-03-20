@@ -13,7 +13,6 @@ export const DetailExam = () => {
 
   const fetchExam = async () => {
     const response = await ExamAPIStudent.getDetailExam(_id ?? "");
-    console.log(response);
     if (response.code === 200) {
       setExam(response.exam);
 

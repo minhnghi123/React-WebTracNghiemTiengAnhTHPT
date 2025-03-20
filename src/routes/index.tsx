@@ -37,6 +37,7 @@ import {Profile} from "@/pages/default/Profile";
 import VerificationTeacher from "@/pages/admin/QuanLyTaiKhoan/verificationTeacher";
 import { QuanLyLopHoc } from "@/pages/giaovien/QuanLyLopHoc";
 import DetailClass from "@/pages/giaovien/QuanLyLopHoc/detailClass";
+import QuanLyDeThiIndex from "@/pages/giaovien/QuanLyDeThi/indexDeThi";
 
 export enum ERolePath {
   ADMIN = 2,
@@ -102,7 +103,7 @@ export const router = [
     children: [
       createRoute("/GiaoVien", <DashBoardGiaoVien />, ERolePath.USER),
       createRoute("/giaovien/NganHangCauHoi", <QuanLyCauHoi />, ERolePath.USER),
-      createRoute("/giaovien/QuanLyDeThi", <QuanLyDeThi />, ERolePath.USER),
+      createRoute("/giaovien/QuanLyDeThi", <QuanLyDeThiIndex />, ERolePath.USER),
       createRoute(
         "/giaovien/QuanLyDeThi/CreateExam",
         <CreateExamQuestion />,

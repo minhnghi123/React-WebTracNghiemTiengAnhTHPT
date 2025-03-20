@@ -58,7 +58,6 @@ export const KyThi = () => {
   const getAllExam = async (page: number) => {
     try {
       const rq = await ExamAPIStudent.getAllExam1000(page);
-      //console.log(rq);
       if (rq?.code === 200) {
         const now = new Date().getTime();
         const filteredExams = rq.exams.filter((exam: Exam) => {

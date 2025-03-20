@@ -272,58 +272,56 @@ export const UpdateExamQuestion = () => {
         </Button>
       </div>
 
-      {/* --- Danh sách câu hỏi trong đề thi (không dùng panel) --- */}
+      {/* --- Danh sách câu hỏi trong đề thi (dùng Collapse) --- */}
       <h3>Danh sách câu hỏi trong đề thi</h3>
       {selectedQuestions && selectedQuestions.length > 0 ? (
         <>
-          {paginatedSelectedQuestions.map((question, index) => (
-            <div
-              key={question._id || index}
-              style={{
-                border: "1px solid #d9d9d9",
-                borderRadius: 4,
-                padding: 12,
-                marginBottom: 12,
-              }}
-            >
-              <div style={{ marginBottom: 8 }}>
-                <strong>
-                  {index + 1 + (selectedPage - 1) * pageSize}.{" "}
-                  {question.content.length > 200
-                    ? question.content.slice(0, 200) + " ..."
-                    : question.content}
-                </strong>
-              </div>
-              <div style={{ marginBottom: 8 }}>
-                <Tag
-                  color={clsx(
-                    question.level === "easy" && "green",
-                    question.level === "medium" && "yellow",
-                    question.level === "hard" && "red"
-                  )}
-                >
-                  {question.level}
-                </Tag>
-                <Tag color="blue">{question.subject}</Tag>
-                <Tag color="cyan">{question.knowledge}</Tag>
-              </div>
-              <div style={{ marginBottom: 8 }}>
-                <Button
-                  size="large"
-                  onClick={() => moveQuestion(question)}
-                  icon={<MinusOutlined style={{ color: "red" }} />}
-                >
-                  Gỡ
-                </Button>
-              </div>
-              <QuestionComponent
-                deletetalbe={false}
-                question={question}
-                onUpdateSuccess={() => {}}
-                questionType={question.questionType || ""}
-              />
-            </div>
-          ))}
+          <Collapse accordion>
+            {paginatedSelectedQuestions.map((question, index) => (
+              <Panel
+                header={
+                  <div>
+                    <strong>
+                      {index + 1 + (selectedPage - 1) * pageSize}.{" "}
+                      {question.content.length > 200
+                        ? question.content.slice(0, 200) + " ..."
+                        : question.content}
+                    </strong>
+                  </div>
+                }
+                key={question._id || index}
+              >
+                <div style={{ marginBottom: 8 }}>
+                  <Tag
+                    color={clsx(
+                      question.level === "easy" && "green",
+                      question.level === "medium" && "yellow",
+                      question.level === "hard" && "red"
+                    )}
+                  >
+                    {question.level}
+                  </Tag>
+                  <Tag color="blue">{question.subject}</Tag>
+                  <Tag color="cyan">{question.knowledge}</Tag>
+                </div>
+                <div style={{ marginBottom: 8 }}>
+                  <Button
+                    size="large"
+                    onClick={() => moveQuestion(question)}
+                    icon={<MinusOutlined style={{ color: "red" }} />}
+                  >
+                    Gỡ
+                  </Button>
+                </div>
+                <QuestionComponent
+                  deletetalbe={false}
+                  question={question}
+                  onUpdateSuccess={() => {}}
+                  questionType={question.questionType || ""}
+                />
+              </Panel>
+            ))}
+          </Collapse>
           <div style={{ marginTop: 16, textAlign: "center" }}>
             <Pagination
               current={selectedPage}
@@ -347,36 +345,35 @@ export const UpdateExamQuestion = () => {
         }}
       >
         <div className="search-filter-container">
-  <Search
-    placeholder="Tìm theo nội dung, kiến thức, chủ đề"
-    value={searchTerm}
-    onChange={(e) => setSearchTerm(e.target.value)}
-    enterButton
-    className="search-input"
-  />
-  <Select
-    placeholder="Loại câu hỏi"
-    allowClear
-    className="select-item"
-    value={filterType || undefined}
-    onChange={(value) => setFilterType(value)}
-  >
-    <Option value="6742fb1cd56a2e75dbd817ea">Yes/No</Option>
-    <Option value="6742fb3bd56a2e75dbd817ec">Điền khuyết</Option>
-  </Select>
-  <Select
-    placeholder="Mức độ"
-    allowClear
-    className="select-item"
-    value={filterLevel || undefined}
-    onChange={(value) => setFilterLevel(value)}
-  >
-    <Option value="easy">Easy</Option>
-    <Option value="medium">Medium</Option>
-    <Option value="hard">Hard</Option>
-  </Select>
-</div>
-
+          <Search
+            placeholder="Tìm theo nội dung, kiến thức, chủ đề"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            enterButton
+            className="search-input"
+          />
+          <Select
+            placeholder="Loại câu hỏi"
+            allowClear
+            className="select-item"
+            value={filterType || undefined}
+            onChange={(value) => setFilterType(value)}
+          >
+            <Option value="6742fb1cd56a2e75dbd817ea">Yes/No</Option>
+            <Option value="6742fb3bd56a2e75dbd817ec">Điền khuyết</Option>
+          </Select>
+          <Select
+            placeholder="Mức độ"
+            allowClear
+            className="select-item"
+            value={filterLevel || undefined}
+            onChange={(value) => setFilterLevel(value)}
+          >
+            <Option value="easy">Easy</Option>
+            <Option value="medium">Medium</Option>
+            <Option value="hard">Hard</Option>
+          </Select>
+        </div>
       </div>
       {filteredOtherQuestions && filteredOtherQuestions.length > 0 ? (
         <>

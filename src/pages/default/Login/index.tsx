@@ -21,7 +21,6 @@ export const Login = () => {
   const getUser = async (email: string, pass: string) => {
     try {
       const rq = await AuthApi.login({ email: email, password: pass });
-      console.log(rq);
       setMessage(rq?.data.message);
       if (rq?.status === 201) {
         handleLogin(rq?.data.user);

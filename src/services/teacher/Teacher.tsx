@@ -150,7 +150,6 @@ export const QuestionAPI = {
     return response.data;
   },
   UpdateQuestion: async (question: Question, _id: string) => {
-    console.log(question);
     const response = await request.patch(
       `/teacher/question/update/${_id}`,
       question
@@ -174,7 +173,6 @@ export const ExamAPI = {
     return response.data;
   },
   creteExam: async (question: Exam) => {
-    console.log(question);
     const response = await request.post("/teacher/exam/create", question);
     return response.data;
   },
@@ -214,12 +212,12 @@ export const ExamAPI = {
     duration: number,
     questionTypes: string[]
   ) => {
-    console.log({
-      level,
-      numberOfQuestions,
-      duration,
-      questionTypes,
-    });
+    // console.log({
+    //   level,
+    //   numberOfQuestions,
+    //   duration,
+    //   questionTypes,
+    // });
     const response = await request.post("/teacher/exam/auto-generate-exam", {
       level,
       numberOfQuestions,

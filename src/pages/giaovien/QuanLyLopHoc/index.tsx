@@ -17,7 +17,6 @@ export const QuanLyLopHoc = () => {
     const fetchClassrooms = async () => {
       try {
         const data = await ClassroomAPI.getAllClassrooms();
-        console.log(data);
         // Lấy đúng mảng classrooms từ dữ liệu trả về
         if (data.success) {
           setClassrooms(data.classrooms);

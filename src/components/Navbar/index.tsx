@@ -23,7 +23,6 @@ export const Navbar: React.FC<navbarProps> = ({ rule= true }) => {
       const rq = await AuthApi.logout();
       console.log(rq?.data.message);
     } catch (error: any) {
-      console.log(error);
     }
   }; // Add this closing brace to fix the error
   const handleBTNLogout = async () => {
