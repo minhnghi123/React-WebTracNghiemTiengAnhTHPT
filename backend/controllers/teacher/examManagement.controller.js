@@ -10,9 +10,11 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { Packer, Document } from "docx";
-import { redisService } from "../../config/redis.config.js";
-import { request } from "http";
-// Tạo __dirname thủ công
+import mammoth from "mammoth";
+import slugify from "slugify";
+import multer from "multer";
+import * as cheerio from "cheerio";
+import { v4 as uuidv4 } from "uuid";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -527,4 +529,123 @@ export const copyExamFromOthers = async (req, res) => {
   } catch (error) {
     res.status(500).send({ error: error.message });
   }
+};
+
+// Cấu hình Multer để upload file Word
+const upload = multer({ dest: "uploads/" });
+
+// Bước 1: Trích xuất nội dung file Word
+const extractTextFromWord = async (filePath) => {
+  try {
+    const result = await mammoth.convertToHtml({ path: filePath });
+    return result.value;
+  } catch (error) {
+    console.error("Lỗi khi trích xuất nội dung:", error);
+    return null;
+  }
+};
+
+// Bước 2: Phân tích dữ liệu từ HTML
+const parseExamData = (html) => {
+  const $ = cheerio.load(html);
+  const lines = $("p")
+    .map((_, el) => $(el).text().trim())
+    .get();
+
+  for (let i = 0; i < lines.length; i++) {
+    const questionMatch = lines[i].match(/^Question (\d+): (.+)/);
+    if (questionMatch) console.error(questionMatch);
+    // handle passage question .
+    if (
+      lines[i].startsWith("Reading the following passage") ||
+      lines[i].startsWith("Read the following passage")
+    ) {
+      let passage = lines[i] + "\n";
+      let j = i + 1;
+      while (!lines[j].startsWith("Question")) {
+        passage += lines[j] + "\n";
+        j++;
+      }
+      console.log(passage);
+      //make sure the next lines will be its questions , traversal it util get the 'Mark' signals
+      while (j < lines.length && lines[j].startsWith("Question")) {
+        //there will be 2 cases that if startwith the question and this line contains 'A', 'B', 'C', 'D' => fill in the blank question
+        if (
+          lines[j].includes("A.") &&
+          lines[j].includes("B.") &&
+          lines[j].includes("C.") &&
+          lines[j].includes("D.")
+        ) {
+          console.warn(lines[j]);
+          j++;
+        }
+        //else if startwith the question, => the next lines will be its part of answer
+        else {
+          console.warn(lines[j]);
+          //the next lines will be its part of answer
+          j++;
+
+          while (
+            lines[j].includes("A.") ||
+            lines[j].includes("B.") ||
+            lines[j].includes("C.") ||
+            lines[j].includes("D.")
+          ) {
+            console.warn(lines[j]);
+            j++;
+          }
+        }
+      }
+      i = j - 1;
+    }
+    //handle other questions
+    else {
+      //stress question, if the line contains 'stress' => the next lines will be its part of answer
+      if (lines[i].includes("stress")) {
+        console.warn(lines[i]);
+        i++;
+        while (
+          lines[i].includes("A.") &&
+          lines[i].includes("B.") &&
+          lines[i].includes("C.") &&
+          lines[i].includes("D.")
+        ) {
+          console.warn(lines[i]);
+          i++;
+        }
+      }
+      //mutiple questions
+      else {
+        console.warn(lines[i]);
+      }
+    }
+  }
+};
+
+// Bước 3: Import đề thi vào MongoDB
+const importExam = async (filePath, userId) => {
+  const html = await extractTextFromWord(filePath);
+  const questions = parseExamData(html);
+  console.log("✅ Đề thi đã được nhập thành công!");
+};
+
+// API Upload file và import đề thi
+export const importExamFromWord = async (req, res) => {
+  upload.single("examFile")(req, res, async (err) => {
+    try {
+      const filePath = req.file.path;
+      await importExam(filePath, req.user._id);
+      return res.status(200).json({
+        success: true,
+        message: "Đề thi đã được nhập thành công!",
+      });
+    } catch (error) {
+      console.error("Lỗi khi nhập đề thi:", error.message);
+      return res.status(500).json({
+        success: false,
+        message: "Lỗi server! Không thể nhập đề thi.",
+        error: error.message,
+      });
+    }
+  });
 };
