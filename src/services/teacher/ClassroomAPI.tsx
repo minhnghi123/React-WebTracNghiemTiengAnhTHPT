@@ -25,9 +25,6 @@ export interface Student {
   __v: number;
 }
 
-
-
-
 export const ClassroomAPI = {
   createClassroom: async (classroomData: Classroom) => {
     const response = await request.post("/teacher/classroom/create", classroomData);
@@ -71,6 +68,18 @@ export const ClassroomAPI = {
   },
   getAllStudents: async () => {
     const response = await request.get("/teacher/classroom/allStudents");
+    return response.data;
+  },
+  getAllStudentResults: async (classroomId: string) => {
+    const response = await request.get(`/teacher/classroom/${classroomId}/results`);
+    return response.data;
+  },
+  getAllStudentResultsbyExam: async (classroomId: string, examId: string) => {
+    const response = await request.get(`/teacher/classroom/${classroomId}/exam/${examId}/results`);
+    return response.data;
+  },
+  downloadStudentResultsExcel: async (classroomId: string) => {
+    const response = await request.get(`/teacher/classroom/${classroomId}/results/excel`, { responseType: 'blob' });
     return response.data;
   }
 };
