@@ -61,6 +61,10 @@ export const ResultAPI = {
     const response = await request.get(`/result/wrong-questions/${id}`);
     return response.data;
   },
+  getInCompletedExam: async () => {
+    const response = await request.get(`/result/check-incomplete-exams/`);
+    return response.data;
+  }
 };
 export const ExamAPIStudent = {
   getAllExam: async (page: number) => {

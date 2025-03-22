@@ -11,7 +11,13 @@ export const getAllResults = async (req, res) => {
       isDeleted: false,
     };
 
-    const results = await Result.find(fillter).populate("examId");
+    const results = await Result.find(fillter).populate({
+      path: "examId",
+      populate: [
+        { path: "questions" },
+        { path: "listeningQuestions" }, // Add this line
+      ],
+    });
     res.status(200).json({
       code: 200,
       data: results,
@@ -24,7 +30,7 @@ export const getAllResults = async (req, res) => {
 // [POST]: /result/submit
 export const submitExam = async (req, res) => {
   try {
-    const { examId, userId, answers } = req.body;
+    const { examId, userId, answers, listeningAnswers } = req.body;
 
     // Tìm bài kiểm tra và các câu hỏi liên quan
     const exam = await Exam.findOne({ _id: examId }).populate({
@@ -33,7 +39,7 @@ export const submitExam = async (req, res) => {
         path: "questionType",
         select: "name",
       },
-    });
+    }).populate("listeningQuestions"); // Add this line
 
     if (!exam) {
       return res.status(404).json({ message: "Exam not found." });
@@ -43,10 +49,12 @@ export const submitExam = async (req, res) => {
     let correctAnswer = 0;
     let wrongAnswer = 0;
     const questionDetails = [];
+    const listeningQuestionDetails = [];
     let wrongAnswerByKnowledge = {};
     let incorrectAnswer = [];
     let answerDetail = "";
-    // Duyệt qua từng câu trả lời người dùng
+
+    // Duyệt qua từng câu trả lời người dùng cho questions
     for (const answer of answers) {
       const { questionId, selectedAnswerId, userAnswer } = answer;
 
@@ -219,6 +227,179 @@ export const submitExam = async (req, res) => {
       questionDetails.push(detail);
     }
 
+    // Duyệt qua từng câu trả lời người dùng cho listeningQuestions
+    for (const answer of listeningAnswers) {
+      const { questionId, selectedAnswerId, userAnswer } = answer;
+
+      // Tìm câu hỏi tương ứng trong bài thi
+      const question = exam.listeningQuestions.find(
+        (q) => String(q._id) === String(questionId)
+      );
+
+      if (!question) {
+        return res.status(400).json({
+          code: 400,
+          message: `Listening Question ${questionId} not found in the exam.`,
+        });
+      }
+
+      let isCorrect = false;
+      let detail = {};
+
+      // Xử lý dựa theo loại câu hỏi (theo tên của questionType)
+      switch (question.questionType.name) {
+        case "Fill in the Blanks":
+          // Nếu là câu hỏi điền khuyết có nhiều blank thì userAnswer phải là mảng
+          if (Array.isArray(userAnswer)) {
+            let correctCount = 0;
+            // Lấy mảng đáp án đúng từ từng phần tử của câu hỏi
+            const correctAnswers = question.answers.map(
+              (ans) => ans.correctAnswerForBlank
+            );
+            // So sánh từng blank
+            const userAnswersDetail = userAnswer.map((ua, index) => {
+              const correctAns = correctAnswers[index]
+                ? correctAnswers[index].trim().toLowerCase()
+                : "";
+              const userAns = ua ? ua.trim().toLowerCase() : "";
+              const answerIsCorrect = correctAns === userAns;
+              if (answerIsCorrect) correctCount++;
+              return {
+                userAnswer: ua,
+                // Nếu cấu trúc luôn theo thứ tự, ta có thể dùng index để tham chiếu đáp án
+                answerId: question.answers[index]?._id,
+                isCorrect: answerIsCorrect,
+              };
+            });
+            isCorrect = correctCount === question.answers.length;
+
+            detail = {
+              questionId: question._id,
+              content: question.content,
+              answers: question.answers,
+              // Lưu mảng kết quả của từng blank
+              userAnswers: userAnswersDetail,
+              correctAnswerForBlank: correctAnswers,
+              audio: question.audio || null,
+              isCorrect,
+            };
+          } else if (question.audio) {
+            // Trường hợp câu hỏi nghe điền khuyết
+            const correctAnswers = question.answers
+              .map((ans) => ({
+                correctAnswer: ans.correctAnswerForBlank,
+                answerId: ans._id,
+              }))
+              .filter((ans) => Boolean(ans.correctAnswer));
+
+            if (!correctAnswers.length) {
+              return res.status(500).json({
+                message: `Listening Question ${questionId} has no correct answers.`,
+              });
+            }
+
+            if (!Array.isArray(userAnswer)) {
+              return res.status(400).json({
+                message: `Invalid format for userAnswer. It should be an array.`,
+              });
+            }
+
+            const userAnswersDetail = userAnswer.map((ua) => {
+              const matchedAnswer = correctAnswers.find(
+                (correct) =>
+                  ua.trim().toLowerCase() ===
+                  correct.correctAnswer.trim().toLowerCase()
+              );
+              return {
+                userAnswer: ua,
+                answerId: matchedAnswer ? matchedAnswer.answerId : null,
+                isCorrect: !!matchedAnswer,
+              };
+            });
+
+            const correctCount = userAnswersDetail.filter(
+              (ans) => ans.isCorrect
+            ).length;
+            isCorrect = correctCount === correctAnswers.length;
+
+            detail = {
+              questionId: question._id,
+              content: question.content,
+              answers: question.answers,
+              userAnswers: userAnswersDetail,
+              correctAnswerForBlank: correctAnswers.map(
+                (correct) => correct.correctAnswer
+              ),
+              audio: question.audio,
+              isCorrect,
+            };
+          }
+          break;
+
+        case "Multiple Choice Questions":
+          const correctAnswerObj = question.answers.find(
+            (ans) => ans.isCorrect
+          );
+          if (!correctAnswerObj) {
+            return res.status(500).json({
+              message: `Listening Question ${questionId} has no correct answer.`,
+            });
+          }
+          isCorrect =
+            selectedAnswerId &&
+            String(correctAnswerObj._id) === String(selectedAnswerId);
+
+          detail = {
+            questionId: question._id,
+            content: question.content,
+            answers: question.answers,
+            selectedAnswerId,
+            // Dành cho câu hỏi trắc nghiệm, lưu userAnswer dưới dạng ID của đáp án đã chọn
+            userAnswers: [{ userAnswer: selectedAnswerId }],
+            correctAnswerForBlank: null,
+            audio: question.audio || null,
+            isCorrect,
+          };
+          break;
+
+        default:
+          return res.status(400).json({
+            message: `Unsupported question type: ${question.questionType.name}`,
+          });
+      }
+
+      // Cập nhật điểm số tổng
+      if (isCorrect) {
+        correctAnswer++;
+        score++;
+      } else {
+        wrongAnswer++;
+        let questionContent = question?.content;
+        let answerTmp = question?.answers;
+
+        for (const ans of answerTmp) {
+          if (!ans.text) {
+            answerDetail += ans.correctAnswerForBlank;
+          } else {
+            answerDetail += ans.text;
+          }
+          answerDetail += "\n";
+        }
+        const knowledge = question?.knowledge;
+        if (!wrongAnswerByKnowledge[knowledge]) {
+          wrongAnswerByKnowledge[knowledge] = 0;
+        }
+        wrongAnswerByKnowledge[knowledge]++;
+        incorrectAnswer.push({
+          questionContent,
+          answerDetail,
+          knowledge,
+        });
+      }
+
+      listeningQuestionDetails.push(detail);
+    }
+
     // Goi y bai tap ve cau hoi bi lam sai
     const suggestionQuestion = await Question.find({
       knowledge: { $in: Object.keys(wrongAnswerByKnowledge) },
@@ -231,6 +412,7 @@ export const submitExam = async (req, res) => {
       correctAnswer,
       wrongAnswer,
       questions: questionDetails,
+      listeningQuestions: listeningQuestionDetails, // Add this line
       suggestionQuestion,
       wrongAnswerByKnowledge,
       answerDetail,
@@ -270,6 +452,7 @@ export const submitExam = async (req, res) => {
       correctAnswer,
       wrongAnswer,
       details: questionDetails,
+      listeningQuestions: listeningQuestionDetails, // Add this line
       wrongAnswerByKnowledge,
       suggestionQuestion,
       videos,
@@ -317,9 +500,17 @@ export const getWrongQuestions = async (req, res) => {
 
   try {
     // Tìm kết quả bài kiểm tra
-    const result = await Result.findById(resultId).populate(
-      "questions.questionId"
-    );
+    const result = await Result.findById(resultId).populate({
+      path: "questions.questionId",
+      populate: [
+        { path: "listeningQuestions" }, // Add this line
+      ],
+    }).populate({
+      path: "listeningQuestions.questionId", // Add this line
+      populate: [
+        { path: "listeningQuestions" }, // Add this line
+      ],
+    });
 
     if (!result) {
       return res.status(404).json({ message: "Result not found" });
@@ -327,11 +518,13 @@ export const getWrongQuestions = async (req, res) => {
 
     // Lọc ra các câu sai
     const wrongQuestions = result.questions.filter((q) => !q.isCorrect);
+    const wrongListeningQuestions = result.listeningQuestions.filter((q) => !q.isCorrect); // Add this line
 
     res.status(200).json({
       code: 200,
       message: "Wrong questions fetched successfully.",
       wrongQuestions,
+      wrongListeningQuestions, // Add this line
     });
   } catch (error) {
     res.status(500).json({
@@ -339,5 +532,23 @@ export const getWrongQuestions = async (req, res) => {
       message: "Failed to fetch wrong questions",
       error,
     });
+  }
+};
+
+// Hàm kiểm tra và cập nhật trạng thái các kỳ thi chưa hoàn thành
+export const getDontCompletedExam = async () => {
+  try {
+    const now = new Date();
+    const results = await Result.find({ isCompleted: false, endTime: { $lt: now } });
+
+    for (const result of results) {
+      result.isCompleted = true;
+      await result.save();
+    }
+
+    return results;
+  } catch (error) {
+    console.error("Error checking incomplete exams:", error);
+    throw error;
   }
 };

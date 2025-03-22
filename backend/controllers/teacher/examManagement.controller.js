@@ -72,8 +72,10 @@ export const getExamDetail = async (req, res) => {
   try {
     const { slug } = req.params; // Lấy slug từ URL
 
-    // Tìm đề thi theo slug và populate danh sách câu hỏi
-    const exam = await Exam.findOne({ slug }).populate("questions");
+    // Tìm đề thi theo slug và populate danh sách câu hỏi và listeningExams
+    const exam = await Exam.findOne({ slug })
+      .populate("questions")
+      .populate("listeningExams"); // Add this line
 
     // Nếu không tìm thấy đề thi, trả về lỗi 404
     if (!exam) {
@@ -155,6 +157,7 @@ export const createExam = async (req, res) => {
       isPublic,
       startTime,
       endTime,
+      listeningExams, // Add this line
     } = req.body;
 
     if (!title || !Array.isArray(questions) || questions.length === 0) {
@@ -170,6 +173,7 @@ export const createExam = async (req, res) => {
         message: "Thời gian bắt đầu phải nhỏ hơn thời gian kết thúc!",
       });
     }
+
     // Tạo đối tượng Exam mới
     const newExam = new Exam({
       title,
@@ -180,6 +184,7 @@ export const createExam = async (req, res) => {
       startTime: startTime ? new Date(startTime) : undefined,
       endTime: endTime ? new Date(endTime) : undefined,
       createdBy: req.user._id,
+      listeningExams, // Add this line
     });
 
     // Lưu vào database
@@ -518,6 +523,7 @@ export const copyExamFromOthers = async (req, res) => {
       startTime: exam.startTime,
       endTime: exam.endTime,
       createdBy: req.user._id,
+      listeningExams: exam.listeningExams, // Add this line
     });
     await newExam.save();
     return res.status(200).json({

@@ -34,6 +34,33 @@ const ResultSchema = new mongoose.Schema({
       isCorrect: { type: Boolean, required: true },
     },
   ],
+  listeningQuestions: [
+    {
+      questionId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "ListeningQuestion",
+        required: true,
+      },
+      content: { type: String, required: true },
+      answers: [
+        {
+          _id: { type: mongoose.Schema.Types.ObjectId, required: true },
+          text: { type: String },
+          correctAnswerForBlank: { type: String },
+          isCorrect: { type: Boolean, required: true },
+        },
+      ],
+      selectedAnswerId: { type: mongoose.Schema.Types.ObjectId },
+      userAnswers: [
+        {
+          userAnswer: { type: String },
+          answerId: { type: mongoose.Schema.Types.ObjectId, ref: "Answer" },
+          isCorrect: { type: Boolean, default: false },
+        },
+      ],
+      isCorrect: { type: Boolean, required: true },
+    },
+  ],
   createdAt: { type: Date, default: Date.now },
   isDeleted: { type: Boolean, default: false },
   suggestionQuestion: {
@@ -44,6 +71,8 @@ const ResultSchema = new mongoose.Schema({
     type: Object,
     default: {},
   },
+  isCompleted: { type: Boolean, default: false }, // Thêm trạng thái hoàn thành
+  endTime: { type: Date }, // Thêm thời gian kết thúc
 });
 
 const Result = mongoose.model("Result", ResultSchema);
