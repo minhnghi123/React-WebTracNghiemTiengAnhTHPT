@@ -10,24 +10,26 @@ import {
   message,
   Modal,
   Pagination,
-  Table,
-  Space,
   Tabs,
-  Upload,
   Avatar,
+  Form,
 } from 'antd';
 import * as XLSX from 'xlsx';
 import { ClassroomAPI, Classroom, Student } from '@/services/teacher/ClassroomAPI';
 import { ExamAPI, Exam } from '@/services/teacher/Teacher';
-import UpdateClassModal from './updateClass';
 import ViewExamDetail from '../QuanLyDeThi/DeThi/deltailExam';
 import '../DetailClass.css';
 import { ColumnsType } from 'antd/es/table';
 import { ClassCodeCopy } from './copyClassID';
+import OverviewTab from './OverviewTab';
+import ExamsTab from './ExamsTab';
+import StudentsTab from './StudentsTab';
+import UpdateClassTab from './UpdateClassTab';
+
 
 const { TabPane } = Tabs;
 
-const columns: ColumnsType<Exam> = [
+const examColumns: ColumnsType<Exam> = [
   {
     title: "Tiêu đề",
     dataIndex: "title",
@@ -76,27 +78,25 @@ const DetailClass: React.FC = () => {
   const [classroom, setClassroom] = useState<Classroom | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [studentId, setStudentId] = useState<string>('');
-  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState<boolean>(false);
   const [listExam, setListExam] = useState<Exam[]>([]);
-  const [isExamModalOpen, setIsExamModalOpen] = useState<boolean>(false);
-  const [examToView, setExamToView] = useState<Exam | null>(null);
-  const [isExamContentModalOpen, setIsExamContentModalOpen] = useState<boolean>(false);
-
-  // State cho danh sách tất cả học sinh (để thêm từ danh sách)
   const [listAllStudents, setListAllStudents] = useState<Student[]>([]);
-  const [isStudentListModalOpen, setIsStudentListModalOpen] = useState<boolean>(false);
-  const [studentToView, setStudentToView] = useState<Student | null>(null);
-  const [isStudentModalOpen, setIsStudentModalOpen] = useState<boolean>(false);
-  const [searchStudentTerm, setSearchStudentTerm] = useState<string>('');
-
-  // State cho modal "Chọn bài kiểm tra"
   const [searchExamTerm, setSearchExamTerm] = useState<string>('');
   const [examCurrentPage, setExamCurrentPage] = useState<number>(1);
   const examPageSize = 5;
 
-  // State cho việc upload Excel
+  // Các state của modal đã được giữ nguyên cho các tab liên quan đến bài thi, học sinh,...
+  const [isExamModalOpen, setIsExamModalOpen] = useState<boolean>(false);
+  const [examToView, setExamToView] = useState<Exam | null>(null);
+  const [isExamContentModalOpen, setIsExamContentModalOpen] = useState<boolean>(false);
+  const [isStudentListModalOpen, setIsStudentListModalOpen] = useState<boolean>(false);
+  const [searchStudentTerm, setSearchStudentTerm] = useState<string>('');
+  const [isStudentModalOpen, setIsStudentModalOpen] = useState<boolean>(false);
+  const [studentToView, setStudentToView] = useState<Student | null>(null);
   const [failedStudents, setFailedStudents] = useState<Student[]>([]);
+
+  // State và form cho tab cập nhật lớp học
+  const [updateForm] = Form.useForm();
+  const [updating, setUpdating] = useState<boolean>(false);
 
   const fetchClassroom = async () => {
     try {
@@ -104,6 +104,13 @@ const DetailClass: React.FC = () => {
         const data = await ClassroomAPI.getClassroomById(_classroom_id);
         if (data.success) {
           setClassroom(data.classroom);
+          // Cập nhật giá trị form khi có dữ liệu lớp học
+          updateForm.setFieldsValue({
+            title: data.classroom.title,
+            teacherId: data.classroom.teacherId,
+            password: data.classroom.password,
+            status: data.classroom.status,
+          });
         } else {
           setError(data.message);
         }
@@ -121,7 +128,6 @@ const DetailClass: React.FC = () => {
       let totalPages = 1;
       let exams: Exam[] = [];
 
-      // Vòng lặp fetch tất cả các trang
       while (currentPage <= totalPages) {
         const response = await ExamAPI.getAllExam(currentPage);
         if (response.success) {
@@ -139,7 +145,6 @@ const DetailClass: React.FC = () => {
     }
   };
 
-  // Lấy danh sách tất cả học sinh từ API
   const fetchAllStudents = async () => {
     try {
       const response = await ClassroomAPI.getAllStudents();
@@ -158,18 +163,31 @@ const DetailClass: React.FC = () => {
     fetchExams();
   }, [_classroom_id]);
 
-  // const handleAddStudent = async () => {
-  //   try {
-  //     await ClassroomAPI.addStudentsToClassroom(_classroom_id || "", [studentId]);
-  //     fetchClassroom();
-  //     setStudentId('');
-  //     message.success("Thêm học sinh thành công");
-  //   } catch (err) {
-  //     setError('Lỗi khi thêm học sinh');
-  //     message.error("Lỗi khi thêm học sinh");
-  //   }
-  // };
+  // Xử lý cập nhật lớp học ở tab "Cập nhật lớp học"
+  const handleUpdateSubmit = async () => {
+    try {
+      const values = await updateForm.validateFields();
+      setUpdating(true);
+      const updateData: Partial<Classroom> = {
+        title: values.title,
+        teacherId: values.teacherId,
+        password: values.password,
+        status: values.status,
+      };
+      if (classroom?._id) {
+        const updatedClassroom = await ClassroomAPI.updateClassroom(classroom._id, updateData);
+        message.success('Cập nhật lớp học thành công');
+        // Cập nhật lại thông tin lớp học sau khi update
+        fetchClassroom();
+      }
+    } catch (error) {
+      message.error('Lỗi khi cập nhật lớp học');
+    } finally {
+      setUpdating(false);
+    }
+  };
 
+  // Các hàm xử lý học sinh và bài kiểm tra giữ nguyên
   const handleAddStudentItem = async (id: string) => {
     try {
       await ClassroomAPI.addStudentsToClassroom(_classroom_id || "", [id]);
@@ -190,20 +208,6 @@ const DetailClass: React.FC = () => {
       message.error("Lỗi khi xóa học sinh");
     }
   };
-
-  // const handleRemoveStudents = async () => {
-  //   try {
-  //     await ClassroomAPI.removeStudentsFromClassroom(
-  //       _classroom_id || "",
-  //       classroom?.students.map((student: any) => student._id) || []
-  //     );
-  //     fetchClassroom();
-  //     message.success("Xóa tất cả học sinh thành công");
-  //   } catch (err) {
-  //     setError('Lỗi khi xóa tất cả học sinh');
-  //     message.error("Lỗi khi xóa tất cả học sinh");
-  //   }
-  // };
 
   const handleAddExamItem = async (examId: string) => {
     try {
@@ -226,10 +230,6 @@ const DetailClass: React.FC = () => {
     }
   };
 
-  const handleClassroomUpdated = (updatedClassroom: Classroom) => {
-    fetchClassroom();
-  };
-
   const openExamContent = (exam: Exam) => {
     setExamToView(exam);
     setIsExamContentModalOpen(true);
@@ -248,7 +248,6 @@ const DetailClass: React.FC = () => {
         const workbook = XLSX.read(binaryStr, { type: 'binary' });
         const sheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[sheetName];
-        // Chuyển sheet thành JSON với header là hàng đầu tiên
         const jsonData: any[] = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
         if (jsonData.length <= 1) {
           message.error("File không có dữ liệu");
@@ -337,8 +336,22 @@ const DetailClass: React.FC = () => {
       }
     };
     reader.readAsBinaryString(file);
-    // Trả về false để ngăn việc upload file theo cách mặc định của Ant Design
     return false;
+  };
+
+  const handleDownloadExcel = async () => {
+    try {
+      const response = await ClassroomAPI.downloadStudentResultsExcel(_classroom_id || "");
+      const url = window.URL.createObjectURL(new Blob([response]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `student_results_${_classroom_id}.xlsx`);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode?.removeChild(link);
+    } catch (error) {
+      message.error("Lỗi khi tải xuống file Excel");
+    }
   };
 
   if (loading) {
@@ -353,13 +366,11 @@ const DetailClass: React.FC = () => {
     return <div className="detail-error">Không tìm thấy lớp học</div>;
   }
 
-  // Nếu teacherId là object, hiển thị tên giáo viên
   const teacherName =
     typeof classroom.teacherId === 'object'
       ? (classroom.teacherId as any).username
       : classroom.teacherId;
 
-  // Lọc danh sách học sinh theo ô tìm kiếm
   const filteredStudents = listAllStudents.filter((student) => {
     const term = searchStudentTerm.toLowerCase();
     return (
@@ -369,7 +380,6 @@ const DetailClass: React.FC = () => {
     );
   });
 
-  // Lọc danh sách bài kiểm tra theo ô tìm kiếm (nếu có)
   const filteredExams = listExam.filter((exam) => {
     const term = searchExamTerm.toLowerCase();
     return (
@@ -384,178 +394,61 @@ const DetailClass: React.FC = () => {
 
   return (
     <div className="detail-class-container">
-      {/* Nút Back quay lại danh sách lớp học */}
       <Row style={{ marginBottom: 16 }}>
         <Col>
-          <Button onClick={() => navigate('/giaovien/quanlylophoc')}>quay lại danh sách lớp học</Button>
+          <Button onClick={() => navigate('/giaovien/quanlylophoc')}>Quay lại danh sách lớp học</Button>
         </Col>
       </Row>
-
       <Row style={{ marginBottom: 16 }}>
         <Col span={24}>
-        <h3>   <center> {classroom.title}</center></h3>
-        <ClassCodeCopy classCode={classroom._id || 'N/A'} />
+          <h3 style={{ textAlign: 'center' }}>{classroom.title}</h3>
+          <ClassCodeCopy classCode={classroom._id || 'N/A'} />
           <p><strong>Giáo viên: </strong>{teacherName}</p>
           <p><strong>Trạng thái: </strong>{classroom.status}</p>
           <p><strong>Mật khẩu lớp: </strong>{classroom.password}</p>
         </Col>
       </Row>
-
       <Card bordered={false} className="detail-card">
         <Tabs defaultActiveKey="1">
           {/* Tab Tổng quan */}
           <TabPane tab="Tổng quan" key="1">
-            <Row gutter={[16, 16]}>
-              <Col span={24}>
-                <p className="detail-info">
-                  <strong>Số lượng học sinh: </strong>{Array.isArray(classroom.students) ? classroom.students.length : 0}
-                </p>
-                <p className="detail-info">
-                  <strong>Số lượng bài kiểm tra: </strong>{Array.isArray(classroom.exams) ? classroom.exams.length : 0}
-                </p>
-              </Col>
-            </Row>
-            <Row className="detail-row">
-              <Col span={24} className="detail-update">
-                <Button type="primary" onClick={() => setIsUpdateModalOpen(true)}>
-                  Cập nhật lớp học
-                </Button>
-              </Col>
-            </Row>
+            <OverviewTab classroom={classroom}  handleDownloadExcel={handleDownloadExcel}/>
           </TabPane>
 
           {/* Tab Kỳ thi */}
           <TabPane tab="Kỳ thi" key="2">
-            <Row gutter={[16, 16]}>
-            <div className="detail-action-group">
-                  <Button type="primary" onClick={() => setIsExamModalOpen(true)}>
-                    Thêm bài kiểm tra
-                  </Button>
-                </div>
-              <Col span={24}>
-                <h3 className="detail-subtitle">Danh sách bài kiểm tra của lớp</h3>
-                {classroom.exams && (
-                  <Table
-                    dataSource={classroom.exams}
-                    showSorterTooltip={false}
-                    columns={[
-                      ...(columns as ColumnsType<any>),
-                      {
-                        title: "",
-                        key: "action",
-                        render: (_, record) => (
-                          <Space size="small">
-                            <Button type="link" onClick={() => openExamContent(record)}>
-                              Xem chi tiết
-                            </Button>
-                            <Button type="link" danger onClick={() => handleRemoveExam(record._id)}>
-                              Xóa
-                            </Button>
-                          </Space>
-                        ),
-                      },
-                    ]}
-                  />
-                )}
-                
-              </Col>
-            </Row>
+            <ExamsTab
+              classroom={classroom}
+              examColumns={examColumns}
+              openExamContent={openExamContent}
+              handleRemoveExam={handleRemoveExam}
+              setIsExamModalOpen={setIsExamModalOpen}
+            />
           </TabPane>
 
           {/* Tab Học sinh */}
           <TabPane tab="Học sinh" key="3">
-            <Row gutter={[16, 16]}>
-              <Col span={24}>
-                <h3 className="detail-subtitle">Danh sách học sinh</h3>
-                <List
-                  className="detail-list"
-                  bordered
-                  dataSource={Array.isArray(classroom.students) ? classroom.students : []}
-                  renderItem={(student: any) => (
-                    <List.Item
-                      actions={[
-                        <Button type="link" onClick={() => openStudentContent(student)}>
-                          Xem chi tiết
-                        </Button>,
-                        <Button type="link" danger onClick={() => handleRemoveStudent(student._id)}>
-                          Xóa
-                        </Button>,
-                      ]}
-                    >
-                      <List.Item.Meta
-                        avatar={<Avatar src={student.avatar} alt={student.username} />}
-                        title={student.username}
-                        description={student.email}
-                      />
-                    </List.Item>
-                  )}
-                />
-                <div className="detail-action-group">
-                  <Button
-                    type="primary"
-                    onClick={() => {
-                      fetchAllStudents();
-                      setIsStudentListModalOpen(true);
-                    }}
-                  >
-                    Thêm học sinh mới
-                  </Button>
-                  {/* <Button type="default" onClick={handleRemoveStudents} className="detail-btn-margin">
-                    Xóa tất cả
-                  </Button> */}
-                </div>
-              </Col>
-            </Row>
-            <Row gutter={[16, 16]} style={{ marginTop: 24 }}>
-              <Col span={24}>
-                <h3 className="detail-subtitle">Thêm học sinh từ file Excel</h3>
-                <h3> Lưu ý: File Excel phải 1 trong các cột: ID, Username, Email</h3>
-                <Upload beforeUpload={handleExcelUpload} accept=".xlsx,.xls" showUploadList={false}>
-                  <Button type="primary">Upload Excel</Button>
-                </Upload>
-              </Col>
-            </Row>
-            {failedStudents.length > 0 && (
-              <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
-                <Col span={24}>
-                  <h4>Các học sinh không được thêm thành công:</h4>
-                  <Table
-                    dataSource={failedStudents}
-                    rowKey="_id"
-                    pagination={false}
-                    columns={[
-                      {
-                        title: "ID",
-                        dataIndex: "_id",
-                        key: "_id",
-                      },
-                      {
-                        title: "Username",
-                        dataIndex: "username",
-                        key: "username",
-                      },
-                      {
-                        title: "Email",
-                        dataIndex: "email",
-                        key: "email",
-                      },
-                      
-                    ]}
-                  />
-                </Col>
-              </Row>
-            )}
+            <StudentsTab
+              classroom={classroom}
+              failedStudents={failedStudents}
+              handleExcelUpload={handleExcelUpload}
+              openStudentContent={openStudentContent}
+              handleRemoveStudent={handleRemoveStudent}
+              fetchAllStudents={fetchAllStudents}
+              setIsStudentListModalOpen={setIsStudentListModalOpen}
+            />
+          </TabPane>
+
+          {/* Tab Cập nhật lớp học */}
+          <TabPane tab="Cập nhật lớp học" key="4">
+            <UpdateClassTab
+              updateForm={updateForm}
+              handleUpdateSubmit={handleUpdateSubmit}
+              updating={updating}
+            />
           </TabPane>
         </Tabs>
       </Card>
-
-      {/* Modal cập nhật lớp học */}
-      <UpdateClassModal
-        isOpen={isUpdateModalOpen}
-        onClose={() => setIsUpdateModalOpen(false)}
-        _classroom_id={classroom._id || ""}
-        onClassroomUpdated={handleClassroomUpdated}
-      />
 
       {/* Modal chọn bài kiểm tra */}
       <Modal
