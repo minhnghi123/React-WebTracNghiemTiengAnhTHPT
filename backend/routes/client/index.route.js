@@ -4,8 +4,10 @@ import questionRoute from "./question.route.js";
 import examRoute from "./exam.route.js";
 import resultRoute from "./result.route.js";
 import flashCardRoute from "./flashcard.route.js";
+
 import listeningExamRoute from "./listening-exams.route.js";
 import Classroom from "./classroom.route.js";
+
 import { protectedRoute } from "../../middlewares/protectedRoute.middleware.js";
 
 const indexClient = (app) => {
@@ -18,6 +20,5 @@ const indexClient = (app) => {
   app.use("/listening-exam", listeningExamRoute);
   app.use("/classroom", Classroom);
   app.use("/", homeRoute);
-
 };
 export default indexClient;
