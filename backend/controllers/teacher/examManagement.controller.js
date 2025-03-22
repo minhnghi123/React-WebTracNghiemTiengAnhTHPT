@@ -533,7 +533,6 @@ export const copyExamFromOthers = async (req, res) => {
 
 // Cấu hình Multer để upload file Word
 const upload = multer({ dest: "uploads/" });
-
 // Bước 1: Trích xuất nội dung file Word
 const extractTextFromWord = async (filePath) => {
   try {
@@ -552,10 +551,11 @@ const parseExamData = (html) => {
     .map((_, el) => $(el).text().trim())
     .get();
 
+  const questions = [];
+  const passages = [];
+
   for (let i = 0; i < lines.length; i++) {
-    const questionMatch = lines[i].match(/^Question (\d+): (.+)/);
-    if (questionMatch) console.error(questionMatch);
-    // handle passage question .
+    // handle passage question
     if (
       lines[i].startsWith("Reading the following passage") ||
       lines[i].startsWith("Read the following passage")
@@ -566,43 +566,42 @@ const parseExamData = (html) => {
         passage += lines[j] + "\n";
         j++;
       }
-      console.log(passage);
-      //make sure the next lines will be its questions , traversal it util get the 'Mark' signals
+      passages.push({ content: passage.trim() });
+      // make sure the next lines will be its questions, traversal it until get the 'Mark' signals
       while (j < lines.length && lines[j].startsWith("Question")) {
-        //there will be 2 cases that if startwith the question and this line contains 'A', 'B', 'C', 'D' => fill in the blank question
+        // there will be 2 cases that if start with the question and this line contains 'A', 'B', 'C', 'D' => fill in the blank question
         if (
           lines[j].includes("A.") &&
           lines[j].includes("B.") &&
           lines[j].includes("C.") &&
           lines[j].includes("D.")
         ) {
-          console.warn(lines[j]);
+          questions.push({ content: lines[j], type: "fill-in-the-blank" });
           j++;
         }
-        //else if startwith the question, => the next lines will be its part of answer
+        // else if start with the question, => the next lines will be its part of answer
         else {
-          console.warn(lines[j]);
-          //the next lines will be its part of answer
+          let question = lines[j];
           j++;
-
           while (
             lines[j].includes("A.") ||
             lines[j].includes("B.") ||
             lines[j].includes("C.") ||
             lines[j].includes("D.")
           ) {
-            console.warn(lines[j]);
+            question += "\n" + lines[j];
             j++;
           }
+          questions.push({ content: question, type: "multiple-choice" });
         }
       }
       i = j - 1;
     }
-    //handle other questions
+    // handle other questions
     else {
-      //stress question, if the line contains 'stress' => the next lines will be its part of answer
+      // stress question, if the line contains 'stress' => the next lines will be its part of answer
       if (lines[i].includes("stress")) {
-        console.warn(lines[i]);
+        let question = lines[i];
         i++;
         while (
           lines[i].includes("A.") &&
@@ -610,34 +609,70 @@ const parseExamData = (html) => {
           lines[i].includes("C.") &&
           lines[i].includes("D.")
         ) {
-          console.warn(lines[i]);
+          question += "\n" + lines[i];
           i++;
         }
+        questions.push({ content: question, type: "stress" });
       }
-      //mutiple questions
+      // multiple questions
       else {
-        console.warn(lines[i]);
+        questions.push({ content: lines[i], type: "multiple-choice" });
       }
     }
   }
+
+  return { questions, passages };
 };
 
 // Bước 3: Import đề thi vào MongoDB
 const importExam = async (filePath, userId) => {
   const html = await extractTextFromWord(filePath);
-  const questions = parseExamData(html);
+  const { questions, passages } = parseExamData(html);
+  console.log("Passages:", passages);
+  console.log("Questions:", questions);
+
+  // // Save passages to the database
+  // const savedPassages = await Passage.insertMany(passages);
+
+  // // Save questions to the database
+  // const savedQuestions = await Question.insertMany(
+  //   questions.map((q) => ({
+  //     ...q,
+  //     createdBy: userId,
+  //   }))
+  // );
+
   console.log("✅ Đề thi đã được nhập thành công!");
+  // return { savedQuestions, savedPassages };
 };
 
 // API Upload file và import đề thi
 export const importExamFromWord = async (req, res) => {
   upload.single("examFile")(req, res, async (err) => {
+    if (err) {
+      return res.status(500).json({
+        success: false,
+        message: "Lỗi khi upload file!",
+        error: err.message,
+      });
+    }
     try {
+      if (!req.file) {
+        return res.status(400).json({
+          success: false,
+          message: "Không tìm thấy file upload!",
+        });
+      }
       const filePath = req.file.path;
       await importExam(filePath, req.user._id);
+      // const { savedQuestions, savedPassages } = await importExam(
+      //   filePath,
+      //   req.user._id
+      // );
       return res.status(200).json({
         success: true,
         message: "Đề thi đã được nhập thành công!",
+        // data: { questions: savedQuestions, passages: savedPassages },
       });
     } catch (error) {
       console.error("Lỗi khi nhập đề thi:", error.message);
