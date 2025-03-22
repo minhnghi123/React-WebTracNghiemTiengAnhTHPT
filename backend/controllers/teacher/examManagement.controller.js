@@ -1,6 +1,7 @@
 import Exam from "../../models/Exam.model.js";
 import { Question } from "../../models/Question.model.js";
 import { formatExamHeader } from "../../utils/examHeader.helper.js";
+import { generateMultipleExamVariants } from "../../utils/generateMultipleExamVariants.js";
 import {
   formatExamQuestions,
   formatFillInBlankQuestions,
@@ -451,51 +452,49 @@ export const autoGenerateExam = async (req, res) => {
 export const exportExamIntoWord = async (req, res) => {
   try {
     const data = req.body;
-    const { questionsMultichoice, questionsFillInBlank, questionsListening } =
-      req.body;
-    const doc = new Document({
-      sections: [
-        {
-          children: [
-            ...formatExamHeader(data),
-            ...formatExamQuestions(questionsMultichoice),
-            ...formatFillInBlankQuestions(questionsFillInBlank),
-            ...formatListeningQuestions(questionsListening),
-          ],
-        },
-      ],
+
+    const variantCount = data.variant; 
+    const variants = generateMultipleExamVariants(data, variantCount);
+
+    const exportPaths = [];
+
+    for (let i = 0; i < variants.length; i++) {
+      const variant = variants[i];
+
+      const doc = new Document({
+        sections: [
+          {
+            children: [
+              ...formatExamHeader(variant, variant.code),
+              ...formatExamQuestions(variant.questionsMultichoice),
+              ...formatFillInBlankQuestions(variant.questionsFillInBlank),
+              ...formatListeningQuestions(variant.questionsListening),
+            ],
+          },
+        ],
+      });
+
+      const buffer = await Packer.toBuffer(doc);
+
+      const fileName = `${data.title} - ${variant.code}.docx`;
+      const downloadPath = path.join(process.env.USERPROFILE, "Downloads", fileName);
+
+      fs.writeFileSync(downloadPath, buffer);
+      exportPaths.push(downloadPath);
+    }
+
+   
+    res.status(200).json({
+      message: `${variantCount} mã đề đã được export thành công.`,
+      files: exportPaths.map((p) => path.basename(p)),
     });
 
-    const buffer = await Packer.toBuffer(doc);
-    let downloadPath = path.join(
-      process.env.USERPROFILE,
-      "Downloads",
-      data.title + ".docx"
-    );
-
-    // Tạo thư mục nếu chưa tồn tại
-    if (!fs.existsSync(path.dirname(downloadPath))) {
-      fs.mkdirSync(path.dirname(downloadPath), { recursive: true });
-    }
-
-    // Kiểm tra và thêm số vào tên file nếu đã tồn tại
-    let counter = 1;
-    while (fs.existsSync(downloadPath)) {
-      const parsedPath = path.parse(downloadPath);
-      downloadPath = path.join(
-        parsedPath.dir,
-        `${parsedPath.name}(${counter})${parsedPath.ext}`
-      );
-      counter++;
-    }
-
-    fs.writeFileSync(downloadPath, buffer);
-    res.download(downloadPath, path.basename(downloadPath));
   } catch (error) {
     console.error("Lỗi:", error);
     res.status(500).send({ error: error.message });
   }
 };
+
 
 //Copy exam from other teacher
 export const copyExamFromOthers = async (req, res) => {
