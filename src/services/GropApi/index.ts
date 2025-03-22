@@ -1,10 +1,10 @@
-import Groq from "groq-sdk";
+// import Groq from "groq-sdk";
 import { gemini } from "../GoogleApi";
 
 
 const configValue: string = import.meta.env.VITE_GROQ_API_KEY || "default_api_key";
 
-const groq = new Groq({ apiKey: configValue, dangerouslyAllowBrowser: true });
+// const groq = new Groq({ apiKey: configValue, dangerouslyAllowBrowser: true });
 const configValue2: string =
   import.meta.env.VITE_MYMEMORY_API_KEY || "default_api_key";
 

@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { Tabs, List, Card } from "antd";
 import { useAuthContext } from "@/contexts/AuthProvider";
 import "bootstrap/dist/css/bootstrap.min.css";
-import YearHeatmap from "./date";
 import { HistoryPage } from "./history";
 import { ClassroomReponse, studentClassroomAPI } from "@/services/student/ClassroomAPI";
 

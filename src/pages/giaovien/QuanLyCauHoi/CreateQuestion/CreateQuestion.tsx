@@ -132,11 +132,11 @@ const CreateQuestionModal: React.FC<CreateQuestionModalProps> = ({
     setQuestion((prev) => ({ ...prev, answers: newAnswers }));
   };
 
-  const handleAudioChange = (info: any) => {
-    if (info.file.status === "done") {
-      setAudioFile(info.file.originFileObj);
-    }
-  };
+  // const handleAudioChange = (info: any) => {
+  //   if (info.file.status === "done") {
+  //     setAudioFile(info.file.originFileObj);
+  //   }
+  // };
 
   const handleSaveClick = async () => {
     if (!question.content.trim()) {

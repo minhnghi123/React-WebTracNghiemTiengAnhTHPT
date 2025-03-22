@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import  { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   Card,
@@ -13,7 +13,6 @@ import {
   message,
 } from "antd";
 import {
-  ClassroomReponse,
   studentClassroomAPI,
 } from "@/services/student/ClassroomAPI";
 import "bootstrap/dist/css/bootstrap.min.css";

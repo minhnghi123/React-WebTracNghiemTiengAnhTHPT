@@ -64,6 +64,10 @@ export const ResultAPI = {
   getInCompletedExam: async () => {
     const response = await request.get(`/result/check-incomplete-exams/`);
     return response.data;
+  },
+  saveAnswer: async (data: SubmitAnswer) => {
+    const response = await request.post(`/result/save`, data);
+    return response.data;
   }
 };
 export const ExamAPIStudent = {

@@ -18,7 +18,6 @@ import { QuanLyCauHoi } from "@/pages/giaovien/QuanLyCauHoi";
 import LayoutAdmin from "@/pages/admin/DashBoard/LayoutAdmin";
 import { DashBoarAdmin } from "@/pages/admin/DashBoard";
 import NotFound from "@/pages/NotFound";
-import { QuanLyDeThi } from "@/pages/giaovien/QuanLyDeThi";
 import { QuanLyDangCauHoi } from "@/pages/admin/QuanLyDangCauHoi";
 import { CreateExamQuestion } from "@/pages/giaovien/QuanLyDeThi/DeThi/CreateExamQuestion.tsx";
 import { UpdateExamQuestion } from "@/pages/giaovien/QuanLyDeThi/DeThi/UpdateExam";

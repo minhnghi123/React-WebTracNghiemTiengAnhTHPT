@@ -152,7 +152,7 @@ export const ListeningQuestionComponent: React.FC<ListeningQuestionComponentProp
             visible={openModal}
             onUpdateSuccess={onUpdateSuccess}
             handleClose={() => setOpenModal(false)}
-            questionData={questionData}
+            questionData={questionData || []}
           />
         </>
       )}
