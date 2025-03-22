@@ -39,11 +39,10 @@ export const SignUp = () => {
           alert("Đăng ký thành công. Đang chờ xác nhận từ quản trị viên");
           navigate("/");
         } else {
-          navigate("/", {
+          navigate("/Login", {
             state: { message: "Đăng ký thành công" },
           });
         }
-       
       } else {
         setMessage(response.data.message);
       }
