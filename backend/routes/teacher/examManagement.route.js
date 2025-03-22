@@ -10,6 +10,7 @@ import {
   autoGenerateExam,
   exportExamIntoWord,
   copyExamFromOthers,
+  importExamFromWord,
 } from "../../controllers/teacher/examManagement.controller.js";
 
 const router = express.Router();
@@ -33,5 +34,7 @@ router.post("/auto-generate-exam", autoGenerateExam);
 router.post("/export-exam", exportExamIntoWord);
 
 router.post("/copy-exam", copyExamFromOthers);
+
+router.post("/import-exam", importExamFromWord);
 
 export default router;
