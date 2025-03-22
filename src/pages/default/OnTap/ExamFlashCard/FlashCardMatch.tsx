@@ -80,7 +80,6 @@ export const FlashCardMatch: React.FC<FlashCardMatchProps> = ({
   const [correctCount, setCorrectCount] = useState(0);
   const [edges, setEdges] = useState<[Node, Node][]>([]);
 
-  // Lấy danh sách term và definition từ flashCardSet (xáo trộn ngẫu nhiên)
   const leftArr = useMemo(
     () =>
       flashCardSet.vocabs
@@ -106,7 +105,6 @@ export const FlashCardMatch: React.FC<FlashCardMatchProps> = ({
     const ctx = canvasRef.current.getContext("2d");
     if (!ctx) return;
 
-    // Cài đặt kích thước canvas theo container
     const { height, width } = ctx.canvas;
     const rowHeight = height / leftArr.length;
     const margin = nodeRadius * 2.5;
@@ -227,13 +225,10 @@ export const FlashCardMatch: React.FC<FlashCardMatchProps> = ({
     setIsSubmitted(true);
   };
 
-  // Hàm reset cho phép nộp bài lại
   const handleReset = () => {
     setIsSubmitted(false);
     setScore(null);
     setCorrectCount(0);
-    // Bạn có thể reset lại các edge nếu muốn cho người dùng làm lại hoàn toàn
-    // setEdges([]);
   };
 
   return (

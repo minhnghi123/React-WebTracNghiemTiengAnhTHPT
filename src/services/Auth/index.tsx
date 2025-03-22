@@ -8,6 +8,7 @@ export interface UserDK {
   username: string;
   email: string;
   password: string;
+  role: string;
 }
 export const AuthApi = {
   createUser: async (data: UserDK) => {
@@ -32,7 +33,6 @@ export const AuthApi = {
   },
   resetPassword: async ( newPassword: string, rePassword: string,) => {
     const response = await request.post(`/auth/reset-password`, {  newPassword ,rePassword});
-    console.log(response);
     return response.data;
   },
 };

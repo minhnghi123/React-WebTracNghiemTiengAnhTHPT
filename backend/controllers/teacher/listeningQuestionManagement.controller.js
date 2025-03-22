@@ -86,6 +86,7 @@ export const createListeningQuestion = async (req, res) => {
 
     // Trả về câu hỏi mới tạo
     return res.status(201).json({
+      code: 201,
       message: "Câu hỏi đã được tạo thành công!",
       data: newQuestion,
     });
@@ -97,33 +98,50 @@ export const createListeningQuestion = async (req, res) => {
     });
   }
 };
-
 export const updateListeningQuestion = async (req, res) => {
   try {
     const { id } = req.params;
     const data = req.body;
+    let updatedQuestion;
 
-    const options =
-      data.options?.map((optionText) => ({
+    if (data.questionType == "6742fb3bd56a2e75dbd817ec") {
+      // Nếu là dạng Fill in the Blank thì chỉ cập nhật trường blankAnswer
+      updatedQuestion = await ListeningQuestion.findByIdAndUpdate(
+        id,
+        {
+          teacherId: data.teacherId,
+          questionText: data.questionText,
+          questionType: data.questionType,
+          difficulty: data.difficulty,
+          blankAnswer: data.blankAnswer,
+        },
+        { new: true, runValidators: true }
+      );
+    } else {
+      // Nếu là dạng Multiple Choice: data.options là mảng chuỗi, data.correctAnswer là mảng số (vị trí đáp án đúng)
+      const options = data.options.map((optionText, index) => ({
         option_id: new mongoose.Types.ObjectId(),
         optionText,
-      })) || [];
+      }));
 
-    const correctAnswer =
-      data.correctAnswer?.map((index) => ({
-        answer_id: options[index]?.option_id,
-        answer: options[index]?.optionText,
-      })) || [];
+      const correctAnswer = data.correctAnswer.map((index) => ({
+        answer_id: options[index].option_id,
+        answer: options[index].optionText,
+      }));
 
-    const updatedQuestion = await ListeningQuestion.findByIdAndUpdate(
-      id,
-      {
-        ...data,
-        options,
-        correctAnswer,
-      },
-      { new: true, runValidators: true }
-    );
+      updatedQuestion = await ListeningQuestion.findByIdAndUpdate(
+        id,
+        {
+          teacherId: data.teacherId,
+          questionText: data.questionText,
+          questionType: data.questionType,
+          difficulty: data.difficulty,
+          options,
+          correctAnswer,
+        },
+        { new: true, runValidators: true }
+      );
+    }
 
     if (!updatedQuestion) {
       return res
@@ -132,6 +150,7 @@ export const updateListeningQuestion = async (req, res) => {
     }
 
     return res.status(200).json({
+      code: 200,
       message: "Cập nhật câu hỏi thành công!",
       data: updatedQuestion,
     });
@@ -143,6 +162,8 @@ export const updateListeningQuestion = async (req, res) => {
     });
   }
 };
+
+
 
 export const createMultipleListeningQuestions = async (req, res) => {
   try {
@@ -219,6 +240,7 @@ export const deleteListeningQuestion = async (req, res) => {
     }
 
     return res.status(200).json({
+      code: 200,
       message: "Câu hỏi đã được xóa thành công!",
       data: deletedQuestion,
     });

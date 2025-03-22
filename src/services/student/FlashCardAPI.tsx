@@ -61,7 +61,6 @@ export const FlashCardAPI = {
   },
 
   updateFlashCardSet: async (idSet: string, data: Partial<FlashCardSet>) => {
-    console.log(data)
     const response = await request.patch(`/flashcard/${idSet}`, data);
     return response.data;
   },

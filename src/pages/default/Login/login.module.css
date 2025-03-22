@@ -41,7 +41,14 @@
   font-weight: 700;
   text-align: center;
   margin-bottom: 15px;
-  background: linear-gradient(90deg, #ff0000, #ff00f3, #0033ff, #ff00c4, #ff0000);
+  background: linear-gradient(
+    90deg,
+    #ff0000,
+    #ff00f3,
+    #0033ff,
+    #ff00c4,
+    #ff0000
+  );
   word-spacing: 5px;
   -webkit-text-fill-color: transparent;
   -webkit-background-clip: text;
@@ -57,16 +64,22 @@
 
 .label {
   font-size: 20px;
-  background: linear-gradient(90deg, #ff0000, #ff00f3, #0033ff, #ff00c4, #ff0000);
+  background: linear-gradient(
+    90deg,
+    #ff0000,
+    #ff00f3,
+    #0033ff,
+    #ff00c4,
+    #ff0000
+  );
   -webkit-text-fill-color: transparent;
   -webkit-background-clip: text;
   animation: animate 10s linear infinite;
   font-weight: 500;
 }
 .input[type="text"],
-.input[type="password"]{
+.input[type="password"] {
   border: 2px solid #ddd;
-
 }
 .input {
   width: 100%;
@@ -108,30 +121,29 @@
 
 .linkGroup {
   display: flex;
-  justify-content: space-between; 
-  margin-top: 1rem; 
+  justify-content: space-between;
+  margin-top: 1rem;
 }
 
 .register {
-  font-size: 17px; 
-  color: #007BFF; 
-  text-decoration: none; 
+  font-size: 17px;
+  color: #007bff;
+  text-decoration: none;
 }
 
 .register:hover {
-  text-decoration: underline; 
+  text-decoration: underline;
 }
 
 .forgotPassword {
-  font-size: 17px; 
-  color: #007BFF;
+  font-size: 17px;
+  color: #007bff;
   text-decoration: none;
 }
 
 .forgotPassword:hover {
   text-decoration: underline;
 }
-
 
 /* Submit Button */
 .submitButton {

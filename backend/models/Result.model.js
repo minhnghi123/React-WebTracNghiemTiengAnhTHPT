@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const ResultSchema = new mongoose.Schema({
   examId: { type: mongoose.Schema.Types.ObjectId, ref: "Exam", required: true },
-  // userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: "TaiKhoan", required: true },
   score: { type: Number, required: true },
   classroomId: {type: mongoose.Schema.Types.ObjectId, ref: "Classroom"},
   correctAnswer: { type: Number, required: true },

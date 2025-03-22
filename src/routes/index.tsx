@@ -18,7 +18,6 @@ import { QuanLyCauHoi } from "@/pages/giaovien/QuanLyCauHoi";
 import LayoutAdmin from "@/pages/admin/DashBoard/LayoutAdmin";
 import { DashBoarAdmin } from "@/pages/admin/DashBoard";
 import NotFound from "@/pages/NotFound";
-import { OnTap } from "@/pages/default/OnTap";
 import { QuanLyDeThi } from "@/pages/giaovien/QuanLyDeThi";
 import { QuanLyDangCauHoi } from "@/pages/admin/QuanLyDangCauHoi";
 import { CreateExamQuestion } from "@/pages/giaovien/QuanLyDeThi/DeThi/CreateExamQuestion.tsx";
@@ -35,6 +34,11 @@ import { FlashCardCreate } from "@/pages/default/OnTap/FlashCardCreate";
 import { FlashCardUpdate } from "@/pages/default/OnTap/FlashCardUpdate";
 import { FlashCardExam } from "@/pages/default/OnTap/FlashCardExam";
 import {Profile} from "@/pages/default/Profile";
+import VerificationTeacher from "@/pages/admin/QuanLyTaiKhoan/verificationTeacher";
+import { QuanLyLopHoc } from "@/pages/giaovien/QuanLyLopHoc";
+import DetailClass from "@/pages/giaovien/QuanLyLopHoc/detailClass";
+import QuanLyDeThiIndex from "@/pages/giaovien/QuanLyDeThi/indexDeThi";
+import { ClassroomDetail } from "@/pages/default/PhongThi/detailclass";
 
 export enum ERolePath {
   ADMIN = 2,
@@ -73,6 +77,7 @@ export const router = [
       createRoute("/About", <VeChungToi />, ERolePath.USER),
       createRoute("/Contact", <LienHe />, ERolePath.USER),
       createRoute("/PhongThi", <PhongThi />, ERolePath.USER),
+      createRoute("/PhongThi/Detail/:classroomId", <ClassroomDetail />, ERolePath.USER),
       createRoute("/OnTap", <FlashCardIndex />, ERolePath.USER),
       createRoute("/FlashCard/:_id", <FlashCardDetail />, ERolePath.USER),
       createRoute("/KyThi", <KyThi />, ERolePath.USER),
@@ -100,7 +105,7 @@ export const router = [
     children: [
       createRoute("/GiaoVien", <DashBoardGiaoVien />, ERolePath.USER),
       createRoute("/giaovien/NganHangCauHoi", <QuanLyCauHoi />, ERolePath.USER),
-      createRoute("/giaovien/QuanLyDeThi", <QuanLyDeThi />, ERolePath.USER),
+      createRoute("/giaovien/QuanLyDeThi", <QuanLyDeThiIndex />, ERolePath.USER),
       createRoute(
         "/giaovien/QuanLyDeThi/CreateExam",
         <CreateExamQuestion />,
@@ -111,6 +116,8 @@ export const router = [
         <UpdateExamQuestion />,
         ERolePath.USER
       ),
+      createRoute("/giaovien/QuanLyLopHoc/:_classroom_id", <DetailClass />, ERolePath.USER),
+      createRoute("/giaovien/QuanLyLopHoc", <QuanLyLopHoc />, ERolePath.USER),
       createRoute("/giaovien/QuanLyAudio", <QuanLyAudio />, ERolePath.USER),
     ],
   },
@@ -120,6 +127,7 @@ export const router = [
     children: [
       createRoute("/Admin", <DashBoarAdmin />, ERolePath.USER),
       createRoute("/Admin/DangCauHoi", <QuanLyDangCauHoi />, ERolePath.USER),
+      createRoute("/Admin/QuanLyTaiKhoan", <VerificationTeacher />, ERolePath.USER),
     ],
   },
   {
@@ -136,6 +144,7 @@ const paths = {
   "/forgetPassword": ["/forgetPassword"],
   "/SignUp": ["/SignUp"],
   "/PhongThi": ["/PhongThi"],
+  "/PhongThi/Detail/:classroomId": ["/PhongThi/Detail/:classroomId"],
   "/GiaoVien": ["/GiaoVien"],
   "/NganHangCauHoi": ["/NganHangCauHoi"],
   "/giaovien/NganHangCauHoi": ["/giaovien/NganHangCauHoi"],
@@ -157,6 +166,10 @@ const paths = {
   "/flashcard/edit/:_id": ["/flashcard/edit/:_id"],
   "/flashcard/exam/:id": ["/flashcard/exam/:id"],
   "/profile": ["/profile"],
+  "/Admin/QuanLyTaiKhoan": ["/Admin/QuanLyTaiKhoan"],
+  "/giaovien/QuanLyLopHoc": ["/giaovien/QuanLyLopHoc"],
+  "/giaovien/QuanLyLopHoc/:_classroom_id": ["/giaovien/QuanLyLopHoc/:_classroom_id"],
+
 } as const;
 
 export type TRoutePaths = (typeof paths)[keyof typeof paths][number] &

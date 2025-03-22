@@ -24,7 +24,6 @@ const QuestionSchema = new mongoose.Schema({
     },
   ],
   subject: { type: String, default: "English" },
-  audio: { type: String, default: "" },
   knowledge: {
     type: String,
     default: "General Knowledge",

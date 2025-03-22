@@ -62,7 +62,6 @@ export const UpdateAudioModal: React.FC<UpdateAudioProps> = ({
     }
     const formData = new FormData();
     if (file !== null) {
-      console.log("file", file);
       formData.append("filePath", file);
     }
     formData.append("description", question.description);
@@ -78,7 +77,6 @@ export const UpdateAudioModal: React.FC<UpdateAudioProps> = ({
         question._id ?? ""
       );
       if (rq?.success) {
-        console.log(rq);
         alert("Cập nhật file nghe thành công");
         handleClose();
       }
