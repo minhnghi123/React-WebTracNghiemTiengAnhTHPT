@@ -181,97 +181,72 @@ export const importExcel = async (req, res) => {
       fs.unlink(excel.tempFilePath);
       return res.status(400).json({ msg: "file is unvalid" });
     }
-
+    //get all question Type
+    const questionTypes = await QuestionType.find({ deleted: false });
+    //get each question type
+    const questionTypeMap = {};
+    for (const questionType of questionTypes) {
+      questionTypeMap[questionType.name] = questionType._id;
+    }
     // Đọc và xử lý tệp Excel
     const workbook = XLSX.readFile(excel.tempFilePath);
     const sheetNames = workbook.SheetNames;
     const data = XLSX.utils.sheet_to_json(workbook.Sheets[sheetNames[0]]);
-
-    // Lay data
-    let successData = [];
-    let failureData = [];
-
-    for (let i = 0; i < data.length; i++) {
-      const {
-        QuestionText,
-        AnswerA,
-        AnswerB,
-        AnswerC,
-        AnswerD,
-        CorrectAnswer,
-        correctAnswerForBlank,
-        Level,
-        Knowledge,
-        Translation,
-      } = data[i];
-
-      if (CorrectAnswer) {
-        // Validate
-        if (!QuestionText || !AnswerA || !AnswerB || !AnswerC || !AnswerD) {
-          failureData.push(data[i]);
-          continue;
-        }
-
-        // Fetch the question type
-        const multiChoice = await QuestionType.findOne({
-          name: "Multiple Choice Questions",
-        });
-
-        const correctAnswers = CorrectAnswer.split(",").map((answer) =>
-          answer.toUpperCase().trim()
-        );
-        const answers = [
-          { text: AnswerA, isCorrect: correctAnswers.includes("A") },
-          { text: AnswerB, isCorrect: correctAnswers.includes("B") },
-          { text: AnswerC, isCorrect: correctAnswers.includes("C") },
-          { text: AnswerD, isCorrect: correctAnswers.includes("D") },
-        ];
-        const newQuestion = new Question({
-          content: QuestionText,
-          questionType: multiChoice.id,
-          level: Level,
-          answers: answers,
-          knowledge: Knowledge,
-          translation: Translation,
-        });
-
-        // Save the new question
-        try {
-          await newQuestion.save();
-          successData.push(newQuestion);
-        } catch (err) {
-          console.error("Error saving question:", err);
-          failureData.push(data[i]);
-        }
-      } else if (correctAnswerForBlank) {
-        if (!QuestionText || !correctAnswerForBlank) {
-          continue;
-        }
-
-        // Fetch the question type
-        const fillBlank = await QuestionType.findOne({
-          name: "Fill in the Blanks",
-        });
-
-        const newQuestion = new Question({
-          content: QuestionText,
-          questionType: fillBlank.id,
-          level: Level,
-          answers: [{ correctAnswerForBlank: correctAnswerForBlank }],
-          knowledge: Knowledge,
-          translation: Translation,
-        });
-
-        // Save the new question
-        try {
-          await newQuestion.save();
-          successData.push(newQuestion);
-        } catch (err) {
-          console.error("Error saving question:", err);
-          failureData.push(data[i]);
-        }
+    let collectQuestions = [];
+    for (const question of data) {
+      let mockData = {};
+      const { correctAnswerForBlank, CorrectAnswer } = question;
+      if (correctAnswerForBlank) {
+        //=> Fill in the Blanks
+        mockData = {
+          content: question.QuestionText,
+          questionType: questionTypeMap["Fill in the Blanks"],
+          level: question.Level.toLowerCase(),
+          Knowledge: question.Knowledge,
+          translation: question.Translation,
+          answers: [
+            {
+              text: "",
+              correctAnswerForBlank: correctAnswerForBlank,
+            },
+          ],
+        };
+      } else {
+        //=> Multiple Choice Questions
+        mockData = {
+          content: question.QuestionText,
+          questionType: questionTypeMap["Multiple Choice Questions"],
+          level: question.Level.toLowerCase(),
+          Knowledge: question.Knowledge,
+          translation: question.Translation,
+          answers: [
+            {
+              text: question.AnswerA,
+              isCorrect: question.CorrectAnswer === "A",
+            },
+            {
+              text: question.AnswerB,
+              isCorrect: question.CorrectAnswer === "B",
+            },
+            {
+              text: question.AnswerC,
+              isCorrect: question.CorrectAnswer === "C",
+            },
+            {
+              text: question.AnswerD,
+              isCorrect: question.CorrectAnswer === "D",
+            },
+          ],
+        };
       }
+      collectQuestions.push(mockData);
     }
+
+    // Save to database
+    await Question.insertMany(
+      collectQuestions,
+      { ordered: false } // If any error occurs, stop inserting and return the error
+    );
 
     // Xóa tệp tạm thời
     fs.unlink(excel.tempFilePath, (err) => {
@@ -280,8 +255,7 @@ export const importExcel = async (req, res) => {
 
     return res.status(200).json({
       msg: "Excel file processed successfully",
-      successData,
-      failureData,
+      data: collectQuestions,
     });
   } catch (error) {
     console.error("Error processing file:", error);
