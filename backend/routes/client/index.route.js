@@ -4,8 +4,12 @@ import questionRoute from "./question.route.js";
 import examRoute from "./exam.route.js";
 import resultRoute from "./result.route.js";
 import flashCardRoute from "./flashcard.route.js";
+<<<<<<< HEAD
 import listeningExamRoute from "./listening-exams.js";
 import Classroom from "./classroom.route.js";
+=======
+import listeningExamRoute from "./listening-exams.route.js";
+>>>>>>> 74e16d2 (Update export word)
 import { protectedRoute } from "../../middlewares/protectedRoute.middleware.js";
 
 const indexClient = (app) => {
