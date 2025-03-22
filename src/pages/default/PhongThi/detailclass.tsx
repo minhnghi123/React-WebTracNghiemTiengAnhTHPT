@@ -1,9 +1,23 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Card, Tabs, Table, List, Avatar, Button, Input, Row, Col, message } from 'antd';
-import { ClassroomReponse, studentClassroomAPI } from '@/services/student/ClassroomAPI';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import { ColumnsType } from 'antd/es/table';
+import React, { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import {
+  Card,
+  Tabs,
+  Table,
+  List,
+  Avatar,
+  Button,
+  Input,
+  Row,
+  Col,
+  message,
+} from "antd";
+import {
+  ClassroomReponse,
+  studentClassroomAPI,
+} from "@/services/student/ClassroomAPI";
+import "bootstrap/dist/css/bootstrap.min.css";
+import { ColumnsType } from "antd/es/table";
 import { Exam, Question } from "@/services/teacher/Teacher";
 
 const { TabPane } = Tabs;
@@ -52,17 +66,16 @@ const examColumns: ColumnsType<Exam> = [
   },
 ];
 export const ClassroomDetail = () => {
-    const navigator = useNavigate();
-    const navagiteToDetail = (id: string) => {
-      navigator(`/KyThi/ChiTiet/${id}`);
-    };
+  const navigator = useNavigate();
+  const navagiteToDetail = (id: string) => {
+    navigator(`/KyThi/ChiTiet/${id}`);
+  };
   const { classroomId } = useParams<{ classroomId: string }>();
   const navigate = useNavigate();
   const [classroom, setClassroom] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string>('');
-  const [joinPassword, setJoinPassword] = useState<string>('');
-
+  const [error, setError] = useState<string>("");
+  const [joinPassword, setJoinPassword] = useState<string>("");
 
   const fetchClassroom = async () => {
     setLoading(true);
@@ -71,25 +84,28 @@ export const ClassroomDetail = () => {
       if (response.success) {
         setClassroom(response.classroom);
       } else {
-        setError(response.message || 'Có lỗi xảy ra');
+        setError(response.message || "Có lỗi xảy ra");
       }
     } catch (err: any) {
-      setError(err.message || 'Có lỗi xảy ra');
+      setError(err.message || "Có lỗi xảy ra");
     }
     setLoading(false);
   };
 
   const handleJoinClassroom = async () => {
     try {
-      const joinResponse = await studentClassroomAPI.joinClassroom(classroomId!, joinPassword);
+      const joinResponse = await studentClassroomAPI.joinClassroom(
+        classroomId!,
+        joinPassword
+      );
       if (joinResponse.success) {
-        message.success('Tham gia lớp học thành công!');
+        message.success("Tham gia lớp học thành công!");
         fetchClassroom(); // Cập nhật lại thông tin lớp học
       } else {
-        message.error('Tham gia lớp thất bại: ' + joinResponse.message);
+        message.error("Tham gia lớp thất bại: " + joinResponse.message);
       }
     } catch (error: any) {
-      message.error('Có lỗi khi tham gia lớp');
+      message.error("Có lỗi khi tham gia lớp");
     }
   };
 
@@ -98,15 +114,23 @@ export const ClassroomDetail = () => {
   }, [classroomId]);
 
   if (loading) {
-    return <div className="container py-4 text-center">Đang tải thông tin lớp...</div>;
+    return (
+      <div className="container py-4 text-center">
+        Đang tải thông tin lớp...
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="container py-4 text-center text-danger">Lỗi: {error}</div>;
+    return (
+      <div className="container py-4 text-center text-danger">Lỗi: {error}</div>
+    );
   }
 
   if (!classroom) {
-    return <div className="container py-4 text-center">Không tìm thấy lớp học</div>;
+    return (
+      <div className="container py-4 text-center">Không tìm thấy lớp học</div>
+    );
   }
 
   // Nếu trường students có tồn tại và là mảng thì học sinh đã gia nhập lớp
@@ -114,20 +138,32 @@ export const ClassroomDetail = () => {
 
   return (
     <div className="container py-4">
-      <Button onClick={() => navigate("/PhongThi")} style={{ marginBottom: 16 }}>
+      <Button
+        onClick={() => navigate("/PhongThi")}
+        style={{ marginBottom: 16 }}
+      >
         Quay lại
       </Button>
-      <Card title={<h3 style={{ textAlign: 'center' }}>{classroom.title}</h3>} bordered={false}>
-        <p><strong>Giáo viên:</strong> {classroom.teacherId.username}</p>
-        <p><strong>Trạng thái:</strong> {classroom.status}</p>
-        <p><strong>Mật khẩu lớp:</strong> {classroom.password}</p>
+      <Card
+        title={<h3 style={{ textAlign: "center" }}>{classroom.title}</h3>}
+        bordered={false}
+      >
+        <p>
+          <strong>Giáo viên:</strong> {classroom.teacherId.username}
+        </p>
+        <p>
+          <strong>Trạng thái:</strong> {classroom.status}
+        </p>
+        <p>
+          <strong>Mật khẩu lớp:</strong> {classroom.password}
+        </p>
       </Card>
 
       {/* Nếu chưa tham gia lớp, hiển thị form nhập mật khẩu */}
       {!joined && (
         <Card title="Tham gia lớp học" bordered style={{ marginTop: 16 }}>
           <p>Để tham gia lớp học này, vui lòng nhập mật khẩu lớp.</p>
-          <Input.Password 
+          <Input.Password
             placeholder="Nhập mật khẩu lớp"
             value={joinPassword}
             onChange={(e) => setJoinPassword(e.target.value)}
@@ -143,43 +179,48 @@ export const ClassroomDetail = () => {
       {joined && (
         <Card bordered style={{ marginTop: 16 }}>
           <Tabs defaultActiveKey="1">
-          <TabPane tab="Kỳ thi" key="1">
+            <TabPane tab="Kỳ thi" key="1">
               <Table
-                        dataSource={classroom.exams || []}
-                        showSorterTooltip={false}
-                        columns={[
-                          ...examColumns,
-              
-                          {
-                            title: "",
-                            key: "action",
-                            render: (_, record) => (
-                              <Button
-                                color="primary"
-                                variant="solid"
-                                onClick={() => {
-                                  navagiteToDetail(record.slug);
-                                }}
-                              >
-                                Chi tiết
-                              </Button>
-                            ),
-                          },
-                        ]}
-                      />
+                dataSource={classroom.exams || []}
+                showSorterTooltip={false}
+                columns={[
+                  ...examColumns,
 
+                  {
+                    title: "",
+                    key: "action",
+                    render: (_, record) => (
+                      <Button
+                        color="primary"
+                        variant="solid"
+                        onClick={() => {
+                          navagiteToDetail(record.slug);
+                        }}
+                      >
+                        Chi tiết
+                      </Button>
+                    ),
+                  },
+                ]}
+              />
             </TabPane>
             <TabPane tab="Tổng quan" key="2">
               <Row gutter={[16, 16]}>
                 <Col span={12}>
-                  <p><strong>Số lượng học sinh:</strong> {classroom.students.length}</p>
+                  <p>
+                    <strong>Số lượng học sinh:</strong>{" "}
+                    {classroom.students.length}
+                  </p>
                 </Col>
                 <Col span={12}>
-                  <p><strong>Số lượng bài kiểm tra:</strong> {classroom.exams ? classroom.exams.length : 0}</p>
+                  <p>
+                    <strong>Số lượng bài kiểm tra:</strong>{" "}
+                    {classroom.exams ? classroom.exams.length : 0}
+                  </p>
                 </Col>
               </Row>
             </TabPane>
-           
+
             <TabPane tab="Học sinh" key="3">
               <List
                 itemLayout="horizontal"

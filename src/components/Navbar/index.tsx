@@ -2,7 +2,7 @@ import { useAuthContext } from "@/contexts/AuthProvider";
 import { AuthApi } from "@/services/Auth";
 import { useLayoutEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Dropdown, List, MenuProps } from "antd";
+import { Dropdown, MenuProps } from "antd";
 interface navbarProps {
   rule?: boolean;
 }
@@ -11,20 +11,20 @@ export const Navbar: React.FC<navbarProps> = ({ rule= true }) => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [userName, setUserName] = useState<string>("");
   const { user, handleLogout } = useAuthContext();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  // const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigator = useNavigate();
 
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
+  // const toggleMenu = () => {
+  //   setIsMenuOpen(!isMenuOpen);
+  // };
 
-  const logout = async () => {
-    try {
-      const rq = await AuthApi.logout();
-      console.log(rq?.data.message);
-    } catch (error: any) {
-    }
-  }; // Add this closing brace to fix the error
+  // const logout = async () => {
+  //   try {
+  //     const rq = await AuthApi.logout();
+  //     console.log(rq?.data.message);
+  //   } catch (error: any) {
+  //   }
+  // }; // Add this closing brace to fix the error
   const handleBTNLogout = async () => {
     handleLogout();
     // logout();

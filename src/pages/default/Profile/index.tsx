@@ -1,38 +1,37 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import { Tabs, List, Card } from "antd";
+import { useAuthContext } from "@/contexts/AuthProvider";
+import "bootstrap/dist/css/bootstrap.min.css";
+import YearHeatmap from "./date";
+import { HistoryPage } from "./history";
+import { ClassroomReponse, studentClassroomAPI } from "@/services/student/ClassroomAPI";
 
-interface IUser {
-  _id: string;
-  username: string;
-  email: string;
-  avatar?: string;
-  phone?: string;
-  role: "student" | "teacher" | "admin";
-}
+const { TabPane } = Tabs;
 
 export const Profile = () => {
-  const [user, setUser] = useState<IUser | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const navigate = useNavigate(); // Dùng để chuyển hướng trang
+  const { user } = useAuthContext();
+  const navigate = useNavigate();
+const [classrooms, setClassrooms] = useState<ClassroomReponse[]>([]);
+
+
+  const getAllClassrooms = async () => {
+    try {
+      const response = await studentClassroomAPI.getStudentClassrooms();
+      if (response.success) {
+        setClassrooms(response.classrooms);
+      } else {
+        console.error("Lỗi khi lấy danh sách lớp:", response.message);
+      }
+    } catch (error) {
+      console.error("Lỗi khi gọi API lấy danh sách lớp:", error);
+    }
+  };
 
   useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const res = await axios.get("/api/auth/me", { withCredentials: true }); // Gửi cookie chứa token
-        setUser(res.data.user);
-      } catch (error) {
-        console.error("Lỗi khi lấy thông tin người dùng:", error);
-        navigate("/login"); // Nếu chưa đăng nhập, chuyển về trang đăng nhập
-      } finally {
-        setLoading(false);
-      }
-    };
+    getAllClassrooms();
+  }, []);
 
-    fetchUser();
-  }, [navigate]);
-
-  if (loading) return <p>Đang tải...</p>;
 
   return (
     <div className="p-4 max-w-lg mx-auto">
@@ -47,15 +46,49 @@ export const Profile = () => {
             />
           </div>
           <div className="mt-4">
-            <p><strong>Username:</strong> {user.username}</p>
-            <p><strong>Email:</strong> {user.email}</p>
-            <p><strong>Phone:</strong> {user.phone || "Chưa có số điện thoại"}</p>
-            <p><strong>Role:</strong> {user.role}</p>
+            <center>
+            <p>
+              <strong>Username:</strong> {user.username}
+            </p>
+            <p>
+              <strong>Email:</strong> {user.email}
+            </p>
+            <p>
+              <strong>Vai trò:</strong> {user.role}
+            </p>
+            </center>
           </div>
         </div>
       ) : (
-        <p className="text-center text-red-500">Không tìm thấy thông tin người dùng.</p>
+        <p className="text-center text-red-500">
+          Không tìm thấy thông tin người dùng.
+        </p>
       )}
+
+      {/* Phần hiển thị 2 tab kết quả ôn tập và lớp học */}
+      <Tabs defaultActiveKey="1" className="mt-8">
+        <TabPane tab="Kết quả ôn tập" key="1">
+          <HistoryPage />
+        </TabPane>
+        <TabPane tab="Lớp học" key="2">
+          {classrooms.length > 0 ? (
+            <List
+              grid={{ gutter: 16, column: 1 }}
+              dataSource={classrooms}
+              renderItem={(item) => (
+                <List.Item>
+                  <Card hoverable onClick={() => navigate(`/PhongThi/Detail/${item._id}`)}>
+                    {item.title}
+                  </Card>
+                </List.Item>
+              )}
+            />
+          ) : (
+            <p>Chưa có lớp học nào.</p>
+          )}
+        </TabPane>
+      </Tabs>
+      {/* <YearHeatmap /> */}
     </div>
   );
 };
