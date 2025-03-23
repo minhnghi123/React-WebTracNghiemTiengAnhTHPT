@@ -584,7 +584,6 @@ const parseQuestionsAndPassages = (html, answerKey) => {
     let htmlContent = $(elements[i]).html();
     // Xử lý đoạn văn (passage)
     if (text.startsWith("Read the following passage")) {
-      let passage = {};
       //the next line is the content of the passage
       console.warn(text);
       let nextText = $(elements[i + 1])
@@ -596,6 +595,12 @@ const parseQuestionsAndPassages = (html, answerKey) => {
         passageContent += nextText + "\n";
         nextText = $(elements[i++]).html().trim();
       }
+      let passage = {
+        id: uuidv4().toString(),
+        title: text,
+        content: passageContent,
+      };
+      data.passages.push(passage);
       //handle reading questions
       while (nextText.includes("Question")) {
         //that will be 2 case ;
@@ -608,7 +613,7 @@ const parseQuestionsAndPassages = (html, answerKey) => {
         ) {
           //get the question number
           let questionNumber = nextText.match(/Question (\d+):/)[1];
-          console.log(questionNumber);
+          // console.log(questionNumber);
           //get the question content
           //convert into the text
           let questionContent = nextText.replace(/Question \d+:/, "").trim();
@@ -616,88 +621,62 @@ const parseQuestionsAndPassages = (html, answerKey) => {
           let textContent = $(elements[i - 1])
             .text()
             .trim();
-          console.log(textContent);
+          // console.log(textContent);
           // Split the string into choices
           const choices = textContent
             .match(/[A-D]\.\s*[^\s][^A-D]*/g)
             .map((choice) => choice.replace(/\s+/g, " ").trim());
-          console.log(choices);
+          //create new question
+          data.questions.push({
+            questionNumber,
+            passageId: passage.id,
+            questionContent,
+            choices,
+            correctAnswer: answerKey[questionNumber],
+            questionType: "word_form",
+          });
+        } else {
+          //Case 2 : in a row has the question and below will have a,b,c,d question => mutiple choices
+          let questionNumber = nextText.match(/Question (\d+):/)[1];
+          let questionContent = nextText.replace(/Question \d+:/, "").trim();
+          //the below will be the 4 options A,B,C,D , they may be laid in one or two rows
+          let collection = [];
+          nextText = $(elements[i++]).html().trim();
+          while (
+            !nextText.includes("Question") &&
+            (nextText.includes("A.") ||
+              nextText.includes("B.") ||
+              nextText.includes("C.") ||
+              nextText.includes("D."))
+          ) {
+            // collection.push(nextText);
+            let textContent = $(elements[i - 1])
+              .text()
+              .trim();
+            const choices = textContent
+              .match(/[A-D]\.\s*[^A-D].*?(?=\s*[A-D]\.|$)/g)
+              .map((choice) =>
+                collection.push(choice.replace(/\s+/g, " ").trim())
+              );
+            nextText = $(elements[i++]).html().trim();
+          }
+          // console.log(questionNumber, questionContent);
+          data.questions.push({
+            questionNumber,
+            passageId: passage.id,
+            questionContent,
+            choices: collection,
+            correctAnswer: answerKey[questionNumber],
+            questionType: "multiple_choices",
+          });
+          i--;
         }
-        //Case 2 : in a row has the question and below will have a,b,c,d question => mutiple choices
+
         nextText = $(elements[i++]).html().trim();
       }
     }
   }
-
-  // elements.forEach((element) => {
-  //   const text = $(element).text().trim();
-  //   const htmlContent = $(element).html();
-
-  //   // Xử lý đoạn văn (passage)
-  //   if (text.startsWith("Read the following passage")) {
-  //     //the next line is the content of the passage
-  //     currentPassage = {
-  //       content: htmlContent,
-  //       questions: [],
-  //       type: "reading",
-  //     };
-  //     data.passages.push(currentPassage);
-  //   }
-
-  // // Xử lý câu hỏi
-  // else if (text.startsWith("Question")) {
-  //   const questionNumber = text.match(/Question (\d+):/)[1];
-  //   const questionContent = htmlContent.replace(/Question \d+:/, "").trim();
-  //   const choices = [];
-  //   let nextElement = element.next;
-
-  //   // Thu thập lựa chọn (A, B, C, D)
-  //   while (nextElement) {
-  //     const nextText = $(nextElement).text().trim();
-  //     if (/^[A-D]\./.test(nextText)) {
-  //       choices.push({
-  //         text: $(nextElement)
-  //           .html()
-  //           .replace(/^[A-D]\./, "")
-  //           .trim(),
-  //         isCorrect: answerKey[questionNumber] === nextText[0],
-  //       });
-  //       nextElement = nextElement.next;
-  //     } else {
-  //       break;
-  //     }
-  //   }
-
-  //   // Xác định loại câu hỏi
-  //   let type = "multiple-choice";
-  //   if (questionContent.includes("stress")) type = "stress";
-  //   if (questionContent.includes("pronunciation")) type = "pronunciation";
-  //   if (questionContent.includes("OPPOSITE")) type = "opposite";
-  //   if (questionContent.includes("CLOSEST")) type = "closest";
-  //   if (questionContent.includes("sentence that best completes"))
-  //     type = "sentence-completion";
-  //   if (questionContent.includes("underlined part that needs correction"))
-  //     type = "error-correction";
-
-  //   // Nếu là câu hỏi đọc hiểu, gán vào passage hiện tại
-  //   if (currentPassage?.type === "reading") {
-  //     currentPassage.questions.push({
-  //       number: questionNumber,
-  //       content: questionContent,
-  //       type,
-  //       choices,
-  //     });
-  //   } else {
-  //     data.questions.push({
-  //       number: questionNumber,
-  //       content: questionContent,
-  //       type,
-  //       choices,
-  //     });
-  //   }
-  // }
-  // });
-
+  console.log(data);
   return data;
 };
 
