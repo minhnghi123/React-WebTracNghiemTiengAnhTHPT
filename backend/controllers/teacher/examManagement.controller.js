@@ -455,7 +455,7 @@ export const exportExamIntoWord = async (req, res) => {
   try {
     const data = req.body;
 
-    const variantCount = data.variant; 
+    const variantCount = data.variant;
     const variants = generateMultipleExamVariants(data, variantCount);
 
     const exportPaths = [];
@@ -479,24 +479,25 @@ export const exportExamIntoWord = async (req, res) => {
       const buffer = await Packer.toBuffer(doc);
 
       const fileName = `${data.title} - ${variant.code}.docx`;
-      const downloadPath = path.join(process.env.USERPROFILE, "Downloads", fileName);
+      const downloadPath = path.join(
+        process.env.USERPROFILE,
+        "Downloads",
+        fileName
+      );
 
       fs.writeFileSync(downloadPath, buffer);
       exportPaths.push(downloadPath);
     }
 
-   
     res.status(200).json({
       message: `${variantCount} mã đề đã được export thành công.`,
       files: exportPaths.map((p) => path.basename(p)),
     });
-
   } catch (error) {
     console.error("Lỗi:", error);
     res.status(500).send({ error: error.message });
   }
 };
-
 
 //Copy exam from other teacher
 export const copyExamFromOthers = async (req, res) => {
@@ -532,121 +533,109 @@ export const copyExamFromOthers = async (req, res) => {
 
 // Cấu hình Multer để upload file Word
 const upload = multer({ dest: "uploads/" });
-// Bước 1: Trích xuất nội dung file Word
-const extractTextFromWord = async (filePath) => {
+// Hàm trích xuất nội dung từ file Word
+const extractContentFromWord = async (filePath) => {
   try {
     const result = await mammoth.convertToHtml({ path: filePath });
     return result.value;
   } catch (error) {
-    console.error("Lỗi khi trích xuất nội dung:", error);
-    return null;
+    throw new Error(`Lỗi trích xuất nội dung: ${error.message}`);
   }
 };
 
-// Bước 2: Phân tích dữ liệu từ HTML
-const parseExamData = (html) => {
+// Hàm phân tích đáp án từ bảng
+const parseAnswerKey = (html) => {
   const $ = cheerio.load(html);
-  const lines = $("p")
-    .map((_, el) => $(el).text().trim())
-    .get();
+  const answerKey = {};
 
-  const questions = [];
-  const passages = [];
+  // Tìm bảng đáp án
+  const answerTable = $('p:has(strong:contains("ĐÁP ÁN THAM"))')
+    .nextAll("table")
+    .first();
 
-  for (let i = 0; i < lines.length; i++) {
-    // handle passage question
-    if (
-      lines[i].startsWith("Reading the following passage") ||
-      lines[i].startsWith("Read the following passage")
-    ) {
-      let passage = lines[i] + "\n";
-      let j = i + 1;
-      while (!lines[j].startsWith("Question")) {
-        passage += lines[j] + "\n";
-        j++;
-      }
-      passages.push({ content: passage.trim() });
-      // make sure the next lines will be its questions, traversal it until get the 'Mark' signals
-      while (j < lines.length && lines[j].startsWith("Question")) {
-        // there will be 2 cases that if start with the question and this line contains 'A', 'B', 'C', 'D' => fill in the blank question
-        if (
-          lines[j].includes("A.") &&
-          lines[j].includes("B.") &&
-          lines[j].includes("C.") &&
-          lines[j].includes("D.")
-        ) {
-          questions.push({ content: lines[j], type: "fill-in-the-blank" });
-          j++;
-        }
-        // else if start with the question, => the next lines will be its part of answer
-        else {
-          let question = lines[j];
-          j++;
-          while (
-            lines[j].includes("A.") ||
-            lines[j].includes("B.") ||
-            lines[j].includes("C.") ||
-            lines[j].includes("D.")
-          ) {
-            question += "\n" + lines[j];
-            j++;
-          }
-          questions.push({ content: question, type: "multiple-choice" });
-        }
-      }
-      i = j - 1;
-    }
-    // handle other questions
-    else {
-      // stress question, if the line contains 'stress' => the next lines will be its part of answer
-      if (lines[i].includes("stress")) {
-        let question = lines[i];
-        i++;
-        while (
-          lines[i].includes("A.") &&
-          lines[i].includes("B.") &&
-          lines[i].includes("C.") &&
-          lines[i].includes("D.")
-        ) {
-          question += "\n" + lines[i];
-          i++;
-        }
-        questions.push({ content: question, type: "stress" });
-      }
-      // multiple questions
-      else {
-        questions.push({ content: lines[i], type: "multiple-choice" });
-      }
-    }
+  // Kiểm tra nếu bảng tồn tại
+  if (!answerTable.length) {
+    console.error("Không tìm thấy bảng đáp án.");
+    return {};
   }
 
-  return { questions, passages };
+  // Duyệt qua từng ô trong bảng
+  answerTable.find("td").each((_, cell) => {
+    const cellText = $(cell).text().trim(); // Lấy nội dung
+    const matches = cellText.match(/^(\d+)\.([A-D])$/); // Bắt cặp dạng "1.C"
+
+    if (matches) {
+      const [_, questionNumber, answer] = matches;
+      answerKey[questionNumber] = answer;
+    }
+  });
+
+  return answerKey;
 };
 
-// Bước 3: Import đề thi vào MongoDB
-const importExam = async (filePath, userId) => {
-  const html = await extractTextFromWord(filePath);
-  const { questions, passages } = parseExamData(html);
-  console.log("Passages:", passages);
-  console.log("Questions:", questions);
+// Hàm phân tích câu hỏi và đoạn văn
+const parseQuestionsAndPassages = (html, answerKey) => {
+  const $ = cheerio.load(html);
+  const elements = $("p").toArray();
+  const data = { questions: [], passages: [] };
+  let currentPassage = null;
 
-  // // Save passages to the database
-  // const savedPassages = await Passage.insertMany(passages);
+  elements.forEach((element) => {
+    const text = $(element).text().trim();
+    const htmlContent = $(element).html();
 
-  // // Save questions to the database
-  // const savedQuestions = await Question.insertMany(
-  //   questions.map((q) => ({
-  //     ...q,
-  //     createdBy: userId,
-  //   }))
-  // );
+    // Xử lý đoạn văn
+    if (text.startsWith("Read the following passage")) {
+      currentPassage = { content: htmlContent, questions: [] };
+      data.passages.push(currentPassage);
+    }
 
-  console.log("✅ Đề thi đã được nhập thành công!");
-  // return { savedQuestions, savedPassages };
+    // Xử lý câu hỏi
+    else if (text.startsWith("Question")) {
+      const questionNumber = text.match(/Question (\d+):/)[1];
+      const questionContent = htmlContent.replace(/Question \d+:/, "").trim();
+      const choices = [];
+      let nextElement = element.next;
+
+      // Thu thập lựa chọn
+      while (nextElement) {
+        const nextText = $(nextElement).text().trim();
+        if (/^[A-D]\./.test(nextText)) {
+          choices.push({
+            text: $(nextElement)
+              .html()
+              .replace(/^[A-D]\./, "")
+              .trim(),
+            isCorrect: answerKey[questionNumber] === nextText[0],
+          });
+          nextElement = nextElement.next;
+        } else break;
+      }
+
+      // Xác định loại câu hỏi
+      let type = "multiple-choice";
+      if (questionContent.includes("stress")) type = "stress";
+      if (
+        questionContent.includes("OPPOSITE") ||
+        questionContent.includes("CLOSEST")
+      )
+        type = "vocabulary";
+
+      data.questions.push({
+        content: questionContent,
+        type,
+        choices,
+        passageId: currentPassage ? data.passages.length - 1 : null,
+      });
+    }
+  });
+
+  return data;
 };
 
-// API Upload file và import đề thi
+// Hàm chính nhập đề thi
 export const importExamFromWord = async (req, res) => {
+  // Upload file Word và trích xuất nội dung
   upload.single("examFile")(req, res, async (err) => {
     if (err) {
       return res.status(500).json({
@@ -656,30 +645,19 @@ export const importExamFromWord = async (req, res) => {
       });
     }
     try {
-      if (!req.file) {
-        return res.status(400).json({
-          success: false,
-          message: "Không tìm thấy file upload!",
-        });
-      }
       const filePath = req.file.path;
-      await importExam(filePath, req.user._id);
-      // const { savedQuestions, savedPassages } = await importExam(
-      //   filePath,
-      //   req.user._id
+      const html = await extractContentFromWord(filePath);
+      const answerKey = parseAnswerKey(html);
+      console.log(answerKey);
+      // const { questions, passages } = parseQuestionsAndPassages(
+      //   html,
+      //   answerKey
       // );
-      return res.status(200).json({
-        success: true,
-        message: "Đề thi đã được nhập thành công!",
-        // data: { questions: savedQuestions, passages: savedPassages },
-      });
+
+      fs.unlinkSync(filePath);
+      res.status(200).json({ success: true });
     } catch (error) {
-      console.error("Lỗi khi nhập đề thi:", error.message);
-      return res.status(500).json({
-        success: false,
-        message: "Lỗi server! Không thể nhập đề thi.",
-        error: error.message,
-      });
+      res.status(500).json({ success: false, message: error.message });
     }
   });
 };
