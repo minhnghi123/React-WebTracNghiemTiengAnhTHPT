@@ -1,4 +1,5 @@
 import { request } from "@/config/request";
+import { ExamDataRecieve } from "./ListeningQuestion";
 export interface Answer {
   _id?: string;
   text?: string;
@@ -37,6 +38,7 @@ export interface Exam {
   title?: string;
   description?: string;
   questions: string[] | Question[];
+  listeningExams: ExamDataRecieve[]; 
   duration: number;
   startTime: Date;
   endTime?: Date;
@@ -123,6 +125,12 @@ export interface Video {
   thumbnail: string;
 }
 export const QuestionAPI = {
+  getAllQuestionsTotal: async (page: number) => {
+    const response = await request.get(
+      `teacher/question-management/?page=${page}`
+    );
+    return response.data;
+  },
   getAllQuestions: async (page: number) => {
     const response = await request.get(
       `teacher/question-management?questionType=6742fb1cd56a2e75dbd817ea&page=${page}`
@@ -172,7 +180,7 @@ export const ExamAPI = {
     );
     return response.data;
   },
-  creteExam: async (question: Exam) => {
+  createExam: async (question: Exam) => {
     const response = await request.post("/teacher/exam/create", question);
     return response.data;
   },

@@ -19,7 +19,6 @@ import LayoutAdmin from "@/pages/admin/DashBoard/LayoutAdmin";
 import { DashBoarAdmin } from "@/pages/admin/DashBoard";
 import NotFound from "@/pages/NotFound";
 import { QuanLyDangCauHoi } from "@/pages/admin/QuanLyDangCauHoi";
-import { CreateExamQuestion } from "@/pages/giaovien/QuanLyDeThi/DeThi/CreateExamQuestion.tsx";
 import { UpdateExamQuestion } from "@/pages/giaovien/QuanLyDeThi/DeThi/UpdateExam";
 import { KyThi } from "@/pages/default/KyThi";
 import { DetailExam } from "@/pages/default/KyThi/BaiLam/DetailExam";
@@ -38,6 +37,7 @@ import { QuanLyLopHoc } from "@/pages/giaovien/QuanLyLopHoc";
 import DetailClass from "@/pages/giaovien/QuanLyLopHoc/detailClass";
 import QuanLyDeThiIndex from "@/pages/giaovien/QuanLyDeThi/indexDeThi";
 import { ClassroomDetail } from "@/pages/default/PhongThi/detailclass";
+import { CreateExamQuestion } from "@/pages/giaovien/QuanLyDeThi/DeThi/CreateExamQuestion.tsx";
 
 export enum ERolePath {
   ADMIN = 2,

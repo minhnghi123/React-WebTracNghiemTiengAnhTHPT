@@ -219,6 +219,7 @@ export const updateExam = async (req, res) => {
       isPublic,
       startTime,
       endTime,
+      listeningExams,
     } = req.body;
 
     if (startTime && endTime && new Date(startTime) >= new Date(endTime)) {
@@ -245,7 +246,7 @@ export const updateExam = async (req, res) => {
     // Cập nhật đề thi dựa trên slug
     const updatedExam = await Exam.findOneAndUpdate(
       { slug },
-      { title, description, questions, duration, isPublic, startTime, endTime },
+      { title, description, questions, duration, isPublic, startTime, endTime,listeningExams },
       { new: true, runValidators: true } // Trả về tài liệu sau khi cập nhật
     );
 
