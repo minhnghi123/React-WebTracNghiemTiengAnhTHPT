@@ -574,61 +574,129 @@ const parseAnswerKey = (html) => {
 };
 
 // Hàm phân tích câu hỏi và đoạn văn
+//TODO: fix the passage questions
 const parseQuestionsAndPassages = (html, answerKey) => {
   const $ = cheerio.load(html);
   const elements = $("p").toArray();
   const data = { questions: [], passages: [] };
-  let currentPassage = null;
-
-  elements.forEach((element) => {
-    const text = $(element).text().trim();
-    const htmlContent = $(element).html();
-
-    // Xử lý đoạn văn
+  for (let i = 0; i < elements.length; i++) {
+    let text = $(elements[i]).text().trim();
+    let htmlContent = $(elements[i]).html();
+    // Xử lý đoạn văn (passage)
     if (text.startsWith("Read the following passage")) {
-      currentPassage = { content: htmlContent, questions: [] };
-      data.passages.push(currentPassage);
-    }
-
-    // Xử lý câu hỏi
-    else if (text.startsWith("Question")) {
-      const questionNumber = text.match(/Question (\d+):/)[1];
-      const questionContent = htmlContent.replace(/Question \d+:/, "").trim();
-      const choices = [];
-      let nextElement = element.next;
-
-      // Thu thập lựa chọn
-      while (nextElement) {
-        const nextText = $(nextElement).text().trim();
-        if (/^[A-D]\./.test(nextText)) {
-          choices.push({
-            text: $(nextElement)
-              .html()
-              .replace(/^[A-D]\./, "")
-              .trim(),
-            isCorrect: answerKey[questionNumber] === nextText[0],
-          });
-          nextElement = nextElement.next;
-        } else break;
+      let passage = {};
+      //the next line is the content of the passage
+      console.warn(text);
+      let nextText = $(elements[i + 1])
+        .html()
+        .trim();
+      let passageContent = nextText + "\n";
+      while (!nextText.includes("Question")) {
+        // console.log(nextText);
+        passageContent += nextText + "\n";
+        nextText = $(elements[i++]).html().trim();
       }
-
-      // Xác định loại câu hỏi
-      let type = "multiple-choice";
-      if (questionContent.includes("stress")) type = "stress";
-      if (
-        questionContent.includes("OPPOSITE") ||
-        questionContent.includes("CLOSEST")
-      )
-        type = "vocabulary";
-
-      data.questions.push({
-        content: questionContent,
-        type,
-        choices,
-        passageId: currentPassage ? data.passages.length - 1 : null,
-      });
+      //handle reading questions
+      while (nextText.includes("Question")) {
+        //that will be 2 case ;
+        //Case 1 : in a row that have A,B,C,D question => word form type
+        if (
+          nextText.includes("A.") &&
+          nextText.includes("B.") &&
+          nextText.includes("C.") &&
+          nextText.includes("D.")
+        ) {
+          //get the question number
+          let questionNumber = nextText.match(/Question (\d+):/)[1];
+          console.log(questionNumber);
+          //get the question content
+          //convert into the text
+          let questionContent = nextText.replace(/Question \d+:/, "").trim();
+          // Extract text content from HTML
+          let textContent = $(elements[i - 1])
+            .text()
+            .trim();
+          console.log(textContent);
+          // Split the string into choices
+          const choices = textContent
+            .match(/([A-D]\.\s*[^A-D]*)/g)
+            .map((choice) => choice.replace(/\s+/g, " ").trim());
+          console.log(choices);
+        }
+        //Case 2 : in a row has the question and below will have a,b,c,d question => mutiple choices
+        nextText = $(elements[i++]).html().trim();
+      }
     }
-  });
+  }
+
+  // elements.forEach((element) => {
+  //   const text = $(element).text().trim();
+  //   const htmlContent = $(element).html();
+
+  //   // Xử lý đoạn văn (passage)
+  //   if (text.startsWith("Read the following passage")) {
+  //     //the next line is the content of the passage
+  //     currentPassage = {
+  //       content: htmlContent,
+  //       questions: [],
+  //       type: "reading",
+  //     };
+  //     data.passages.push(currentPassage);
+  //   }
+
+  // // Xử lý câu hỏi
+  // else if (text.startsWith("Question")) {
+  //   const questionNumber = text.match(/Question (\d+):/)[1];
+  //   const questionContent = htmlContent.replace(/Question \d+:/, "").trim();
+  //   const choices = [];
+  //   let nextElement = element.next;
+
+  //   // Thu thập lựa chọn (A, B, C, D)
+  //   while (nextElement) {
+  //     const nextText = $(nextElement).text().trim();
+  //     if (/^[A-D]\./.test(nextText)) {
+  //       choices.push({
+  //         text: $(nextElement)
+  //           .html()
+  //           .replace(/^[A-D]\./, "")
+  //           .trim(),
+  //         isCorrect: answerKey[questionNumber] === nextText[0],
+  //       });
+  //       nextElement = nextElement.next;
+  //     } else {
+  //       break;
+  //     }
+  //   }
+
+  //   // Xác định loại câu hỏi
+  //   let type = "multiple-choice";
+  //   if (questionContent.includes("stress")) type = "stress";
+  //   if (questionContent.includes("pronunciation")) type = "pronunciation";
+  //   if (questionContent.includes("OPPOSITE")) type = "opposite";
+  //   if (questionContent.includes("CLOSEST")) type = "closest";
+  //   if (questionContent.includes("sentence that best completes"))
+  //     type = "sentence-completion";
+  //   if (questionContent.includes("underlined part that needs correction"))
+  //     type = "error-correction";
+
+  //   // Nếu là câu hỏi đọc hiểu, gán vào passage hiện tại
+  //   if (currentPassage?.type === "reading") {
+  //     currentPassage.questions.push({
+  //       number: questionNumber,
+  //       content: questionContent,
+  //       type,
+  //       choices,
+  //     });
+  //   } else {
+  //     data.questions.push({
+  //       number: questionNumber,
+  //       content: questionContent,
+  //       type,
+  //       choices,
+  //     });
+  //   }
+  // }
+  // });
 
   return data;
 };
@@ -648,11 +716,12 @@ export const importExamFromWord = async (req, res) => {
       const filePath = req.file.path;
       const html = await extractContentFromWord(filePath);
       const answerKey = parseAnswerKey(html);
-      console.log(answerKey);
-      // const { questions, passages } = parseQuestionsAndPassages(
-      //   html,
-      //   answerKey
-      // );
+      // console.log(answerKey);
+      const { questions, passages } = parseQuestionsAndPassages(
+        html,
+        answerKey
+      );
+      // console.log(passages);
 
       fs.unlinkSync(filePath);
       res.status(200).json({ success: true });
