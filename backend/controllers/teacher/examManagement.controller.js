@@ -619,7 +619,7 @@ const parseQuestionsAndPassages = (html, answerKey) => {
           console.log(textContent);
           // Split the string into choices
           const choices = textContent
-            .match(/([A-D]\.\s*[^A-D]*)/g)
+            .match(/[A-D]\.\s*[^\s][^A-D]*/g)
             .map((choice) => choice.replace(/\s+/g, " ").trim());
           console.log(choices);
         }
