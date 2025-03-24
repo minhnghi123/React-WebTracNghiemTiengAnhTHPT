@@ -5,7 +5,7 @@ const QuestionSchema = new mongoose.Schema({
     ref: "Passage",
     default: null,
   }, // Liên kết bài đọc (nếu có)
-  content: { type: String, required: true },
+  content: { type: String, default: "" },
   questionType: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "QuestionType",
