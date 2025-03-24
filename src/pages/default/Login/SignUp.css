@@ -1,11 +1,14 @@
 /* BASIC */
 
-a {
-  color: #92badd;
-  display: inline-block;
+.login-btn, .signup-btn {
   text-decoration: none;
-  font-weight: 400;
+    color: #333;
+    font-weight: bold;
+    padding: 5px 10px;
+    border-radius: 3px;
+    transition: background-color 0.3s, color 0.3s;
 }
+
 .input-group label {
   display: block;
   width: 100%;

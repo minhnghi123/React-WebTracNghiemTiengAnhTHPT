@@ -1,7 +1,7 @@
 import "./footer.css";
 export const Footer = () => {
   return (
-    <div className="mt-auto flex w-full gap-5 py-3 ">
+    <div className="mt-auto flex w-full gap-5 ">
       <footer className="footer">
         <div className="container3">
           <div className="row footer-content">

@@ -5,181 +5,100 @@ import { useNavigate } from "react-router-dom";
 import { Dropdown, MenuProps } from "antd";
 
 export const Navbar = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
-  const [userName, setUserName] = useState<string>("");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userName, setUserName] = useState("");
   const { user, handleLogout } = useAuthContext();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const navigator = useNavigate();
+  const navigate = useNavigate();
 
+  // Toggle Mobile Menu
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
-  const logout = async () => {
-    try {
-      const rq = await AuthApi.logout();
-      console.log(rq?.data.message);
-    } catch (error: any) {
-      console.log(error);
-    }
-  }; // Add this closing brace to fix the error
+  // Xử lý đăng xuất
   const handleBTNLogout = async () => {
     handleLogout();
-    // logout();
     setIsLoggedIn(false);
     setUserName("");
+
     try {
       const rq = await AuthApi.logout();
       console.log(rq?.data.message);
-    } catch (error: any) {
+    } catch (error) {
       console.log(error);
     }
-    navigator("/login");
+
+    navigate("/login");
   };
+
+  // Kiểm tra trạng thái đăng nhập khi component render
   useLayoutEffect(() => {
     if (user) {
       setIsLoggedIn(true);
       setUserName(user.username);
     }
   }, [user]);
+
+  // Tạo danh sách menu dropdown
   const items: MenuProps["items"] = [
-    {
-      key: "1",
-      label: (
-        <a rel="noopener noreferrer" href="/profile">
-          Thông tin cá nhân
-        </a>
-      ),
-    },
-    // Nếu là admin, hiển thị cả "Vào giao diện admin" và "Vào giao diện học sinh"
+    { key: "1", label: <a href="/profile">Thông tin cá nhân</a> },
     ...(user?.role === "admin"
       ? [
-          {
-            key: "3",
-            label: (
-              <a rel="noopener noreferrer" href="/Admin">
-                Vào giao diện admin
-              </a>
-            ),
-          },
-          {
-            key: "4",
-            label: (
-              <a rel="noopener noreferrer" href="/">
-                Vào giao diện học sinh
-              </a>
-            ),
-          },
-          {
-            key: "4",
-            label: (
-              <a rel="noopener noreferrer" href="/Giaovien">
-                Vào giao diện giáo viên
-              </a>
-            ),
-          },
+          { key: "2", label: <a href="/Admin">Vào giao diện admin</a> },
+          { key: "3", label: <a href="/">Vào giao diện học sinh</a> },
+          { key: "4", label: <a href="/Giaovien">Vào giao diện giáo viên</a> },
         ]
       : []),
     {
       key: "5",
       label: (
-        <a
-          onClick={() => handleBTNLogout()}
-          className="nav-link"
-          href="#"
-          style={{ color: "#007bff" }}
-        >
+        <a onClick={handleBTNLogout} style={{ color: "#007bff", cursor: "pointer" }}>
           <span className="fas fa-sign-out-alt"></span> Đăng xuất
         </a>
       ),
     },
-  ];  
-  return (
-    <div id="main">
-      <div id="header">
-        <div
-          onClick={() => navigator("/")}
-          id="logo"
-          className="cursor-pointer"
-          style={{ cursor: "pointer" }}
-        >
-          <img src="/src/assets/img/P2N 1.svg" alt="Logo"></img>
-        </div>
-        <div id="menu">
-          <ul className="dsMenu">
-            <li>
-              <a href="/">Trang chủ</a>
-            </li>
-            <li>
-              <a href="/KyThi">Kỳ Thi</a>
-            </li>
-            <li>
-              <a href="/Ontap">Ôn tập</a>
-            </li>
-            <li>
-              <a href="/PhongThi">Lớp học</a>
-            </li>
-          </ul>
-        </div>
-        {isLoggedIn ? (
-          <ul className="navbar-nav ml-auto">
-            <Dropdown menu={{ items }} placement="bottomRight">
-              <a
-                onClick={(e) => e.preventDefault()}
-                className="nav-link"
-                href="/hocsinh/ThongTinCaNhan/Index"
-                style={{ color: "#007bff", fontWeight: "bold" }}
-              >
-                <li className="nav-item">
-                  <span className="fas fa-user"></span> {userName}
-                </li>
-                <li className="nav-item">
-                  {" "}
-                  <span className="fas fa-user"></span>{" "}
-                  {user?.role === "student" ? "Học sinh" : "Giáo viên"}
-                </li>
-              </a>
-            </Dropdown>
-          </ul>
-        ) : (
-          <ul
-            className="nav nav-pills justify-content-center gap-3"
-            id="ex1"
-            role="tablist"
-          >
-            <li className="nav-item rounded-pill shadow-sm" role="presentation">
-              <a
-                className="nav-dn bg-secondary text-white px-4 py-2 rounded-pill hover-bg-dark"
-                id="tab-login"
-                href="/Login"
-                role="tab"
-                aria-controls="pills-login"
-                aria-selected="true"
-              >
-                Đăng nhập
-              </a>
-            </li>
+  ];
 
-            <li className="nav-item rounded-pill shadow-sm" role="presentation">
-              <a
-                className="nav-dn bg-primary text-white px-4 py-2 rounded-pill hover-bg-dark"
-                id="tab-register"
-                href="/SignUp"
-                role="tab"
-                aria-controls="pills-register"
-                aria-selected="false"
-              >
-                Đăng ký
-              </a>
-            </li>
-          </ul>
-        )}
+  return (
+    <div id="header">
+      {/* Logo */}
+      <a href="/" id="logo">
+      <img src="/src/assets/img/P2N 1.svg" alt="Logo" />
+      </a>
+      {/* Biểu tượng Menu (Hiện trên mobile) */}
+      <button className="mobile-menu-icon" onClick={toggleMenu}>
+        ☰
+      </button>
+
+      {/* Menu chính */}
+      <div id="menu" className={isMenuOpen ? "show" : ""}>
+        <ul className="dsMenu">
+          <li><a href="/">Trang chủ</a></li>
+          <li><a href="/KyThi">Kỳ Thi</a></li>
+          <li><a href="/Ontap">Ôn tập</a></li>
+          <li><a href="/PhongThi">Lớp học</a></li>
+        </ul>
       </div>
+
+      {/* Dropdown user */}
+      {isLoggedIn ? (
+        <Dropdown menu={{ items }} placement="bottomRight">
+          <a className="nav-link" href="/profile">
+            <span className="fas fa-user"></span> {userName} - {user?.role === "student" ? "Học sinh" : "Giáo viên"}
+          </a>
+        </Dropdown>
+      ) : (
+        <div className="auth-buttons">
+          <a className="login-btn" href="/Login">Đăng nhập</a>
+          <a className="signup-btn" href="/SignUp">Đăng ký</a>
+        </div>
+      )}
     </div>
   );
 };
 
-// Utility function to get cookie value
+// Hàm lấy giá trị Cookie
 export function getCookie(name: string) {
   const value = `; ${document.cookie}`;
   const parts = value.split(`; ${name}=`);
