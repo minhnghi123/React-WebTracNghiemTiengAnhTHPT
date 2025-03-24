@@ -574,7 +574,6 @@ const parseAnswerKey = (html) => {
 };
 
 // Hàm phân tích câu hỏi và đoạn văn
-//TODO: fix the passage questions
 const parseQuestionsAndPassages = (html, answerKey) => {
   const $ = cheerio.load(html);
   const elements = $("p").toArray();
@@ -582,10 +581,11 @@ const parseQuestionsAndPassages = (html, answerKey) => {
   for (let i = 0; i < elements.length; i++) {
     let text = $(elements[i]).text().trim();
     let htmlContent = $(elements[i]).html();
+    let questionKnowledge;
     // Xử lý đoạn văn (passage)
     if (text.startsWith("Read the following passage")) {
       //the next line is the content of the passage
-      console.warn(text);
+      // console.warn(text);
       let nextText = $(elements[i + 1])
         .html()
         .trim();
@@ -611,18 +611,14 @@ const parseQuestionsAndPassages = (html, answerKey) => {
           nextText.includes("C.") &&
           nextText.includes("D.")
         ) {
-          //get the question number
           let questionNumber = nextText.match(/Question (\d+):/)[1];
-          // console.log(questionNumber);
-          //get the question content
-          //convert into the text
+
           let questionContent = nextText.replace(/Question \d+:/, "").trim();
-          // Extract text content from HTML
+
           let textContent = $(elements[i - 1])
             .text()
             .trim();
-          // console.log(textContent);
-          // Split the string into choices
+
           const choices = textContent
             .match(/[A-D]\.\s*[^\s][^A-D]*/g)
             .map((choice) => choice.replace(/\s+/g, " ").trim());
@@ -674,9 +670,61 @@ const parseQuestionsAndPassages = (html, answerKey) => {
 
         nextText = $(elements[i++]).html().trim();
       }
+    } else {
+      //solve multiple choices questions
+      // TODO: implement basic questions parsing
+      if (text.startsWith("Mark")) {
+        ++i;
+        let nextText = $(elements[i]).html().trim();
+        if (text.includes("indicate the word whose underlined part differs")) {
+          questionKnowledge = "pronunciation";
+          while (nextText.includes("Question")) {
+            // console.log(nextText);
+            let questionNumber = nextText.match(/Question (\d+):/)[1];
+
+            let questionContent = nextText.replace(/Question \d+:/, "").trim();
+
+            let htmlContent = $(elements[i]).html().trim(); // Lấy toàn bộ HTML thay vì chỉ text
+
+            const choices = htmlContent
+              .match(/([A-D]\.\s*(?:<[^>]+>)*\s*[^<]+(?:<[^>]+>)*)/g)
+              .map((choice) => choice.trim()); // Chuẩn hóa khoảng trắng
+            console.log(choices);
+            ++i;
+            nextText = $(elements[i]).html().trim();
+          }
+        }
+        // else if (
+        //   text.includes(
+        //     "indicate the word that differs from the other three in the position of stress"
+        //   )
+        // ) {
+        //   questionKnowledge = "stress";
+        // } else if (
+        //   text.includes(
+        //     "indicate the sentence that best completes each of the following exchanges"
+        //   )
+        // ) {
+        //   questionKnowledge = "exchanges";
+        // } else if (
+        //   text.includes(
+        //     "indicate the sentence that best combines each pair of sentences"
+        //   )
+        // ) {
+        //   questionKnowledge = "sentence_combination";
+        // } else if (
+        //   text.includes("indicate the underlined part that needs correction")
+        // ) {
+        //   questionKnowledge = "error_correction";
+        // } else if (
+        //   text.includes("indicate the sentence that is closest in meaning")
+        // ) {
+        //   questionKnowledge = "closest_meaning";
+        // }
+      }
     }
   }
-  console.log(data);
+  // console.log(data);
   return data;
 };
 
