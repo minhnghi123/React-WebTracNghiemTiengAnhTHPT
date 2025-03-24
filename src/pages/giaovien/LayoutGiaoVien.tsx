@@ -6,7 +6,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 const LayoutGiaoVien = () => {
   return (
     <div id="main">
-      <Navbar />
+      <Navbar rule={false} />
       <div className="container-fluid">
         <div className="row">
           <nav className="col-md-3 col-lg-2 d-md-block bg-light sidebar">
@@ -68,7 +68,7 @@ const LayoutGiaoVien = () => {
                     </li>
                     <li>
                       <a
-                        href="/admin/QuanLyDangBai"
+                        href="/giaovien/QuanLyLopHoc"
                         className="nav-link px-0"
                         style={{
                           color: "#495057",

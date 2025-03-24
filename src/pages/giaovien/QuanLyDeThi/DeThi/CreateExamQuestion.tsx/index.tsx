@@ -1,13 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Question, QuestionAPI } from "@/services/teacher/Teacher";
+import { ExamListeningQuestionAPI, ExamDataRecieve } from "@/services/teacher/ListeningQuestion";
 import { Form, InputNumber, Modal, Button, Table, Tag } from "antd";
-import {
-  PlusOutlined,
-  MinusOutlined,
-  InfoCircleOutlined,
-} from "@ant-design/icons";
+import { PlusOutlined, MinusOutlined, InfoCircleOutlined } from "@ant-design/icons";
 import QuestionComponent from "@/pages/giaovien/QuanLyCauHoi/Question";
-
 import clsx from "clsx";
 import CreateExamModal from "../CreateExam";
 
@@ -15,24 +11,30 @@ export const CreateExamQuestion = () => {
   const [data, setData] = useState<Question[]>([]);
   const [otherQuestions, setOtherQuestions] = useState<Question[]>([]);
   const [selectedQuestions, setSelectedQuestions] = useState<Question[]>([]);
+  const [listeningExams, setListeningExams] = useState<ExamDataRecieve[]>([]);
+  const [selectedListeningExams, setSelectedListeningExams] = useState<ExamDataRecieve[]>([]);
   const [total, setTotal] = useState<number>(1);
   const [easyLimit, setEasyLimit] = useState<number>(0);
   const [mediumLimit, setMediumLimit] = useState<number>(0);
   const [hardLimit, setHardLimit] = useState<number>(0);
   const [openModal, setOpenModal] = useState<boolean>(false);
   const [openInfoModal, setOpenInfoModal] = useState<boolean>(false);
-  const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(
-    null
-  );
+  const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
   const [openModalCreate, setOpenModalCreate] = useState<boolean>(false);
 
-  const [total2, setTotal2] = useState<number>(1);
   const getAllQuestions = async (page: number) => {
     try {
-      const rq = await QuestionAPI.getAllQuestions(page);
+      const rq = await QuestionAPI.getAllQuestionsTotal(page);
       if (rq?.code === 200) {
         setTotal(rq?.totalPage);
-        setData((prev) => [...prev, ...rq?.questions]);
+        setData((prev) => {
+          const newQuestions = [...prev, ...rq?.questions];
+          const uniqueQuestions = newQuestions.filter(
+            (question, index, self) =>
+              index === self.findIndex((q) => q._id === question._id)
+          );
+          return uniqueQuestions;
+        });
       }
     } catch (error: any) {
       if (error.response) {
@@ -40,23 +42,25 @@ export const CreateExamQuestion = () => {
       }
     }
   };
-  const getAllQuestions2 = async (page: number) => {
+
+  const getAllListeningExams = async () => {
     try {
-      const rq = await QuestionAPI.getAllQuestionsBlank(page);
-      if (rq?.code === 200) {
-        setTotal2(rq?.totalPage);
-        setData((prev) => [...prev, ...rq?.questions]);
+      const response = await ExamListeningQuestionAPI.getAllListeningExams();
+      console.log(response);
+      if (response?.data) {
+        setListeningExams(response?.data);
       }
     } catch (error: any) {
       if (error.response) {
-        console.log(error.response.data.message);
+        console.log(error.response.message);
       }
     }
   };
+
   useEffect(() => {
     setData([]);
     getAllQuestions(1);
-    getAllQuestions2(1);
+    getAllListeningExams();
   }, []);
 
   useEffect(() => {
@@ -64,11 +68,6 @@ export const CreateExamQuestion = () => {
       getAllQuestions(i);
     }
   }, [total]);
-  useEffect(() => {
-    for (let i = 2; i <= total2; i++) {
-      getAllQuestions2(i);
-    }
-  }, [total2]);
 
   useEffect(() => {
     setOtherQuestions(data);
@@ -127,6 +126,17 @@ export const CreateExamQuestion = () => {
     setTo([...to, question]);
   };
 
+  const moveListeningExam = (
+    exam: ExamDataRecieve,
+    from: ExamDataRecieve[],
+    to: ExamDataRecieve[],
+    setFrom: React.Dispatch<React.SetStateAction<ExamDataRecieve[]>>,
+    setTo: React.Dispatch<React.SetStateAction<ExamDataRecieve[]>>
+  ) => {
+    setFrom(from.filter((e) => e._id !== exam._id));
+    setTo([...to, exam]);
+  };
+
   const handleInfoClick = (question: Question) => {
     setSelectedQuestion(question);
     setOpenInfoModal(true);
@@ -179,7 +189,7 @@ export const CreateExamQuestion = () => {
       ),
     },
     {
-      title: "Action",
+      title: "",
       key: "action",
       render: (record: Question) => (
         <span className="gap-2">
@@ -220,6 +230,73 @@ export const CreateExamQuestion = () => {
     },
   ];
 
+  const listeningExamColumns = [
+    {
+      title: "Tiêu đề",
+      dataIndex: "title",
+      key: "title",
+    },
+    {
+      title: "Mô tả",
+      dataIndex: "description",
+      key: "description",
+    },
+    {
+      title: "Thời gian",
+      dataIndex: "duration",
+      key: "duration",
+      render: (duration: number) => `${duration} phút`,
+    },
+    {
+      title: "Điểm qua",
+      dataIndex: "passingScore",
+      key: "passingScore",
+    },
+    {
+      title: "Trạng thái",
+      dataIndex: "isPublished",
+      key: "isPublished",
+      render: (isPublished: boolean) =>
+        isPublished ? "Đã phát hành" : "Chưa phát hành",
+    },
+    {
+      title: "",
+      key: "action",
+      render: (record: ExamDataRecieve) => (
+        <span className="gap-2">
+          <Button
+            onClick={() => {
+              if (selectedListeningExams.includes(record)) {
+                moveListeningExam(
+                  record,
+                  selectedListeningExams,
+                  listeningExams,
+                  setSelectedListeningExams,
+                  setListeningExams
+                );
+              } else {
+                moveListeningExam(
+                  record,
+                  listeningExams,
+                  selectedListeningExams,
+                  setListeningExams,
+                  setSelectedListeningExams
+                );
+              }
+            }}
+            icon={
+              selectedListeningExams.includes(record) ? (
+                <MinusOutlined style={{ color: "red" }} />
+              ) : (
+                <PlusOutlined style={{ color: "green" }} />
+              )
+            }
+          />
+        </span>
+      ),
+    },
+  ];
+
   return (
     <div>
       <div>
@@ -233,9 +310,9 @@ export const CreateExamQuestion = () => {
         <Button
           type="default"
           onClick={() => {
-            if (selectedQuestions.length > 0) {
+            if (selectedQuestions.length > 0 || selectedListeningExams.length > 0) {
               setOpenModalCreate(true);
-            } else alert("chưa có câu hỏi nào");
+            } else alert("chưa có câu hỏi hoặc kỳ thi nghe nào");
           }}
         >
           Tạo đề thi
@@ -245,6 +322,10 @@ export const CreateExamQuestion = () => {
       <Table columns={columns} dataSource={selectedQuestions} rowKey="_id" />
       <h3>Danh sách câu hỏi còn lại</h3>
       <Table columns={columns} dataSource={otherQuestions} rowKey="_id" />
+      <h3>Phần thi nghe đã chọn</h3>
+      <Table columns={listeningExamColumns} dataSource={selectedListeningExams} rowKey="_id" />
+      <h3>Phần thi nghe còn lại</h3>
+      <Table columns={listeningExamColumns} dataSource={listeningExams} rowKey="_id" />
       <Modal
         open={openModal}
         title="Thêm câu hỏi tự động"
@@ -325,6 +406,7 @@ export const CreateExamQuestion = () => {
           setOpenModalCreate(false);
         }}
         dataQuestion={selectedQuestions}
+        listeningExams={selectedListeningExams}
       />
     </div>
   );

@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const ResultSchema = new mongoose.Schema({
   examId: { type: mongoose.Schema.Types.ObjectId, ref: "Exam", required: true },
-  // userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: "TaiKhoan", required: true },
   score: { type: Number, required: true },
   classroomId: {type: mongoose.Schema.Types.ObjectId, ref: "Classroom"},
   correctAnswer: { type: Number, required: true },
@@ -12,6 +12,33 @@ const ResultSchema = new mongoose.Schema({
       questionId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Question",
+        required: true,
+      },
+      content: { type: String, required: true },
+      answers: [
+        {
+          _id: { type: mongoose.Schema.Types.ObjectId, required: true },
+          text: { type: String },
+          correctAnswerForBlank: { type: String },
+          isCorrect: { type: Boolean, required: true },
+        },
+      ],
+      selectedAnswerId: { type: mongoose.Schema.Types.ObjectId },
+      userAnswers: [
+        {
+          userAnswer: { type: String },
+          answerId: { type: mongoose.Schema.Types.ObjectId, ref: "Answer" },
+          isCorrect: { type: Boolean, default: false },
+        },
+      ],
+      isCorrect: { type: Boolean, required: true },
+    },
+  ],
+  listeningQuestions: [
+    {
+      questionId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "ListeningQuestion",
         required: true,
       },
       content: { type: String, required: true },
@@ -44,6 +71,8 @@ const ResultSchema = new mongoose.Schema({
     type: Object,
     default: {},
   },
+  isCompleted: { type: Boolean, default: false }, // Thêm trạng thái hoàn thành
+  endTime: { type: Date }, // Thêm thời gian kết thúc
 });
 
 const Result = mongoose.model("Result", ResultSchema);

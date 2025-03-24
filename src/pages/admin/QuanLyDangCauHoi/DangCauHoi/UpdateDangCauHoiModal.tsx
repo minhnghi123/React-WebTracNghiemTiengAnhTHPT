@@ -48,9 +48,7 @@ export const UpdateQuestionTypeModal: React.FC<
   }, [visible]);
   const createQuestion = async (q: QuestionType) => {
     try {
-      console.log("13");
       const rq = await QuestionTypeAPI.UpdateQuestionType(q, q._id || "");
-      console.log(rq);
       if (rq?.code === 200) {
         setQuestion({
           name: "",

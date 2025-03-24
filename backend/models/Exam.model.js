@@ -23,6 +23,7 @@ const ExamSchema = new mongoose.Schema({
     unique: true,
   },
   createdAt: { type: Date, default: Date.now },
+  listeningExams: [{ type: mongoose.Schema.Types.ObjectId, ref: "ListeningExam" }], // Add this line
 });
 
 const Exam = mongoose.model("Exam", ExamSchema);

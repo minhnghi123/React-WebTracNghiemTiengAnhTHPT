@@ -6,6 +6,9 @@ import "./SignUp.css";
 import { AuthApi } from "@/services/Auth";
 
 export const SignUp = () => {
+  const [step, setStep] = useState<number>(1);
+  const [selectedRole, setSelectedRole] = useState<string | null>(null);
+
   const [message, setMessage] = useState<string | null>(null);
   const [name, setName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
@@ -18,36 +21,38 @@ export const SignUp = () => {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (password !== confirmPassword) {
-      setMessage("Passwords do not match");
+      setMessage("Mật khẩu không khớp");
       return;
     }
 
-    // Handle form submission logic here
     try {
       const response = await AuthApi.createUser({
         email,
         password,
         username: name,
+        role: selectedRole || "user",
       });
 
       if (response.status === 201) {
         setMessage(response.data.message);
-        navigate("/admin/Login/Login", {
-          state: { message: "Đăng ký thành công" },
-        });
+        if (selectedRole === "teacher") {
+          alert("Đăng ký thành công. Đang chờ xác nhận từ quản trị viên");
+          navigate("/");
+        } else {
+          navigate("/Login", {
+            state: { message: "Đăng ký thành công" },
+          });
+        }
       } else {
         setMessage(response.data.message);
       }
     } catch (error: any) {
       if (error.response) {
-        // Server responded with a status other than 200 range
-        setMessage(`Sign up failed: ${error.response.data.message}`);
+        setMessage(`Đăng ký thất bại: ${error.response.data.message}`);
       } else if (error.request) {
-        // Request was made but no response was received
-        setMessage("Network error: Please check your connection.");
+        setMessage("Lỗi mạng: Vui lòng kiểm tra kết nối.");
       } else {
-        // Something else happened while setting up the request
-        setMessage(`Error: ${error.message}`);
+        setMessage(`Lỗi: ${error.message}`);
       }
     }
   };
@@ -56,6 +61,69 @@ export const SignUp = () => {
     setShowPassword(!showPassword);
   };
 
+  if (step === 1) {
+    return (
+      <div className="container mt-5">
+        <center>
+          {" "}
+          <h2 className="text-center mb-4">Chọn loại tài khoản</h2>
+        </center>
+        <div className="row justify-content-center">
+          <div className="col-md-4 mb-3" style={{ height: "100%" }}>
+            <div
+              className={`card ${
+                selectedRole === "student" ? "border-primary" : ""
+              }`}
+              onClick={() => setSelectedRole("student")}
+              style={{ cursor: "pointer" }}
+            >
+              <div className="card-body">
+                <h5 className="card-title">Học sinh</h5>
+                <div className="card-text">
+                  <ul>
+                    <li>Tham gia các lớp học</li>
+                    <li>Tham gia làm bài kiểm tra, ôn tập</li>
+                    <li>Theo dõi tiến độ học tập</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="col-md-4 mb-3" style={{ height: "100%" }}>
+            <div
+              className={`card ${
+                selectedRole === "teacher" ? "border-primary" : ""
+              }`}
+              onClick={() => setSelectedRole("teacher")}
+              style={{ cursor: "pointer" }}
+            >
+              <div className="card-body">
+                <h5 className="card-title">Giáo viên</h5>
+                <div className="card-text">
+                  <ul>
+                    <li>Quản lý ngân hàng câu hỏi</li>
+                    <li>Tạo và quản lý các lớp học</li>
+                    <li>Theo dõi và đánh giá tiến độ học tập của học sinh</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="text-center mt-4">
+          <button
+            className="btn btn-primary"
+            onClick={() => setStep(2)}
+            disabled={!selectedRole}
+          >
+            Tiếp tục
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Bước 2: Form đăng ký
   return (
     <div className="wrapper fadeInDown">
       {message && (
@@ -65,15 +133,18 @@ export const SignUp = () => {
         </div>
       )}
       <div className="formContent">
-      <h2>Đăng Ký Tài Khoản</h2>
+        <h2>
+          Đăng Ký Tài Khoản{" "}
+          {selectedRole === "teacher" ? "Giáo viên" : "Học sinh"}
+        </h2>
         <form onSubmit={handleSubmit}>
           <div className="input-group">
-            <label htmlFor="name">Họ Tên</label>
+            <label htmlFor="name">Username</label>
             <input
               type="text"
               id="name"
               name="name"
-              placeholder="Nhập họ tên"
+              placeholder="Nhập tên đăng nhập"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
@@ -102,6 +173,13 @@ export const SignUp = () => {
               onChange={(e) => setPassword(e.target.value)}
               required
             />
+            <i
+              className={`bi ${
+                showPassword ? "bi-eye-slash" : "bi-eye"
+              } toggle-password`}
+              onClick={togglePasswordVisibility}
+              style={{ cursor: "pointer" }}
+            ></i>
           </div>
           <div className="input-group">
             <label htmlFor="confirm-password">Xác Nhận Mật Khẩu</label>
@@ -123,6 +201,9 @@ export const SignUp = () => {
           <p>
             Đã có tài khoản? <a href="/Login">Đăng nhập</a>
           </p>
+          <button className="btn btn-link" onClick={() => setStep(1)}>
+            Quay lại chọn loại tài khoản
+          </button>
         </div>
       </div>
     </div>

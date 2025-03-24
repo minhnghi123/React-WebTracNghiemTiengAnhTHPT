@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { Card, Button, Input, message } from "antd";
-import { useNavigate } from "react-router-dom";
 import { FlashCardSet } from "@/services/student/FlashCardAPI";
 import "./index.css";
 import clsx from "clsx";
@@ -17,7 +16,6 @@ interface FlashCardExamWrittenProps {
 }
 
 export const FlashCardExamWritten: React.FC<FlashCardExamWrittenProps> = ({ flashCardSet }) => {
-  const navigate = useNavigate();
   const [questions, setQuestions] = useState<WrittenQuestion[]>([]);
   const [userAnswers, setUserAnswers] = useState<Record<number, string>>({});
   const [score, setScore] = useState<{ correct: number; wrong: number } | null>(null);

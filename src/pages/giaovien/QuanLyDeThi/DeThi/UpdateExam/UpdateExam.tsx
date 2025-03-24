@@ -1,30 +1,34 @@
 import React, { useEffect, useState } from "react";
 import { Modal, Input, Select, Form, DatePicker, message } from "antd";
-
 import { Exam, ExamAPI, Question } from "@/services/teacher/Teacher";
 import { useNavigate } from "react-router-dom";
+import moment from "moment";
+import { ExamDataRecieve } from "@/services/teacher/ListeningQuestion";
 
 const { Option } = Select;
 
-interface CreateExamModalProps {
+interface UpdateExamModalProps {
   visible: boolean;
   handleClose: () => void;
   onCreateSuccess: () => void;
   dataQuestion: Question[];
+  listeningExams: ExamDataRecieve[];
   slug: string;
 }
 
-const UpdateExamModal: React.FC<CreateExamModalProps> = ({
+const UpdateExamModal: React.FC<UpdateExamModalProps> = ({
   visible,
   handleClose,
   onCreateSuccess,
   dataQuestion,
+  listeningExams,
   slug,
 }) => {
   const [exam, setExam] = useState<Exam>({
     title: "",
     description: "",
-    questions:    dataQuestion    || [],
+    questions: dataQuestion || [],
+    listeningExams: listeningExams || [],
     duration: 90,
     startTime: new Date(),
     endTime: undefined,
@@ -32,10 +36,7 @@ const UpdateExamModal: React.FC<CreateExamModalProps> = ({
     slug: "",
     createdAt: new Date(),
   });
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setExam((prev) => ({ ...prev, [name]: value }));
   };
@@ -47,6 +48,7 @@ const UpdateExamModal: React.FC<CreateExamModalProps> = ({
   const handleDateChange = (name: string, date: any) => {
     setExam((prev) => ({ ...prev, [name]: date }));
   };
+
   useEffect(() => {
     const fetchExamDetails = async () => {
       if (slug) {
@@ -56,12 +58,10 @@ const UpdateExamModal: React.FC<CreateExamModalProps> = ({
           setExam((prev) => ({
             ...prev,
             startTime: new Date(response.data.startTime),
-            endTime: response.data.endTime
-              ? new Date(response.data.endTime)
-              : undefined,
+            endTime: response.data.endTime ? new Date(response.data.endTime) : undefined,
             questions: dataQuestion || [],
+            listeningExams: listeningExams || [],
           }));
-          console.log(exam);
         } else {
           console.log(response);
         }
@@ -69,7 +69,8 @@ const UpdateExamModal: React.FC<CreateExamModalProps> = ({
     };
 
     fetchExamDetails();
-  }, []);
+  }, [slug, dataQuestion, listeningExams]);
+
   const handleSaveClick = async () => {
     if (!exam.startTime) {
       alert("Vui lòng chọn thời gian bắt đầu ");
@@ -80,22 +81,21 @@ const UpdateExamModal: React.FC<CreateExamModalProps> = ({
       alert("Thời gian kết thúc phải lớn hơn thời gian bắt đầu.");
       return;
     }
-
-    console.log(exam);
+    console.log("gửi",exam);
     const response = await ExamAPI.UpdateExam(exam as Exam, slug);
-
+    console.log(response);
     if (response?.success === true) {
       alert("Sửa đề thi thành công");
       navigate("/giaovien/QuanLyDeThi/");
       handleClose();
-
       onCreateSuccess();
     } else {
       message.error(response?.message);
-  
     }
   };
+
   const navigate = useNavigate();
+
   return (
     <Modal
       title="Sửa kỳ thi"
@@ -111,39 +111,29 @@ const UpdateExamModal: React.FC<CreateExamModalProps> = ({
           <Input name="title" value={exam.title} onChange={handleChange} />
         </Form.Item>
         <Form.Item label="Mô tả">
-          <Input.TextArea
-            name="description"
-            value={exam.description}
-            onChange={handleChange}
-          />
+          <Input.TextArea name="description" value={exam.description} onChange={handleChange} />
         </Form.Item>
         <Form.Item label="Thời gian (phút)">
-          <Input
-            name="duration"
-            type="number"
-            value={exam.duration}
-            onChange={handleChange}
-          />
+          <Input name="duration" type="number" value={exam.duration} onChange={handleChange} />
         </Form.Item>
         <Form.Item label="Thời gian bắt đầu">
           <DatePicker
             showTime
-            onChange={(date) => {
-              console.log(date);
-              handleDateChange("startTime", date);
-            }}
+            value={exam.startTime ? moment(exam.startTime) : null}
+            onChange={(date) => handleDateChange("startTime", date)}
           />
         </Form.Item>
         <Form.Item label="Thời gian kết thúc">
           <DatePicker
             showTime
+            value={exam.endTime ? moment(exam.endTime) : null}
             onChange={(date) => handleDateChange("endTime", date)}
           />
         </Form.Item>
         <Form.Item label="Công khai">
           <Select value={exam.isPublic} onChange={handleSelectChange}>
             <Option value={true}>Công khai</Option>
-            <Option value={false}>Riêng</Option>
+            <Option value={false}>Riêng tư</Option>
           </Select>
         </Form.Item>
       </Form>

@@ -1,4 +1,6 @@
 import ListeningExam from "../../models/listeningExam.model.js";
+import jwt from "jsonwebtoken";
+import { ENV_VARS } from "../../config/envVars.config.js";
 
 export const createListeningExamController = async (req, res) => {
   try {
@@ -23,9 +25,15 @@ export const createListeningExamController = async (req, res) => {
 
 export const getAllListeningExamsController = async (req, res) => {
   try {
+    const token = req.cookies["jwt-token"];
+    const decoded = jwt.verify(token, ENV_VARS.JWT_SECRET);
+    const teacherId = decoded.userId;
+
     const exams = await ListeningExam.find({
-      isDeleted: false,
-      isPublished: true,
+      $or: [
+        { isDeleted: false, isPublished: true },
+        { isDeleted: false, teacherId: teacherId }
+      ]
     })
       .populate("questions")
       .populate("teacherId")

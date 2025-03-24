@@ -137,9 +137,7 @@ export const QuanLyDeThi = () => {
   
   return (
     <div className="container mx-auto p-4">
-      <center>
-        <h1 className="text-3xl font-bold ">Quản lý đề thi</h1>
-      </center>
+
       <div>
         <button
           className="btn btn-primary   my-3 mx-3"

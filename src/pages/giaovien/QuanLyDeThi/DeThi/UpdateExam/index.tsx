@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import {
   ExamAPI,
-  ExamCopy,
   Question,
   QuestionAPI,
 } from "@/services/teacher/Teacher";
@@ -22,6 +21,8 @@ import clsx from "clsx";
 import { useParams } from "react-router-dom";
 import UpdateExamModal from "./UpdateExam";
 import "./index.css";
+import { ExamListeningQuestionAPI, ExamDataRecieve } from "@/services/teacher/ListeningQuestion";
+
 const { Search } = Input;
 const { Panel } = Collapse;
 const { Option } = Select;
@@ -29,10 +30,14 @@ const { Option } = Select;
 export const UpdateExamQuestion = () => {
   const { _id } = useParams<{ _id: string }>();
 
-  // State chính
+  // --- State cho câu hỏi ---
   const [data, setData] = useState<Question[]>([]);
   const [otherQuestions, setOtherQuestions] = useState<Question[]>([]);
   const [selectedQuestions, setSelectedQuestions] = useState<Question[]>([]);
+  // --- State cho kỳ thi nghe ---
+  const [allListeningExams, setAllListeningExams] = useState<ExamDataRecieve[]>([]);
+  const [selectedListeningExams, setSelectedListeningExams] = useState<ExamDataRecieve[]>([]);
+  // --- Các state phụ ---
   const [total, setTotal] = useState<number>(1);
   const [total2, setTotal2] = useState<number>(1);
   const [easyLimit, setEasyLimit] = useState<number>(0);
@@ -48,9 +53,9 @@ export const UpdateExamQuestion = () => {
 
   const [selectedPage, setSelectedPage] = useState<number>(1);
   const [bankPage, setBankPage] = useState<number>(1);
-  const pageSize = 10;
+  const [pageSize] = useState<number>(10);
 
-  // Lấy danh sách câu hỏi từ API (1)
+  // --- API: Lấy danh sách câu hỏi ---
   const getAllQuestions = async (page: number) => {
     try {
       const rq = await QuestionAPI.getAllQuestions(page);
@@ -58,19 +63,15 @@ export const UpdateExamQuestion = () => {
         setTotal(rq.totalPage);
         setData((prev) => {
           const combined = [...prev, ...rq.questions];
-          // Loại bỏ các câu hỏi trùng lặp theo _id
           const unique = Array.from(new Map(combined.map((q) => [q._id, q])).values());
           return unique;
         });
       }
     } catch (error: any) {
-      if (error.response) {
-        console.log(error.response.data.message);
-      }
+      console.error(error.response?.data.message);
     }
   };
 
-  // Lấy danh sách câu hỏi từ API (2)
   const getAllQuestions2 = async (page: number) => {
     try {
       const rq = await QuestionAPI.getAllQuestionsBlank(page);
@@ -83,16 +84,27 @@ export const UpdateExamQuestion = () => {
         setTotal2(rq.totalPage);
       }
     } catch (error: any) {
-      if (error.response) {
-        console.log(error.response.data.message);
-      }
+      console.error(error.response?.data.message);
     }
   };
 
-  // Load dữ liệu ban đầu và các trang tiếp theo nếu có
+  // --- API: Lấy danh sách kỳ thi nghe ---
+  const getAllListeningExams = async () => {
+    try {
+      const response = await ExamListeningQuestionAPI.getAllListeningExams();
+      if (response?.data) {
+        setAllListeningExams(response.data);
+      }
+    } catch (error: any) {
+      console.error(error.response?.message);
+    }
+  };
+
+  // --- Load dữ liệu ban đầu ---
   useEffect(() => {
     getAllQuestions(1);
     getAllQuestions2(1);
+    getAllListeningExams();
     addSeletedQuestion();
   }, []);
 
@@ -112,14 +124,14 @@ export const UpdateExamQuestion = () => {
     }
   }, [total2]);
 
-  // Cập nhật danh sách câu hỏi chưa chọn
+  // --- Cập nhật ngân hàng câu hỏi (loại trừ câu đã chọn) ---
   useEffect(() => {
     setOtherQuestions(
       data.filter((q) => !selectedQuestions.some((sq) => sq._id === q._id))
     );
   }, [selectedQuestions, data]);
 
-  // Lấy danh sách câu hỏi đã có của đề thi
+  // --- Lấy dữ liệu câu hỏi và kỳ thi nghe đã có của đề thi ---
   const addSeletedQuestion = async () => {
     if (!_id) {
       console.error("Không tìm thấy id");
@@ -128,11 +140,12 @@ export const UpdateExamQuestion = () => {
     const rq = await ExamAPI.getDetailExam(_id);
     if (rq?.success) {
       setSelectedQuestions(rq.data.questions || []);
+      setSelectedListeningExams(rq.data.listeningExams || []);
       setExamID(rq.data._id);
     }
   };
 
-  // Hàm trộn mảng (shuffle)
+  // --- Utility: Trộn mảng câu hỏi ---
   const shuffleArray = (array: Question[]) => {
     for (let i = array.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -141,7 +154,7 @@ export const UpdateExamQuestion = () => {
     return array;
   };
 
-  // Tự động thêm câu hỏi theo số lượng yêu cầu cho từng mức
+  // --- Xử lý thêm câu hỏi tự động ---
   const handleOk = () => {
     const easyQuestions = shuffleArray(
       otherQuestions.filter((q) => q.level === "easy")
@@ -176,7 +189,7 @@ export const UpdateExamQuestion = () => {
     setOpenModal(false);
   };
 
-  // Hàm di chuyển câu hỏi giữa danh sách được chọn và chưa chọn
+  // --- Di chuyển câu hỏi giữa danh sách được chọn và ngân hàng ---
   const moveQuestion = (question: Question) => {
     if (selectedQuestions.some((q) => q._id === question._id)) {
       setSelectedQuestions((prev) =>
@@ -199,20 +212,22 @@ export const UpdateExamQuestion = () => {
     }
   };
 
-  const copyExam = async () => {
-    if (!_id) {
-      alert("Không tìm thấy id");
-      return;
-    }
-    const examCopy: ExamCopy = { examId: examID };
-    const rq = await ExamAPI.copyExam(examCopy);
-    if (rq?.success) {
-      alert("Sao chép đề thi thành công");
-    } else {
-      alert("Sao chép đề thi thất bại");
-    }
+  // --- Xử lý chuyển kỳ thi nghe ---
+  // Khi ấn "Thêm" sẽ đưa exam đó vào danh sách đã chọn
+  const handleAddListeningExam = (exam: ExamDataRecieve) => {
+    setSelectedListeningExams((prev) => [...prev, exam]);
   };
 
+  // Khi ấn "Gỡ" sẽ loại bỏ exam đó khỏi danh sách đã chọn
+  const handleRemoveListeningExam = (exam: ExamDataRecieve) => {
+    setSelectedListeningExams((prev) => prev.filter((e) => e._id !== exam._id));
+  };
+
+  // --- Tính danh sách ngân hàng kỳ thi nghe (loại trừ các đã chọn) ---
+  const bankListeningExams = allListeningExams.filter(
+    (exam) => !selectedListeningExams.some((e) => e._id === exam._id)
+  );
+  // --- Lọc câu hỏi theo tìm kiếm và filter ---
   const filteredOtherQuestions = otherQuestions.filter((q) => {
     const term = searchTerm.toLowerCase();
     const matchesSearch =
@@ -228,7 +243,7 @@ export const UpdateExamQuestion = () => {
     return matchesSearch && matchesType && matchesLevel;
   });
 
-  // Phân trang cho các danh sách
+  // --- Phân trang cho danh sách câu hỏi ---
   const paginatedSelectedQuestions = selectedQuestions.slice(
     (selectedPage - 1) * pageSize,
     selectedPage * pageSize
@@ -247,10 +262,10 @@ export const UpdateExamQuestion = () => {
         <Button
           type="default"
           onClick={() => {
-            if (selectedQuestions.length > 0) {
+            if (selectedQuestions.length > 0 || selectedListeningExams.length > 0) {
               setOpenModalCreate(true);
             } else {
-              alert("Chưa có câu hỏi nào");
+              alert("Chưa có câu hỏi hoặc kỳ thi nghe nào");
             }
           }}
           style={{ marginLeft: 8 }}
@@ -260,10 +275,11 @@ export const UpdateExamQuestion = () => {
         <Button
           type="default"
           onClick={() => {
-            if (selectedQuestions.length > 0) {
+            if (selectedQuestions.length > 0 || selectedListeningExams.length > 0) {
+              // Ví dụ: copy đề thi
               copyExam();
             } else {
-              alert("Chưa có câu hỏi nào");
+              alert("Chưa có câu hỏi hoặc kỳ thi nghe nào");
             }
           }}
           style={{ marginLeft: 8 }}
@@ -272,58 +288,56 @@ export const UpdateExamQuestion = () => {
         </Button>
       </div>
 
-      {/* --- Danh sách câu hỏi trong đề thi (không dùng panel) --- */}
+      {/* --- Danh sách câu hỏi trong đề thi --- */}
       <h3>Danh sách câu hỏi trong đề thi</h3>
       {selectedQuestions && selectedQuestions.length > 0 ? (
         <>
-          {paginatedSelectedQuestions.map((question, index) => (
-            <div
-              key={question._id || index}
-              style={{
-                border: "1px solid #d9d9d9",
-                borderRadius: 4,
-                padding: 12,
-                marginBottom: 12,
-              }}
-            >
-              <div style={{ marginBottom: 8 }}>
-                <strong>
-                  {index + 1 + (selectedPage - 1) * pageSize}.{" "}
-                  {question.content.length > 200
-                    ? question.content.slice(0, 200) + " ..."
-                    : question.content}
-                </strong>
-              </div>
-              <div style={{ marginBottom: 8 }}>
-                <Tag
-                  color={clsx(
-                    question.level === "easy" && "green",
-                    question.level === "medium" && "yellow",
-                    question.level === "hard" && "red"
-                  )}
-                >
-                  {question.level}
-                </Tag>
-                <Tag color="blue">{question.subject}</Tag>
-                <Tag color="cyan">{question.knowledge}</Tag>
-              </div>
-              <div style={{ marginBottom: 8 }}>
-                <Button
-                  size="large"
-                  onClick={() => moveQuestion(question)}
-                  icon={<MinusOutlined style={{ color: "red" }} />}
-                >
-                  Gỡ
-                </Button>
-              </div>
-              <QuestionComponent
-                deletetalbe={false}
-                question={question}
-                onUpdateSuccess={() => {}}
-                questionType={question.questionType || ""}
-              />
-            </div>
-          ))}
+          <Collapse accordion>
+            {paginatedSelectedQuestions.map((question, index) => (
+              <Panel
+                header={
+                  <div>
+                    <strong>
+                      {index + 1 + (selectedPage - 1) * pageSize}.{" "}
+                      {question.content.length > 200
+                        ? question.content.slice(0, 200) + " ..."
+                        : question.content}
+                    </strong>
+                  </div>
+                }
+                key={question._id || index}
+              >
+                <div style={{ marginBottom: 8 }}>
+                  <Tag
+                    color={clsx(
+                      question.level === "easy" && "green",
+                      question.level === "medium" && "yellow",
+                      question.level === "hard" && "red"
+                    )}
+                  >
+                    {question.level}
+                  </Tag>
+                  <Tag color="blue">{question.subject}</Tag>
+                  <Tag color="cyan">{question.knowledge}</Tag>
+                </div>
+                <div style={{ marginBottom: 8 }}>
+                  <Button
+                    size="large"
+                    onClick={() => moveQuestion(question)}
+                    icon={<MinusOutlined style={{ color: "red" }} />}
+                  >
+                    Gỡ
+                  </Button>
+                </div>
+                <QuestionComponent
+                  deletetalbe={false}
+                  question={question}
+                  onUpdateSuccess={() => {}}
+                  questionType={question.questionType || ""}
+                />
+              </Panel>
+            ))}
+          </Collapse>
           <div style={{ marginTop: 16, textAlign: "center" }}>
             <Pagination
               current={selectedPage}
@@ -337,6 +351,7 @@ export const UpdateExamQuestion = () => {
         <p>Chưa có câu hỏi nào được chọn.</p>
       )}
 
+      {/* --- Ngân hàng câu hỏi --- */}
       <h3>Ngân hàng câu hỏi</h3>
       <div
         style={{
@@ -347,36 +362,35 @@ export const UpdateExamQuestion = () => {
         }}
       >
         <div className="search-filter-container">
-  <Search
-    placeholder="Tìm theo nội dung, kiến thức, chủ đề"
-    value={searchTerm}
-    onChange={(e) => setSearchTerm(e.target.value)}
-    enterButton
-    className="search-input"
-  />
-  <Select
-    placeholder="Loại câu hỏi"
-    allowClear
-    className="select-item"
-    value={filterType || undefined}
-    onChange={(value) => setFilterType(value)}
-  >
-    <Option value="6742fb1cd56a2e75dbd817ea">Yes/No</Option>
-    <Option value="6742fb3bd56a2e75dbd817ec">Điền khuyết</Option>
-  </Select>
-  <Select
-    placeholder="Mức độ"
-    allowClear
-    className="select-item"
-    value={filterLevel || undefined}
-    onChange={(value) => setFilterLevel(value)}
-  >
-    <Option value="easy">Easy</Option>
-    <Option value="medium">Medium</Option>
-    <Option value="hard">Hard</Option>
-  </Select>
-</div>
-
+          <Search
+            placeholder="Tìm theo nội dung, kiến thức, chủ đề"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            enterButton
+            className="search-input"
+          />
+          <Select
+            placeholder="Loại câu hỏi"
+            allowClear
+            className="select-item"
+            value={filterType || undefined}
+            onChange={(value) => setFilterType(value)}
+          >
+            <Option value="6742fb1cd56a2e75dbd817ea">Yes/No</Option>
+            <Option value="6742fb3bd56a2e75dbd817ec">Điền khuyết</Option>
+          </Select>
+          <Select
+            placeholder="Mức độ"
+            allowClear
+            className="select-item"
+            value={filterLevel || undefined}
+            onChange={(value) => setFilterLevel(value)}
+          >
+            <Option value="easy">Easy</Option>
+            <Option value="medium">Medium</Option>
+            <Option value="hard">Hard</Option>
+          </Select>
+        </div>
       </div>
       {filteredOtherQuestions && filteredOtherQuestions.length > 0 ? (
         <>
@@ -396,12 +410,12 @@ export const UpdateExamQuestion = () => {
                 key={question._id || index}
               >
                 <div style={{ marginBottom: 8 }}>
-                  <button
+                  <Button
                     className="btn"
                     onClick={() => moveQuestion(question)}
                   >
                     <PlusOutlined style={{ color: "green" }} /> Thêm
-                  </button>
+                  </Button>
                 </div>
                 <QuestionComponent
                   deletetalbe={false}
@@ -425,6 +439,75 @@ export const UpdateExamQuestion = () => {
         <p>Không có câu hỏi phù hợp.</p>
       )}
 
+      {/* --- Danh sách kỳ thi nghe đã chọn (hiển thị dạng Collapse) --- */}
+      <h3>Danh sách kỳ thi nghe trong đề thi</h3>
+      {selectedListeningExams && selectedListeningExams.length > 0 ? (
+        <Collapse accordion>
+          {selectedListeningExams.map((exam, index) => (
+            <Panel
+              header={
+                <div>
+                  <strong>
+                    {index + 1}. {exam.title}
+                  </strong>
+                </div>
+              }
+              key={exam._id || index}
+            >
+              <p>{exam.description}</p>
+              <p>
+                Thời gian: {exam.duration} phút - Điểm qua: {exam.passingScore} -{" "}
+                {exam.isPublished ? "Đã phát hành" : "Chưa phát hành"}
+              </p>
+              <Button
+                size="small"
+                onClick={() => handleRemoveListeningExam(exam)}
+                icon={<MinusOutlined style={{ color: "red" }} />}
+              >
+                Gỡ
+              </Button>
+            </Panel>
+          ))}
+        </Collapse>
+      ) : (
+        <p>Chưa có kỳ thi nghe nào được chọn.</p>
+      )}
+
+      {/* --- Ngân hàng kỳ thi nghe (hiển thị dạng Collapse) --- */}
+      <h3>Ngân hàng kỳ thi nghe</h3>
+      {bankListeningExams && bankListeningExams.length > 0 ? (
+        <Collapse accordion>
+          {bankListeningExams.map((exam, index) => (
+            <Panel
+              header={
+                <div>
+                  <strong>
+                    {index + 1}. {exam.title}
+                  </strong>
+                </div>
+              }
+              key={exam._id || ""}
+            >
+              <p>{exam.description}</p>
+              <p>
+                Thời gian: {exam.duration} phút - Điểm qua: {exam.passingScore} -{" "}
+                {exam.isPublished ? "Đã phát hành" : "Chưa phát hành"}
+              </p>
+              <Button
+                size="small"
+                onClick={() => handleAddListeningExam(exam)}
+                icon={<PlusOutlined style={{ color: "green" }} />}
+              >
+                Thêm
+              </Button>
+            </Panel>
+          ))}
+        </Collapse>
+      ) : (
+        <p>Không có kỳ thi nghe phù hợp.</p>
+      )}
+
+      {/* --- Modal thêm câu hỏi tự động --- */}
       <Modal
         open={openModal}
         title="Thêm câu hỏi tự động"
@@ -484,7 +567,14 @@ export const UpdateExamQuestion = () => {
         handleClose={() => setOpenModalCreate(false)}
         onCreateSuccess={() => setOpenModalCreate(false)}
         dataQuestion={selectedQuestions}
+        listeningExams={selectedListeningExams}
       />
     </div>
   );
 };
+
+function copyExam() {
+  // Hàm sao chép đề thi (ví dụ)
+  // Bạn có thể triển khai theo yêu cầu cụ thể của dự án
+  alert("Sao chép đề thi thành công");
+}

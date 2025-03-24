@@ -10,6 +10,8 @@ import QuestionComponent from "@/pages/giaovien/QuanLyCauHoi/Question";
 import clsx from "clsx";
 import { useParams } from "react-router-dom";
 import ExportWordModal from "../ExportWord/ExportWordModal";
+// import { ExamDataExport, QuestionFillInBlank, QuestionListening, QuestionMultichoice } from "@/services/teacher/ExportImport";
+import UpdateExamModal from "../UpdateExam/UpdateExam";
 
 export const UpdateExamQuestion = () => {
   const { _id } = useParams<{ _id: string }>();
@@ -239,26 +241,26 @@ export const UpdateExamQuestion = () => {
     },
   ];
 
-  const examData: ExamDataExport = {
-    title: "ĐỀ KIỂM TRA CHUNG LẦN 1",
-    description: "NĂM HỌC 2024 - 2025",
-    school: "TRƯỜNG THPT NGUYỄN TRÃI",
-    department: "SỞ GD & ĐT THÁI BÌNH",
-    subject: "Tiếng Anh",
-    teacher: "Nguyễn Văn A",
-    code: "132",
-    duration: 90,
-    comments: "Chúc các em làm bài thật tốt!",
-    questionsMultichoice: selectedQuestions.filter(
-      (q) => q.questionType === "multichoice"
-    ) as QuestionMultichoice[],
-    questionsFillInBlank: selectedQuestions.filter(
-      (q) => q.questionType === "fillinblank"
-    ) as QuestionFillInBlank[],
-    questionsListening: selectedQuestions.filter(
-      (q) => q.questionType === "listening"
-    ) as QuestionListening[],
-  };
+  // const examData: ExamDataExport = {
+  //   title: "ĐỀ KIỂM TRA CHUNG LẦN 1",
+  //   description: "NĂM HỌC 2024 - 2025",
+  //   school: "TRƯỜNG THPT NGUYỄN TRÃI",
+  //   department: "SỞ GD & ĐT THÁI BÌNH",
+  //   subject: "Tiếng Anh",
+  //   teacher: "Nguyễn Văn A",
+  //   code: "132",
+  //   duration: 90,
+  //   comments: "Chúc các em làm bài thật tốt!",
+  //   questionsMultichoice: selectedQuestions.filter(
+  //     (q) => q.questionType === "multichoice"
+  //   ) as QuestionMultichoice[],
+  //   questionsFillInBlank: selectedQuestions.filter(
+  //     (q) => q.questionType === "fillinblank"
+  //   ) as QuestionFillInBlank[],
+  //   questionsListening: selectedQuestions.filter(
+  //     (q) => q.questionType === "listening"
+  //   ) as unknown as QuestionListening[],
+  // };
 
   return (
     <div>
@@ -390,7 +392,7 @@ export const UpdateExamQuestion = () => {
       <ExportWordModal
         visible={openExportModal}
         handleClose={() => setOpenExportModal(false)}
-        examData={examData}
+        examId={_id || ""}
       />
     </div>
   );

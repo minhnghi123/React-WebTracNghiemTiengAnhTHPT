@@ -7,14 +7,13 @@ import listeningQuestionManagementRoute from "./listeningQuestionManagement.rout
 import listeningExamManagementRoute from "./listeningExamManagement.route.js";
 import {
   protectedRoute,
-  isStudent,
-  isAdmin,
   isTeacher,
 } from "../../middlewares/protectedRoute.middleware.js";
 
 
 const indexTeacher = (app) => {
   app.use(protectedRoute);
+  app.use("/teacher/listening-exam", isTeacher, listeningExamManagementRoute);
   app.use("/teacher", isTeacher, questionManagementRoute);
 
   app.use("/teacher/exam", isTeacher, examManagementRoute);
@@ -23,11 +22,7 @@ const indexTeacher = (app) => {
 
   app.use("/teacher/audio", isTeacher, audioManagementRoute);
 
-  app.use("/teacher/classroom", classroomManagementRoute);
-
-  app.use("/teacher/listening-question", listeningQuestionManagementRoute);
-  
-  app.use("/teacher/listening-exam", isTeacher, listeningExamManagementRoute);
+  app.use("/teacher/listening-question", isTeacher, listeningQuestionManagementRoute);
 
   app.use("/teacher/classroom", isTeacher, classroomManagementRoute);
 };

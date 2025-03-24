@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { Card, Button, Radio, message } from "antd";
-import { useNavigate } from "react-router-dom";
 import { FlashCardSet } from "@/services/student/FlashCardAPI";
 import "./index.css";
 import clsx from "clsx";
@@ -17,7 +16,6 @@ interface FlashCardExamTrueFalseProps {
 }
 
 export const FlashCardExamTrueFalse: React.FC<FlashCardExamTrueFalseProps> = ({ flashCardSet }) => {
-  const navigate = useNavigate();
   const [questions, setQuestions] = useState<TrueFalseQuestion[]>([]);
   const [userAnswers, setUserAnswers] = useState<Record<number, boolean>>({});
   const [score, setScore] = useState<{ correct: number; wrong: number } | null>(null);

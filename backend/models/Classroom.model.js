@@ -9,6 +9,10 @@ const ClassroomSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId, 
         ref: 'Exam'
     }],
+    exams_listening:[{
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'ListeningExam'
+    }],
     isDeleted: { type: Boolean, default: false },
     status: { type: String, enum: ['active', 'inactive', 'completed'], default: 'active' }
 }, { 

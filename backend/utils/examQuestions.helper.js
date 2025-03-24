@@ -1,4 +1,47 @@
-import { Paragraph, TextRun, Table, TableRow, TableCell, WidthType, AlignmentType, BorderStyle } from 'docx';
+import {
+  Paragraph,
+  TextRun,
+  Table,
+  TableRow,
+  TableCell,
+  WidthType,
+  AlignmentType,
+  BorderStyle,
+} from "docx";
+
+/**
+ * Xóa tiền tố "A. ", "B. ", ... nếu có trong text.
+ * @param {string} text - Nội dung đáp án gốc.
+ * @returns {string} - Nội dung đã làm sạch.
+ */
+const sanitizeAnswerText = (text) => {
+  return text.replace(/^[A-D]\.\s*/, "");
+};
+
+const getAnswerCell = (answerText, index) =>
+  new TableCell({
+    margins: { top: 100, bottom: 100, left: 200, right: 200 },
+    children: [
+      new Paragraph({
+        children: [
+          new TextRun({
+            text: `${["A", "B", "C", "D"][index]}. ${sanitizeAnswerText(
+              answerText || ""
+            )}`,
+            font: "Times New Roman",
+            size: 22,
+          }),
+        ],
+      }),
+    ],
+    borders: {
+      top: { style: BorderStyle.SINGLE, color: "FFFFFF" },
+      bottom: { style: BorderStyle.SINGLE, color: "FFFFFF" },
+      left: { style: BorderStyle.SINGLE, color: "FFFFFF" },
+      right: { style: BorderStyle.SINGLE, color: "FFFFFF" },
+    },
+    width: { size: 50, type: WidthType.PERCENTAGE },
+  });
 
 /**
  * Tạo phần câu hỏi trắc nghiệm với khung màu trắng và khoảng cách hợp lý.
@@ -20,17 +63,34 @@ export const formatExamQuestions = (questionsMultichoice) => [
     spacing: { before: 200, after: 200 },
   }),
 
-  // 📚 Xử Lý Danh Sách Câu Hỏi
-  ...questionsMultichoice.map((question, index) => {
-    const MAX_ANSWER_LENGTH = 30; // Độ dài tối đa của 1 đáp án để quyết định kiểu hiển thị
-
-    // Kiểm tra xem tất cả đáp án có ngắn không
-    const isShortAnswers = question.answers.every(
-      (answer) => answer.text.length <= MAX_ANSWER_LENGTH
-    );
+  ...questionsMultichoice.flatMap((question, index) => {
+    const getAnswerCell = (answerText, index) =>
+      new TableCell({
+        margins: { top: 100, bottom: 100, left: 200, right: 200 },
+        children: [
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: `${["A", "B", "C", "D"][index]}. ${sanitizeAnswerText(
+                  answerText || ""
+                )}`,
+                font: "Times New Roman",
+                size: 22,
+              }),
+            ],
+          }),
+        ],
+        borders: {
+          top: { style: BorderStyle.SINGLE, color: "FFFFFF" },
+          bottom: { style: BorderStyle.SINGLE, color: "FFFFFF" },
+          left: { style: BorderStyle.SINGLE, color: "FFFFFF" },
+          right: { style: BorderStyle.SINGLE, color: "FFFFFF" },
+        },
+        width: { size: 50, type: WidthType.PERCENTAGE },
+      });
 
     return [
-      // 📝 Hiển Thị Câu Hỏi
+      // 📝 Hiển thị câu hỏi
       new Paragraph({
         children: [
           new TextRun({
@@ -40,159 +100,42 @@ export const formatExamQuestions = (questionsMultichoice) => [
             size: 24,
           }),
         ],
-        spacing: { after: 150 }, // Khoảng cách giữa câu hỏi và đáp án
+        spacing: { after: 150 },
       }),
 
-      // 🅰️ Hiển Thị Đáp Án
-      isShortAnswers
-        ? // 📊 Hiển Thị 2 Đáp Án Trên 1 Hàng (Dạng Bảng Với Khung Màu Trắng)
-          new Table({
-            width: { size: 100, type: WidthType.PERCENTAGE },
-            rows: [
-              new TableRow({
-                children: [
-                  new TableCell({
-                    margins: { top: 100, bottom: 100, left: 200, right: 200 }, // Padding bên trong ô
-                    children: [
-                      new Paragraph({
-                        children: [
-                          new TextRun({
-                            text: `A. ${question.answers[0]?.text || ''}`,
-                            font: "Times New Roman",
-                            size: 22,
-                          }),
-                        ],
-                      }),
-                    ],
-                    borders: {
-                      top: { style: BorderStyle.SINGLE, color: "FFFFFF" },
-                      bottom: { style: BorderStyle.SINGLE, color: "FFFFFF" },
-                      left: { style: BorderStyle.SINGLE, color: "FFFFFF" },
-                      right: { style: BorderStyle.SINGLE, color: "FFFFFF" },
-                    },
-                    width: { size: 50, type: WidthType.PERCENTAGE },
-                  }),
-                  new TableCell({
-                    margins: { top: 100, bottom: 100, left: 200, right: 200 },
-                    children: [
-                      new Paragraph({
-                        children: [
-                          new TextRun({
-                            text: `B. ${question.answers[1]?.text || ''}`,
-                            font: "Times New Roman",
-                            size: 22,
-                          }),
-                        ],
-                      }),
-                    ],
-                    borders: {
-                      top: { style: BorderStyle.SINGLE, color: "FFFFFF" },
-                      bottom: { style: BorderStyle.SINGLE, color: "FFFFFF" },
-                      left: { style: BorderStyle.SINGLE, color: "FFFFFF" },
-                      right: { style: BorderStyle.SINGLE, color: "FFFFFF" },
-                    },
-                    width: { size: 50, type: WidthType.PERCENTAGE },
-                  }),
-                ],
-              }),
-              new TableRow({
-                children: [
-                  new TableCell({
-                    margins: { top: 100, bottom: 100, left: 200, right: 200 },
-                    children: [
-                      new Paragraph({
-                        children: [
-                          new TextRun({
-                            text: `C. ${question.answers[2]?.text || ''}`,
-                            font: "Times New Roman",
-                            size: 22,
-                          }),
-                        ],
-                      }),
-                    ],
-                    borders: {
-                      top: { style: BorderStyle.SINGLE, color: "FFFFFF" },
-                      bottom: { style: BorderStyle.SINGLE, color: "FFFFFF" },
-                      left: { style: BorderStyle.SINGLE, color: "FFFFFF" },
-                      right: { style: BorderStyle.SINGLE, color: "FFFFFF" },
-                    },
-                    width: { size: 50, type: WidthType.PERCENTAGE },
-                  }),
-                  new TableCell({
-                    margins: { top: 100, bottom: 100, left: 200, right: 200 },
-                    children: [
-                      new Paragraph({
-                        children: [
-                          new TextRun({
-                            text: `D. ${question.answers[3]?.text || ''}`,
-                            font: "Times New Roman",
-                            size: 22,
-                          }),
-                        ],
-                      }),
-                    ],
-                    borders: {
-                      top: { style: BorderStyle.SINGLE, color: "FFFFFF" },
-                      bottom: { style: BorderStyle.SINGLE, color: "FFFFFF" },
-                      left: { style: BorderStyle.SINGLE, color: "FFFFFF" },
-                      right: { style: BorderStyle.SINGLE, color: "FFFFFF" },
-                    },
-                    width: { size: 50, type: WidthType.PERCENTAGE },
-                  }),
-                ],
-              }),
+      // 📊 Hiển thị đáp án trong bảng 2x2
+      new Table({
+        width: { size: 100, type: WidthType.PERCENTAGE },
+        rows: [
+          new TableRow({
+            children: [
+              getAnswerCell(question.answers[0]?.text, 0),
+              getAnswerCell(question.answers[1]?.text, 1),
             ],
-            spacing: { before: 100, after: 200 }, // Khoảng cách giữa bảng và câu hỏi tiếp theo
-          })
-        : // 📊 Hiển Thị Mỗi Đáp Án Trên 1 Hàng
-        new Table({
-          width: { size: 100, type: WidthType.PERCENTAGE },
-          rows: question.answers.map((answer, i) =>
-            new TableRow({
-              children: [
-                new TableCell({
-                  children: [
-                    new Paragraph({
-                      children: [
-                        new TextRun({
-                          text: `${['A', 'B', 'C', 'D'][i]}. ${answer.text}`,
-                          font: "Times New Roman",
-                          size: 22,
-                        }),
-                      ],
-                      spacing: { after: 50 }, // Khoảng cách giữa các đáp án
-                    }),
-                  ],
-                  margins: { top: 100, bottom: 100, left: 200, right: 200 }, // Padding bên trong ô
-                  borders: {
-                    top: { style: BorderStyle.SINGLE, color: "FFFFFF" },
-                    bottom: { style: BorderStyle.SINGLE, color: "FFFFFF" },
-                    left: { style: BorderStyle.SINGLE, color: "FFFFFF" },
-                    right: { style: BorderStyle.SINGLE, color: "FFFFFF" },
-                  },
-                  width: { size: 100, type: WidthType.PERCENTAGE },
-                }),
-              ],
-            })
-          ),
-          spacing: { before: 50, after: 100 }, // Khoảng cách giữa bảng và câu hỏi tiếp theo
-        }),
-    
+          }),
+          new TableRow({
+            children: [
+              getAnswerCell(question.answers[2]?.text, 2),
+              getAnswerCell(question.answers[3]?.text, 3),
+            ],
+          }),
+        ],
+        spacing: { before: 100, after: 200 },
+      }),
 
-      // 📝 Thêm Khoảng Cách Giữa Các Câu Hỏi
+      // 📏 Khoảng cách giữa các câu
       new Paragraph({
         children: [],
-        spacing: { after: 200 }, // Khoảng cách giữa câu hỏi này và câu hỏi tiếp theo
+        spacing: { after: 200 },
       }),
     ];
-  }).flat(),
+  }),
 ];
-
 
 /**
  * Tạo phần câu hỏi điền khuyết đơn giản.
  * @param {Array} questionsFillInBlank - Danh sách câu hỏi điền khuyết.
- * @returns {Array} - Mảng các Paragraph.
+ * @returns {Array}
  */
 export const formatFillInBlankQuestions = (questionsFillInBlank) => [
   // 📚 Tiêu Đề Phần Câu Hỏi
@@ -210,23 +153,29 @@ export const formatFillInBlankQuestions = (questionsFillInBlank) => [
   }),
 
   // 📝 Hiển Thị Từng Câu Hỏi Điền Khuyết
-  ...questionsFillInBlank.map((question, index) =>
-    new Paragraph({
-      children: [
-        new TextRun({
-          text: `${index + 1}. ${question.content}`,
-          font: "Times New Roman",
-          size: 24,
-        }),
-      ],
-      spacing: { after: 150 }, // Khoảng cách giữa các câu hỏi
-    })
-  )
+  ...questionsFillInBlank.map(
+    (question, index) =>
+      new Paragraph({
+        children: [
+          new TextRun({
+            text: `${index + 1}. ${question.content}`,
+            font: "Times New Roman",
+            size: 24,
+          }),
+        ],
+        spacing: { after: 150 }, // Khoảng cách giữa các câu hỏi
+      })
+  ),
 ];
+
+/**
+ * Tạo phần câu hỏi bài nghe (Listening)
+ * @param {Array} questionsListening
+ * @returns {Array}
+ */
 
 
 export const formatListeningQuestions = (questionsListening) => [
-  // 📚 Tiêu Đề Phần Câu Hỏi Bài Nghe
   new Paragraph({
     children: [
       new TextRun({
@@ -240,9 +189,8 @@ export const formatListeningQuestions = (questionsListening) => [
     spacing: { before: 200, after: 200 },
   }),
 
-  // 🎧 Xử Lý Từng Bài Nghe
   ...questionsListening.flatMap((listening, index) => [
-    // 📝 Hiển Thị Transcript
+    // Transcript
     new Paragraph({
       children: [
         new TextRun({
@@ -255,7 +203,7 @@ export const formatListeningQuestions = (questionsListening) => [
       spacing: { after: 100 },
     }),
 
-    // 🎼 Hiển Thị Link Audio (nếu có)
+    // Audio link
     listening.audio
       ? new Paragraph({
           children: [
@@ -274,11 +222,13 @@ export const formatListeningQuestions = (questionsListening) => [
           ],
           spacing: { after: 150 },
         })
-      : new Paragraph({ children: [] }),
+      : new Paragraph({
+          children: [new TextRun({ text: "", size: 1 })],
+          spacing: { after: 100 },
+        }),
 
-    // 📚 Hiển Thị Danh Sách Câu Hỏi Kèm Đáp Án
+    // Questions
     ...listening.questions.flatMap((question, qIndex) => [
-      // 📝 Câu Hỏi
       new Paragraph({
         children: [
           new TextRun({
@@ -291,31 +241,29 @@ export const formatListeningQuestions = (questionsListening) => [
         spacing: { after: 100 },
       }),
 
-      // 🅰️ Đáp Án
-      ...question.answers.map((answer, i) => 
-        new Paragraph({
-          children: [
-            new TextRun({
-              text: `${['A', 'B', 'C', 'D'][i]}. ${answer.text}`,
-              font: "Times New Roman",
-              size: 22,
-            }),
-          ],
-          spacing: { after: 50 },
-        })
-      ),
+      new Table({
+        width: { size: 100, type: WidthType.PERCENTAGE },
+        rows: [
+          new TableRow({
+            children: [
+              getAnswerCell(question.answers[0]?.text, 0),
+              getAnswerCell(question.answers[1]?.text, 1),
+            ],
+          }),
+          new TableRow({
+            children: [
+              getAnswerCell(question.answers[2]?.text, 2),
+              getAnswerCell(question.answers[3]?.text, 3),
+            ],
+          }),
+        ],
+        spacing: { before: 100, after: 200 },
+      }),
 
-      // 📏 Khoảng Cách Giữa Các Câu Hỏi
       new Paragraph({
         children: [],
-        spacing: { after: 150 },
+        spacing: { after: 200 },
       }),
     ]),
-
-    // 📏 Khoảng Cách Giữa Các Phần Bài Nghe
-    new Paragraph({
-      children: [],
-      spacing: { after: 200 },
-    }),
   ]),
 ];
