@@ -18,7 +18,13 @@ export const getAllResults = async (req, res) => {
       path: "examId",
       populate: [
         { path: "questions" },
-        { path: "listeningQuestions" }, // Populate listeningQuestions
+        { 
+          path: "listeningExams", 
+          populate: { 
+            path: "questions", 
+            select: "questionText options correctAnswer blankAnswer audio" // Include necessary fields
+          } 
+        },
       ],
     });
     res.status(200).json({
@@ -29,7 +35,6 @@ export const getAllResults = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch results", error });
   }
 };
-
 // [POST]: /result/submit
 // Xử lý nộp bài thi: kiểm tra thời gian, tính điểm, cập nhật kết quả và trả về phản hồi
 export const submitExam = async (req, res) => {
@@ -372,6 +377,7 @@ export const submitExam = async (req, res) => {
             return {
               ...opt.toObject(),
               isCorrect: String(opt.option_id) === String(correctAnswerObj.answer_id),
+              optionText: opt.optionText, // Include optionText field
             };
           });
           isCorrect = String(correctAnswerObj.answer_id) === String(selectedAnswerId);

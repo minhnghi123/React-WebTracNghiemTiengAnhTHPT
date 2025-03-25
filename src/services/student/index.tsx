@@ -8,9 +8,14 @@ export interface Result {
   score: number;
   correctAnswer: number;
   wrongAnswer: number;
-  questions: Question[];
+  questions: QuestionAnswerResult[];
+  listeningQuestions: QuestionAnswerResult[];
+  suggestionQuestion: Question[];
+  isCompleted: boolean;
+  endTime: string;
   createdAt: Date;
   isDeleted: boolean;
+  wrongAnswerByKnowledge: Record<string, number>;
 }
 
 export interface AnswerResult {
@@ -25,14 +30,14 @@ export interface QuestionAnswerResult {
   questionId: string;
   content: string;
   answers: AnswerResult[];
-  selectedAnswerId: string;
+  selectedAnswerId?: string;
   userAnswers: UserAnswer[];
   isCorrect: boolean;
 }
 
 interface UserAnswer {
   userAnswer: string;
-  answerId: string;
+  answerId?: string;
   isCorrect: boolean;
   _id: string;
 }
