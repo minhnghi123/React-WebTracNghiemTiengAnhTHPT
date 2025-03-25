@@ -1,5 +1,6 @@
 import { request } from "@/config/request";
 import { Exam, Question } from "../teacher/Teacher";
+
 export interface Result {
   _id?: string;
   examId: string | Exam;
@@ -11,6 +12,7 @@ export interface Result {
   createdAt: Date;
   isDeleted: boolean;
 }
+
 export interface AnswerResult {
   _id: string;
   text: string;
@@ -24,26 +26,29 @@ export interface QuestionAnswerResult {
   content: string;
   answers: AnswerResult[];
   selectedAnswerId: string;
-  userAnswers: userAnswers[];
+  userAnswers: UserAnswer[];
   isCorrect: boolean;
-  
 }
-interface userAnswers {
-  userAnswer: string,
-  answerId: string,
-  isCorrect: boolean,
-  _id: string
+
+interface UserAnswer {
+  userAnswer: string;
+  answerId: string;
+  isCorrect: boolean;
+  _id: string;
 }
+
 export interface SubmitAnswer {
-  examId: string;
-  userId: string;
-  answers: submitAnswer[];
+  resultId: string;
+  answers: SubmitAnswerDetail[];
+  listeningAnswers: SubmitAnswerDetail[];
 }
-export interface submitAnswer {
+
+export interface SubmitAnswerDetail {
   questionId: string;
   selectedAnswerId?: string;
   userAnswer?: string[];
 }
+
 export const ResultAPI = {
   getAllResult: async (page: number) => {
     const response = await request.get(`/result/?page=${page}`);
@@ -54,7 +59,7 @@ export const ResultAPI = {
     return response.data;
   },
   submitAnswer: async (data: SubmitAnswer) => {
-    const response = await request.post(`/result/submit`, data);
+    const response = await request.post("/result/submit", data);
     return response.data;
   },
   getWrongAnswers: async (id: string) => {
@@ -70,6 +75,7 @@ export const ResultAPI = {
     return response.data;
   }
 };
+
 export const ExamAPIStudent = {
   getAllExam: async (page: number) => {
     const response = await request.get(`/exam/?page=${page}`);

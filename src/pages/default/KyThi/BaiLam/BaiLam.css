@@ -1,6 +1,6 @@
 .containerKetQua {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   gap: 20px;
   margin: 20px;
 }
@@ -70,5 +70,53 @@
   .container {
     flex-direction: column;
   }
+}
+/* Container chính */
+.containerKetQua {
+  padding: 1rem;
+}
+
+/* Box hiển thị các câu hỏi (gộp thi chính và phần nghe) */
+.question-box {
+  border: 1px solid #ddd;
+  padding: 1rem;
+  border-radius: 4px;
+  background-color: #fdfdfd;
+  margin-bottom: 1rem;
+}
+
+/* Style cho timer */
+.timer {
+  background-color: #fff;
+  padding: 1rem;
+  border-radius: 4px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  margin-bottom: 1rem;
+}
+
+.timer.critical {
+  background-color: #ffe6e6;
+  color: #d9534f;
+}
+
+/* Navigation button style */
+.question-nav button {
+  margin: 0.2rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: #f8f8f8;
+  cursor: pointer;
+}
+
+.question-nav button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Loading overlay cho lời khuyên */
+.loading-overlay {
+  padding: 1rem;
 }
 

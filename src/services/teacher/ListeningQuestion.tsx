@@ -1,5 +1,6 @@
 import { request } from "@/config/request";
 import { Audio } from "./Teacher";
+import { Answer } from "@/types/interface";
 
 export interface ListeningQuestion {
   id?: string;
@@ -7,6 +8,7 @@ export interface ListeningQuestion {
   questionText: string;
   questionType: string;
   options?: { option_id: string; optionText: string }[] ;
+  answers?: Answer[];
   correctAnswer?: { answer_id: string; answer: string }[];
   difficulty: "easy" | "medium" | "hard";
   isDeleted?: boolean;

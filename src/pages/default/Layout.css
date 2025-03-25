@@ -794,6 +794,43 @@ h2.display-4 {
 .testimonials-section .stars i:hover {
   color: #f06292;
 }
+.exam-info-box {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  background: white;
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  text-align: center;
+  min-width: 220px;
+  transition: transform 0.2s ease-in-out;
+  border: 2px solid #d9534f; /* Màu đỏ nổi bật */
+}
+
+.exam-info-box:hover {
+  transform: scale(1.05);
+}
+
+.exam-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.exam-title {
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+}
+
+.time-left {
+  font-size: 32px;
+  font-weight: bold;
+  color: #d9534f; /* Màu đỏ nổi bật */
+}
+
 
   
 

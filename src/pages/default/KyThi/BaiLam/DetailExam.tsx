@@ -24,8 +24,10 @@ export const DetailExam = () => {
     fetchExam();
   }, [_id]);
   const navigator = useNavigate();
-  const handleJoinExam = (id: string) => {
-    navigator(`/KyThi/BaiLam/${id}`);
+  const handleJoinExam = async () => {
+    const rq=  await ExamAPIStudent.joinExam(exam?._id ?? "")
+    if(rq.code===200)
+    navigator(`/KyThi/BaiLam/`);
   };
   return (
     <div className="container mt-4">

@@ -1,5 +1,6 @@
 import Exam from "../../models/Exam.model.js";
 import { redisService } from "../../config/redis.config.js";
+import Result from "../../models/Result.model.js";
 
 function shuffleArray(array) {
   for (let i = array.length - 1; i > 0; i--) {
@@ -77,8 +78,6 @@ export const detailExam = async (req, res) => {
   }
 };
 
-
-
 export const joinedExam = async (req, res) => {
   try {
     // Kiểm tra xem người dùng có đang tham gia kỳ thi khác không
@@ -87,7 +86,6 @@ export const joinedExam = async (req, res) => {
       isCompleted: false,
       endTime: { $gt: new Date() },
     });
-
     if (ongoingExam) {
       return res.status(400).json({
         code: 400,
@@ -95,33 +93,42 @@ export const joinedExam = async (req, res) => {
       });
     }
 
+    // Tìm đề thi và populate các câu hỏi của đề chính và phần nghe
     const exam = await Exam.findOne({ _id: req.params.examId })
-      .populate("questions")
-      .populate("listeningExams");
+      .populate({
+        path: "questions",
+        populate: { path: "answers" },
+      })
+      .populate({
+        path: "listeningExams",
+        populate: {
+          path: "questions",
+          populate: { path: "options" },
+        },
+      });
+
     if (!exam) {
       return res.status(404).json({ message: "Đề thi không tồn tại." });
     }
 
-    // Đảo câu hỏi
-    const shuffledQuestions = shuffleArray(exam.questions);
-    const shuffledListeningExams = shuffleArray(exam.listeningExams);
+    // Đảo thứ tự câu hỏi của đề thi chính
+    const shuffledQuestions = shuffleArray(exam.questions).map((question) => ({
+      ...question.toObject(),
+      answers: shuffleArray(question.answers),
+    }));
 
-    // Đảo đáp án cho từng câu hỏi
-    const questionsWithShuffledAnswers = shuffledQuestions.map((question) => {
-      return {
-        ...question.toObject(),
-        answers: shuffleArray(question.answers),
-      };
-    });
-
-    const listeningQuestionsWithShuffledAnswers = shuffledListeningExams.map((listeningExam) => {
+    // Đảo thứ tự bài nghe và câu hỏi của từng bài nghe
+    const shuffledListeningExams = exam.listeningExams.map((listeningExam) => {
       return {
         ...listeningExam.toObject(),
-        answers: shuffleArray(listeningExam.answers),
+        questions: shuffleArray(listeningExam.questions).map((listeningQuestion) => ({
+          ...listeningQuestion.toObject(),
+          options: shuffleArray(listeningQuestion.options),
+        })),
       };
     });
 
-    // Tạo kết quả mới với trạng thái isCompleted và thời gian kết thúc
+    // Tạo kết quả mới với thời gian kết thúc dựa trên thời lượng của đề thi
     const endTime = new Date();
     endTime.setMinutes(endTime.getMinutes() + exam.duration);
 
@@ -142,12 +149,12 @@ export const joinedExam = async (req, res) => {
       title: exam.title,
       description: exam.description,
       duration: exam.duration,
-      questions: questionsWithShuffledAnswers,
-      listeningExams: listeningQuestionsWithShuffledAnswers,
+      questions: shuffledQuestions,
+      listeningExams: shuffledListeningExams,
       resultId: result._id,
     });
   } catch (error) {
     console.error(error);
-    res.status(400).json({ code: 400, message: "Lỗi khi tham gia đề thi." });
+    res.status(500).json({ code: 500, message: "Lỗi khi tham gia đề thi." });
   }
 };

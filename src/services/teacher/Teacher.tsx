@@ -32,6 +32,7 @@ export interface Question {
   createdAt?: Date;
   audioInfo?: Audio;
   text?: string;
+  __v?: number; 
 }
 export interface Exam {
   _id?: string;

@@ -22,7 +22,6 @@ import { QuanLyDangCauHoi } from "@/pages/admin/QuanLyDangCauHoi";
 import { UpdateExamQuestion } from "@/pages/giaovien/QuanLyDeThi/DeThi/UpdateExam";
 import { KyThi } from "@/pages/default/KyThi";
 import { DetailExam } from "@/pages/default/KyThi/BaiLam/DetailExam";
-import { BaiLam } from "@/pages/default/KyThi/BaiLam/BaiLam";
 import { KetQua } from "@/pages/default/KyThi/KetQua";
 import { QuanLyAudio } from "@/pages/giaovien/QuanLyFileAudio";
 import { ForgetPass } from "@/pages/default/Login/forgetPass";
@@ -38,6 +37,7 @@ import DetailClass from "@/pages/giaovien/QuanLyLopHoc/detailClass";
 import QuanLyDeThiIndex from "@/pages/giaovien/QuanLyDeThi/indexDeThi";
 import { ClassroomDetail } from "@/pages/default/PhongThi/detailclass";
 import { CreateExamQuestion } from "@/pages/giaovien/QuanLyDeThi/DeThi/CreateExamQuestion.tsx";
+import BaiLam from "@/pages/default/KyThi/BaiLam/BaiLam";
 
 export enum ERolePath {
   ADMIN = 2,
@@ -81,7 +81,7 @@ export const router = [
       createRoute("/FlashCard/:_id", <FlashCardDetail />, ERolePath.USER),
       createRoute("/KyThi", <KyThi />, ERolePath.USER),
       createRoute("/KyThi/ChiTiet/:_id", <DetailExam />, ERolePath.USER),
-      createRoute("/KyThi/BaiLam/:_id", <BaiLam />, ERolePath.USER),
+      createRoute("/KyThi/BaiLam/", <BaiLam />, ERolePath.USER),
       createRoute("/KetQua", <KetQua />, ERolePath.USER), 
       createRoute("/profile", <Profile />, ERolePath.USER),
       createRoute("/flashcard/create", <FlashCardCreate />, ERolePath.USER),
@@ -157,7 +157,7 @@ const paths = {
   ],
   "/KyThi/ChiTiet/:_id": ["/KyThi/ChiTiet/:_id"],
   "/KyThi": ["/KyThi"],
-  "/KyThi/BaiLam/:_id": ["/KyThi/BaiLam/:_id"],
+  "/KyThi/BaiLam/": ["/KyThi/BaiLam/"],
   "/KetQua": ["/KetQua"],
   "/giaovien/QuanLyAudio": ["/giaovien/QuanLyAudio"],
   "/FlashCard/:_id": ["/FlashCard/:_id"],
