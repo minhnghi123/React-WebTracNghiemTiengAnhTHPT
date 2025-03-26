@@ -32,7 +32,20 @@ const columns: ColumnsType<Exam> = [
     key: "startTime",
     sorter: (a: Exam, b: Exam) =>
       new Date(a.startTime).getTime() - new Date(b.startTime).getTime(),
-    render: (text: string) => (text ? new Date(text).toLocaleString() : "N/A"),
+    render: (text: string) =>
+      text
+        ? new Intl.DateTimeFormat("vi-VN", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+          }).format(new Date(text)) +
+          ` (${new Date(text).toLocaleTimeString("vi-VN", {
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: false, // Use 24-hour format
+          })})`
+        : "N/A",
   },
   {
     title: "Thời gian kết thúc",
@@ -40,7 +53,20 @@ const columns: ColumnsType<Exam> = [
     key: "endTime",
     sorter: (a: Exam, b: Exam) =>
       new Date(a.endTime || 0).getTime() - new Date(b.endTime || 0).getTime(),
-    render: (text: string) => (text ? new Date(text).toLocaleString() : "N/A"),
+    render: (text: string) =>
+      text
+        ? new Intl.DateTimeFormat("vi-VN", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+          }).format(new Date(text)) +
+          ` (${new Date(text).toLocaleTimeString("vi-VN", {
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: false, // Use 24-hour format
+          })})`
+        : "N/A",
   },
 
   {
@@ -61,15 +87,13 @@ export const QuanLyDeThi = () => {
   const [data, setData] = useState<Exam[]>();
   const [showModal, setShowModal] = useState<boolean>(false);
   const [showModalExport, setShowModalExport] = useState<boolean>(false);
- const [currentSlug, setCurrentSlug] = useState<string>("");
+  const [currentSlug, setCurrentSlug] = useState<string>("");
   const changeSatusExam = async (id: string) => {
-    
     try {
       const rq = await ExamAPI.changePublic(id);
-      
+
       if (rq?.success) {
         getAllExam(page);
-       
       }
     } catch (error: any) {
       if (error.response) {
@@ -134,19 +158,18 @@ export const QuanLyDeThi = () => {
   );
   const [showModalCreatAuto, setShowModalCreatAuto] = useState<boolean>(false);
   const navigatetor = useNavigate();
-  
+
   return (
     <div className="container mx-auto p-4">
-
-      <div>
+      <div className="flex justify-end mb-4">
         <button
-          className="btn btn-primary   my-3 mx-3"
+          className="btn btn-primary mx-3"
           onClick={() => navigatetor("/giaovien/QuanLyDeThi/CreateExam")}
         >
           Tạo đề thi
         </button>
         <button
-          className="btn btn-primary  my-3 mx-3"
+          className="btn btn-primary mx-3"
           onClick={() => setShowModalCreatAuto(true)}
         >
           Tạo đề thi tự động
@@ -168,12 +191,11 @@ export const QuanLyDeThi = () => {
               ],
               onFilter: (value, record) => record.isPublic === value,
               render: (_, record) => (
-              
                 <center>
                   {record.isPublic ? (
                     <Tag
                       color="green"
-                      onClick={() => changeSatusExam(record._id || "" )}
+                      onClick={() => changeSatusExam(record._id || "")}
                       style={{ cursor: "pointer" }}
                     >
                       Công khai
@@ -184,7 +206,6 @@ export const QuanLyDeThi = () => {
                       onClick={() => changeSatusExam(record._id || "")}
                       style={{ cursor: "pointer" }}
                     >
-                     
                       Riêng
                     </Tag>
                   )}
@@ -203,7 +224,6 @@ export const QuanLyDeThi = () => {
                     style={{ backgroundColor: "orange" }}
                     onClick={() => setShowModalSchedule(record._id || "")}
                   >
-                    
                     Sửa lịch
                   </Button>
                   <Button
@@ -275,9 +295,9 @@ export const QuanLyDeThi = () => {
         _id={showModalSchedule || ""}
       />
       <ExportWordModal
-       visible={showModalExport}
-       handleClose={() => setShowModalExport(false)}
-        examId={ currentSlug|| ""}
+        visible={showModalExport}
+        handleClose={() => setShowModalExport(false)}
+        examId={currentSlug || ""}
       />
     </div>
   );

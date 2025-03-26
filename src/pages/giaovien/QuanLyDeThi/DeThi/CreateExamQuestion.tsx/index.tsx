@@ -1,8 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { Question, QuestionAPI } from "@/services/teacher/Teacher";
-import { ExamListeningQuestionAPI, ExamDataRecieve } from "@/services/teacher/ListeningQuestion";
-import { Form, InputNumber, Modal, Button, Table, Tag } from "antd";
-import { PlusOutlined, MinusOutlined, InfoCircleOutlined } from "@ant-design/icons";
+import {
+  ExamListeningQuestionAPI,
+  ExamDataRecieve,
+} from "@/services/teacher/ListeningQuestion";
+import { Form, InputNumber, Modal, Button, Table, Tag, Tabs, Card } from "antd";
+import {
+  PlusOutlined,
+  MinusOutlined,
+  InfoCircleOutlined,
+} from "@ant-design/icons";
 import QuestionComponent from "@/pages/giaovien/QuanLyCauHoi/Question";
 import clsx from "clsx";
 import CreateExamModal from "../CreateExam";
@@ -12,14 +19,18 @@ export const CreateExamQuestion = () => {
   const [otherQuestions, setOtherQuestions] = useState<Question[]>([]);
   const [selectedQuestions, setSelectedQuestions] = useState<Question[]>([]);
   const [listeningExams, setListeningExams] = useState<ExamDataRecieve[]>([]);
-  const [selectedListeningExams, setSelectedListeningExams] = useState<ExamDataRecieve[]>([]);
+  const [selectedListeningExams, setSelectedListeningExams] = useState<
+    ExamDataRecieve[]
+  >([]);
   const [total, setTotal] = useState<number>(1);
   const [easyLimit, setEasyLimit] = useState<number>(0);
   const [mediumLimit, setMediumLimit] = useState<number>(0);
   const [hardLimit, setHardLimit] = useState<number>(0);
   const [openModal, setOpenModal] = useState<boolean>(false);
   const [openInfoModal, setOpenInfoModal] = useState<boolean>(false);
-  const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
+  const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(
+    null
+  );
   const [openModalCreate, setOpenModalCreate] = useState<boolean>(false);
 
   const getAllQuestions = async (page: number) => {
@@ -299,33 +310,70 @@ export const CreateExamQuestion = () => {
 
   return (
     <div>
-      <div>
+      {/* Card chứa các nút hành động */}
+      <Card className="m-3" bordered={false}>
         <Button
-          type="default"
-          className="m-3 "
+          type="primary"
+          className="m-2"
           onClick={() => setOpenModal(true)}
         >
-          Thêm câu hỏi từ ngân hàng câu hỏi của bạn
+          Thêm câu hỏi từ ngân hàng câu hỏi
         </Button>
         <Button
           type="default"
+          className="m-2"
           onClick={() => {
-            if (selectedQuestions.length > 0 || selectedListeningExams.length > 0) {
+            if (
+              selectedQuestions.length > 0 ||
+              selectedListeningExams.length > 0
+            ) {
               setOpenModalCreate(true);
-            } else alert("chưa có câu hỏi hoặc kỳ thi nghe nào");
+            } else {
+              alert("Chưa có câu hỏi hoặc kỳ thi nghe nào");
+            }
           }}
         >
           Tạo đề thi
         </Button>
-      </div>
-      <h3>Danh sách câu hỏi hiện có</h3>
-      <Table columns={columns} dataSource={selectedQuestions} rowKey="_id" />
-      <h3>Danh sách câu hỏi còn lại</h3>
-      <Table columns={columns} dataSource={otherQuestions} rowKey="_id" />
-      <h3>Phần thi nghe đã chọn</h3>
-      <Table columns={listeningExamColumns} dataSource={selectedListeningExams} rowKey="_id" />
-      <h3>Phần thi nghe còn lại</h3>
-      <Table columns={listeningExamColumns} dataSource={listeningExams} rowKey="_id" />
+      </Card>
+
+      {/* Tabs để phân chia nội dung */}
+      <Tabs defaultActiveKey="1" type="card">
+        <Tabs.TabPane tab="Danh sách câu hỏi" key="1">
+          <h3>Danh sách câu hỏi hiện có</h3>
+          <Table
+            columns={columns}
+            dataSource={selectedQuestions}
+            rowKey="_id"
+            pagination={{ pageSize: 5 }}
+          />
+          <h3>Danh sách câu hỏi còn lại</h3>
+          <Table
+            columns={columns}
+            dataSource={otherQuestions}
+            rowKey="_id"
+            pagination={{ pageSize: 5 }}
+          />
+        </Tabs.TabPane>
+        <Tabs.TabPane tab="Phần thi nghe" key="2">
+          <h3>Phần thi nghe đã chọn</h3>
+          <Table
+            columns={listeningExamColumns}
+            dataSource={selectedListeningExams}
+            rowKey="_id"
+            pagination={{ pageSize: 5 }}
+          />
+          <h3>Phần thi nghe còn lại</h3>
+          <Table
+            columns={listeningExamColumns}
+            dataSource={listeningExams}
+            rowKey="_id"
+            pagination={{ pageSize: 5 }}
+          />
+        </Tabs.TabPane>
+      </Tabs>
+
+      {/* Modal thêm câu hỏi tự động */}
       <Modal
         open={openModal}
         title="Thêm câu hỏi tự động"
@@ -385,6 +433,8 @@ export const CreateExamQuestion = () => {
           </Form.Item>
         </Form>
       </Modal>
+
+      {/* Modal chi tiết câu hỏi */}
       <Modal
         open={openInfoModal}
         title="Chi tiết câu hỏi"
@@ -399,6 +449,8 @@ export const CreateExamQuestion = () => {
           />
         )}
       </Modal>
+
+      {/* Modal tạo đề thi */}
       <CreateExamModal
         visible={openModalCreate}
         handleClose={() => setOpenModalCreate(false)}
