@@ -465,7 +465,7 @@ export const autoGenerateExam = async (req, res) => {
   }
 };
 
-// 📚 Hàm Export Exam Into Word
+//  Hàm Export Exam Into Word
 export const exportExamIntoWord = async (req, res) => {
   try {
     const data = req.body;
