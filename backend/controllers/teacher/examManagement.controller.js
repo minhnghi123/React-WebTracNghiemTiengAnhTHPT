@@ -2,6 +2,7 @@ import Exam from "../../models/Exam.model.js";
 import { Question } from "../../models/Question.model.js";
 import { formatExamHeader } from "../../utils/examHeader.helper.js";
 import { generateMultipleExamVariants } from "../../utils/generateMultipleExamVariants.js";
+import { generateMultipleExamVariants } from "../../utils/generateMultipleExamVariants.js";
 import {
   formatExamQuestions,
   formatFillInBlankQuestions,
@@ -246,7 +247,16 @@ export const updateExam = async (req, res) => {
     // Cập nhật đề thi dựa trên slug
     const updatedExam = await Exam.findOneAndUpdate(
       { slug },
-      { title, description, questions, duration, isPublic, startTime, endTime,listeningExams },
+      {
+        title,
+        description,
+        questions,
+        duration,
+        isPublic,
+        startTime,
+        endTime,
+        listeningExams,
+      },
       { new: true, runValidators: true } // Trả về tài liệu sau khi cập nhật
     );
 

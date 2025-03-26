@@ -21,4 +21,5 @@ const indexClient = (app) => {
   app.use("/classroom", Classroom);
   app.use("/", homeRoute);
 };
+
 export default indexClient;
