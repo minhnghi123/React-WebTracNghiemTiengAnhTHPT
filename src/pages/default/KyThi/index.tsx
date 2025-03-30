@@ -62,10 +62,8 @@ export const KyThi = () => {
         const now = new Date().getTime();
         const filteredExams = rq.exams.filter((exam: Exam) => {
           const startTime = new Date(exam.startTime).getTime();
-          const endTime = exam.endTime
-            ? new Date(exam.endTime).getTime()
-            : Infinity;
-          return startTime <= now && now <= endTime;
+          const endTime = exam.endTime ? new Date(exam.endTime).getTime() : Infinity;
+           return startTime <= now && now <= endTime;
         });
         setData((prev) => [...(prev || []), ...filteredExams]);
         setTotal(rq?.total);

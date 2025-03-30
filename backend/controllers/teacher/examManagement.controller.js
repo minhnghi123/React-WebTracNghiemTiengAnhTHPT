@@ -246,7 +246,16 @@ export const updateExam = async (req, res) => {
     // Cập nhật đề thi dựa trên slug
     const updatedExam = await Exam.findOneAndUpdate(
       { slug },
-      { title, description, questions, duration, isPublic, startTime, endTime,listeningExams },
+      {
+        title,
+        description,
+        questions,
+        duration,
+        isPublic,
+        startTime,
+        endTime,
+        listeningExams,
+      },
       { new: true, runValidators: true } // Trả về tài liệu sau khi cập nhật
     );
 
@@ -456,7 +465,7 @@ export const autoGenerateExam = async (req, res) => {
   }
 };
 
-// 📚 Hàm Export Exam Into Word
+//  Hàm Export Exam Into Word
 export const exportExamIntoWord = async (req, res) => {
   try {
     const data = req.body;

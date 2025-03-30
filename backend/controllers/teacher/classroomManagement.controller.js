@@ -365,7 +365,7 @@ export const getAllStudentResultsByExams = async (req, res) => {
     const studentAggregates = {};
     results.forEach(result => {
       const sid = result.userId._id.toString();
-      const totalQuestions = result.examId.questions.length;
+      const totalQuestions = result.examId.questions.length + result.listeningQuestions.length;
       // Bỏ qua nếu bài kiểm tra không có câu hỏi
       if (totalQuestions === 0) return;
       if (!studentAggregates[sid]) {

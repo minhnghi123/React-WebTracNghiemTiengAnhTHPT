@@ -3,11 +3,39 @@ import { Navbar } from "@/components/Navbar";
 import { Outlet } from "react-router-dom";
 import "./Layout.css";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { ResultAPI } from "@/services/student";
+import { useAuthContext } from "@/contexts/AuthProvider";
+import { useState, useEffect } from "react";
+import { Result } from "@/types/interface";
+import ExamInfoBox from "./ExamInfor";
+
 const Layout = () => {
+  const { user } = useAuthContext();
+  const [examDetails, setExamDetails] = useState<Result | null>(null);
+
+  const getInCompletedExam = async () => {
+    try {
+      const response = await ResultAPI.getInCompletedExam();
+      console.log("getInCompletedExam", response);
+      if (response.code === 200 && response.results) {
+        setExamDetails(response.results);
+      }
+    } catch (error) {
+      console.error("Error fetching incomplete exam:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (user?._id) {
+      getInCompletedExam();
+    }
+  }, [user]);
+
   return (
     <div id="main">
       <Navbar />
       <Outlet />
+      {examDetails && <ExamInfoBox examDetails={examDetails} />}
       <Footer />
     </div>
   );

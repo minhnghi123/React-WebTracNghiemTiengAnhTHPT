@@ -1,9 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-  ExamAPI,
-  Question,
-  QuestionAPI,
-} from "@/services/teacher/Teacher";
+import { ExamAPI, Question, QuestionAPI } from "@/services/teacher/Teacher";
 import {
   Form,
   Input,
@@ -14,6 +10,7 @@ import {
   Collapse,
   Pagination,
   Select,
+  Tabs,
 } from "antd";
 import { PlusOutlined, MinusOutlined } from "@ant-design/icons";
 import QuestionComponent from "@/pages/giaovien/QuanLyCauHoi/Question";
@@ -21,8 +18,12 @@ import clsx from "clsx";
 import { useParams } from "react-router-dom";
 import UpdateExamModal from "./UpdateExam";
 import "./index.css";
-import { ExamListeningQuestionAPI, ExamDataRecieve } from "@/services/teacher/ListeningQuestion";
-
+import {
+  ExamListeningQuestionAPI,
+  ExamDataRecieve,
+} from "@/services/teacher/ListeningQuestion";
+import { EditOutlined, CopyOutlined } from "@ant-design/icons";
+import { Card } from "antd";
 const { Search } = Input;
 const { Panel } = Collapse;
 const { Option } = Select;
@@ -35,8 +36,12 @@ export const UpdateExamQuestion = () => {
   const [otherQuestions, setOtherQuestions] = useState<Question[]>([]);
   const [selectedQuestions, setSelectedQuestions] = useState<Question[]>([]);
   // --- State cho kỳ thi nghe ---
-  const [allListeningExams, setAllListeningExams] = useState<ExamDataRecieve[]>([]);
-  const [selectedListeningExams, setSelectedListeningExams] = useState<ExamDataRecieve[]>([]);
+  const [allListeningExams, setAllListeningExams] = useState<ExamDataRecieve[]>(
+    []
+  );
+  const [selectedListeningExams, setSelectedListeningExams] = useState<
+    ExamDataRecieve[]
+  >([]);
   // --- Các state phụ ---
   const [total, setTotal] = useState<number>(1);
   const [total2, setTotal2] = useState<number>(1);
@@ -63,7 +68,9 @@ export const UpdateExamQuestion = () => {
         setTotal(rq.totalPage);
         setData((prev) => {
           const combined = [...prev, ...rq.questions];
-          const unique = Array.from(new Map(combined.map((q) => [q._id, q])).values());
+          const unique = Array.from(
+            new Map(combined.map((q) => [q._id, q])).values()
+          );
           return unique;
         });
       }
@@ -78,7 +85,9 @@ export const UpdateExamQuestion = () => {
       if (rq?.code === 200) {
         setData((prev) => {
           const combined = [...prev, ...rq.questions];
-          const unique = Array.from(new Map(combined.map((q) => [q._id, q])).values());
+          const unique = Array.from(
+            new Map(combined.map((q) => [q._id, q])).values()
+          );
           return unique;
         });
         setTotal2(rq.totalPage);
@@ -255,259 +264,284 @@ export const UpdateExamQuestion = () => {
 
   return (
     <div style={{ padding: 16 }}>
-      <div style={{ marginBottom: 16 }}>
-        <Button type="default" onClick={() => setOpenModal(true)}>
-          Thêm câu hỏi tự động từ ngân hàng của bạn
+      {/* Card chứa các nút hành động */}
+      <Card
+        style={{
+          marginBottom: 16,
+          boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+          borderRadius: 8,
+        }}
+      >
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={() => setOpenModal(true)}
+          style={{ marginRight: 8 }}
+        >
+          Thêm câu hỏi tự động
         </Button>
         <Button
           type="default"
+          icon={<EditOutlined />}
           onClick={() => {
-            if (selectedQuestions.length > 0 || selectedListeningExams.length > 0) {
+            if (
+              selectedQuestions.length > 0 ||
+              selectedListeningExams.length > 0
+            ) {
               setOpenModalCreate(true);
             } else {
               alert("Chưa có câu hỏi hoặc kỳ thi nghe nào");
             }
           }}
-          style={{ marginLeft: 8 }}
+          style={{ marginRight: 8 }}
         >
           Sửa đề thi
         </Button>
         <Button
           type="default"
+          icon={<CopyOutlined />}
           onClick={() => {
-            if (selectedQuestions.length > 0 || selectedListeningExams.length > 0) {
-              // Ví dụ: copy đề thi
+            if (
+              selectedQuestions.length > 0 ||
+              selectedListeningExams.length > 0
+            ) {
               copyExam();
             } else {
               alert("Chưa có câu hỏi hoặc kỳ thi nghe nào");
             }
           }}
-          style={{ marginLeft: 8 }}
         >
           Sao chép đề thi
         </Button>
-      </div>
+      </Card>
 
-      {/* --- Danh sách câu hỏi trong đề thi --- */}
-      <h3>Danh sách câu hỏi trong đề thi</h3>
-      {selectedQuestions && selectedQuestions.length > 0 ? (
-        <>
-          <Collapse accordion>
-            {paginatedSelectedQuestions.map((question, index) => (
-              <Panel
-                header={
-                  <div>
-                    <strong>
-                      {index + 1 + (selectedPage - 1) * pageSize}.{" "}
-                      {question.content.length > 200
-                        ? question.content.slice(0, 200) + " ..."
-                        : question.content}
-                    </strong>
-                  </div>
-                }
-                key={question._id || index}
-              >
-                <div style={{ marginBottom: 8 }}>
-                  <Tag
-                    color={clsx(
-                      question.level === "easy" && "green",
-                      question.level === "medium" && "yellow",
-                      question.level === "hard" && "red"
-                    )}
+      {/* Tabs để phân chia nội dung */}
+      <Tabs defaultActiveKey="1" type="card">
+        {/* Tab: Danh sách câu hỏi */}
+        <Tabs.TabPane tab="Danh sách câu hỏi" key="1">
+          <h3>Danh sách câu hỏi trong đề thi</h3>
+          {selectedQuestions && selectedQuestions.length > 0 ? (
+            <>
+              <Collapse accordion>
+                {paginatedSelectedQuestions.map((question, index) => (
+                  <Panel
+                    header={
+                      <div>
+                        <strong>
+                          {index + 1 + (selectedPage - 1) * pageSize}.{" "}
+                          {question.content.length > 200
+                            ? question.content.slice(0, 200) + " ..."
+                            : question.content}
+                        </strong>
+                      </div>
+                    }
+                    key={question._id || index}
                   >
-                    {question.level}
-                  </Tag>
-                  <Tag color="blue">{question.subject}</Tag>
-                  <Tag color="cyan">{question.knowledge}</Tag>
-                </div>
-                <div style={{ marginBottom: 8 }}>
+                    <div style={{ marginBottom: 8 }}>
+                      <Tag
+                        color={clsx(
+                          question.level === "easy" && "green",
+                          question.level === "medium" && "yellow",
+                          question.level === "hard" && "red"
+                        )}
+                      >
+                        {question.level}
+                      </Tag>
+                      <Tag color="blue">{question.subject}</Tag>
+                      <Tag color="cyan">{question.knowledge}</Tag>
+                    </div>
+                    <Button
+                      size="large"
+                      onClick={() => moveQuestion(question)}
+                      icon={<MinusOutlined style={{ color: "red" }} />}
+                    >
+                      Gỡ
+                    </Button>
+                    <QuestionComponent
+                      deletetalbe={false}
+                      question={question}
+                      onUpdateSuccess={() => {}}
+                      questionType={question.questionType || ""}
+                    />
+                  </Panel>
+                ))}
+              </Collapse>
+              <div style={{ marginTop: 16, textAlign: "center" }}>
+                <Pagination
+                  current={selectedPage}
+                  pageSize={pageSize}
+                  total={selectedQuestions.length}
+                  onChange={(page) => setSelectedPage(page)}
+                />
+              </div>
+            </>
+          ) : (
+            <p>Chưa có câu hỏi nào được chọn.</p>
+          )}
+        </Tabs.TabPane>
+
+        {/* Tab: Ngân hàng câu hỏi */}
+        <Tabs.TabPane tab="Ngân hàng câu hỏi" key="2">
+          <h3>Ngân hàng câu hỏi</h3>
+          <div
+            style={{
+              marginBottom: 16,
+              display: "flex",
+              gap: 8,
+              flexWrap: "wrap",
+            }}
+          >
+            <Search
+              placeholder="Tìm theo nội dung, kiến thức, chủ đề"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              enterButton
+              className="search-input"
+            />
+            <Select
+              placeholder="Loại câu hỏi"
+              allowClear
+              className="select-item"
+              value={filterType || undefined}
+              onChange={(value) => setFilterType(value)}
+            >
+              <Option value="6742fb1cd56a2e75dbd817ea">Yes/No</Option>
+              <Option value="6742fb3bd56a2e75dbd817ec">Điền khuyết</Option>
+            </Select>
+            <Select
+              placeholder="Mức độ"
+              allowClear
+              className="select-item"
+              value={filterLevel || undefined}
+              onChange={(value) => setFilterLevel(value)}
+            >
+              <Option value="easy">Easy</Option>
+              <Option value="medium">Medium</Option>
+              <Option value="hard">Hard</Option>
+            </Select>
+          </div>
+          {filteredOtherQuestions && filteredOtherQuestions.length > 0 ? (
+            <>
+              <Collapse accordion>
+                {paginatedBankQuestions.map((question, index) => (
+                  <Panel
+                    header={
+                      <div>
+                        <strong>
+                          {index + 1 + (bankPage - 1) * pageSize}.{" "}
+                          {question.content.length > 200
+                            ? question.content.slice(0, 200) + " ..."
+                            : question.content}
+                        </strong>
+                      </div>
+                    }
+                    key={question._id || index}
+                  >
+                    <Button
+                      className="btn"
+                      onClick={() => moveQuestion(question)}
+                    >
+                      <PlusOutlined style={{ color: "green" }} /> Thêm
+                    </Button>
+                    <QuestionComponent
+                      deletetalbe={false}
+                      question={question}
+                      onUpdateSuccess={() => {}}
+                      questionType={question.questionType || ""}
+                    />
+                  </Panel>
+                ))}
+              </Collapse>
+              <div style={{ marginTop: 16, textAlign: "center" }}>
+                <Pagination
+                  current={bankPage}
+                  pageSize={pageSize}
+                  total={filteredOtherQuestions.length}
+                  onChange={(page) => setBankPage(page)}
+                />
+              </div>
+            </>
+          ) : (
+            <p>Không có câu hỏi phù hợp.</p>
+          )}
+        </Tabs.TabPane>
+
+        {/* Tab: Danh sách kỳ thi nghe */}
+        <Tabs.TabPane tab="Danh sách kỳ thi nghe" key="3">
+          <h3>Danh sách kỳ thi nghe trong đề thi</h3>
+          {selectedListeningExams && selectedListeningExams.length > 0 ? (
+            <Collapse accordion>
+              {selectedListeningExams.map((exam, index) => (
+                <Panel
+                  header={
+                    <div>
+                      <strong>
+                        {index + 1}. {exam.title}
+                      </strong>
+                    </div>
+                  }
+                  key={exam._id || index}
+                >
+                  <p>{exam.description}</p>
+                  <p>
+                    Thời gian: {exam.duration} phút - Điểm qua:{" "}
+                    {exam.passingScore} -{" "}
+                    {exam.isPublished ? "Đã phát hành" : "Chưa phát hành"}
+                  </p>
                   <Button
-                    size="large"
-                    onClick={() => moveQuestion(question)}
+                    size="small"
+                    onClick={() => handleRemoveListeningExam(exam)}
                     icon={<MinusOutlined style={{ color: "red" }} />}
                   >
                     Gỡ
                   </Button>
-                </div>
-                <QuestionComponent
-                  deletetalbe={false}
-                  question={question}
-                  onUpdateSuccess={() => {}}
-                  questionType={question.questionType || ""}
-                />
-              </Panel>
-            ))}
-          </Collapse>
-          <div style={{ marginTop: 16, textAlign: "center" }}>
-            <Pagination
-              current={selectedPage}
-              pageSize={pageSize}
-              total={selectedQuestions.length}
-              onChange={(page) => setSelectedPage(page)}
-            />
-          </div>
-        </>
-      ) : (
-        <p>Chưa có câu hỏi nào được chọn.</p>
-      )}
+                </Panel>
+              ))}
+            </Collapse>
+          ) : (
+            <p>Chưa có kỳ thi nghe nào được chọn.</p>
+          )}
+        </Tabs.TabPane>
 
-      {/* --- Ngân hàng câu hỏi --- */}
-      <h3>Ngân hàng câu hỏi</h3>
-      <div
-        style={{
-          marginBottom: 16,
-          display: "flex",
-          gap: 8,
-          flexWrap: "wrap",
-        }}
-      >
-        <div className="search-filter-container">
-          <Search
-            placeholder="Tìm theo nội dung, kiến thức, chủ đề"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            enterButton
-            className="search-input"
-          />
-          <Select
-            placeholder="Loại câu hỏi"
-            allowClear
-            className="select-item"
-            value={filterType || undefined}
-            onChange={(value) => setFilterType(value)}
-          >
-            <Option value="6742fb1cd56a2e75dbd817ea">Yes/No</Option>
-            <Option value="6742fb3bd56a2e75dbd817ec">Điền khuyết</Option>
-          </Select>
-          <Select
-            placeholder="Mức độ"
-            allowClear
-            className="select-item"
-            value={filterLevel || undefined}
-            onChange={(value) => setFilterLevel(value)}
-          >
-            <Option value="easy">Easy</Option>
-            <Option value="medium">Medium</Option>
-            <Option value="hard">Hard</Option>
-          </Select>
-        </div>
-      </div>
-      {filteredOtherQuestions && filteredOtherQuestions.length > 0 ? (
-        <>
-          <Collapse accordion>
-            {paginatedBankQuestions.map((question, index) => (
-              <Panel
-                header={
-                  <div>
-                    <strong>
-                      {index + 1 + (bankPage - 1) * pageSize}.{" "}
-                      {question.content.length > 200
-                        ? question.content.slice(0, 200) + " ..."
-                        : question.content}
-                    </strong>
-                  </div>
-                }
-                key={question._id || index}
-              >
-                <div style={{ marginBottom: 8 }}>
+        {/* Tab: Ngân hàng kỳ thi nghe */}
+        <Tabs.TabPane tab="Ngân hàng kỳ thi nghe" key="4">
+          <h3>Ngân hàng kỳ thi nghe</h3>
+          {bankListeningExams && bankListeningExams.length > 0 ? (
+            <Collapse accordion>
+              {bankListeningExams.map((exam, index) => (
+                <Panel
+                  header={
+                    <div>
+                      <strong>
+                        {index + 1}. {exam.title}
+                      </strong>
+                    </div>
+                  }
+                  key={exam._id || ""}
+                >
+                  <p>{exam.description}</p>
+                  <p>
+                    Thời gian: {exam.duration} phút - Điểm qua:{" "}
+                    {exam.passingScore} -{" "}
+                    {exam.isPublished ? "Đã phát hành" : "Chưa phát hành"}
+                  </p>
                   <Button
-                    className="btn"
-                    onClick={() => moveQuestion(question)}
+                    size="small"
+                    onClick={() => handleAddListeningExam(exam)}
+                    icon={<PlusOutlined style={{ color: "green" }} />}
                   >
-                    <PlusOutlined style={{ color: "green" }} /> Thêm
+                    Thêm
                   </Button>
-                </div>
-                <QuestionComponent
-                  deletetalbe={false}
-                  question={question}
-                  onUpdateSuccess={() => {}}
-                  questionType={question.questionType || ""}
-                />
-              </Panel>
-            ))}
-          </Collapse>
-          <div style={{ marginTop: 16, textAlign: "center" }}>
-            <Pagination
-              current={bankPage}
-              pageSize={pageSize}
-              total={filteredOtherQuestions.length}
-              onChange={(page) => setBankPage(page)}
-            />
-          </div>
-        </>
-      ) : (
-        <p>Không có câu hỏi phù hợp.</p>
-      )}
+                </Panel>
+              ))}
+            </Collapse>
+          ) : (
+            <p>Không có kỳ thi nghe phù hợp.</p>
+          )}
+        </Tabs.TabPane>
+      </Tabs>
 
-      {/* --- Danh sách kỳ thi nghe đã chọn (hiển thị dạng Collapse) --- */}
-      <h3>Danh sách kỳ thi nghe trong đề thi</h3>
-      {selectedListeningExams && selectedListeningExams.length > 0 ? (
-        <Collapse accordion>
-          {selectedListeningExams.map((exam, index) => (
-            <Panel
-              header={
-                <div>
-                  <strong>
-                    {index + 1}. {exam.title}
-                  </strong>
-                </div>
-              }
-              key={exam._id || index}
-            >
-              <p>{exam.description}</p>
-              <p>
-                Thời gian: {exam.duration} phút - Điểm qua: {exam.passingScore} -{" "}
-                {exam.isPublished ? "Đã phát hành" : "Chưa phát hành"}
-              </p>
-              <Button
-                size="small"
-                onClick={() => handleRemoveListeningExam(exam)}
-                icon={<MinusOutlined style={{ color: "red" }} />}
-              >
-                Gỡ
-              </Button>
-            </Panel>
-          ))}
-        </Collapse>
-      ) : (
-        <p>Chưa có kỳ thi nghe nào được chọn.</p>
-      )}
-
-      {/* --- Ngân hàng kỳ thi nghe (hiển thị dạng Collapse) --- */}
-      <h3>Ngân hàng kỳ thi nghe</h3>
-      {bankListeningExams && bankListeningExams.length > 0 ? (
-        <Collapse accordion>
-          {bankListeningExams.map((exam, index) => (
-            <Panel
-              header={
-                <div>
-                  <strong>
-                    {index + 1}. {exam.title}
-                  </strong>
-                </div>
-              }
-              key={exam._id || ""}
-            >
-              <p>{exam.description}</p>
-              <p>
-                Thời gian: {exam.duration} phút - Điểm qua: {exam.passingScore} -{" "}
-                {exam.isPublished ? "Đã phát hành" : "Chưa phát hành"}
-              </p>
-              <Button
-                size="small"
-                onClick={() => handleAddListeningExam(exam)}
-                icon={<PlusOutlined style={{ color: "green" }} />}
-              >
-                Thêm
-              </Button>
-            </Panel>
-          ))}
-        </Collapse>
-      ) : (
-        <p>Không có kỳ thi nghe phù hợp.</p>
-      )}
-
-      {/* --- Modal thêm câu hỏi tự động --- */}
+      {/* Modal thêm câu hỏi tự động */}
       <Modal
         open={openModal}
         title="Thêm câu hỏi tự động"
@@ -518,9 +552,9 @@ export const UpdateExamQuestion = () => {
       >
         <Form layout="vertical">
           <Form.Item
-            label={`Số câu dễ (còn lại: ${otherQuestions.filter(
-              (q) => q.level === "easy"
-            ).length})`}
+            label={`Số câu dễ (còn lại: ${
+              otherQuestions.filter((q) => q.level === "easy").length
+            })`}
           >
             <InputNumber
               min={0}
@@ -532,9 +566,9 @@ export const UpdateExamQuestion = () => {
             />
           </Form.Item>
           <Form.Item
-            label={`Số câu trung bình (còn lại: ${otherQuestions.filter(
-              (q) => q.level === "medium"
-            ).length})`}
+            label={`Số câu trung bình (còn lại: ${
+              otherQuestions.filter((q) => q.level === "medium").length
+            })`}
           >
             <InputNumber
               min={0}
@@ -546,9 +580,9 @@ export const UpdateExamQuestion = () => {
             />
           </Form.Item>
           <Form.Item
-            label={`Số câu khó (còn lại: ${otherQuestions.filter(
-              (q) => q.level === "hard"
-            ).length})`}
+            label={`Số câu khó (còn lại: ${
+              otherQuestions.filter((q) => q.level === "hard").length
+            })`}
           >
             <InputNumber
               min={0}
@@ -574,7 +608,5 @@ export const UpdateExamQuestion = () => {
 };
 
 function copyExam() {
-  // Hàm sao chép đề thi (ví dụ)
-  // Bạn có thể triển khai theo yêu cầu cụ thể của dự án
   alert("Sao chép đề thi thành công");
 }
