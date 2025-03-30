@@ -47,7 +47,7 @@ const [classrooms, setClassrooms] = useState<ClassroomReponse[]>([]);
           <div className="mt-4">
             <center>
             <p>
-              <strong>Username:</strong> {user.username}
+              <strong>Tên người dùng:</strong> {user.username}
             </p>
             <p>
               <strong>Email:</strong> {user.email}

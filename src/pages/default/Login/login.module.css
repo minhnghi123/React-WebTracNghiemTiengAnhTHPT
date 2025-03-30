@@ -1,196 +1,53 @@
-/* Login Container */
-.loginContainer {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #f7f8fc;
-}
-
-/* Left Panel */
-.leftPanel {
-  flex: 1;
+/* Login.css */
+.container {
   display: flex;
   justify-content: center;
-  align-items: center;
-  background: linear-gradient(135deg, #6a11cb, #2575fc);
+  align-items: center;  
+  height: 80vh;
+  background: linear-gradient(135deg, #d0e1ff 0%, #eee4f9 100%);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-.illustration {
-  max-width: 100%;
-  height: auto;
+.loginForm {
+  background: linear-gradient(135deg, #9abaf2 0%, #d7b2ff 100%);
+  padding: 2rem;
   border-radius: 10px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  width: 400px;
 }
 
-/* Form */
-.form {
-  flex: 1;
-  max-width: 400px;
-  background: #ffffff;
-  padding: 30px 25px;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-/* Form Title */
-.formTitle {
-  font-size: 28px;
-  font-weight: 700;
+.title {
   text-align: center;
-  margin-bottom: 15px;
-  background: linear-gradient(
-    90deg,
-    #ff0000,
-    #ff00f3,
-    #0033ff,
-    #ff00c4,
-    #ff0000
-  );
-  word-spacing: 5px;
-  -webkit-text-fill-color: transparent;
-  -webkit-background-clip: text;
-  animation: animate 10s linear infinite;
-}
-
-/* Input Group */
-.inputGroup {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.label {
-  font-size: 20px;
-  background: linear-gradient(
-    90deg,
-    #ff0000,
-    #ff00f3,
-    #0033ff,
-    #ff00c4,
-    #ff0000
-  );
-  -webkit-text-fill-color: transparent;
-  -webkit-background-clip: text;
-  animation: animate 10s linear infinite;
-  font-weight: 500;
-}
-.input[type="text"],
-.input[type="password"] {
-  border: 2px solid #ddd;
-}
-.input {
-  width: 100%;
-  padding: 12px 16px;
-  border: 5px solid #ddd;
-  border-radius: 8px;
-  font-size: 14px;
+  margin-bottom: 1rem;
   color: #333;
-  outline: none;
-  background-color: #f9f9f9;
-  transition: all 0.3s ease;
 }
 
-.input:focus {
-  border-color: #6a11cb;
-  box-shadow: 0 0 5px rgba(106, 17, 203, 0.3);
-  background-color: #ffffff;
+.form-label {
+  font-weight: bold;
 }
 
-/* Password Wrapper */
+.form-control {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.form-control::placeholder {
+  color: #aaa;
+  font-style: italic;
+}
+
+.alert {
+  text-align: center;
+  padding: 10px;
+  border-radius: 5px;
+}
+
 .passwordWrapper {
+  position: relative;
   display: flex;
   align-items: center;
-  position: relative;
 }
 
-.togglePassword {
-  position: absolute;
-  right: 10px;
-  font-size: 16px;
-  color: #999;
-  cursor: pointer;
-  transition: color 0.3s ease;
-}
 
-.togglePassword:hover {
-  color: #6a11cb;
-}
 
-.linkGroup {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 1rem;
-}
-
-.register {
-  font-size: 17px;
-  color: #007bff;
-  text-decoration: none;
-}
-
-.register:hover {
-  text-decoration: underline;
-}
-
-.forgotPassword {
-  font-size: 17px;
-  color: #007bff;
-  text-decoration: none;
-}
-
-.forgotPassword:hover {
-  text-decoration: underline;
-}
-
-/* Submit Button */
-.submitButton {
-  padding: 12px;
-  background: linear-gradient(90deg, #6a11cb, #2575fc);
-  color: #ffffff;
-  font-size: 16px;
-  font-weight: bold;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.submitButton:hover {
-  background: linear-gradient(90deg, #5d0cbf, #1d5dfb);
-  transform: scale(1.02);
-}
-
-.submitButton:active {
-  transform: scale(0.98);
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-  .loginContainer {
-    flex-direction: column;
-    padding: 20px;
-  }
-
-  .leftPanel {
-    display: none; /* Hide left panel on smaller screens */
-  }
-
-  .form {
-    width: 100%;
-  }
-
-  .formTitle {
-    font-size: 22px;
-  }
-
-  .input {
-    font-size: 14px;
-  }
-
-  .submitButton {
-    font-size: 14px;
-  }
-}

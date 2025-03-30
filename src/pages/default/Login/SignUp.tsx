@@ -139,7 +139,7 @@ export const SignUp = () => {
         </h2>
         <form onSubmit={handleSubmit}>
           <div className="input-group">
-            <label htmlFor="name">Username</label>
+            <label htmlFor="name">Tài khoản</label>
             <input
               type="text"
               id="name"

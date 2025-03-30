@@ -232,7 +232,7 @@ body {
   .slider-image {
     animation: fadeIn 1s ease-in-out;
   }
-  
+   
   /* Feature Card Styles */
   .feature-card {
     background: white;
@@ -272,6 +272,43 @@ body {
     color: white;
     padding: 0.5rem 1.5rem;
     border-radius: 0.75rem;
+  }
+  
+  .exam-prep-section {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    gap: 20px;
+  }
+  
+  .exam-card {
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    transition: transform 0.3s ease-in-out;
+  }
+  
+  .exam-card:hover {
+    transform: translateY(-5px);
+  }
+  
+  .exam-image {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+    margin-bottom: 15px;
+  }
+  
+  .exam-info h3 {
+    font-size: 20px;
+    color: #333;
+  }
+  
+  .exam-info p {
+    font-size: 14px;
+    color: #666;
   }
   
   
