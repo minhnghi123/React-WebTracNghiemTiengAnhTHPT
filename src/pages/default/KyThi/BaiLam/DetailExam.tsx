@@ -67,14 +67,14 @@ export const DetailExam = () => {
                   <CalendarOutlined /> <strong>Thời gian bắt đầu:</strong>
                 </Text>
                 <br />
-                <Text type="secondary">{formatDate(exam.startTime)}</Text>
+                <Text type="secondary">{formatDate(exam.startTime as unknown as string)}</Text>
               </Col>
               <Col span={12}>
                 <Text>
                   <CalendarOutlined /> <strong>Thời gian kết thúc:</strong>
                 </Text>
                 <br />
-                <Text type="secondary">{formatDate(exam.endTime)}</Text>
+                <Text type="secondary">{formatDate(exam.endTime as unknown as string)}</Text>
               </Col>
 
               <Col span={12}>

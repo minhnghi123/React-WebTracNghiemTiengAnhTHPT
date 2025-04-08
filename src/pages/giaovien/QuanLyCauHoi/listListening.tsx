@@ -15,7 +15,7 @@ export const ListListening = () => {
       // Giả sử API trả về { message: string, data: ListeningQuestion[] }
       if (rq.data) {
         // Chuyển _id thành id cho phù hợp với interface ListeningQuestion
-        const questions = rq.data.map((q: any) => ({ ...q, id: q._id ? q._id : "" }));
+        const questions = rq.data.map((q: any) => ({ ...q, id: String(q._id ?? "default-id") }));
         setData(questions);
         // Nếu có thông tin phân trang từ API thì setTotal, setPage tương ứng
       } else {

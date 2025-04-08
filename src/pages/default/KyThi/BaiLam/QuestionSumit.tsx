@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Divider, Input, Radio, Card, Typography, Space } from "antd";
+import {  Input, Radio, Card, Typography } from "antd";
 import { Question } from "@/types/interface";
 import { cleanString } from "@/utils/cn";
 
@@ -24,7 +24,6 @@ const QuestionSubmit: React.FC<QuestionComponentProps> = ({
   questionType,
   onAnswerChange,
   currentAnswer,
-  index,
 }) => {
   const [localAnswer, setLocalAnswer] = useState<UserAnswer>(
     currentAnswer || { questionId: question._id || "", userAnswer: [] }

@@ -86,7 +86,7 @@ export const ListeningQuestionComponent: React.FC<
         />
       </h3>
       <div className="mt-1">
-        {question.options?.map((option) => {
+        {question.questionType._id!="6742fb3bd56a2e75dbd817ec"&& question.options?.map((option) => {
           const isCorrect = question.correctAnswer?.some(
             (ans) => ans.answer_id === option.option_id
           );
@@ -103,7 +103,7 @@ export const ListeningQuestionComponent: React.FC<
             </div>
           );
         })}
-        {question.blankAnswer && (
+        {question.questionType._id=="6742fb3bd56a2e75dbd817ec"&& question.blankAnswer && (
           <div
             className="ml-2 rounded mb-2 bg-green-100 p-2"
             style={{ whiteSpace: "pre-wrap" }}
@@ -160,7 +160,13 @@ export const ListeningQuestionComponent: React.FC<
             visible={openModal}
             onUpdateSuccess={onUpdateSuccess}
             handleClose={() => setOpenModal(false)}
-            questionData={questionData || []}
+            questionData={{
+              ...questionData,
+              teacherId: questionData.teacherId || "",
+              questionText: questionData.questionText || "",
+              questionType: questionData.questionType || "",
+              difficulty: questionData.difficulty || "easy",
+            }}
           />
         </>
       )}

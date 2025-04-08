@@ -93,10 +93,10 @@ export const KyThi = () => {
                   {exam.duration} phút
                 </Tag>
                 <Tag icon={<CalendarOutlined />} color="green">
-                  Bắt đầu: {formatDate(exam.startTime)}
+                  Bắt đầu: {formatDate(exam.startTime as unknown as string)}
                 </Tag>
                 <Tag icon={<CalendarOutlined />} color="red">
-                  Kết thúc: {formatDate(exam.endTime)}
+                  Kết thúc: {formatDate(exam.endTime as unknown as string)}
                 </Tag>
                 <Tag icon={<QuestionCircleOutlined />} color="purple">
                   {exam.questions?.length ?? 0} câu hỏi

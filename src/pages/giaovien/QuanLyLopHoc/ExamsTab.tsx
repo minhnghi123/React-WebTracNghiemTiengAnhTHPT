@@ -140,7 +140,8 @@ const ExamsTab: React.FC<ExamsTabProps> = ({
                       startTime: record.startTime,
                       isPublic: record.isPublic,
                       slug: '',
-                      createdAt: new Date()
+                      createdAt: new Date(),
+                      listeningExams: []
                     })}>
                       Xem chi tiết
                     </Button>
