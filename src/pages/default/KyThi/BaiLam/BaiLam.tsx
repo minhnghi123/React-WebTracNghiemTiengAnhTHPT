@@ -8,6 +8,7 @@ import { gemini } from "@/services/GoogleApi";
 import "./BaiLam.css";
 import QuestionSubmit from "./QuestionSumit";
 import ListeningQuestionSubmit from "./listeningQuestionSubmit";
+import ErrorReportModal from "@/components/ErrorReportModal"; // Import ErrorReportModal
 import { ListeningQuestion, Question } from "@/types/interface";
 
 const { Panel } = Collapse;
@@ -23,6 +24,8 @@ const BaiLam: React.FC = () => {
   const [showDetails, setShowDetails] = useState<boolean>(false);
   const [answers, setAnswers] = useState<any[]>([]);
   const [listeningAnswers, setListeningAnswers] = useState<any[]>([]);
+  const [errorReportVisible, setErrorReportVisible] = useState<boolean>(false);
+  const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
 
   const fetchExamDetails = async () => {
     try {
@@ -109,6 +112,16 @@ const BaiLam: React.FC = () => {
     }
   };
 
+  const openErrorReportModal = (question: Question | ListeningQuestion) => {
+      setSelectedQuestion(question as Question);
+      setErrorReportVisible(true);
+    };
+
+  const closeErrorReportModal = () => {
+    setSelectedQuestion(null);
+    setErrorReportVisible(false);
+  };
+
   useEffect(() => {
     const fetchPostSubmitData = async () => {
       if (Examresult) {
@@ -146,6 +159,14 @@ const BaiLam: React.FC = () => {
                 onAnswerChange={handleAnswerChange}
                 currentAnswer={answers.find((ans) => ans.questionId === q._id)}
               />
+              <Button
+                type="link"
+                danger
+                onClick={() => openErrorReportModal(q)}
+                style={{ marginTop: "8px" }}
+              >
+                Báo lỗi
+              </Button>
             </div>
           ))}
         </div>
@@ -168,6 +189,16 @@ const BaiLam: React.FC = () => {
                       onAnswerChange={handleListeningAnswerChange}
                       currentAnswer={listeningAnswers.find((ans) => ans.questionId === q._id)}
                     />
+                    <Button
+                      type="link"
+                      danger
+                      onClick={() => openErrorReportModal(q 
+
+                      )}
+                      style={{ marginTop: "8px" }}
+                    >
+                      Báo lỗi
+                    </Button>
                   </div>
                 ))}
               </div>
@@ -198,6 +229,14 @@ const BaiLam: React.FC = () => {
           </div>
         </div>
       </div>
+      {selectedQuestion && errorReportVisible && (
+        <ErrorReportModal
+          questionId={selectedQuestion._id }
+          examId={examDetails.examId._id}
+          userId={examDetails.userId}
+          onClose={closeErrorReportModal}
+        />
+      )}
       {Examresult && (
         <div className="container my-4" ref={resultSectionRef}>
           <Card className="shadow p-3">

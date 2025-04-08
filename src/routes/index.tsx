@@ -38,7 +38,7 @@ import QuanLyDeThiIndex from "@/pages/giaovien/QuanLyDeThi/indexDeThi";
 import { ClassroomDetail } from "@/pages/default/PhongThi/detailclass";
 import { CreateExamQuestion } from "@/pages/giaovien/QuanLyDeThi/DeThi/CreateExamQuestion.tsx";
 import BaiLam from "@/pages/default/KyThi/BaiLam/BaiLam";
-
+import QuanLyBaoLoi  from "@/pages/giaovien/QuanLyBaoLoi/index.tsx";
 export enum ERolePath {
   ADMIN = 2,
   GIAOVIEN = 3,
@@ -118,6 +118,7 @@ export const router = [
       createRoute("/giaovien/QuanLyLopHoc/:_classroom_id", <DetailClass />, ERolePath.USER),
       createRoute("/giaovien/QuanLyLopHoc", <QuanLyLopHoc />, ERolePath.USER),
       createRoute("/giaovien/QuanLyAudio", <QuanLyAudio />, ERolePath.USER),
+      createRoute("/GiaoVien/QuanLyBaoLoi", <QuanLyBaoLoi />, ERolePath.USER),
     ],
   },
   {
@@ -155,6 +156,7 @@ const paths = {
   "/giaovien/QuanLyDeThi/UpdateExam/:_id": [
     "/giaovien/QuanLyDeThi/UpdateExam/:_id",
   ],
+  "GiaoVien/QuanLyBaoLoi": ["/GiaoVien/QuanLyBaoLoi"],
   "/KyThi/ChiTiet/:_id": ["/KyThi/ChiTiet/:_id"],
   "/KyThi": ["/KyThi"],
   "/KyThi/BaiLam/": ["/KyThi/BaiLam/"],

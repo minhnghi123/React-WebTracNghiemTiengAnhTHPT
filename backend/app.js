@@ -4,7 +4,7 @@ import { redisService } from "./config/redis.config.js";
 // import { crawlData } from "./utils/crawl.util.js";
 import http from 'http';
 import { Server as socketIo } from 'socket.io';
-
+import handleErrorReport from "./socket/client/handleErrorReport.js"; // Import handleErrorReport
 
 import { connect } from "./config/db.config.js";
 
@@ -19,8 +19,17 @@ const app = express();
 
 // Socket IO
 const server = http.createServer(app);
-const io = new socketIo(server);
-global._io = io
+const io = new socketIo(server, {
+  cors: {
+    origin: "http://localhost:5173", // Allow requests from this origin
+    methods: ["GET", "POST"], // Allowed HTTP methods
+    credentials: true, // Allow credentials (cookies, etc.)
+  },
+});
+global._io = io;
+
+// Gọi handleErrorReport
+handleErrorReport(); // Thêm dòng này
 // End Socket IO
 
 // Configure CORS
