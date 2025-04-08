@@ -11,20 +11,9 @@ export const Navbar: React.FC<navbarProps> = ({ rule= true }) => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [userName, setUserName] = useState<string>("");
   const { user, handleLogout } = useAuthContext();
-  // const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigator = useNavigate();
 
-  // const toggleMenu = () => {
-  //   setIsMenuOpen(!isMenuOpen);
-  // };
 
-  // const logout = async () => {
-  //   try {
-  //     const rq = await AuthApi.logout();
-  //     console.log(rq?.data.message);
-  //   } catch (error: any) {
-  //   }
-  // }; // Add this closing brace to fix the error
   const handleBTNLogout = async () => {
     handleLogout();
     // logout();
@@ -50,23 +39,6 @@ export const Navbar: React.FC<navbarProps> = ({ rule= true }) => {
       label: (
         <a rel="noopener noreferrer" href="/profile">
           Thông tin cá nhân
-        </a>
-      ),
-    },
-    {
-      key: "2",
-      label: (
-        <a rel="noopener noreferrer" href="/GiaoVien">
-          Vào giao diện giáo viên
-        </a>
-      ),
-    },
-
-    {
-      key: "3",
-      label: (
-        <a rel="noopener noreferrer" href="/Admin">
-          Vào giao diện admin
         </a>
       ),
     },
@@ -101,15 +73,15 @@ export const Navbar: React.FC<navbarProps> = ({ rule= true }) => {
             <li>
               <a href="/">Trang chủ </a>
             </li>
-            <li>
-              <a href="/KyThi">Danh sách kỳ thi</a>
-            </li>
-            <li>
-              <a href="/Ontap">Ôn tập</a>
-            </li>
-            <li>
-              <a href="/PhongThi">Lớp học</a>
-            </li>
+            { user && 
+                        <><li>
+                <a href="/KyThi">Danh sách kỳ thi</a>
+              </li><li>
+                  <a href="/Ontap">Ôn tập</a>
+                </li><li>
+                  <a href="/PhongThi">Lớp học</a>
+                </li></>
+            }
             <li>
               <a href="/About">Về chúng tôi</a>
             </li>
@@ -121,24 +93,32 @@ export const Navbar: React.FC<navbarProps> = ({ rule= true }) => {
         }
         {isLoggedIn ? (
           <ul className="navbar-nav ml-auto">
-            <Dropdown menu={{ items }} placement="bottomRight">
+          <Dropdown
+            menu={{ items }}
+            placement="bottomRight"
+            trigger={["hover"]}
+          >
+            <div
+              onClick={() => user && (
+                user.role === "student" ? navigator("/profile") : ( user?.role === "teacher" ? navigator("/giaovien/"):navigator("/admin") ) )}
+              style={{ cursor: "pointer" }}
+            >
               <a
                 onClick={(e) => e.preventDefault()}
                 className="nav-link"
-                href="/hocsinh/ThongTinCaNhan/Index"
                 style={{ color: "#007bff", fontWeight: "bold" }}
-              >                                
+              >
                 <li className="nav-item">
                   <span className="fas fa-user"></span> {userName}
                 </li>
                 <li className="nav-item">
-                  {" "}
                   <span className="fas fa-user"></span>{" "}
                   {user?.role === "student" ? "Học sinh" : (user?.role === "teacher" ? "Giáo viên" : "Admin")}
                 </li>
               </a>
-            </Dropdown>
-          </ul>
+            </div>
+          </Dropdown>
+        </ul>
         ) : (
           <ul
             className="nav nav-pills justify-content-center gap-3"

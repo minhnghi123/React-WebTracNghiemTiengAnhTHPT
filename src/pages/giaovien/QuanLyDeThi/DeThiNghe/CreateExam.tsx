@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { Modal, Input, Select, Form, Button } from "antd";
+import { Modal, Input, Select, Form, Button, DatePicker, message } from "antd";
 import { ExamListeningQuestionAPI, ListeningExamData } from "@/services/teacher/ListeningQuestion";
 import { AudioAPI, Audio } from "@/services/teacher/Teacher";
 import { CreateAudioModal } from "../../QuanLyFileAudio/FileAudio/CreateDangCauHoiModal";
+import moment from "moment";
 
 const { Option } = Select;
 
@@ -23,15 +24,14 @@ const CreateExamModal: React.FC<CreateExamModalProps> = ({
     teacherId: teacherId,
     title: "",
     description: "",
-    audio: "", // Audio ID sẽ được gán tại đây
+    audio: "",
     questions: [],
     duration: 90,
-    difficulty: "easy",
-    passingScore: 50,
-    isPublished: false,
+    isPublic: false,
+    startTime: undefined,
+    endTime: undefined,
   });
 
-  // State quản lý audio
   const [existingAudios, setExistingAudios] = useState<Audio[]>([]);
   const [isCreateAudioModalVisible, setIsCreateAudioModalVisible] = useState<boolean>(false);
 
@@ -49,32 +49,45 @@ const CreateExamModal: React.FC<CreateExamModalProps> = ({
   }, []);
 
   const handleAudioCreated = (audioId: string) => {
-    // Khi tạo audio thành công, cập nhật exam.audio và refresh danh sách audio
-    setExam(prev => ({ ...prev, audio: audioId }));
+    setExam((prev) => ({ ...prev, audio: audioId }));
     setIsCreateAudioModalVisible(false);
     fetchAudios();
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setExam(prev => ({ ...prev, [name]: value }));
+    setExam((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSelectChange = (name: string, value: any) => {
-    setExam(prev => ({ ...prev, [name]: value }));
+    setExam((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleDateChange = (name: string, value: any) => {
+    setExam((prev) => ({ ...prev, [name]: value ? value.toISOString() : null }));
   };
 
   const handleSaveClick = async () => {
+    if (!exam.startTime) {
+      message.error("Vui lòng chọn thời gian bắt đầu.");
+      return;
+    }
+
+    if (exam.endTime && new Date(exam.endTime) <= new Date(exam.startTime)) {
+      message.error("Thời gian kết thúc phải lớn hơn thời gian bắt đầu.");
+      return;
+    }
+
     const formattedExam: ListeningExamData = {
       teacherId: exam.teacherId || "",
       title: exam.title || "",
       description: exam.description || "",
       audio: exam.audio || "",
-      questions:  [],
+      questions: exam.questions || [],
       duration: Number(exam.duration) || 90,
-      difficulty: exam.difficulty as "easy" | "medium" | "hard",
-      passingScore: Number(exam.passingScore) || 50,
-      isPublished: exam.isPublished,
+      startTime: exam.startTime || new Date(),
+      endTime: exam.endTime || new Date(new Date(exam.startTime!).getTime() + 90 * 60 * 1000),
+      isPublic: exam.isPublic || false,
     };
 
     try {
@@ -124,7 +137,7 @@ const CreateExamModal: React.FC<CreateExamModalProps> = ({
           <Select
             placeholder="Hoặc chọn audio có sẵn"
             value={exam.audio}
-            onChange={(value) => setExam(prev => ({ ...prev, audio: value }))}
+            onChange={(value) => setExam((prev) => ({ ...prev, audio: value }))}
             style={{ width: "100%", marginTop: "10px" }}
           >
             {existingAudios.map((audio) => (
@@ -137,18 +150,27 @@ const CreateExamModal: React.FC<CreateExamModalProps> = ({
         <Form.Item label="Thời gian (phút)">
           <Input name="duration" type="number" value={exam.duration} onChange={handleChange} />
         </Form.Item>
-        <Form.Item label="Độ khó">
-          <Select value={exam.difficulty} onChange={(value) => handleSelectChange("difficulty", value)}>
-            <Option value="easy">Easy</Option>
-            <Option value="medium">Medium</Option>
-            <Option value="hard">Hard</Option>
-          </Select>
+        <Form.Item label="Thời gian bắt đầu">
+          <DatePicker
+            showTime
+            value={exam.startTime ? moment(exam.startTime) : null}
+            onChange={(value) => handleDateChange("startTime", value)}
+            style={{ width: "100%" }}
+          />
         </Form.Item>
-        <Form.Item label="Điểm qua">
-          <Input name="passingScore" type="number" value={exam.passingScore} onChange={handleChange} />
+        <Form.Item label="Thời gian kết thúc">
+          <DatePicker
+            showTime
+            value={exam.endTime ? moment(exam.endTime) : null}
+            onChange={(value) => handleDateChange("endTime", value)}
+            style={{ width: "100%" }}
+          />
         </Form.Item>
-        <Form.Item label="Phát hành">
-          <Select value={exam.isPublished} onChange={(value) => handleSelectChange("isPublished", value)}>
+        <Form.Item label="Trạng thái">
+          <Select
+            value={exam.isPublic}
+            onChange={(value) => handleSelectChange("isPublic", value)}
+          >
             <Option value={true}>Công khai</Option>
             <Option value={false}>Riêng tư</Option>
           </Select>

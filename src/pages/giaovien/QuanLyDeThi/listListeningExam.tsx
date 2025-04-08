@@ -1,17 +1,16 @@
 import { useState, useEffect } from "react";
 import { Button, Table, Tag, Modal } from "antd";
-import { ExamListeningQuestionAPI, listenQuestionAPI, ExamDataRecieve, Question } from "@/services/teacher/ListeningQuestion";
+import { ExamListeningQuestionAPI, ListeningExamData, listenQuestionAPI, Question } from "@/services/teacher/ListeningQuestion";
 import CreateExamModal from "./DeThiNghe/CreateExam";
 import { useAuthContext } from "@/contexts/AuthProvider";
 import DetailListeningExam from "./DeThiNghe/deltailExam";
 
 export const ListListeningExam = () => {
-  const [exams, setExams] = useState<ExamDataRecieve[]>([]);
+  const [exams, setExams] = useState<ListeningExamData[]>([]);
   const [showModal, setShowModal] = useState<boolean>(false);
   const [dataQuestion, setDataQuestion] = useState<Question[]>([]);
   const { user } = useAuthContext();
-  // State để hiển thị chi tiết đề thi
-  const [selectedExam, setSelectedExam] = useState<ExamDataRecieve | null>(null);
+  const [selectedExam, setSelectedExam] = useState<ListeningExamData | null>(null);
 
   const getAllExams = async () => {
     try {
@@ -48,57 +47,53 @@ export const ListListeningExam = () => {
     getAllQuestions();
   }, []);
 
-  const handleUpdateSuccess = () => {
-    getAllExams();
-  };
+  // const handleUpdateSuccess = () => {
+  //   getAllExams();
+  // };
 
-  // Khi bấm "Xem chi tiết", lưu đề thi được chọn vào state selectedExam
-  const handleDetail = (record: ExamDataRecieve) => {
+  const handleDetail = (record: ListeningExamData) => {
     setSelectedExam(record);
   };
 
-  // Hàm xóa đề thi với modal xác nhận
-  const handleDeleteExam = (record: ExamDataRecieve) => {
+  const handleDeleteExam = (record: ListeningExamData) => {
     Modal.confirm({
       title: "Xác nhận xóa",
-      content: "Bạn có chắc chắn muốn xóa đề thi này không?",
+      content: "Bạn có chắc chắn muốn xóa bài kiểm tra này không?",
       okText: "Xóa",
       okType: "danger",
       cancelText: "Hủy",
       onOk: async () => {
         try {
-          const response = await ExamListeningQuestionAPI.deleteListeningExam(record._id!);
+          const response = await ExamListeningQuestionAPI.deleteListeningExam(record.id!,user?._id || "");
           if (response) {
             Modal.success({
               title: "Thành công",
-              content: "Đề thi đã được xóa thành công.",
+              content: "Bài kiểm tra đã được xóa thành công.",
             });
             getAllExams();
           }
         } catch (error: any) {
           Modal.error({
             title: "Lỗi",
-            content: error.response?.data?.message || "Có lỗi xảy ra khi xóa đề thi.",
+            content: error.response?.data?.message || "Có lỗi xảy ra khi xóa bài kiểm tra.",
           });
         }
       },
     });
   };
 
-  // Nếu có selectedExam, hiển thị DetailListeningExam với nút Back
   if (selectedExam) {
     return (
       <div className="container mx-auto p-4">
         <DetailListeningExam
           data={selectedExam}
-          dataQUestion={dataQuestion}
+          dataQuestion={dataQuestion}
           onBack={() => setSelectedExam(null)}
         />
       </div>
     );
   }
 
-  // Các cột của bảng
   const columns = [
     {
       title: "Tiêu đề",
@@ -111,45 +106,64 @@ export const ListListeningExam = () => {
       key: "description",
     },
     {
-      title: "Độ khó",
-      dataIndex: "difficulty",
-      key: "difficulty",
-      render: (difficulty: string) => (
-        <Tag
-          color={
-            difficulty === "easy"
-              ? "green"
-              : difficulty === "medium"
-              ? "yellow"
-              : "red"
-          }
-        >
-          {difficulty}
-        </Tag>
-      ),
-    },
-    {
       title: "Thời gian",
       dataIndex: "duration",
       key: "duration",
       render: (duration: number) => `${duration} phút`,
     },
     {
-      title: "Điểm qua",
-      dataIndex: "passingScore",
-      key: "passingScore",
+      title: "Thời gian bắt đầu",
+      dataIndex: "startTime",
+      key: "startTime",
+      render: (startTime: string) =>
+        startTime
+          ? new Intl.DateTimeFormat("vi-VN", {
+              day: "2-digit",
+              month: "2-digit",
+              year: "numeric",
+            }).format(new Date(startTime)) +
+            ` (${new Date(startTime).toLocaleTimeString("vi-VN", {
+              hour: "2-digit",
+              minute: "2-digit",
+              second: "2-digit",
+              hour12: false,
+            })})`
+          : "N/A",
+    },
+    {
+      title: "Thời gian kết thúc",
+      dataIndex: "endTime",
+      key: "endTime",
+      render: (endTime: string) =>
+        endTime
+          ? new Intl.DateTimeFormat("vi-VN", {
+              day: "2-digit",
+              month: "2-digit",
+              year: "numeric",
+            }).format(new Date(endTime)) +
+            ` (${new Date(endTime).toLocaleTimeString("vi-VN", {
+              hour: "2-digit",
+              minute: "2-digit",
+              second: "2-digit",
+              hour12: false,
+            })})`
+          : "N/A",
     },
     {
       title: "Trạng thái",
-      dataIndex: "isPublished",
-      key: "isPublished",
-      render: (isPublished: boolean) =>
-        isPublished ? "Đã phát hành" : "Chưa phát hành",
+      dataIndex: "isPublic",
+      key: "isPublic",
+      render: (isPublic: boolean) =>
+        isPublic ? (
+          <Tag color="green">Công khai</Tag>
+        ) : (
+          <Tag color="volcano">Riêng tư</Tag>
+        ),
     },
     {
       title: "Hành động",
       key: "action",
-      render: (_: any, record: ExamDataRecieve) => (
+      render: (_: any, record: ListeningExamData) => (
         <>
           <Button type="link" onClick={() => handleDetail(record)}>
             Xem chi tiết

@@ -79,7 +79,7 @@ export const ForgetPass = () => {
         <div>
           <div className={`${styles.fadeIn} ${styles.first}`}>
             <img
-              src="src/assets/img/P2N 1.svg"
+              src="/src/assets/img/P2N 1.svg"
               className={styles.icon}
               alt="User Icon"
             />

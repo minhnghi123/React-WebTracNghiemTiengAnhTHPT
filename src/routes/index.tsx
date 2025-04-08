@@ -95,7 +95,7 @@ export const router = [
     children: [
       createRoute("/Login", <Login />, ERolePath.USER),
       createRoute("/SignUp", <SignUp />, ERolePath.USER),
-      createRoute("/forgetPassword", <ForgetPass />, ERolePath.USER),
+      createRoute("/forgetPass", <ForgetPass />, ERolePath.USER),
     ],
   },
   {
@@ -140,7 +140,7 @@ const paths = {
   "/About": ["/About"],
   "/Contact": ["/Contact"],
   "/Login": ["/Login"],
-  "/forgetPassword": ["/forgetPassword"],
+  "/forgetPass": ["/forgetPass"],
   "/SignUp": ["/SignUp"],
   "/PhongThi": ["/PhongThi"],
   "/PhongThi/Detail/:classroomId": ["/PhongThi/Detail/:classroomId"],

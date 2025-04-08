@@ -275,8 +275,8 @@ export const QuanLyDeThi = () => {
         visible={showModal}
         handleClose={() => setShowModal(false)}
         onCreateSuccess={handleCreateSuccess}
-        dataQuestion={[]}
-      />
+        dataQuestion={[]} 
+        listeningExams={[]}      />
       <CreateExamModalAuTo
         visible={showModalCreatAuto}
         handleClose={() => {

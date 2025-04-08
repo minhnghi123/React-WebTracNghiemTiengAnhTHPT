@@ -18,7 +18,7 @@ export interface Audio {
 export interface Question {
   _id?: string;
   content: string;
-  level: "easy" | "medium" | "hard";
+  level: "easy" | "hard";
   questionType?: string;
   sourceType?: string;
   passageId?: string;

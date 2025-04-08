@@ -13,7 +13,7 @@ export const DashBoarAdmin = () => {
         >
           <div className="bg-white p-4 rounded shadow h-100 text-center">
             <img
-              src="src/Content/img/img-folder-de-thi.png"
+              src="/src/Content/img/img-folder-de-thi.png"
               alt="Đề thi"
               style={{ width: "64px", height: "64px" }}
             />
@@ -28,7 +28,7 @@ export const DashBoarAdmin = () => {
         >
           <div className="bg-white p-4 rounded shadow h-100 text-center">
             <img
-              src="src/Content/img/img-ngan-hang-cau-hoi.jpg"
+              src="/src/Content/img/img-ngan-hang-cau-hoi.jpg"
               alt="Ngân hàng câu hỏi"
               style={{ width: "64px", height: "64px" }}
             />
@@ -42,7 +42,7 @@ export const DashBoarAdmin = () => {
           className="col-12 col-md-6 col-lg-3 dashboard-item">
           <div className="bg-white p-4 rounded shadow h-100 text-center">
             <img
-              src="src/Content/img/img-lop-hoc.jpg"
+              src="/src/Content/img/img-lop-hoc.jpg"
               alt="Quản lý lớp"
               style={{ width: "64px", height: "64px" }}
             />
@@ -55,7 +55,7 @@ export const DashBoarAdmin = () => {
         <div className="col-12 col-md-6 col-lg-3 dashboard-item">
           <div className="bg-white p-4 rounded shadow h-100 text-center">
             <img
-              src="src/Content/img/duyet-de-thi.png"
+              src="/src/Content/img/duyet-de-thi.png"
               alt="Quản lý báo lỗi"
               style={{ width: "64px", height: "64px" }}
             />

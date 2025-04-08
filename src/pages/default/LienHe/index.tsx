@@ -55,29 +55,10 @@ export const LienHe = () => {
           <div className="contact-method">
             <h2 className="method-title">Địa chỉ</h2>
             <address className="contact-address">
-              <p>123 Đường ABC, Phường DEF, Quận GHI, TP. Hồ Chí Minh</p>
+              <p>06 Trần Văn Ơn, Phú Hoà, Thủ Dầu Một, Bình Dương</p>
               <p>Điện thoại: +84 123 456 789</p>
             </address>
           </div>
-        </div>
-
-        <div className="contact-form">
-          <h2 className="form-title">Gửi tin nhắn</h2>
-          <form>
-            <div className="form-group">
-              <label htmlFor="name">Họ và tên:</label>
-              <input type="text" id="name" name="name" placeholder="Nhập họ và tên" required />
-            </div>
-            <div className="form-group">
-              <label htmlFor="email">Email:</label>
-              <input type="email" id="email" name="email" placeholder="Nhập email của bạn" required />
-            </div>
-            <div className="form-group">
-              <label htmlFor="message">Tin nhắn:</label>
-              <textarea id="message" name="message" placeholder="Nhập nội dung tin nhắn" required />
-            </div>
-            <button type="submit" className="submit-button">Gửi</button>
-          </form>
         </div>
       </div>
     </div>

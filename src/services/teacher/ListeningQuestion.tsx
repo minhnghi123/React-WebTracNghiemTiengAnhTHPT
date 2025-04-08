@@ -1,6 +1,7 @@
 import { request } from "@/config/request";
 import { Audio } from "./Teacher";
 import { Answer } from "@/types/interface";
+import { useAuthContext } from "@/contexts/AuthProvider";
 
 export interface ListeningQuestion {
   id?: string;
@@ -30,16 +31,16 @@ export interface ListeningQuestionData {
 
 export interface ListeningExamData {
   id?: string;
-  teacherId: string;
-  title: string;
-  description: string;
-  audio: string | Audio;           // ID của audio
-  questions: string[];     // Mảng các ID câu hỏi (có thể thay đổi thành ListeningQuestion[] nếu cần)
-  duration: number;
-  difficulty: "easy" | "medium" | "hard";
-  passingScore: number;
-  isPublished?: boolean;
-  isDeleted?: boolean;
+  teacherId: string; // ID của giáo viên
+  title: string; // Tiêu đề bài kiểm tra
+  description: string; // Mô tả bài kiểm tra
+  audio: string; // ID của audio
+  questions: string[]; // Mảng các ID câu hỏi
+  duration?: number; // Thời lượng bài kiểm tra (mặc định: 90 phút)
+  startTime?: Date; // Thời gian bắt đầu
+  endTime?: Date; // Thời gian kết thúc
+  isPublic?: boolean; // Trạng thái công khai (mặc định: false)
+  isDeleted?: boolean; // Trạng thái xóa mềm
 }
 
 
@@ -131,20 +132,47 @@ export const ExamListeningQuestionAPI = {
     const response = await request.get("/teacher/listening-exam");
     return response.data;
   },
-  getListeningExamMySelf: async ()  => {
+  getListeningExamMySelf: async () => {
     const response = await request.get(`/teacher/listening-exam/my-self`);
     return response.data;
   },
-  createListeningExam: async (data: ListeningExamData) => {
-    const response = await request.post("/teacher/listening-exam/create", data);
+  createListeningExam: async (data: Partial<ListeningExamData>) => {
+    // Chỉ gửi các trường cần thiết theo cấu trúc mới
+    const payload = {
+      teacherId: data.teacherId,
+      title: data.title,
+      description: data.description,
+      audio: data.audio,
+      questions: data.questions,
+      duration: data.duration || 90,
+      startTime: data.startTime,
+      endTime: data.endTime,
+      isPublic: data.isPublic || false,
+    };
+
+    const response = await request.post("/teacher/listening-exam/create", payload);
     return response.data;
   },
-  updateListeningExam: async (id: string, data: Partial<ListeningExamData>)=> {
-    const response = await request.patch(`/teacher/listening-exam/update/${id}`, data);
+  updateListeningExam: async (id: string,teacherId, data: Partial<ListeningExamData>) => {
+    // Chỉ gửi các trường cần thiết theo cấu trúc mới
+    const payload = {
+      title: data.title,
+      description: data.description,
+      audio: data.audio,
+      questions: data.questions,
+      duration: data.duration,
+      startTime: data.startTime,
+      endTime: data.endTime,
+      isPublic: data.isPublic,
+      teacherId: teacherId,
+    };
+
+    const response = await request.patch(`/teacher/listening-exam/update/${id}`, payload);
     return response.data;
   },
-  deleteListeningExam: async (id: string)=> {
-    const response = await request.patch(`/teacher/listening-exam/delete/${id}`);
+  deleteListeningExam: async (id: string,teacherId: string) => {
+    const response = await request.patch(`/teacher/listening-exam/delete/${id}`,teacherId);
+    ;
     return response.data;
   },
 };
