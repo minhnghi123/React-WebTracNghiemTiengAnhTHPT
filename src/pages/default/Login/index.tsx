@@ -80,7 +80,7 @@ export const Login = () => {
               className="form-control"
               id="username"
               value={username}
-              placeholder="Nhập tên đăng nhập"
+              placeholder="Nhập email"
               onChange={(e) => setUsername(e.target.value)}
             />
           </div>
@@ -97,10 +97,12 @@ export const Login = () => {
                 placeholder="Nhập mật khẩu"
                 onChange={(e) => setPassword(e.target.value)}
               />
-               <i
-              className={`bi ${showPassword ? "bi-eye-slash" : "bi-eye"} eyeIcon`}
-              onClick={togglePasswordVisibility}
-            ></i>
+              <i
+                className={`bi ${
+                  showPassword ? "bi-eye-slash" : "bi-eye"
+                } eyeIcon`}
+                onClick={togglePasswordVisibility}
+              ></i>
             </div>
           </div>
 
@@ -119,8 +121,9 @@ export const Login = () => {
         </form>
         {message && (
           <div
-            className={`alert alert-${message.type === "success" ? "success" : "danger"
-              } mt-3`}
+            className={`alert alert-${
+              message.type === "success" ? "success" : "danger"
+            } mt-3`}
           >
             {message.text}
           </div>
