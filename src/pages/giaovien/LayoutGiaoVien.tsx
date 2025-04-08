@@ -1,9 +1,35 @@
 import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
 import { Outlet } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { io } from "socket.io-client";
+import { useAuthContext } from "@/contexts/AuthProvider";
 
 import "bootstrap/dist/css/bootstrap.min.css";
+
+const socket = io("http://localhost:5000");
+
 const LayoutGiaoVien = () => {
+  const [pendingReportsCount, setPendingReportsCount] = useState(0);
+  const { user } = useAuthContext();
+
+  useEffect(() => {
+    socket.emit("GET_ERROR_REPORTS");
+
+    socket.on("ERROR_REPORTS", (reports) => {
+      const filteredReports = reports.filter(
+        (report) =>
+          report.status === "pending" &&
+          report.examId?.createdBy === user?._id
+      );
+      setPendingReportsCount(filteredReports.length);
+    });
+
+    return () => {
+      socket.off("ERROR_REPORTS");
+    };
+  }, [user?._id]);
+
   return (
     <div id="main">
       <Navbar rule={false} />
@@ -95,7 +121,7 @@ const LayoutGiaoVien = () => {
                     <li>
                       <a
                         href="/GiaoVien/QuanLyBaoLoi"
-                        className="nav-link px-0"
+                        className="nav-link px-0 d-flex justify-content-between align-items-center"
                         style={{
                           color: "#495057",
                           padding: "8px 0",
@@ -103,6 +129,17 @@ const LayoutGiaoVien = () => {
                         }}
                       >
                         Báo lỗi
+                        {pendingReportsCount > 0 && (
+                          <span
+                            className="badge bg-danger"
+                            style={{
+                              fontSize: "12px",
+                              marginLeft: "10px",
+                            }}
+                          >
+                            {pendingReportsCount}
+                          </span>
+                        )}
                       </a>
                     </li>
                     <li>

@@ -1,7 +1,7 @@
 import { Result } from "@/types/interface";
 import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-
+import "./Layout.css"; 
 interface ExamInfoBoxProps {
   examDetails: Result;
 }
@@ -45,9 +45,9 @@ const ExamInfoBox: React.FC<ExamInfoBoxProps> = ({ examDetails }) => {
 
   return (
     <div className="exam-info-box">
-      <Link to={`/KyThi/BaiLam/${examDetails.examId._id}`} className="exam-link">
+      <Link to={`/KyThi/BaiLam/`} className="exam-link">
         <h2 className="exam-title">{examDetails.examId.title}</h2>
-        <p className="time-left">{timeLeft}</p>
+        <p className="time-left"><center>{timeLeft}</center></p>
       </Link>
     </div>
   );

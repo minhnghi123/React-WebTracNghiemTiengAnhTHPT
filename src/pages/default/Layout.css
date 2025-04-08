@@ -33,6 +33,7 @@ body {
   word-spacing: 5px;
   -webkit-text-fill-color: transparent;
   -webkit-background-clip: text;
+  background-clip: text;
   animation: animate 10s linear infinite;
 }
 
@@ -311,5 +312,32 @@ body {
     color: #666;
   }
   
+    .exam-info-box {
+    position: fixed;
+    bottom: 20px; /* Cách đáy trang 20px */
+    left: 20px; /* Cách bên trái trang 20px */
+    background-color: #ffffff; /* Màu nền trắng */
+    border: 1px solid #ccc; /* Viền màu xám */
+    border-radius: 8px; /* Bo góc */
+    padding: 15px; /* Khoảng cách bên trong */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Đổ bóng */
+    z-index: 1000; /* Đảm bảo nằm trên các phần tử khác */
+    width: 250px; /* Độ rộng cố định */
+  }
   
+  .exam-info-box .exam-link {
+    text-decoration: none; /* Xóa gạch chân */
+    color: #333; /* Màu chữ */
+  }
+  
+  .exam-info-box .exam-title {
+    font-size: 18px; /* Kích thước chữ tiêu đề */
+    font-weight: bold; /* Chữ đậm */
+    margin-bottom: 10px; /* Khoảng cách dưới */
+  }
+  
+  .exam-info-box .time-left {
+    font-size: 16px; /* Kích thước chữ thời gian */
+    color: #007bff; /* Màu xanh dương */
+  }
   

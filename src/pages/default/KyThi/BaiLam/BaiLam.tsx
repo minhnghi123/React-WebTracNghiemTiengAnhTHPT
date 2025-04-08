@@ -13,12 +13,12 @@ import {
   Affix,
   Divider,
 } from "antd";
-import { useAuthContext } from "@/contexts/AuthProvider";
 import { gemini } from "@/services/GoogleApi";
 import QuestionSubmit from "./QuestionSumit";
 import ListeningQuestionSubmit from "./listeningQuestionSubmit";
-import { ListeningQuestion, Question } from "@/types/interface";
-
+import { Question } from "@/types/interface";
+import ErrorReportModal from "@/components/ErrorReportModal"; // Import ErrorReportModal
+import errorrIcon from "@/Content/img/errorr.png"; // Import your error icon
 const { Panel } = Collapse;
 const { Title, Paragraph } = Typography;
 const { Sider, Content } = Layout;
@@ -33,6 +33,10 @@ const BaiLam: React.FC = () => {
   const [showDetails, setShowDetails] = useState<boolean>(false);
   const [answers, setAnswers] = useState<any[]>([]);
   const [listeningAnswers, setListeningAnswers] = useState<any[]>([]);
+  const [showErrorModal, setShowErrorModal] = useState<boolean>(false); // State to control modal visibility
+  const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(
+    null
+  ); // State to store the selected question for reporting
   const questionRefs = useRef<any[]>([]);
   const resultSectionRef = useRef<HTMLDivElement>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -161,6 +165,16 @@ const BaiLam: React.FC = () => {
     fetchPostSubmitData();
   }, [Examresult]);
 
+  const handleReportError = (question: Question) => {
+    setSelectedQuestion(question);
+    setShowErrorModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowErrorModal(false);
+    setSelectedQuestion(null);
+  };
+
   return (
     <Layout style={{ minHeight: "100vh", background: "#fff" }}>
       <Content style={{ padding: "2rem", maxWidth: 900, margin: "0 auto" }}>
@@ -183,6 +197,15 @@ const BaiLam: React.FC = () => {
               boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
             }}
           >
+            <div style={{ display: "flex", justifyContent: "flex-end" }}>
+  <img
+    src={errorrIcon}
+    alt="Báo lỗi"
+    onClick={() => handleReportError(q)}
+    style={{ marginTop: 8, height: 20, width: 20, cursor: "pointer" }}
+  />
+</div>
+
             {q.audio ? (
               <>
                 <audio controls style={{ marginBottom: 8 }}>
@@ -203,10 +226,22 @@ const BaiLam: React.FC = () => {
                 questionType={q.questionType || ""}
                 onAnswerChange={handleAnswerChange}
                 currentAnswer={answers.find((ans) => ans.questionId === q._id)}
+                index={0}
               />
             )}
+
+            
           </Card>
         ))}
+
+        {showErrorModal && selectedQuestion && (
+          <ErrorReportModal
+            questionId={selectedQuestion._id}
+            examId={examDetails.examId._id}
+            userId={examDetails.userId}
+            onClose={handleCloseModal}
+          />
+        )}
 
         {Examresult && (
           <div className="my-4" ref={resultSectionRef}>
@@ -270,6 +305,7 @@ const BaiLam: React.FC = () => {
                             question={q}
                             questionType={q.questionType || ""}
                             onAnswerChange={() => {}}
+                            index={0}
                           />
                         </Panel>
                       ))}

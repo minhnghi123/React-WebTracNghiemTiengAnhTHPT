@@ -1,4 +1,7 @@
 import ErrorReport from "../../models/errorReport.model.js";
+import { Question } from "../../models/Question.model.js";
+import { TaiKhoan } from "../../models/Taikhoan.model.js";
+import Exam from "../../models/Exam.model.js";
 
 const handleErrorReport = () => {
   _io.on("connection", (socket) => {
@@ -42,8 +45,11 @@ const handleErrorReport = () => {
     socket.on("GET_ERROR_REPORTS", async () => {
       try {
         const reports = await ErrorReport.find()
-          .populate("questionId examId userId")
-          .sort({ createdAt: -1 }); // Sắp xếp theo thời gian mới nhất
+          .populate("questionId")
+          .populate("examId")
+          .populate({ path: "userId", model: "TaiKhoan" })
+          .sort({ createdAt: -1 });
+
         socket.emit("ERROR_REPORTS", reports);
       } catch (error) {
         console.error("Lỗi khi lấy danh sách báo lỗi:", error);

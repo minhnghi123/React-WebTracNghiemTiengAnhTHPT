@@ -1,13 +1,22 @@
 import React, { useEffect, useState } from "react";
 import { io } from "socket.io-client";
+import { Table, Button, Modal, Input, Space, Typography, message, Tag } from "antd";
+import type { ColumnsType } from "antd/es/table";
+import QuestionComponent from "../QuanLyCauHoi/Question";
+import { Question } from "@/services/teacher/Teacher";
+import { Exam } from "@/types/interface";
+import { useAuthContext } from "@/contexts/AuthProvider";
 
-const socket = io("http://localhost:5000"); // Kết nối đến server WebSocket
+const { TextArea } = Input;
+const { Title, Text } = Typography;
 
-interface ErrorReport {
+const socket = io("http://localhost:5000");
+
+export interface ErrorReport {
   _id: string;
   description: string;
-  questionId: string;
-  examId: string;
+  questionId: Question;
+  examId: Exam;
   userId: string;
   createdAt: string;
   status: string;
@@ -16,19 +25,30 @@ interface ErrorReport {
 
 const QuanLyBaoLoi: React.FC = () => {
   const [errorReports, setErrorReports] = useState<ErrorReport[]>([]);
+  const [filteredReports, setFilteredReports] = useState<ErrorReport[]>([]); // Danh sách đã lọc
   const [response, setResponse] = useState("");
   const [selectedReport, setSelectedReport] = useState<ErrorReport | null>(null);
+  const [questionModalVisible, setQuestionModalVisible] = useState(false);
+  const [selectedQuestionId, setSelectedQuestionId] = useState<Question>("");
 
+  const {user} = useAuthContext()
   useEffect(() => {
-    // Kết nối và lắng nghe sự kiện từ server
-    socket.emit("GET_ERROR_REPORTS"); // Yêu cầu danh sách báo lỗi
+    // Yêu cầu danh sách báo lỗi khi component được render
+    socket.emit("GET_ERROR_REPORTS");
 
     socket.on("ERROR_REPORTS", (reports: ErrorReport[]) => {
-      setErrorReports(reports); // Cập nhật danh sách báo lỗi
+      setErrorReports(reports);
+
+      // Lọc danh sách báo lỗi dựa trên adminId
+      const filtered = reports.filter((report) => {
+        const examOwner = report.examId?.createdBy;
+        return examOwner === user?._id;
+      });
+
+      setFilteredReports(filtered); // Cập nhật danh sách đã lọc
     });
 
     socket.on("ERROR_REPORT_UPDATED", (updatedReport: ErrorReport) => {
-      // Cập nhật trạng thái báo lỗi trong danh sách
       setErrorReports((prev) =>
         prev.map((report) =>
           report._id === updatedReport._id ? updatedReport : report
@@ -48,68 +68,124 @@ const QuanLyBaoLoi: React.FC = () => {
 
   const handleSubmitResponse = () => {
     if (!selectedReport) return;
-
     socket.emit("UPDATE_ERROR_STATUS", {
       reportId: selectedReport._id,
       status: "resolved",
     });
 
-    socket.on("UPDATE_SUCCESS", (response) => {
-      alert(response.message);
+    socket.on("UPDATE_SUCCESS", (res) => {
+      message.success(res.message);
       setResponse("");
       setSelectedReport(null);
+      socket.off("UPDATE_SUCCESS");
     });
 
     socket.on("error", (error) => {
-      alert(error.message);
+      message.error(error.message);
+      socket.off("error");
     });
   };
 
+  const handleShowQuestionInfo = (questionId: Question) => {
+    setSelectedQuestionId(questionId);
+    setQuestionModalVisible(true);
+  };
+
+  const columns: ColumnsType<ErrorReport> = [
+    {
+      title: "Mô tả lỗi",
+      dataIndex: "description",
+      key: "description",
+      render: (text: string) => <Text>{text}</Text>,
+    },
+    {
+      title: "Ngày tạo",
+      dataIndex: "createdAt",
+      key: "createdAt",
+      render: (date: string) => <Text>{new Date(date).toLocaleString()}</Text>,
+    },
+    {
+      title: "Trạng thái",
+      dataIndex: "status",
+      key: "status",
+      render: (status: string) => (
+        <Tag
+          color={
+            status === "pending"
+              ? "yellow"
+              : status === "resolved"
+              ? "green"
+              : "red"
+          }
+        >
+          {status}
+        </Tag>
+      ),
+    },
+    {
+      title: "Hành động",
+      key: "actions",
+      render: (_, record) => (
+        <Space>
+          <Button type="primary" onClick={() => handleRespond(record)}>
+            Phản hồi
+          </Button>
+          <Button onClick={() => handleShowQuestionInfo(record.questionId)}>
+            Xem thông tin câu hỏi
+          </Button>
+        </Space>
+      ),
+    },
+  ];
+
   return (
-    <div>
-      <h1>Quản Lý Báo Lỗi</h1>
-      <table border="1" style={{ width: "100%", textAlign: "left" }}>
-        <thead>
-          <tr>
-            <th>Mô tả lỗi</th>
-            <th>Ngày tạo</th>
-            <th>Trạng thái</th>
-            <th>Hành động</th>
-          </tr>
-        </thead>
-        <tbody>
-          {errorReports.map((report) => (
-            <tr key={report._id}>
-              <td>{report.description}</td>
-              <td>{new Date(report.createdAt).toLocaleString()}</td>
-              <td>{report.status}</td>
-              <td>
-                <button onClick={() => handleRespond(report)}>Phản hồi</button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div style={{ padding: "20px" }}>
+      <Title level={2}>Quản Lý Báo Lỗi</Title>
+      <Table
+        dataSource={filteredReports} // Hiển thị danh sách đã lọc
+        columns={columns}
+        rowKey={(record) => record._id}
+        pagination={{ pageSize: 5 }}
+      />
 
       {selectedReport && (
-        <div style={{ marginTop: "20px" }}>
-          <h2>Phản hồi báo lỗi</h2>
+        <Modal
+          title="Phản hồi báo lỗi"
+          visible={!!selectedReport}
+          onOk={handleSubmitResponse}
+          onCancel={() => setSelectedReport(null)}
+          okText="Gửi phản hồi"
+          cancelText="Hủy"
+        >
           <p>
             <strong>Mô tả lỗi:</strong> {selectedReport.description}
           </p>
-          <textarea
+          <TextArea
             value={response}
             onChange={(e) => setResponse(e.target.value)}
             placeholder="Nhập phản hồi..."
-            style={{ width: "100%", height: "100px", marginBottom: "10px" }}
+            rows={4}
           />
-          <br />
-          <button onClick={handleSubmitResponse}>Gửi phản hồi</button>
-          <button onClick={() => setSelectedReport(null)} style={{ marginLeft: "10px" }}>
-            Hủy
-          </button>
-        </div>
+        </Modal>
       )}
+
+      <Modal
+        title="Thông tin câu hỏi"
+        visible={questionModalVisible}
+        onOk={() => setQuestionModalVisible(false)}
+        onCancel={() => setQuestionModalVisible(false)}
+        okText="Đóng"
+        width={1200}
+      >
+        <QuestionComponent
+          editable={true}
+          question={selectedQuestionId}
+          onUpdateSuccess={function (): void {
+            throw new Error("Function not implemented.");
+          }}
+          questionType={""}
+        />
+      </Modal>
     </div>
   );
 };

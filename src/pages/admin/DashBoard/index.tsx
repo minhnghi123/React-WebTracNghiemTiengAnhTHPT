@@ -22,7 +22,7 @@ export const DashBoarAdmin = () => {
             </p>
           </div>
         </div>
-        <div
+        {/* <div
           className="col-12 col-md-6 col-lg-3 dashboard-item"
           onClick={() => navigate("/giaovien/NganHangCauHoi")}
         >
@@ -36,9 +36,9 @@ export const DashBoarAdmin = () => {
               Ngân hàng câu hỏi
             </p>
           </div>
-        </div>
+        </div> */}
         <div 
-          onClick={() => navigate("/giaovien/QuanLyLopHoc")}
+          onClick={() => navigate("/Admin/QuanLyTaiKhoan")}
           className="col-12 col-md-6 col-lg-3 dashboard-item">
           <div className="bg-white p-4 rounded shadow h-100 text-center">
             <img
@@ -52,7 +52,7 @@ export const DashBoarAdmin = () => {
             </p>
           </div>
         </div>
-        <div className="col-12 col-md-6 col-lg-3 dashboard-item">
+        {/* <div className="col-12 col-md-6 col-lg-3 dashboard-item">
           <div className="bg-white p-4 rounded shadow h-100 text-center">
             <img
               src="/src/Content/img/duyet-de-thi.png"
@@ -63,7 +63,7 @@ export const DashBoarAdmin = () => {
               Duyệt đề thi
             </p>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );

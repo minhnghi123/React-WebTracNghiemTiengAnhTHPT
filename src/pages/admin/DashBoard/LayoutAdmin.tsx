@@ -79,7 +79,7 @@ const LayoutAdmin = () => {
                         Quản lý tài khoản
                       </a>
                     </li>
-                    <li>
+                    {/* <li>
                       <a
                         href="/giaovien/NganHangCauHoi"
                         className="nav-link px-0"
@@ -104,7 +104,7 @@ const LayoutAdmin = () => {
                       >
                         Duyệt đề thi
                       </a>
-                    </li>
+                    </li> */}
                   </ul>
                 </li>
               </ul>
