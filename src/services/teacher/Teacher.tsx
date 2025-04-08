@@ -1,5 +1,6 @@
 import { request } from "@/config/request";
 import { ExamDataRecieve } from "./ListeningQuestion";
+import ImportExamExcel from "@/pages/giaovien/QuanLyDeThi/ImportExamExcel";
 export interface Answer {
   _id?: string;
   text?: string;
@@ -32,14 +33,14 @@ export interface Question {
   createdAt?: Date;
   audioInfo?: Audio;
   text?: string;
-  __v?: number; 
+  __v?: number;
 }
 export interface Exam {
   _id?: string;
   title?: string;
   description?: string;
   questions: string[] | Question[];
-  listeningExams: ExamDataRecieve[]; 
+  listeningExams: ExamDataRecieve[];
   duration: number;
   startTime: Date;
   endTime?: Date;
@@ -103,8 +104,6 @@ export interface QuestionDetail {
   audio?: string | null;
   isCorrect: boolean;
 }
-
-
 
 export interface UserAnswer {
   userAnswer: string | string[];
@@ -196,14 +195,11 @@ export const ExamAPI = {
     );
     return response.data;
   },
-  copyExam: async (ExamCopy : ExamCopy) => {
-    
-    const response = await request.post(`/teacher/exam/copy-exam/`,ExamCopy);
-    
+  copyExam: async (ExamCopy: ExamCopy) => {
+    const response = await request.post(`/teacher/exam/copy-exam/`, ExamCopy);
 
     return response.data;
-  }
-  ,
+  },
   deleteExam: async (id: string) => {
     const response = await request.delete(`/teacher/exam/delete/${id}`);
     return response.data;
@@ -232,6 +228,14 @@ export const ExamAPI = {
       numberOfQuestions,
       duration,
       questionTypes,
+    });
+    return response.data;
+  },
+  ImportExamExcel: async (formData: FormData) => {
+    const response = await request.post("/teacher/exam/import-exam", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
     });
     return response.data;
   },
@@ -274,7 +278,7 @@ export const AudioAPI = {
   createAudio: async (question: Audio) => {
     const response = await request.post("/teacher/audio/upload", question, {
       headers: {
-        "Content-Type": "multipart/form-data", 
+        "Content-Type": "multipart/form-data",
       },
     });
     return response.data;
@@ -282,12 +286,13 @@ export const AudioAPI = {
   updateAudio: async (question: Audio, _id: string) => {
     const response = await request.patch(
       `/teacher/audio/update/${_id}`,
-      question
-      , {
+      question,
+      {
         headers: {
-          "Content-Type": "multipart/form-data", 
+          "Content-Type": "multipart/form-data",
         },
-      } );
+      }
+    );
     return response.data;
   },
   deleteAudio: async (id: string) => {

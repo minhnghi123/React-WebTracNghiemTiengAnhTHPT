@@ -16,13 +16,19 @@ const QuestionSchema = new mongoose.Schema({
     enum: ["easy", "hard"],
     default: "easy",
   },
+
   answers: [
     {
-      text: { type: String },
+      text: { type: String, default: "" },
       correctAnswerForBlank: { type: String, default: "" },
       isCorrect: { type: Boolean, default: false },
     },
   ],
+  correctAnswerForTrueFalseNGV: {
+    type: String,
+
+    default: "",
+  },
   subject: { type: String, default: "English" },
   knowledge: {
     type: String,
@@ -36,8 +42,8 @@ const QuestionSchema = new mongoose.Schema({
     type: String,
     default: "",
   },
-  // author: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-  // isApproved: { type: Boolean, default: false },
+  author: { type: mongoose.Schema.Types.ObjectId, ref: "Taikhoan" },
+  isApproved: { type: Boolean, default: false },
   deleted: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now },
 });
