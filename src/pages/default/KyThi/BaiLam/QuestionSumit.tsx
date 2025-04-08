@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { cleanString } from "@/utils/cn";
-import { Divider, Input, Radio } from "antd";
+import { Divider, Input, Radio, Card, Typography, Space } from "antd";
 import { Question } from "@/types/interface";
+import { cleanString } from "@/utils/cn";
+
+const { Title, Text, Paragraph } = Typography;
 
 export type UserAnswer = {
   questionId: string;
@@ -14,6 +16,7 @@ type QuestionComponentProps = {
   questionType: string;
   onAnswerChange: (newAnswer: UserAnswer) => void;
   currentAnswer?: UserAnswer;
+  index: number;
 };
 
 const QuestionSubmit: React.FC<QuestionComponentProps> = ({
@@ -21,6 +24,7 @@ const QuestionSubmit: React.FC<QuestionComponentProps> = ({
   questionType,
   onAnswerChange,
   currentAnswer,
+  index,
 }) => {
   const [localAnswer, setLocalAnswer] = useState<UserAnswer>(
     currentAnswer || { questionId: question._id || "", userAnswer: [] }
@@ -32,115 +36,175 @@ const QuestionSubmit: React.FC<QuestionComponentProps> = ({
     }
   }, [currentAnswer]);
 
-  // Xử lý cho câu hỏi Yes/No
-  const handleCheckboxChange = (questionId: string, selectedAnswerId: string) => {
+  const handleCheckboxChange = (
+    questionId: string,
+    selectedAnswerId: string
+  ) => {
     const newAnswer: UserAnswer = { questionId, selectedAnswerId };
     setLocalAnswer(newAnswer);
     onAnswerChange(newAnswer);
   };
 
-  // Xử lý cho câu hỏi điền khuyết
-  const handleFillBlankInputChange = (questionId: string, index: number, value: string) => {
+  const handleFillBlankInputChange = (
+    questionId: string,
+    index: number,
+    value: string
+  ) => {
     let currentUserAnswers: string[] = localAnswer.userAnswer
       ? [...localAnswer.userAnswer]
       : new Array(question.answers ? question.answers.length : 0).fill("");
     currentUserAnswers[index] = value;
-    const newAnswer: UserAnswer = { questionId, userAnswer: currentUserAnswers };
+    const newAnswer: UserAnswer = {
+      questionId,
+      userAnswer: currentUserAnswers,
+    };
     setLocalAnswer(newAnswer);
     onAnswerChange(newAnswer);
   };
 
+  const renderFillInBlankContent = () => {
+    const placeholderRegex = /_+\d+_+/g;
+    const matchedPlaceholders = question.content.match(placeholderRegex);
+
+    if (
+      matchedPlaceholders &&
+      question.answers &&
+      matchedPlaceholders.length === question.answers.length
+    ) {
+      const parts = question.content.split(placeholderRegex);
+      return (
+        <Paragraph>
+          {parts.map((part, idx) => (
+            <React.Fragment key={idx}>
+              <span>{part}</span>
+              {idx < matchedPlaceholders.length && (
+                <Input
+                  size="middle"
+                  style={{ width: 160, margin: "0 6px" }}
+                  value={localAnswer.userAnswer?.[idx] || ""}
+                  onChange={(e) =>
+                    handleFillBlankInputChange(
+                      question._id || "",
+                      idx,
+                      e.target.value
+                    )
+                  }
+                  placeholder={`Blank ${idx + 1}`}
+                />
+              )}
+            </React.Fragment>
+          ))}
+        </Paragraph>
+      );
+    }
+
+    return (
+      <Paragraph
+        dangerouslySetInnerHTML={{ __html: cleanString(question.content) }}
+      />
+    );
+  };
+
   return (
-    <div className="bg-white p-4 rounded shadow mb-4">
-      <h5 className="text-xl font-bold mb-2" style={{ whiteSpace: "pre-wrap" }}>
+    <Card className="mb-4 shadow" bodyStyle={{ padding: "24px" }}>
+      <Title
+        level={5}
+        style={{
+          whiteSpace: "normal",
+          wordBreak: "break-word", // đảm bảo nội dung không tràn
+          fontSize: "16px",
+          lineHeight: "1.5",
+          marginBottom: 16,
+        }}
+      >
         {questionType === "6742fb3bd56a2e75dbd817ec" ? (
-          (() => {
-            const placeholderRegex = /_+\d+_+/g;
-            const matchedPlaceholders = question.content.match(placeholderRegex);
-            if (matchedPlaceholders && question.answers && matchedPlaceholders.length === question.answers.length) {
-              const parts = question.content.split(placeholderRegex);
-              return (
-                <span>
-                  {parts.map((part, index) => (
-                    <React.Fragment key={index}>
-                      <span>{part}</span>
-                      {index < matchedPlaceholders.length && (
-                        <Input
-                          style={{ width: "150px", display: "inline-block", margin: "0 4px" }}
-                          value={localAnswer.userAnswer?.[index] || ""}
-                          onChange={(e) => handleFillBlankInputChange(question._id || "", index, e.target.value)}
-                          placeholder={`Blank ${index + 1}`}
-                        />
-                      )}
-                    </React.Fragment>
-                  ))}
-                </span>
-              );
-            }
-            return <span dangerouslySetInnerHTML={{ __html: cleanString(question.content) }} />;
-          })()
+          renderFillInBlankContent()
         ) : (
-          <span dangerouslySetInnerHTML={{ __html: cleanString(question.content) }} />
+          <span
+            dangerouslySetInnerHTML={{
+              __html: cleanString(question.content),
+            }}
+          />
         )}
-      </h5>
-      <div className="mt-1">
+      </Title>
+
+      <div className="mt-2">
         {questionType === "6742fb1cd56a2e75dbd817ea" ? (
           <Radio.Group
-            onChange={(e) => handleCheckboxChange(question._id || "", e.target.value)}
+            onChange={(e) =>
+              handleCheckboxChange(question._id || "", e.target.value)
+            }
             value={localAnswer.selectedAnswerId}
+            style={{ display: "flex", flexDirection: "column", gap: "12px" }}
           >
-            {question.answers && question.answers.map((answer) => (
-              <div key={answer._id}>
-                <Radio value={answer._id}>
-                  <span dangerouslySetInnerHTML={{ __html: cleanString(answer.text || "") }} />
-                </Radio>
-              </div>
+            {question.answers?.map((answer) => (
+              <Radio key={answer._id} value={answer._id}>
+                <span
+                  dangerouslySetInnerHTML={{
+                    __html: cleanString(answer.text || ""),
+                  }}
+                />
+              </Radio>
             ))}
           </Radio.Group>
         ) : (
           (() => {
             const placeholderRegex = /_+\d+_+/g;
-            const matchedPlaceholders = question.content.match(placeholderRegex);
-            if (matchedPlaceholders && question.answers && matchedPlaceholders.length === question.answers.length) {
+            const matched = question.content.match(placeholderRegex);
+            if (matched && matched.length === (question.answers?.length || 0))
               return null;
-            } else {
-              return (
-                <div className="fill-blank-separate">
-                  {question.answers && question.answers.map((_, index) => {
-                    const value = localAnswer.userAnswer?.[index] || "";
-                    return (
-                      <div key={index} className="mb-2">
-                        <Input
-                          value={value}
-                          onChange={(e) => handleFillBlankInputChange(question._id || "", index, e.target.value)}
-                          placeholder={`Blank ${index + 1}`}
-                        />
-                      </div>
-                    );
-                  })}
-                </div>
-              );
-            }
+
+            return (
+              <div className="fill-blank-separate">
+                {question.answers?.map((_, idx) => (
+                  <div key={idx} className="mb-2">
+                    <Input
+                      value={localAnswer.userAnswer?.[idx] || ""}
+                      onChange={(e) =>
+                        handleFillBlankInputChange(
+                          question._id || "",
+                          idx,
+                          e.target.value
+                        )
+                      }
+                      placeholder={`Blank ${idx + 1}`}
+                    />
+                  </div>
+                ))}
+              </div>
+            );
           })()
         )}
       </div>
+
       {question.audioInfo && (
-        <div>
-          <Divider orientation="left" style={{ borderColor: "#7cb305" }}>
-            Phần nghe
-          </Divider>
-          <audio controls>
-            <source src={typeof question.audioInfo.filePath === "string" ? question.audioInfo.filePath : ""} type="audio/mpeg" />
+        <Card
+          size="small"
+          className="mt-4"
+          title="Phần nghe"
+          headStyle={{ backgroundColor: "#f6ffed", borderColor: "#b7eb8f" }}
+        >
+          <audio controls className="mb-3">
+            <source
+              src={
+                typeof question.audioInfo.filePath === "string"
+                  ? question.audioInfo.filePath
+                  : ""
+              }
+              type="audio/mpeg"
+            />
           </audio>
-          <p className="text-sm text-gray-600 mb-2" style={{ whiteSpace: "pre-wrap" }}>
-            <strong>Giải thích: </strong>{cleanString(question.audioInfo.description)}
-          </p>
-          <p className="text-sm text-gray-600 mb-2" style={{ whiteSpace: "pre-wrap" }}>
-            <strong>Dịch: </strong>{cleanString(question.audioInfo.transcription)}
-          </p>
-        </div>
+          <Paragraph>
+            <Text strong>Giải thích:</Text>{" "}
+            {cleanString(question.audioInfo.description || "")}
+          </Paragraph>
+          <Paragraph>
+            <Text strong>Dịch:</Text>{" "}
+            {cleanString(question.audioInfo.transcription || "")}
+          </Paragraph>
+        </Card>
       )}
-    </div>
+    </Card>
   );
 };
 

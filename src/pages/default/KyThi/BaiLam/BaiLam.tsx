@@ -1,22 +1,31 @@
 import React, { useEffect, useRef, useState } from "react";
 import { ResultAPI, SubmitAnswer } from "@/services/student";
 import { ExamResult, QuestionAPI } from "@/services/teacher/Teacher";
-import { Button, Card, Collapse, Spin } from "antd";
+import {
+  Button,
+  Card,
+  Collapse,
+  Spin,
+  Layout,
+  Typography,
+  Row,
+  Col,
+  Affix,
+  Divider,
+} from "antd";
 import { useAuthContext } from "@/contexts/AuthProvider";
 import { gemini } from "@/services/GoogleApi";
-
-import "./BaiLam.css";
 import QuestionSubmit from "./QuestionSumit";
 import ListeningQuestionSubmit from "./listeningQuestionSubmit";
-import ErrorReportModal from "@/components/ErrorReportModal"; // Import ErrorReportModal
 import { ListeningQuestion, Question } from "@/types/interface";
 
 const { Panel } = Collapse;
+const { Title, Paragraph } = Typography;
+const { Sider, Content } = Layout;
 
 const BaiLam: React.FC = () => {
   const [examDetails, setExamDetails] = useState<any>(null);
   const [remainingTime, setRemainingTime] = useState<number>(0);
-  const resultSectionRef = useRef<HTMLDivElement>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [Examresult, setExamresult] = useState<ExamResult>();
   const [suggestedQuestions, setSuggestedQuestions] = useState<Question[]>([]);
@@ -24,69 +33,84 @@ const BaiLam: React.FC = () => {
   const [showDetails, setShowDetails] = useState<boolean>(false);
   const [answers, setAnswers] = useState<any[]>([]);
   const [listeningAnswers, setListeningAnswers] = useState<any[]>([]);
-  const [errorReportVisible, setErrorReportVisible] = useState<boolean>(false);
-  const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
+  const questionRefs = useRef<any[]>([]);
+  const resultSectionRef = useRef<HTMLDivElement>(null);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const endTimeRef = useRef<Date | null>(null);
 
-  const fetchExamDetails = async () => {
-    try {
-      const response = await ResultAPI.getInCompletedExam();
-      if (response.code === 200 && response.results) {
-        const endTimeDate = new Date(response.results.endTime);
-        setExamDetails(response.results);
-        setSuggestedQuestions(response.results.suggestionQuestion || []);
-        updateRemainingTime(endTimeDate);
+  useEffect(() => {
+    const fetchExamDetails = async () => {
+      try {
+        const response = await ResultAPI.getInCompletedExam();
+        if (response.code === 200 && response.results) {
+          setExamDetails(response.results);
+          setSuggestedQuestions(response.results.suggestionQuestion || []);
+          const endTime = new Date(response.results.endTime);
+          endTimeRef.current = endTime;
+        }
+      } catch (error) {
+        console.error("Error fetching exam details:", error);
       }
-    } catch (error) {
-      console.error("Error fetching exam details:", error);
-    }
-  };
+    };
 
-  const updateRemainingTime = (endTimeDate: Date) => {
-    const updateRemaining = () => {
+    fetchExamDetails();
+  }, []);
+
+  // Countdown timer logic
+  useEffect(() => {
+    const tick = () => {
+      if (!endTimeRef.current || Examresult) return;
+
       const now = new Date();
-      const timeLeft = Math.max(0, Math.floor((endTimeDate.getTime() - now.getTime()) / 1000));
+      const timeLeft = Math.max(
+        0,
+        Math.floor((endTimeRef.current.getTime() - now.getTime()) / 1000)
+      );
       setRemainingTime(timeLeft);
-      if (timeLeft <= 0 && !Examresult) {
+
+      if (timeLeft <= 0) {
         alert("Hết thời gian làm bài");
         handleSubmit();
       }
     };
-    updateRemaining();
-    const interval = setInterval(updateRemaining, 1000);
-    return () => clearInterval(interval);
-  };
 
-  useEffect(() => {
-    fetchExamDetails();
-  }, []);
+    tick();
+    intervalRef.current = setInterval(tick, 1000);
+
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, [Examresult]);
 
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+    return `${minutes.toString().padStart(2, "0")}:${secs
+      .toString()
+      .padStart(2, "0")}`;
   };
 
   const handleAnswerChange = (newAnswer: any) => {
-    setAnswers((prev: any[]) => {
-      const existingIndex = prev.findIndex((ans) => ans.questionId === newAnswer.questionId);
-      if (existingIndex !== -1) {
-        const updated = [...prev];
-        updated[existingIndex] = newAnswer;
-        return updated;
-      }
-      return [...prev, newAnswer];
+    setAnswers((prev) => {
+      const updated = [...prev];
+      const index = updated.findIndex(
+        (a) => a.questionId === newAnswer.questionId
+      );
+      if (index !== -1) updated[index] = newAnswer;
+      else updated.push(newAnswer);
+      return updated;
     });
   };
 
   const handleListeningAnswerChange = (newAnswer: any) => {
-    setListeningAnswers((prev: any[]) => {
-      const existingIndex = prev.findIndex((ans) => ans.questionId === newAnswer.questionId);
-      if (existingIndex !== -1) {
-        const updated = [...prev];
-        updated[existingIndex] = newAnswer;
-        return updated;
-      }
-      return [...prev, newAnswer];
+    setListeningAnswers((prev) => {
+      const updated = [...prev];
+      const index = updated.findIndex(
+        (a) => a.questionId === newAnswer.questionId
+      );
+      if (index !== -1) updated[index] = newAnswer;
+      else updated.push(newAnswer);
+      return updated;
     });
   };
 
@@ -96,12 +120,14 @@ const BaiLam: React.FC = () => {
       return;
     }
     if (!examDetails) return;
+
+    if (intervalRef.current) clearInterval(intervalRef.current);
+
     const submitAnswer: SubmitAnswer = {
       resultId: examDetails._id,
-      answers: answers,
-      listeningAnswers: listeningAnswers,
+      answers,
+      listeningAnswers,
     };
-    console.log(submitAnswer);
     const response = await ResultAPI.submitAnswer(submitAnswer);
     if (response.code === 200) {
       alert("Nộp bài thành công");
@@ -112,16 +138,6 @@ const BaiLam: React.FC = () => {
     }
   };
 
-  const openErrorReportModal = (question: Question | ListeningQuestion) => {
-      setSelectedQuestion(question as Question);
-      setErrorReportVisible(true);
-    };
-
-  const closeErrorReportModal = () => {
-    setSelectedQuestion(null);
-    setErrorReportVisible(false);
-  };
-
   useEffect(() => {
     const fetchPostSubmitData = async () => {
       if (Examresult) {
@@ -129,119 +145,73 @@ const BaiLam: React.FC = () => {
         const advResponse = await gemini(Examresult.arrResponse);
         setAdvice(advResponse);
         const updated: Question[] = [];
+
         for (const sug of suggestedQuestions) {
           if (sug._id) {
             const res = await QuestionAPI.getQuestion(sug._id);
-            if (res.code === 200) {
-              updated.push(res.question);
-            }
+            if (res.code === 200) updated.push(res.question);
           }
         }
+
         setSuggestedQuestions(updated);
         setLoading(false);
       }
     };
+
     fetchPostSubmitData();
   }, [Examresult]);
 
   return (
-    <div>
-      <center>
-        <h1 className="text-2xl font-bold mb-4">{examDetails?.examId.title}</h1>
-      </center>
-      <div className="containerKetQua mx-auto">
-        <div className="question-box">
-          {examDetails?.examId.questions?.map((q: Question) => (
-            <div key={q._id} className="mb-4">
+    <Layout style={{ minHeight: "100vh", background: "#fff" }}>
+      <Content style={{ padding: "2rem", maxWidth: 900, margin: "0 auto" }}>
+        <Title level={3} style={{ textAlign: "center", marginBottom: 32 }}>
+          {examDetails?.examId.title}
+        </Title>
+
+        {[
+          ...(examDetails?.examId.questions || []),
+          ...(examDetails?.examId.listeningExams?.flatMap(
+            (le: any) => le.questions || []
+          ) || []),
+        ].map((q: any, idx: number) => (
+          <Card
+            key={q._id || idx}
+            ref={(el) => (questionRefs.current[idx] = el)}
+            style={{
+              marginBottom: 24,
+              borderRadius: 12,
+              boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+            }}
+          >
+            {q.audio ? (
+              <>
+                <audio controls style={{ marginBottom: 8 }}>
+                  <source src={q.audio.filePath} type="audio/mpeg" />
+                </audio>
+                <ListeningQuestionSubmit
+                  question={q}
+                  questionType={q.questionType || ""}
+                  onAnswerChange={handleListeningAnswerChange}
+                  currentAnswer={listeningAnswers.find(
+                    (ans) => ans.questionId === q._id
+                  )}
+                />
+              </>
+            ) : (
               <QuestionSubmit
                 question={q}
                 questionType={q.questionType || ""}
                 onAnswerChange={handleAnswerChange}
                 currentAnswer={answers.find((ans) => ans.questionId === q._id)}
               />
-              <Button
-                type="link"
-                danger
-                onClick={() => openErrorReportModal(q)}
-                style={{ marginTop: "8px" }}
-              >
-                Báo lỗi
-              </Button>
-            </div>
-          ))}
-        </div>
-        {examDetails?.examId.listeningExams && examDetails.examId.listeningExams.length > 0 && (
-          <div className="listening-box">
-            {examDetails.examId.listeningExams.map((le: any) => (
-              <div key={le._id} className="mb-6">
-                <h2 className="section-title">{le.title}</h2>
-                <p className="section-desc">{le.description}</p>
-                <div className="audio-container">
-                  <audio controls>
-                    <source src={le.audio.filePath} type="audio/mpeg" />
-                  </audio>
-                </div>
-                {le.questions && le.questions.map((q: ListeningQuestion) => (
-                  <div key={q._id} className="mb-4">
-                    <ListeningQuestionSubmit
-                      question={q}
-                      questionType={q.questionType || ""}
-                      onAnswerChange={handleListeningAnswerChange}
-                      currentAnswer={listeningAnswers.find((ans) => ans.questionId === q._id)}
-                    />
-                    <Button
-                      type="link"
-                      danger
-                      onClick={() => openErrorReportModal(q 
+            )}
+          </Card>
+        ))}
 
-                      )}
-                      style={{ marginTop: "8px" }}
-                    >
-                      Báo lỗi
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            ))}
-          </div>
-        )}
-        <div className="timer-column">
-          <div className={`timer ${remainingTime <= 60 ? "critical" : ""}`}>
-            Thời gian còn lại: {formatTime(remainingTime)}
-            <hr />
-            <Button onClick={handleSubmit} disabled={!!Examresult || loading}>
-              Nộp bài
-            </Button>
-          </div>
-          <div className="question-nav">
-            {[
-              ...(examDetails?.examId.questions || []),
-              ...(examDetails?.examId.listeningExams?.flatMap((le: any) => le.questions || []) || [])
-            ].map((_, index) => (
-              <button
-                key={index}
-                onClick={() => questionRefs.current[index]?.scrollIntoView({ behavior: "smooth" })}
-                disabled={loading}
-              >
-                {index + 1}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-      {selectedQuestion && errorReportVisible && (
-        <ErrorReportModal
-          questionId={selectedQuestion._id }
-          examId={examDetails.examId._id}
-          userId={examDetails.userId}
-          onClose={closeErrorReportModal}
-        />
-      )}
-      {Examresult && (
-        <div className="container my-4" ref={resultSectionRef}>
-          <Card className="shadow p-3">
-            <center>
-              <h3 className="text-primary">Kết quả của bạn</h3>
+        {Examresult && (
+          <div className="my-4" ref={resultSectionRef}>
+            <Card>
+              <Title level={4}>Kết quả</Title>
               <p>
                 Điểm số:{" "}
                 <strong>
@@ -249,79 +219,135 @@ const BaiLam: React.FC = () => {
                   {Examresult.correctAnswer + Examresult.wrongAnswer}
                 </strong>
               </p>
-            </center>
-            <Button type="primary" onClick={() => setShowDetails(!showDetails)}>
-              {showDetails ? "Ẩn chi tiết" : "Xem chi tiết"}
-            </Button>
-            {showDetails && (
-              <Collapse className="mt-3" defaultActiveKey={["1"]}>
-                <Panel header="Lời khuyên" key="3">
-                  {loading ? (
-                    <center>
-                      <div className="loading-overlay">
-                        <Spin size="large" />
-                        Đang tạo lời khuyên...
-                      </div>
-                    </center>
-                  ) : (
-                    <p style={{ whiteSpace: "pre-line", fontSize: "1rem" }}>{advice}</p>
-                  )}
-                </Panel>
-                <Panel header="Video liên quan" key="1">
-                  {Examresult.videos &&
-                    Object.keys(Examresult.videos).map((key) => (
-                      <div key={key} className="mb-3">
-                        <h5 className="text-success">{key}</h5>
-                        <div className="list-group">
-                          {Examresult.videos[key].map((video: any) => (
-                            <a
-                              key={video.videoId}
-                              href={video.linkUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="list-group-item list-group-item-action"
-                            >
-                              <img
-                                src={video.thumbnail}
-                                alt={video.title}
-                                className="img-fluid rounded mb-2"
-                                style={{ maxWidth: "120px" }}
-                              />
-                              <p className="mb-0">{video.title}</p>
-                            </a>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                </Panel>
-                <Panel header="Câu hỏi đề nghị" key="2">
-                  <ul className="list-group">
-                    {suggestedQuestions && suggestedQuestions.length > 0 && (
-                      <Collapse className="mt-3">
-                        {suggestedQuestions.map((q: Question, id: number) => (
-                          <Panel
-                            header={`${id + 1}. ${
-                              q.content.length > 200 ? q.content.slice(0, 200) + " ..." : q.content
-                            }`}
-                            key={q._id ?? id}
-                          >
-                            <QuestionSubmit
-                              question={q}
-                              questionType={q.questionType || ""}
-                              onAnswerChange={() => {}}
-                            />
-                          </Panel>
-                        ))}
-                      </Collapse>
+              <Button type="link" onClick={() => setShowDetails(!showDetails)}>
+                {showDetails ? "Ẩn chi tiết" : "Xem chi tiết"}
+              </Button>
+              {showDetails && (
+                <Collapse>
+                  <Panel header="Lời khuyên" key="advice">
+                    {loading ? (
+                      <Spin />
+                    ) : (
+                      <Paragraph style={{ whiteSpace: "pre-line" }}>
+                        {advice}
+                      </Paragraph>
                     )}
-                  </ul>
-                </Panel>
-              </Collapse>
-            )}
-          </Card>
-        </div>
-      )}
-    </div>
+                  </Panel>
+                  <Panel header="Video liên quan" key="videos">
+                    {Examresult.videos &&
+                      Object.keys(Examresult.videos).map((key) => (
+                        <div key={key}>
+                          <Title level={5}>{key}</Title>
+                          <Row gutter={[16, 16]}>
+                            {Examresult.videos[key].map((video: any) => (
+                              <Col span={8} key={video.videoId}>
+                                <a
+                                  href={video.linkUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  <img
+                                    src={video.thumbnail}
+                                    alt={video.title}
+                                    style={{ width: "100%", borderRadius: 8 }}
+                                  />
+                                  <p>{video.title}</p>
+                                </a>
+                              </Col>
+                            ))}
+                          </Row>
+                        </div>
+                      ))}
+                  </Panel>
+                  <Panel header="Câu hỏi đề nghị" key="suggested">
+                    <Collapse>
+                      {suggestedQuestions.map((q: Question, id: number) => (
+                        <Panel
+                          header={`${id + 1}. ${q.content.slice(0, 200)}...`}
+                          key={q._id ?? id}
+                        >
+                          <QuestionSubmit
+                            question={q}
+                            questionType={q.questionType || ""}
+                            onAnswerChange={() => {}}
+                          />
+                        </Panel>
+                      ))}
+                    </Collapse>
+                  </Panel>
+                </Collapse>
+              )}
+            </Card>
+          </div>
+        )}
+      </Content>
+
+      <Sider
+        width={260}
+        theme="light"
+        style={{
+          background: "#f7f8fa",
+          borderLeft: "1px solid #f0f0f0",
+          padding: "1rem",
+        }}
+      >
+        <Affix offsetTop={20}>
+          <div>
+            <Title level={5}>Sơ đồ câu hỏi</Title>
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: "6px",
+                marginBottom: 16,
+              }}
+            >
+              {[
+                ...(examDetails?.examId.questions || []),
+                ...(examDetails?.examId.listeningExams?.flatMap(
+                  (le: any) => le.questions || []
+                ) || []),
+              ].map((_, index) => (
+                <Button
+                  size="small"
+                  key={index}
+                  onClick={() =>
+                    questionRefs.current[index]?.scrollIntoView({
+                      behavior: "smooth",
+                    })
+                  }
+                >
+                  {index + 1}
+                </Button>
+              ))}
+            </div>
+
+            <Divider />
+
+            <Title level={5}>
+              Thời gian còn lại :{" "}
+              <strong
+                style={{
+                  fontWeight: "bold",
+                  color: remainingTime <= 60 ? "#ff4d4f" : "#000",
+                }}
+              >
+                {formatTime(remainingTime)}
+              </strong>
+            </Title>
+
+            <Button
+              type="primary"
+              onClick={handleSubmit}
+              disabled={!!Examresult || loading}
+              block
+            >
+              Nộp bài
+            </Button>
+          </div>
+        </Affix>
+      </Sider>
+    </Layout>
   );
 };
 
