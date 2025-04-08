@@ -1,5 +1,5 @@
 import { Exam, ExamAPI, Question } from "@/services/teacher/Teacher";
-import { Button, Pagination, Space, Tag } from "antd";
+import { Button, Pagination, Space, Tag, Modal } from "antd";
 import Table, { ColumnsType } from "antd/es/table";
 
 import { useEffect, useState } from "react";
@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 import CreateExamModalAuTo from "./DeThi/CreateExamQuestion.tsx/CreateExamAuto";
 import CreateExamModalShedule from "./DeThi/CreateExamQuestion.tsx/SetExamModalShedule";
 import ExportWordModal from "./DeThi/ExportWord/ExportWordModal";
-
+import ImportExamExcel from "./ImportExamExcel";
 const columns: ColumnsType<Exam> = [
   {
     title: "Tiêu đề",
@@ -86,6 +86,7 @@ export const QuanLyDeThi = () => {
   const [total, setTotal] = useState<number>(0);
   const [data, setData] = useState<Exam[]>();
   const [showModal, setShowModal] = useState<boolean>(false);
+  const [showModalImportExcel, setShowModalImportExcel] = useState(false);
   const [showModalExport, setShowModalExport] = useState<boolean>(false);
   const [currentSlug, setCurrentSlug] = useState<string>("");
   const changeSatusExam = async (id: string) => {
@@ -174,6 +175,22 @@ export const QuanLyDeThi = () => {
         >
           Tạo đề thi tự động
         </button>
+        <button
+          className="btn btn-primary mx-3"
+          onClick={() => setShowModalImportExcel(true)}
+        >
+          Tạo đề thi từ file excel
+        </button>
+        <Modal
+          open={showModalImportExcel}
+          onCancel={() => setShowModalImportExcel(false)}
+          footer={null}
+          width={750}
+          title="Tạo đề thi từ file Excel"
+          destroyOnClose // clear dữ liệu khi đóng modal
+        >
+          <ImportExamExcel />
+        </Modal>
       </div>
       {data ? (
         <Table
@@ -275,8 +292,9 @@ export const QuanLyDeThi = () => {
         visible={showModal}
         handleClose={() => setShowModal(false)}
         onCreateSuccess={handleCreateSuccess}
-        dataQuestion={[]} 
-        listeningExams={[]}      />
+        dataQuestion={[]}
+        listeningExams={[]}
+      />
       <CreateExamModalAuTo
         visible={showModalCreatAuto}
         handleClose={() => {
