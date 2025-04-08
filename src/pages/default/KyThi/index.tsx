@@ -1,79 +1,43 @@
-import { Exam, Question } from "@/services/teacher/Teacher";
-import { Button } from "antd";
-import Table, { ColumnsType } from "antd/es/table";
+import { Exam } from "@/services/teacher/Teacher";
+import { Card, Col, Row, Space, Tag, Typography } from "antd";
+import {
+  ClockCircleOutlined,
+  QuestionCircleOutlined,
+  CalendarOutlined,
+} from "@ant-design/icons";
 
 import { useEffect, useState } from "react";
-
 import { ExamAPIStudent } from "@/services/student";
 import { useNavigate } from "react-router-dom";
 
-const columns: ColumnsType<Exam> = [
-  {
-    title: "Tiêu đề",
-    dataIndex: "title",
-    key: "title",
-  },
-  {
-    title: "Mô tả",
-    dataIndex: "description",
-    key: "description",
-  },
-  {
-    title: "Thời gian phút",
-    dataIndex: "duration",
-    sorter: (a: Exam, b: Exam) => a.duration - b.duration,
-    key: "duration",
-  },
-  {
-    title: "Thời gian bắt đầu",
-    dataIndex: "startTime",
-    key: "startTime",
-    sorter: (a: Exam, b: Exam) =>
-      new Date(a.startTime || 0).getTime() -
-      new Date(b.startTime || 0).getTime(),
-    render: (text: string) => (text ? new Date(text).toLocaleString() : "N/A"),
-  },
-  {
-    title: "Thời gian kết thúc",
-    dataIndex: "endTime",
-    key: "endTime",
-    sorter: (a: Exam, b: Exam) =>
-      new Date(a.endTime || 0).getTime() - new Date(b.endTime || 0).getTime(),
-    render: (text: string) => (text ? new Date(text).toLocaleString() : "N/A"),
-  },
+const { Title, Text } = Typography;
 
-  {
-    title: "Số câu hỏi",
-    dataIndex: "questions",
-    key: "questions",
-    sorter: (a: Exam, b: Exam) =>
-      (a.questions?.length ?? 0) - (b.questions?.length ?? 0),
-    render: (record: Question[]) => record.length ?? 0,
-  },
-];
 export const KyThi = () => {
-  const [data, setData] = useState<Exam[]>();
+  const [data, setData] = useState<Exam[]>([]);
   const [total, setTotal] = useState<number>(0);
+  const navigator = useNavigate();
 
   const getAllExam = async (page: number) => {
     try {
       const rq = await ExamAPIStudent.getAllExam1000(page);
       if (rq?.code === 200) {
-        const now = new Date().getTime();
-        const filteredExams = rq.exams.filter((exam: Exam) => {
-          const startTime = new Date(exam.startTime).getTime();
-          const endTime = exam.endTime ? new Date(exam.endTime).getTime() : Infinity;
-           return startTime <= now && now <= endTime;
+        setData((prev) => {
+          const merged = [...(prev || []), ...rq.exams];
+          const unique = Array.from(
+            new Map(merged.map((i) => [i.slug, i])).values()
+          );
+          return unique;
         });
-        setData((prev) => [...(prev || []), ...filteredExams]);
         setTotal(rq?.total);
       }
     } catch (error: any) {
-      if (error.response) {
-        console.log(error.response.data.message);
-      }
+      console.log(error.response?.data?.message || error.message);
     }
   };
+
+  useEffect(() => {
+    getAllExam(1);
+  }, []);
 
   useEffect(() => {
     if (total > 1) {
@@ -82,45 +46,98 @@ export const KyThi = () => {
       );
     }
   }, [total]);
-  useEffect(() => {
-    getAllExam(1);
-  }, []);
 
-  const navigator = useNavigate();
-  const navagiteToDetail = (id: string) => {
-    navigator(`/KyThi/ChiTiet/${id}`);
+  const formatDate = (dateStr?: string) => {
+    return dateStr ? new Date(dateStr).toLocaleString() : "Không có";
   };
+
+  const now = new Date().getTime();
+  const ongoing = data.filter((exam) => {
+    const start = new Date(exam.startTime).getTime();
+    const end = exam.endTime ? new Date(exam.endTime).getTime() : Infinity;
+    return start <= now && now <= end;
+  });
+
+  const ended = data.filter((exam) => {
+    const end = exam.endTime ? new Date(exam.endTime).getTime() : 0;
+    return now > end;
+  });
+
+  const renderExamList = (exams: Exam[]) => (
+    <Row gutter={[16, 16]}>
+      {exams.map((exam) => (
+        <Col xs={24} sm={12} md={8} lg={6} key={exam._id}>
+          <Card
+            bordered
+            hoverable
+            onClick={() => navigator(`/KyThi/ChiTiet/${exam.slug}`)}
+            style={{
+              borderRadius: 12,
+              height: "100%",
+              cursor: "pointer",
+              transition: "all 0.3s ease",
+              boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+            }}
+            bodyStyle={{ minHeight: 200 }}
+            className="exam-card"
+          >
+            <Space direction="vertical" size="middle" style={{ width: "100%" }}>
+              <Title level={5} style={{ marginBottom: 0 }}>
+                {exam.title}
+              </Title>
+              <Text type="secondary" ellipsis={{ tooltip: exam.description }}>
+                {exam.description}
+              </Text>
+              <Space wrap size={[8, 8]}>
+                <Tag icon={<ClockCircleOutlined />} color="blue">
+                  {exam.duration} phút
+                </Tag>
+                <Tag icon={<CalendarOutlined />} color="green">
+                  Bắt đầu: {formatDate(exam.startTime)}
+                </Tag>
+                <Tag icon={<CalendarOutlined />} color="red">
+                  Kết thúc: {formatDate(exam.endTime)}
+                </Tag>
+                <Tag icon={<QuestionCircleOutlined />} color="purple">
+                  {exam.questions?.length ?? 0} câu hỏi
+                </Tag>
+              </Space>
+            </Space>
+          </Card>
+        </Col>
+      ))}
+    </Row>
+  );
+
   return (
     <div className="container mx-auto p-4">
       <center>
-        <h1 className="text-3xl font-bold ">Danh sách kỳ thi</h1>
+        <Title level={2}>📋 Danh sách kỳ thi</Title>
       </center>
 
-      {data ? (
-        <Table
-          dataSource={data}
-          showSorterTooltip={false}
-          columns={[
-            ...columns,
+      {ongoing.length > 0 && (
+        <>
+          <Title level={4} style={{ color: "#52c41a" }}>
+            🟢 Đang diễn ra
+          </Title>
+          {renderExamList(ongoing)}
+        </>
+      )}
 
-            {
-              title: "",
-              key: "action",
-              render: (_, record) => (
-                <Button
-                  color="primary"
-                  variant="solid"
-                  onClick={() => {
-                    navagiteToDetail(record.slug);
-                  }}
-                >
-                  Chi tiết
-                </Button>
-              ),
-            },
-          ]}
-        />
-      ) : null}
+      {ended.length > 0 && (
+        <>
+          <Title level={4} style={{ color: "#f5222d", marginTop: 32 }}>
+            🔴 Đã kết thúc
+          </Title>
+          {renderExamList(ended)}
+        </>
+      )}
+
+      {data.length === 0 && (
+        <center>
+          <Text type="secondary">Không có kỳ thi nào.</Text>
+        </center>
+      )}
     </div>
   );
 };

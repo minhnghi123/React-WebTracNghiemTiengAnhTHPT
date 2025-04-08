@@ -7,7 +7,6 @@ import { useEffect, useState } from "react";
 import UpdateListeningQuestionModal from "./CreateQuestion/UpdateListeningQuestion";
 import { ListeningQuestionData } from "@/services/teacher/ListeningQuestion";
 
-
 export interface ListeningQuestion {
   id: string;
   teacherId: any; // Bạn có thể định nghĩa chi tiết hơn nếu cần
@@ -27,13 +26,12 @@ type ListeningQuestionComponentProps = {
   deletetalbe?: boolean;
 };
 
-export const ListeningQuestionComponent: React.FC<ListeningQuestionComponentProps> = ({
-  onUpdateSuccess,
-  question,
-  editable = true,
-  deletetalbe = true,
-}) => {
-  const [questionData, setQuestionData] = useState<Partial<ListeningQuestionData>>({
+export const ListeningQuestionComponent: React.FC<
+  ListeningQuestionComponentProps
+> = ({ onUpdateSuccess, question, editable = true, deletetalbe = true }) => {
+  const [questionData, setQuestionData] = useState<
+    Partial<ListeningQuestionData>
+  >({
     teacherId: "",
     questionText: "",
     difficulty: "easy",
@@ -51,8 +49,7 @@ export const ListeningQuestionComponent: React.FC<ListeningQuestionComponentProp
       options: question.options?.map((opt) => opt.optionText) || [],
       blankAnswer: question.blankAnswer || "",
     });
-  }
-  , [question]);
+  }, [question]);
   const [open, setOpen] = useState(false);
   const [openModal, setOpenModal] = useState<boolean>(false);
 
@@ -82,7 +79,11 @@ export const ListeningQuestionComponent: React.FC<ListeningQuestionComponentProp
   return (
     <div className="bg-white p-4 rounded shadow mb-4">
       <h3 className="text-xl font-bold mb-2" style={{ whiteSpace: "pre-wrap" }}>
-        <span dangerouslySetInnerHTML={{ __html: cleanString(question.questionText) }} />
+        <span
+          dangerouslySetInnerHTML={{
+            __html: cleanString(question.questionText),
+          }}
+        />
       </h3>
       <div className="mt-1">
         {question.options?.map((option) => {
@@ -103,7 +104,10 @@ export const ListeningQuestionComponent: React.FC<ListeningQuestionComponentProp
           );
         })}
         {question.blankAnswer && (
-          <div className="ml-2 rounded mb-2 bg-green-100 p-2" style={{ whiteSpace: "pre-wrap" }}>
+          <div
+            className="ml-2 rounded mb-2 bg-green-100 p-2"
+            style={{ whiteSpace: "pre-wrap" }}
+          >
             {cleanString(question.blankAnswer)}
           </div>
         )}
@@ -126,7 +130,11 @@ export const ListeningQuestionComponent: React.FC<ListeningQuestionComponentProp
       {editable && (
         <>
           <hr />
-          <Button type="primary" className="my-3 mx-3" onClick={() => setOpenModal(true)}>
+          <Button
+            type="primary"
+            className="my-3 mx-3"
+            onClick={() => setOpenModal(true)}
+          >
             Sửa câu hỏi
           </Button>
           {deletetalbe && (

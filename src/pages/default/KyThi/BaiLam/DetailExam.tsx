@@ -2,76 +2,114 @@ import { ExamAPIStudent } from "@/services/student";
 import { Exam } from "@/services/teacher/Teacher";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import "bootstrap/dist/css/bootstrap.min.css";
-import { Button } from "antd";
+import { Card, Typography, Row, Col, Button, Space } from "antd";
+import {
+  CalendarOutlined,
+  ClockCircleOutlined,
+  QuestionCircleOutlined,
+  CheckCircleTwoTone,
+  PlayCircleOutlined,
+} from "@ant-design/icons";
 import { KetQua } from "../KetQua";
-import "./Detail.css";
+
+const { Title, Text } = Typography;
+
 export const DetailExam = () => {
   const { _id } = useParams<{ _id: string }>();
   const [exam, setExam] = useState<Exam | null>(null);
   const [questionCount, setQuestionCount] = useState<number>(0);
+  const [isPracticed, setIsPracticed] = useState(false);
+
+  const navigate = useNavigate();
 
   const fetchExam = async () => {
     const response = await ExamAPIStudent.getDetailExam(_id ?? "");
     if (response.code === 200) {
       setExam(response.exam);
-
       setQuestionCount(response.exam.questions.length);
+      setIsPracticed(response.exam.hasDone);
     }
   };
+
+  const handleJoinExam = async () => {
+    const res = await ExamAPIStudent.joinExam(exam?._id ?? "");
+    if (res.code === 200) navigate(`/KyThi/BaiLam/`);
+  };
+
+  const formatDate = (dateStr?: string) =>
+    dateStr ? new Date(dateStr).toLocaleString() : "Không giới hạn thời gian";
 
   useEffect(() => {
     fetchExam();
   }, [_id]);
-  const navigator = useNavigate();
-  const handleJoinExam = async () => {
-    const rq=  await ExamAPIStudent.joinExam(exam?._id ?? "")
-    if(rq.code===200)
-    navigator(`/KyThi/BaiLam/`);
-  };
+
   return (
     <div className="container mt-4">
       {exam ? (
-        <div className="card">
-          <div className="card-header">
-            <h1 className="card-title">{exam.title}</h1>
-          </div>
-          <div className="card-body">
-            <p className="card-text">
-              <strong>Giới thiệu:</strong> {exam.description}
-            </p>
-            <p className="card-text">
-              <strong>Số lượng câu hỏi:</strong> {questionCount}
-            </p>
-            <p className="card-text">
-              <strong>Thời gian:</strong> {exam.duration} minutes
-            </p>
+        <Card
+          bordered
+          style={{
+            maxWidth: 800,
+            margin: "0 auto",
+            borderRadius: 10,
+            boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
+          }}
+        >
+          <Space direction="vertical" style={{ width: "100%" }} size="large">
+            <Title level={3} style={{ textAlign: "center" }}>
+              {exam.title}{" "}
+              {isPracticed && <CheckCircleTwoTone twoToneColor="#52c41a" />}
+            </Title>
 
-            <p className="card-text">
-              <strong>Thời gian bắt đầu:</strong>{" "}
-              {new Date(exam.startTime).toLocaleString()}
-            </p>
-            <p className="card-text">
-              <strong>Thời gian kết thúc:</strong>{" "}
-              {exam.endTime
-                ? new Date(exam.endTime).toLocaleString()
-                : "Không giới hạn thời gian"}
-            </p>
-            <center>
-              <Button
-                onClick={() => {
-                  handleJoinExam(exam._id ?? "");
-                }}
-              >
-                Làm bài
-              </Button>
-            </center>
-          </div>
+            <Row gutter={[16, 16]}>
+              <Col span={12}>
+                <Text>
+                  <CalendarOutlined /> <strong>Thời gian bắt đầu:</strong>
+                </Text>
+                <br />
+                <Text type="secondary">{formatDate(exam.startTime)}</Text>
+              </Col>
+              <Col span={12}>
+                <Text>
+                  <CalendarOutlined /> <strong>Thời gian kết thúc:</strong>
+                </Text>
+                <br />
+                <Text type="secondary">{formatDate(exam.endTime)}</Text>
+              </Col>
 
-          <KetQua DeThi={exam._id} />
-        </div>
+              <Col span={12}>
+                <Text>
+                  <QuestionCircleOutlined /> <strong>Số câu hỏi:</strong>
+                </Text>
+                <br />
+                <Text type="secondary">{questionCount}</Text>
+              </Col>
+              <Col span={12}>
+                <Text>
+                  <ClockCircleOutlined /> <strong>Thời gian làm bài:</strong>
+                </Text>
+                <br />
+                <Text type="secondary">{exam.duration} phút</Text>
+              </Col>
+            </Row>
+
+            <Button
+              type="primary"
+              icon={<PlayCircleOutlined />}
+              size="large"
+              onClick={handleJoinExam}
+              style={{ width: "100%", borderRadius: 6 }}
+            >
+              Làm bài
+            </Button>
+
+            <KetQua DeThi={exam._id} />
+          </Space>
+        </Card>
       ) : (
-        <p>Loading...</p>
+        <center>
+          <Text>Đang tải thông tin kỳ thi...</Text>
+        </center>
       )}
     </div>
   );
