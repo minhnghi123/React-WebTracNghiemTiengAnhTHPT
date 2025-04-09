@@ -9,6 +9,13 @@ import jwt from "jsonwebtoken";
 import { ENV_VARS } from "../../config/envVars.config.js";
 import { Audio } from "../../models/Audio.model.js";
 
+// Map database question type names to standardized names
+const questionTypeMapping = {
+  "Mutiple Choices": "Multiple Choice Questions",
+  "Fill in the blank": "Fill in the Blanks",
+  "True/False/Not Given": "True/False/Not Given",
+};
+
 // [GET]: /result/
 // Lấy tất cả kết quả (không bị xóa và đã hoàn thành) và populate các trường liên quan
 export const getAllResults = async (req, res) => {
@@ -18,12 +25,12 @@ export const getAllResults = async (req, res) => {
       path: "examId",
       populate: [
         { path: "questions" },
-        { 
-          path: "listeningExams", 
-          populate: { 
-            path: "questions", 
-            select: "questionText options correctAnswer blankAnswer audio" // Include necessary fields
-          } 
+        {
+          path: "listeningExams",
+          populate: {
+            path: "questions",
+            select: "questionText options correctAnswer blankAnswer audio", // Include necessary fields
+          },
         },
       ],
     });
@@ -42,7 +49,11 @@ export const submitExam = async (req, res) => {
     const { resultId, answers, listeningAnswers } = req.body;
 
     // Kiểm tra tính hợp lệ của dữ liệu đầu vào
-    if (!resultId || !Array.isArray(answers) || !Array.isArray(listeningAnswers)) {
+    if (
+      !resultId ||
+      !Array.isArray(answers) ||
+      !Array.isArray(listeningAnswers)
+    ) {
       return res.status(400).json({ message: "Invalid input data." });
     }
 
@@ -53,7 +64,10 @@ export const submitExam = async (req, res) => {
     }).populate({
       path: "examId",
       populate: [
-        { path: "questions", populate: { path: "questionType", select: "name" } },
+        {
+          path: "questions",
+          populate: { path: "questionType", select: "name" },
+        },
         {
           path: "listeningExams",
           populate: {
@@ -82,7 +96,7 @@ export const submitExam = async (req, res) => {
       let correctAnswer = 0;
       let wrongAnswer = 0;
       if (Array.isArray(existingResult.questions)) {
-        existingResult.questions.forEach(q => {
+        existingResult.questions.forEach((q) => {
           if (q.isCorrect) {
             score++;
             correctAnswer++;
@@ -92,7 +106,7 @@ export const submitExam = async (req, res) => {
         });
       }
       if (Array.isArray(existingResult.listeningQuestions)) {
-        existingResult.listeningQuestions.forEach(q => {
+        existingResult.listeningQuestions.forEach((q) => {
           if (q.isCorrect) {
             score++;
             correctAnswer++;
@@ -140,7 +154,10 @@ export const submitExam = async (req, res) => {
       let isCorrect = false;
       let detail = {};
 
-      switch (question.questionType.name) {
+      switch (
+        questionTypeMapping[question.questionType.name] ||
+        question.questionType.name
+      ) {
         case "Fill in the Blanks":
           if (Array.isArray(userAnswer)) {
             let correctCount = 0;
@@ -163,7 +180,7 @@ export const submitExam = async (req, res) => {
             isCorrect = correctCount === question.answers.length;
             detail = {
               questionId: question._id,
-              content: question.content,
+              content: question.content || " ",
               answers: question.answers,
               userAnswers: userAnswersDetail,
               correctAnswerForBlank: correctAnswers,
@@ -184,7 +201,8 @@ export const submitExam = async (req, res) => {
             }
             if (!Array.isArray(userAnswer)) {
               return res.status(400).json({
-                message: "Invalid format for userAnswer. It should be an array.",
+                message:
+                  "Invalid format for userAnswer. It should be an array.",
               });
             }
             const userAnswersDetail = userAnswer.map((ua) => {
@@ -205,7 +223,7 @@ export const submitExam = async (req, res) => {
             isCorrect = correctCount === correctAnswers.length;
             detail = {
               questionId: question._id,
-              content: question.content,
+              content: question.content || " ",
               answers: question.answers,
               userAnswers: userAnswersDetail,
               correctAnswerForBlank: correctAnswers.map(
@@ -231,11 +249,35 @@ export const submitExam = async (req, res) => {
             String(correctAnswerObj._id) === String(selectedAnswerId);
           detail = {
             questionId: question._id,
-            content: question.content,
+            content: question.content || " ",
             answers: question.answers,
             selectedAnswerId,
             userAnswers: [{ userAnswer: selectedAnswerId }],
             correctAnswerForBlank: null,
+            audio: question.audio || null,
+            isCorrect,
+          };
+          break;
+
+        case "True/False/Not Given":
+          if (!Array.isArray(userAnswer)) {
+            return res.status(400).json({
+              message: `Invalid answer format for question ${questionId}.`,
+            });
+          }
+          const correctAnswers = question.correctAnswerForTrueFalseNGV || [];
+          const userAnswersDetail = userAnswer.map((ua) => ({
+            userAnswer: ua,
+            isCorrect: correctAnswers.includes(ua.trim().toLowerCase()),
+          }));
+          const correctCount = userAnswersDetail.filter((ans) => ans.isCorrect).length;
+          isCorrect = correctCount === correctAnswers.length;
+          detail = {
+            questionId: question._id,
+            content: question.content || " ",
+            answers: [], // No options for True/False/Not Given
+            userAnswers: userAnswersDetail,
+            correctAnswerForBlank: correctAnswers,
             audio: question.audio || null,
             isCorrect,
           };
@@ -295,12 +337,15 @@ export const submitExam = async (req, res) => {
       let detail = {};
       console.log("answer", answer);
       console.log("question", question);
-      switch (question.questionType.name) {
+      switch (
+        questionTypeMapping[question.questionType.name] ||
+        question.questionType.name
+      ) {
         case "Fill in the Blanks":
           if (Array.isArray(userAnswer)) {
             let correctCount = 0;
             const correctAnswers = question.blankAnswer
-              .split(',')
+              .split(",")
               .map((ans) => ans.trim().toLowerCase());
             const userAnswersDetail = userAnswer.map((ua, index) => {
               const correctAns = correctAnswers[index] || "";
@@ -316,7 +361,7 @@ export const submitExam = async (req, res) => {
             isCorrect = correctCount === correctAnswers.length;
             detail = {
               questionId: question._id,
-              content: question.questionText,
+              content: question.questionText || " ",
               answers: question.options || [],
               userAnswers: userAnswersDetail,
               correctAnswerForBlank: correctAnswers,
@@ -325,7 +370,7 @@ export const submitExam = async (req, res) => {
             };
           } else if (question.audio) {
             const correctAnswers = question.blankAnswer
-              .split(',')
+              .split(",")
               .map((ans) => ans.trim().toLowerCase());
             if (!correctAnswers.length) {
               return res.status(500).json({
@@ -334,7 +379,8 @@ export const submitExam = async (req, res) => {
             }
             if (!Array.isArray(userAnswer)) {
               return res.status(400).json({
-                message: "Invalid format for userAnswer. It should be an array.",
+                message:
+                  "Invalid format for userAnswer. It should be an array.",
               });
             }
             const userAnswersDetail = userAnswer.map((ua) => {
@@ -353,7 +399,7 @@ export const submitExam = async (req, res) => {
             isCorrect = correctCount === correctAnswers.length;
             detail = {
               questionId: question._id,
-              content: question.questionText,
+              content: question.questionText || " ",
               answers: question.options || [],
               userAnswers: userAnswersDetail,
               correctAnswerForBlank: correctAnswers,
@@ -376,14 +422,16 @@ export const submitExam = async (req, res) => {
             // opt.option_id chứa id của option, so sánh với correctAnswerObj.answer_id
             return {
               ...opt.toObject(),
-              isCorrect: String(opt.option_id) === String(correctAnswerObj.answer_id),
+              isCorrect:
+                String(opt.option_id) === String(correctAnswerObj.answer_id),
               optionText: opt.optionText, // Include optionText field
             };
           });
-          isCorrect = String(correctAnswerObj.answer_id) === String(selectedAnswerId);
+          isCorrect =
+            String(correctAnswerObj.answer_id) === String(selectedAnswerId);
           detail = {
             questionId: question._id,
-            content: question.questionText,
+            content: question.questionText || " ",
             answers: transformedOptions,
             selectedAnswerId,
             userAnswers: [{ userAnswer: selectedAnswerId }],
@@ -537,7 +585,9 @@ export const getWrongQuestions = async (req, res) => {
       return res.status(404).json({ message: "Result not found" });
     }
     const wrongQuestions = result.questions.filter((q) => !q.isCorrect);
-    const wrongListeningQuestions = result.listeningQuestions.filter((q) => !q.isCorrect);
+    const wrongListeningQuestions = result.listeningQuestions.filter(
+      (q) => !q.isCorrect
+    );
     res.status(200).json({
       code: 200,
       message: "Wrong questions fetched successfully.",
@@ -561,11 +611,16 @@ export const getDontCompletedExam = async (req, res) => {
     // Tìm các kết quả chưa hoàn thành mà đã vượt thời gian
     const expiredResults = await Result.find({
       isCompleted: false,
-      endTime: { $lt: now }
+      endTime: { $lt: now },
     }).populate({
       path: "examId",
       populate: [
-        { path: "questions" },
+        {
+          path: "questions",
+          populate: [
+            { path: "passageId", select: "title content createdAt updatedAt" }, // Include all fields of passageId
+          ],
+        },
         { path: "listeningExams", populate: { path: "questions audio" } },
       ],
     });
@@ -625,13 +680,22 @@ export const getDontCompletedExam = async (req, res) => {
     }).populate({
       path: "examId",
       populate: [
-        { path: "questions" },
+        {
+          path: "questions",
+          populate: [
+            { path: "passageId", select: "title content createdAt updatedAt" }, // Include all fields of passageId
+          ],
+        },
         { path: "listeningExams", populate: { path: "questions audio" } },
       ],
     });
 
     // Convert audio field to URL
-    if (ongoingExam && ongoingExam.examId && Array.isArray(ongoingExam.examId.listeningExams)) {
+    if (
+      ongoingExam &&
+      ongoingExam.examId &&
+      Array.isArray(ongoingExam.examId.listeningExams)
+    ) {
       for (const listeningExam of ongoingExam.examId.listeningExams) {
         if (listeningExam.audio && listeningExam.audio.filePath) {
           listeningExam.audio = listeningExam.audio.filePath;
@@ -641,7 +705,8 @@ export const getDontCompletedExam = async (req, res) => {
 
     res.status(200).json({
       code: 200,
-      message: "Final scores computed and incomplete exams updated successfully",
+      message:
+        "Final scores computed and incomplete exams updated successfully",
       results: ongoingExam,
     });
   } catch (error) {

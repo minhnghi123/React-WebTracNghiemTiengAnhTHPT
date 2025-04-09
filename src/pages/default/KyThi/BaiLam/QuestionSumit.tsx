@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {  Input, Radio, Card, Typography } from "antd";
+import { Input, Radio, Card, Typography } from "antd";
 import { Question } from "@/types/interface";
 import { cleanString } from "@/utils/cn";
 
@@ -24,6 +24,7 @@ const QuestionSubmit: React.FC<QuestionComponentProps> = ({
   questionType,
   onAnswerChange,
   currentAnswer,
+  index,
 }) => {
   const [localAnswer, setLocalAnswer] = useState<UserAnswer>(
     currentAnswer || { questionId: question._id || "", userAnswer: [] }
@@ -57,6 +58,12 @@ const QuestionSubmit: React.FC<QuestionComponentProps> = ({
       questionId,
       userAnswer: currentUserAnswers,
     };
+    setLocalAnswer(newAnswer);
+    onAnswerChange(newAnswer);
+  };
+
+  const handleTrueFalseChange = (questionId: string, value: string) => {
+    const newAnswer: UserAnswer = { questionId, userAnswer: [value] };
     setLocalAnswer(newAnswer);
     onAnswerChange(newAnswer);
   };
@@ -97,7 +104,6 @@ const QuestionSubmit: React.FC<QuestionComponentProps> = ({
       );
     }
 
-    // return null;
     return (
       <span
         dangerouslySetInnerHTML={{
@@ -113,12 +119,13 @@ const QuestionSubmit: React.FC<QuestionComponentProps> = ({
         level={5}
         style={{
           whiteSpace: "normal",
-          wordBreak: "break-word", // đảm bảo nội dung không tràn
+          wordBreak: "break-word",
           fontSize: "16px",
           lineHeight: "1.5",
           marginBottom: 16,
         }}
       >
+        {index + 1}.{" "}
         {questionType === "6742fb3bd56a2e75dbd817ec" ? (
           renderFillInBlankContent()
         ) : (
@@ -148,6 +155,18 @@ const QuestionSubmit: React.FC<QuestionComponentProps> = ({
                 />
               </Radio>
             ))}
+          </Radio.Group>
+        ) : questionType === "6742fb5dd56a2e75dbd817ee" ? (
+          <Radio.Group
+            onChange={(e) =>
+              handleTrueFalseChange(question._id || "", e.target.value)
+            }
+            value={localAnswer.userAnswer?.[0]}
+            style={{ display: "flex", flexDirection: "column", gap: "12px" }}
+          >
+            <Radio value="true">True</Radio>
+            <Radio value="false">False</Radio>
+            <Radio value="not_given">Not Given</Radio>
           </Radio.Group>
         ) : (
           (() => {

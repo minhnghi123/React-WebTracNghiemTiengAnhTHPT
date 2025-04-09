@@ -19,6 +19,7 @@ import ListeningQuestionSubmit from "./listeningQuestionSubmit";
 import { Question } from "@/types/interface";
 import ErrorReportModal from "@/components/ErrorReportModal"; // Import ErrorReportModal
 import errorrIcon from "@/Content/img/errorr.png"; // Import your error icon
+
 const { Panel } = Collapse;
 const { Title, Paragraph } = Typography;
 const { Sider, Content } = Layout;
@@ -33,10 +34,9 @@ const BaiLam: React.FC = () => {
   const [showDetails, setShowDetails] = useState<boolean>(false);
   const [answers, setAnswers] = useState<any[]>([]);
   const [listeningAnswers, setListeningAnswers] = useState<any[]>([]);
-  const [showErrorModal, setShowErrorModal] = useState<boolean>(false); // State to control modal visibility
-  const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(
-    null
-  ); // State to store the selected question for reporting
+  const [showErrorModal, setShowErrorModal] = useState<boolean>(false);
+  const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
+  const [groupedQuestions, setGroupedQuestions] = useState<Record<string, any[]>>({});
   const questionRefs = useRef<any[]>([]);
   const resultSectionRef = useRef<HTMLDivElement>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -48,7 +48,22 @@ const BaiLam: React.FC = () => {
         const response = await ResultAPI.getInCompletedExam();
         if (response.code === 200 && response.results) {
           setExamDetails(response.results);
-          setSuggestedQuestions(response.results.suggestionQuestion || []);
+
+          // Group questions by passageId
+          const questions = [
+            ...(response.results.examId.questions || []),
+            ...(response.results.examId.listeningExams?.flatMap(
+              (le: any) => le.questions || []
+            ) || []),
+          ];
+          const grouped = questions.reduce((acc: Record<string, any[]>, question: any) => {
+            const passageId = question.passageId?._id || question.passageId || "no-passage";
+            if (!acc[passageId]) acc[passageId] = [];
+            acc[passageId].push(question);
+            return acc;
+          }, {});
+          setGroupedQuestions(grouped);
+
           const endTime = new Date(response.results.endTime);
           endTimeRef.current = endTime;
         }
@@ -175,64 +190,167 @@ const BaiLam: React.FC = () => {
     setSelectedQuestion(null);
   };
 
+  // Initialize globalQuestionIndex to 0
+  let globalQuestionIndex = 0;
+
   return (
     <Layout style={{ minHeight: "100vh", background: "#fff" }}>
-      <Content style={{ padding: "2rem", maxWidth: 900, margin: "0 auto" }}>
+      <Content style={{ padding: "2rem", maxWidth: 1200, margin: "0 auto" }}>
         <Title level={3} style={{ textAlign: "center", marginBottom: 32 }}>
           {examDetails?.examId.title}
         </Title>
 
-        {[
-          ...(examDetails?.examId.questions || []),
-          ...(examDetails?.examId.listeningExams?.flatMap(
-            (le: any) => le.questions || []
-          ) || []),
-        ].map((q: any, idx: number) => (
-          <Card
-            key={q._id || idx}
-            ref={(el) => (questionRefs.current[idx] = el)}
-            style={{
-              marginBottom: 24,
-              borderRadius: 12,
-              boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
-            }}
-          >
-            <div style={{ display: "flex", justifyContent: "flex-end" }}>
-  <img
-    src={errorrIcon}
-    alt="Báo lỗi"
-    onClick={() => handleReportError(q)}
-    style={{ marginTop: 8, height: 20, width: 20, cursor: "pointer" }}
-  />
-</div>
-
-            {q.audio ? (
-              <>
-                <audio controls style={{ marginBottom: 8 }}>
-                  <source src={q.audio.filePath} type="audio/mpeg" />
-                </audio>
-                <ListeningQuestionSubmit
-                  question={q}
-                  questionType={q.questionType || ""}
-                  onAnswerChange={handleListeningAnswerChange}
-                  currentAnswer={listeningAnswers.find(
-                    (ans) => ans.questionId === q._id
+        {Object.keys(groupedQuestions).length > 1 || !groupedQuestions["no-passage"] ? (
+          // Case: Questions grouped by passages
+          Object.keys(groupedQuestions).map((passageId, groupIndex) => {
+            return (
+              <div
+                key={groupIndex}
+                style={{
+                  display: "flex",
+                  gap: "16px",
+                  marginBottom: "24px",
+                  border: "1px solid #ddd",
+                  borderRadius: 8,
+                  padding: 16,
+                }}
+              >
+                {passageId !== "no-passage" &&
+                  groupedQuestions[passageId][0]?.passageId?.content && (
+                    // Left Panel: Passage Content
+                    <div
+                      style={{
+                        flex: 1,
+                        overflowY: "auto",
+                        maxHeight: "500px",
+                        padding: "16px",
+                        borderRight: "1px solid #ddd",
+                      }}
+                      dangerouslySetInnerHTML={{
+                        __html: groupedQuestions[passageId][0].passageId.content.replace(/\n/g, "<br />"),
+                      }}
+                    ></div>
                   )}
-                />
-              </>
-            ) : (
-              <QuestionSubmit
-                question={q}
-                questionType={q.questionType || ""}
-                onAnswerChange={handleAnswerChange}
-                currentAnswer={answers.find((ans) => ans.questionId === q._id)}
-                index={0}
-              />
-            )}
 
-            
-          </Card>
-        ))}
+                {/* Right Panel: Scrollable Questions */}
+                <div
+                  style={{
+                    flex: 2,
+                    overflowY: "auto",
+                    maxHeight: "500px",
+                    padding: "16px",
+                  }}
+                >
+                  {groupedQuestions[passageId].map((q, idx) => {
+                    // Use globalQuestionIndex for consistent numbering
+                    const questionIndex = globalQuestionIndex++;
+                    return (
+                      <Card
+                        key={q._id || idx}
+                        ref={(el) => {
+                          if (el) questionRefs.current[questionIndex] = el; // Only add non-null elements
+                        }}
+                        style={{
+                          marginBottom: 24,
+                          borderRadius: 12,
+                          boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+                        }}
+                      >
+                        <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                          <img
+                            src={errorrIcon}
+                            alt="Báo lỗi"
+                            onClick={() => handleReportError(q)}
+                            style={{ marginTop: 8, height: 20, width: 20, cursor: "pointer" }}
+                          />
+                        </div>
+
+                        {q.audio ? (
+                          <>
+                            <audio controls style={{ marginBottom: 8 }}>
+                              <source src={q.audio.filePath} type="audio/mpeg" />
+                            </audio>
+                            <ListeningQuestionSubmit
+                              question={q}
+                              questionType={q.questionType || ""}
+                              onAnswerChange={handleListeningAnswerChange}
+                              currentAnswer={listeningAnswers.find(
+                                (ans) => ans.questionId === q._id
+                              )}
+                              index={questionIndex}
+                            />
+                          </>
+                        ) : (
+                          <QuestionSubmit
+                            question={q}
+                            questionType={q.questionType || ""}
+                            onAnswerChange={handleAnswerChange}
+                            currentAnswer={answers.find((ans) => ans.questionId === q._id)}
+                            index={questionIndex}
+                          />
+                        )}
+                      </Card>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })
+        ) : (
+          // Case: No passages, display questions in a single column
+          <div>
+            {groupedQuestions["no-passage"]?.map((q, idx) => {
+              const questionIndex = globalQuestionIndex++;
+              return (
+                <Card
+                  key={q._id || idx}
+                  ref={(el) => {
+                    if (el) questionRefs.current[questionIndex] = el; // Only add non-null elements
+                  }}
+                  style={{
+                    marginBottom: 24,
+                    borderRadius: 12,
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+                  }}
+                >
+                  <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                    <img
+                      src={errorrIcon}
+                      alt="Báo lỗi"
+                      onClick={() => handleReportError(q)}
+                      style={{ marginTop: 8, height: 20, width: 20, cursor: "pointer" }}
+                    />
+                  </div>
+
+                  {q.audio ? (
+                    <>
+                      <audio controls style={{ marginBottom: 8 }}>
+                        <source src={q.audio.filePath} type="audio/mpeg" />
+                      </audio>
+                      <ListeningQuestionSubmit
+                        question={q}
+                        questionType={q.questionType || ""}
+                        onAnswerChange={handleListeningAnswerChange}
+                        currentAnswer={listeningAnswers.find(
+                          (ans) => ans.questionId === q._id
+                        )}
+                        index={questionIndex}
+                      />
+                    </>
+                  ) : (
+                    <QuestionSubmit
+                      question={q}
+                      questionType={q.questionType || ""}
+                      onAnswerChange={handleAnswerChange}
+                      currentAnswer={answers.find((ans) => ans.questionId === q._id)}
+                      index={questionIndex}
+                    />
+                  )}
+                </Card>
+              );
+            })}
+          </div>
+        )}
 
         {showErrorModal && selectedQuestion && (
           <ErrorReportModal
@@ -338,24 +456,45 @@ const BaiLam: React.FC = () => {
                 marginBottom: 16,
               }}
             >
-              {[
-                ...(examDetails?.examId.questions || []),
-                ...(examDetails?.examId.listeningExams?.flatMap(
-                  (le: any) => le.questions || []
-                ) || []),
-              ].map((_, index) => (
-                <Button
-                  size="small"
-                  key={index}
-                  onClick={() =>
-                    questionRefs.current[index]?.scrollIntoView({
-                      behavior: "smooth",
-                    })
+              {questionRefs.current
+                .filter((ref) => ref) // Filter out any undefined/null elements
+                .map((_, index) => {
+                  let questionId: string | undefined;
+                  let currentIndex = 0;
+
+                  for (const passageId of Object.keys(groupedQuestions)) {
+                    const questions = groupedQuestions[passageId];
+                    if (index < currentIndex + questions.length) {
+                      questionId = questions[index - currentIndex]?._id;
+                      break;
+                    }
+                    currentIndex += questions.length;
                   }
-                >
-                  {index + 1}
-                </Button>
-              ))}
+
+                  // Determine if the question is answered
+                  const isAnswered =
+                    answers.some((ans) => ans.questionId === questionId) ||
+                    listeningAnswers.some((ans) => ans.questionId === questionId);
+
+                  return (
+                    <Button
+                      size="small"
+                      key={index}
+                      style={{
+                        backgroundColor: isAnswered ? "#52c41a" : "#f0f0f0", // Green for answered, default for unanswered
+                        color: isAnswered ? "#fff" : "#000",
+                      }}
+                      onClick={() =>
+                        questionRefs.current[index]?.scrollIntoView({
+                          behavior: "smooth",
+                          block: "center", // Ensure the question is centered in view
+                        })
+                      }
+                    >
+                      {index + 1}
+                    </Button>
+                  );
+                })}
             </div>
 
             <Divider />

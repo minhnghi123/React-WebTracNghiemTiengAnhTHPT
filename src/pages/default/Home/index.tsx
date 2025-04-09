@@ -2,6 +2,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "./reponsive.css";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { Button } from "antd";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -99,12 +100,12 @@ const Home = () => {
             <p className="text-gray-600 mt-2">
               Thử sức với các đề thi sát với đề thi THPT quốc gia, nâng cao kỹ năng làm bài.
             </p>
-            <button 
-              className="mt-4 px-6 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600 transition"
+            <Button 
+              className="mt-4 px-6 py-2 bg-blue-500 text-black font-semibold rounded-lg shadow-md hover:bg-blue-600 transition"
               onClick={() => handleNavigation("/KyThi")}
             >
               Tham gia ngay
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -117,12 +118,12 @@ const Home = () => {
             <p className="text-gray-600 mt-2">
               Hệ thống ôn tập thông minh giúp bạn cải thiện điểm số nhanh chóng.
             </p>
-            <button 
-              className="mt-4 px-6 py-2 bg-green-500 text-white font-semibold rounded-lg shadow-md hover:bg-green-600 transition"
+            <Button 
+              className="mt-4 px-6 py-2 bg-green-500 text-black font-semibold rounded-lg shadow-md hover:bg-green-600 transition"
               onClick={() => handleNavigation("/OnTap")}
             >
               Ôn tập ngay
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -134,12 +135,12 @@ const Home = () => {
             <p className="text-gray-600 mt-2">
               Học tập cùng bạn bè, trao đổi kiến thức và nhận hỗ trợ từ giáo viên.
             </p>
-            <button 
-              className="mt-4 px-6 py-2 bg-purple-500 text-white font-semibold rounded-lg shadow-md hover:bg-purple-600 transition"
+            <Button 
+              className="mt-4 px-6 py-2 bg-purple-500 text-black font-semibold rounded-lg shadow-md hover:bg-purple-600 transition"
               onClick={() => handleNavigation("/PhongThi")}
             >
               Tham gia ngay
-            </button>
+            </Button>
           </div>
         </div>
 

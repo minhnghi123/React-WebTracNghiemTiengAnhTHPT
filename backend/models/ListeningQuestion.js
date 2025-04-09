@@ -42,6 +42,11 @@ const listeningQuestionSchema  = new Schema(
         },
       },
     ],
+    correctAnswerForTrueFalseNGV: {
+      type: String,
+      enum: ["true", "false", "notgiven"],
+      default: "",
+    },
     difficulty: {
       type: String,
       enum: ["easy", "medium", "hard"],

@@ -1,3 +1,5 @@
+import { Passage } from "@/services/teacher/Teacher";
+
 export interface Answer {
   _id: string;
   correctAnswerForBlank: string;
@@ -6,7 +8,7 @@ export interface Answer {
 }
 
 export interface Question {
-  passageId: string | null;
+  passageId?: Passage;
   _id: string;
   content: string;
   level: string;
