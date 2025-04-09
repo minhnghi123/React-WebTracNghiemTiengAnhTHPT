@@ -97,9 +97,12 @@ const QuestionSubmit: React.FC<QuestionComponentProps> = ({
       );
     }
 
+    // return null;
     return (
-      <Paragraph
-        dangerouslySetInnerHTML={{ __html: cleanString(question.content) }}
+      <span
+        dangerouslySetInnerHTML={{
+          __html: cleanString(question.content),
+        }}
       />
     );
   };

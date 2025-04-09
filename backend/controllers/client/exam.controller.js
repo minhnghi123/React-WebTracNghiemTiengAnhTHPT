@@ -1,7 +1,7 @@
 import Exam from "../../models/Exam.model.js";
 import { redisService } from "../../config/redis.config.js";
 import Result from "../../models/Result.model.js";
-
+import { Passage } from "../../models/Passage.model.js";
 function shuffleArray(array) {
   for (let i = array.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -81,17 +81,17 @@ export const detailExam = async (req, res) => {
 export const joinedExam = async (req, res) => {
   try {
     // Kiểm tra xem người dùng có đang tham gia kỳ thi khác không
-    const ongoingExam = await Result.findOne({
-      userId: req.user._id,
-      isCompleted: false,
-      endTime: { $gt: new Date() },
-    });
-    if (ongoingExam) {
-      return res.status(400).json({
-        code: 400,
-        message: "Bạn đang tham gia kỳ thi khác.",
-      });
-    }
+    // const ongoingExam = await Result.findOne({
+    //   userId: req.user._id,
+    //   isCompleted: false,
+    //   endTime: { $gt: new Date() },
+    // });
+    // if (ongoingExam) {
+    //   return res.status(400).json({
+    //     code: 400,
+    //     message: "Bạn đang tham gia kỳ thi khác.",
+    //   });
+    // }
 
     // Tìm đề thi và populate các câu hỏi của đề chính và phần nghe
     const exam = await Exam.findOne({ _id: req.params.examId })
@@ -111,20 +111,53 @@ export const joinedExam = async (req, res) => {
       return res.status(404).json({ message: "Đề thi không tồn tại." });
     }
 
-    // Đảo thứ tự câu hỏi của đề thi chính
-    const shuffledQuestions = shuffleArray(exam.questions).map((question) => ({
-      ...question.toObject(),
-      answers: shuffleArray(question.answers),
-    }));
+    // 1. Shuffle toàn bộ câu hỏi và shuffle cả câu trả lời trong mỗi câu hỏi
+    const allShuffled = shuffleArray(exam.questions).map((question) => {
+      return {
+        ...question.toObject(),
+        answers: shuffleArray(question.answers),
+      };
+    });
+
+    // 2. Tách riêng câu hỏi đọc (có passageId) và câu hỏi riêng lẻ (không có passageId)
+    const groupedQuestions = {};
+    const shuffledQuestions = []; // chứa câu hỏi không có passageId (câu hỏi riêng lẻ)
+
+    for (const question of allShuffled) {
+      if (question.passageId) {
+        if (!groupedQuestions[question.passageId]) {
+          groupedQuestions[question.passageId] = [];
+        }
+        groupedQuestions[question.passageId].push(question);
+      } else {
+        shuffledQuestions.push(question);
+      }
+    }
+
+    // 3. Lấy các passage tương ứng theo passageId
+    const passageIds = Object.keys(groupedQuestions);
+    const passages = await Promise.all(
+      passageIds.map((id) => Passage.findById(id))
+    );
+
+    // 4. Tạo mảng readingQuestionsArray chứa: { passageInfo, questions }
+    const readingQuestionsArray = passageIds.map((id) => {
+      return {
+        passageInfo: passages.find((p) => p._id.toString() === id),
+        questions: groupedQuestions[id],
+      };
+    });
 
     // Đảo thứ tự bài nghe và câu hỏi của từng bài nghe
     const shuffledListeningExams = exam.listeningExams.map((listeningExam) => {
       return {
         ...listeningExam.toObject(),
-        questions: shuffleArray(listeningExam.questions).map((listeningQuestion) => ({
-          ...listeningQuestion.toObject(),
-          options: shuffleArray(listeningQuestion.options),
-        })),
+        questions: shuffleArray(listeningExam.questions).map(
+          (listeningQuestion) => ({
+            ...listeningQuestion.toObject(),
+            options: shuffleArray(listeningQuestion.options),
+          })
+        ),
       };
     });
 
@@ -151,6 +184,7 @@ export const joinedExam = async (req, res) => {
       duration: exam.duration,
       questions: shuffledQuestions,
       listeningExams: shuffledListeningExams,
+      readingQuestion: readingQuestionsArray,
       resultId: result._id,
     });
   } catch (error) {
