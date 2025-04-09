@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Modal, Button, Input, Select, Form } from "antd";
 import { CloseCircleOutlined } from "@ant-design/icons";
 import clsx from "clsx";
-import { Question, QuestionAPI, AudioAPI, Audio } from "@/services/teacher/Teacher";
+import { Question, QuestionAPI, AudioAPI, Audio, Passage } from "@/services/teacher/Teacher";
 import { CreateAudioModal } from "../../QuanLyFileAudio/FileAudio/CreateDangCauHoiModal";
 
 const { Option } = Select;
@@ -56,7 +56,7 @@ const CreateQuestionModal: React.FC<CreateQuestionModalProps> = ({
     setQuestion((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleLevelChange = (value: "easy" | "medium" | "hard") => {
+  const handleLevelChange = (value: "easy" | "hard") => {
     setQuestion((prev) => ({ ...prev, level: value }));
   };
 
@@ -66,6 +66,13 @@ const CreateQuestionModal: React.FC<CreateQuestionModalProps> = ({
         ...prev,
         questionType: "6742fb3bd56a2e75dbd817ec",
         answers: [{ text: "", correctAnswerForBlank: "", isCorrect: true }],
+      }));
+    } else if (value === "truefalsengv") {
+      setQuestion((prev) => ({
+        ...prev,
+        questionType: "6742fb5dd56a2e75dbd817ee",
+        correctAnswerForTrueFalseNGV: "true",
+        answers: [],
       }));
     } else {
       setQuestion((prev) => ({
@@ -132,12 +139,6 @@ const CreateQuestionModal: React.FC<CreateQuestionModalProps> = ({
     setQuestion((prev) => ({ ...prev, answers: newAnswers }));
   };
 
-  // const handleAudioChange = (info: any) => {
-  //   if (info.file.status === "done") {
-  //     setAudioFile(info.file.originFileObj);
-  //   }
-  // };
-
   const handleSaveClick = async () => {
     if (!question.content.trim()) {
       return Modal.error({
@@ -154,6 +155,13 @@ const CreateQuestionModal: React.FC<CreateQuestionModalProps> = ({
         return Modal.error({
           title: "Lỗi",
           content: "Tất cả các từ khóa điền khuyết phải được nhập",
+        });
+      }
+    } else if (question.questionType === "6742fb5dd56a2e75dbd817ee") {
+      if (!question.correctAnswerForTrueFalseNGV) {
+        return Modal.error({
+          title: "Lỗi",
+          content: "Cần phải chọn đáp án đúng cho câu hỏi True/False/Not Given",
         });
       }
     } else {
@@ -269,12 +277,15 @@ const CreateQuestionModal: React.FC<CreateQuestionModalProps> = ({
               value={
                 question.questionType === "6742fb1cd56a2e75dbd817ea"
                   ? "yesno"
-                  : "fillblank"
+                  : question.questionType === "6742fb3bd56a2e75dbd817ec"
+                  ? "fillblank"
+                  : "truefalsengv"
               }
               onChange={handleQuestionTypeChange}
             >
               <Option value="yesno">Yes/No</Option>
               <Option value="fillblank">Điền khuyết</Option>
+              <Option value="truefalsengv">True/False/Not Given</Option>
             </Select>
           </Form.Item>
 
@@ -318,7 +329,7 @@ const CreateQuestionModal: React.FC<CreateQuestionModalProps> = ({
                 Thêm đáp án
               </Button>
             </Form.Item>
-          ) : (
+          ) : question.questionType === "6742fb3bd56a2e75dbd817ec" ? (
             <Form.Item label="Từ khóa cần điền">
               {question.answers.map((answer, index) => (
                 <div key={index} className="blank-container">
@@ -335,6 +346,22 @@ const CreateQuestionModal: React.FC<CreateQuestionModalProps> = ({
               <Button type="dashed" onClick={handleAddBlank}>
                 Thêm từ khóa
               </Button>
+            </Form.Item>
+          ) : (
+            <Form.Item label="Đáp án đúng">
+              <Select
+                value={question.correctAnswerForTrueFalseNGV}
+                onChange={(value) =>
+                  setQuestion((prev) => ({
+                    ...prev,
+                    correctAnswerForTrueFalseNGV: value,
+                  }))
+                }
+              >
+                <Option value="true">True</Option>
+                <Option value="false">False</Option>
+                <Option value="notgiven">Not Given</Option>
+              </Select>
             </Form.Item>
           )}
 

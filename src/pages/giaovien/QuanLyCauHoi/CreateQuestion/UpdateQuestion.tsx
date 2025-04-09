@@ -211,6 +211,59 @@ const UpdateQuestionModal: React.FC<UpdateQuestionModalProps> = ({
           />
         </Form.Item>
 
+        <Form.Item label="Loại câu hỏi">
+          <Select
+            value={
+              question.questionType === "6742fb1cd56a2e75dbd817ea"
+                ? "yesno"
+                : question.questionType === "6742fb3bd56a2e75dbd817ec"
+                ? "fillblank"
+                : "truefalsengv"
+            }
+            onChange={(value) =>
+              setQuestion((prev) => ({
+                ...prev,
+                questionType:
+                  value === "yesno"
+                    ? "6742fb1cd56a2e75dbd817ea"
+                    : value === "fillblank"
+                    ? "6742fb3bd56a2e75dbd817ec"
+                    : "6742fb5dd56a2e75dbd817ee",
+                answers:
+                  value === "yesno"
+                    ? [{ text: "", isCorrect: false }]
+                    : value === "fillblank"
+                    ? [{ text: "", correctAnswerForBlank: "", isCorrect: true }]
+                    : [],
+                correctAnswerForTrueFalseNGV:
+                  value === "truefalsengv" ? "true" : "",
+              }))
+            }
+          >
+            <Option value="yesno">Yes/No</Option>
+            <Option value="fillblank">Điền khuyết</Option>
+            <Option value="truefalsengv">True/False/Not Given</Option>
+          </Select>
+        </Form.Item>
+
+        {question.questionType === "6742fb5dd56a2e75dbd817ee" && (
+          <Form.Item label="Đáp án đúng">
+            <Select
+              value={question.correctAnswerForTrueFalseNGV}
+              onChange={(value) =>
+                setQuestion((prev) => ({
+                  ...prev,
+                  correctAnswerForTrueFalseNGV: value,
+                }))
+              }
+            >
+              <Option value="true">True</Option>
+              <Option value="false">False</Option>
+              <Option value="notgiven">Not Given</Option>
+            </Select>
+          </Form.Item>
+        )}
+
         <Form.Item label="Đáp án">
           {question.answers.map((answer, index) => (
             <div

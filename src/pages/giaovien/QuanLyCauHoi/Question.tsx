@@ -6,6 +6,7 @@ import { useState } from "react";
 import UpdateQuestionModal from "./CreateQuestion/UpdateQuestion";
 import UpdateBlankQuestionModal from "./CreateQuestion/UpdateQuestionBlank";
 import { UpdateAudioModal } from "../QuanLyFileAudio/FileAudio/UpdateDangCauHoiModal";
+import UpdateQuestionTFModal from "./CreateQuestion/UpdateQuestionTF";
 import { Card, Typography, Button } from "antd";
 import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
 
@@ -75,22 +76,34 @@ const QuestionComponent: React.FC<QuestionComponentProps> = ({
         Đáp án
       </Divider>
       <div style={{ marginBottom: 16 }}>
-        {question.answers.map((answer) => (
+        {question.questionType === "6742fb5dd56a2e75dbd817ee" ? (
           <div
-            key={answer._id}
-            className={`p-2 rounded mb-2 ${
-              answer.isCorrect ? "bg-green-100" : "bg-gray-100"
-            }`}
+            className={`p-2 rounded mb-2 bg-gray-100`}
             style={{
-              border: answer.isCorrect
-                ? "1px solid #52c41a"
-                : "1px solid #d9d9d9",
-              color: answer.isCorrect ? "#52c41a" : "#595959",
+              border: "1px solid #d9d9d9",
+              color: "#595959",
             }}
           >
-            {cleanString(answer.text || answer.correctAnswerForBlank || "")}
+            {question.correctAnswerForTrueFalseNGV?.toUpperCase()}
           </div>
-        ))}
+        ) : (
+          question.answers.map((answer) => (
+            <div
+              key={answer._id}
+              className={`p-2 rounded mb-2 ${
+                answer.isCorrect ? "bg-green-100" : "bg-gray-100"
+              }`}
+              style={{
+                border: answer.isCorrect
+                  ? "1px solid #52c41a"
+                  : "1px solid #d9d9d9",
+                color: answer.isCorrect ? "#52c41a" : "#595959",
+              }}
+            >
+              {cleanString(answer.text || answer.correctAnswerForBlank || "")}
+            </div>
+          ))
+        )}
       </div>
 
       {/* Thông tin chi tiết */}
@@ -173,19 +186,30 @@ const QuestionComponent: React.FC<QuestionComponentProps> = ({
       </Modal>
 
       {/* Modal sửa câu hỏi */}
-      {questionType === "6742fb1cd56a2e75dbd817ea" ? (
+      {questionType === "6742fb5dd56a2e75dbd817ee" ? (
+        <UpdateQuestionTFModal
+          visible={openModal}
+          handleClose={() => setOpenModal(false)}
+          question2={question}
+          onUpdateSuccess={onUpdateSuccess}
+        />
+      ) : questionType === "6742fb1cd56a2e75dbd817ea" ? (
         <UpdateQuestionModal
           visible={openModal}
           onUpdateSuccess={onUpdateSuccess}
           handleClose={() => setOpenModal(false)}
           question2={question}
         />
-      ) : (
+      ) : questionType === "6742fb3bd56a2e75dbd817ec" ? (
         <UpdateBlankQuestionModal
           visible={openModal}
           handleClose={() => setOpenModal(false)}
           question2={question}
         />
+      ) : (
+        <div>
+          {/* Placeholder for future modals */}
+        </div>
       )}
       {question.audioInfo && (
         <div>

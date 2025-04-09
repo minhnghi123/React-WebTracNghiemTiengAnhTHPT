@@ -22,7 +22,7 @@ export interface Question {
   questionType?: string;
   sourceType?: string;
   passageId?: Passage;
-  passage: Passage;
+  passage?: Passage;
   correctAnswerForTrueFalseNGV?: string;
   answers: Answer[];
   subject: string;

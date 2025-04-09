@@ -12,21 +12,33 @@ export const questionCreate = (req, res, next) => {
         message: "The level must be provided !",
       });
     }
-    if (req.body.answers.length === 0) {
-      return res.status(400).json({
-        code: 400,
-        message: "The answer must not be empty !",
-      });
-    }
-    let checkAnswer = false;
-    for (const element of req.body.answers) {
-      if (element.isCorrect) checkAnswer = true;
-    }
-    if (!checkAnswer) {
-      return res.status(400).json({
-        code: 400,
-        message: "At least one true answer must be provided",
-      });
+
+    if (req.body.questionType === "6742fb5dd56a2e75dbd817ee") {
+      // Validation for True/False/Not Given
+      if (!["true", "false", "notgiven"].includes(req.body.correctAnswerForTrueFalseNGV)) {
+        return res.status(400).json({
+          code: 400,
+          message: "A valid answer for True/False/Not Given must be provided!",
+        });
+      }
+    } else {
+      // Validation for other question types
+      if (req.body.answers.length === 0) {
+        return res.status(400).json({
+          code: 400,
+          message: "The answer must not be empty !",
+        });
+      }
+      let checkAnswer = false;
+      for (const element of req.body.answers) {
+        if (element.isCorrect) checkAnswer = true;
+      }
+      if (!checkAnswer) {
+        return res.status(400).json({
+          code: 400,
+          message: "At least one true answer must be provided",
+        });
+      }
     }
 
     next();
