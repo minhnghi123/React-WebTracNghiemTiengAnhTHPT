@@ -1,6 +1,11 @@
 import { useState, useEffect } from "react";
 import { Button, Table, Tag, Modal } from "antd";
-import { ExamListeningQuestionAPI, ListeningExamData, listenQuestionAPI, Question } from "@/services/teacher/ListeningQuestion";
+import {
+  ExamListeningQuestionAPI,
+  ListeningExamData,
+  listenQuestionAPI,
+  Question,
+} from "@/services/teacher/ListeningQuestion";
 import CreateExamModal from "./DeThiNghe/CreateExam";
 import { useAuthContext } from "@/contexts/AuthProvider";
 import DetailListeningExam from "./DeThiNghe/deltailExam";
@@ -10,11 +15,14 @@ export const ListListeningExam = () => {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [dataQuestion, setDataQuestion] = useState<Question[]>([]);
   const { user } = useAuthContext();
-  const [selectedExam, setSelectedExam] = useState<ListeningExamData | null>(null);
+  const [selectedExam, setSelectedExam] = useState<ListeningExamData | null>(
+    null
+  );
 
   const getAllExams = async () => {
     try {
       const rq = await ExamListeningQuestionAPI.getListeningExamMySelf();
+      console.log(rq);
       if (rq.data) {
         const examList = rq.data.map((exam: any) => ({
           ...exam,
@@ -64,7 +72,10 @@ export const ListListeningExam = () => {
       cancelText: "Hủy",
       onOk: async () => {
         try {
-          const response = await ExamListeningQuestionAPI.deleteListeningExam(record.id!,user?._id || "");
+          const response = await ExamListeningQuestionAPI.deleteListeningExam(
+            record.id!,
+            user?._id || ""
+          );
           if (response) {
             Modal.success({
               title: "Thành công",
@@ -75,7 +86,9 @@ export const ListListeningExam = () => {
         } catch (error: any) {
           Modal.error({
             title: "Lỗi",
-            content: error.response?.data?.message || "Có lỗi xảy ra khi xóa bài kiểm tra.",
+            content:
+              error.response?.data?.message ||
+              "Có lỗi xảy ra khi xóa bài kiểm tra.",
           });
         }
       },

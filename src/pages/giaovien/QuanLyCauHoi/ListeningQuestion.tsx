@@ -75,6 +75,7 @@ export const ListeningQuestionComponent: React.FC<
       }
     }
   };
+  console.log(question);
 
   return (
     <div className="bg-white p-4 rounded shadow mb-4">
@@ -86,31 +87,35 @@ export const ListeningQuestionComponent: React.FC<
         />
       </h3>
       <div className="mt-1">
-        {question.questionType._id!="6742fb3bd56a2e75dbd817ec"&& question.options?.map((option) => {
-          const isCorrect = question.correctAnswer?.some(
-            (ans) => ans.answer_id === option.option_id
-          );
-          return (
+        {question.questionType._id != "6742fb3bd56a2e75dbd817ec" &&
+          question.options?.map((option) => {
+            const isCorrect = question.correctAnswer?.some(
+              (ans) =>
+                ans.answer_id?.toString() === option.option_id?.toString()
+            );
+
+            return (
+              <div
+                key={option.option_id}
+                className={clsx("ml-2 rounded mb-2 p-2", {
+                  "bg-green-100": isCorrect,
+                  "bg-red-100": !isCorrect,
+                })}
+                style={{ whiteSpace: "pre-wrap" }}
+              >
+                {cleanString(option.optionText)}
+              </div>
+            );
+          })}
+        {question.questionType._id == "6742fb3bd56a2e75dbd817ec" &&
+          question.blankAnswer && (
             <div
-              key={option.option_id}
-              className={clsx("ml-2 rounded mb-2 p-2", {
-                "bg-green-100": isCorrect,
-                "bg-red-100": !isCorrect,
-              })}
+              className="ml-2 rounded mb-2 bg-green-100 p-2"
               style={{ whiteSpace: "pre-wrap" }}
             >
-              {cleanString(option.optionText)}
+              {cleanString(question.blankAnswer)}
             </div>
-          );
-        })}
-        {question.questionType._id=="6742fb3bd56a2e75dbd817ec"&& question.blankAnswer && (
-          <div
-            className="ml-2 rounded mb-2 bg-green-100 p-2"
-            style={{ whiteSpace: "pre-wrap" }}
-          >
-            {cleanString(question.blankAnswer)}
-          </div>
-        )}
+          )}
       </div>
       <Divider orientation="left" style={{ borderColor: "#7cb305" }}>
         Độ khó

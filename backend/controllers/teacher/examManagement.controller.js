@@ -14,11 +14,7 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { Packer, Document } from "docx";
-import mammoth from "mammoth";
-import slugify from "slugify";
-import multer from "multer";
-import * as cheerio from "cheerio";
-import { v4 as uuidv4 } from "uuid";
+
 import XLSX from "xlsx";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
