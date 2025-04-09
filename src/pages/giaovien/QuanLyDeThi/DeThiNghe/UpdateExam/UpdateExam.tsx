@@ -25,7 +25,7 @@ const UpdateExamModal: React.FC<UpdateExamModalProps> = ({
   const [exam, setExam] = useState<Partial<ListeningExamData>>(examData || {});
   const [existingAudios, setExistingAudios] = useState<Audio[]>([]);
   const {user} = useAuthContext() 
-
+  
   const fetchAudios = async () => {
     try {
       const response = await AudioAPI.getAllAudio();
@@ -74,10 +74,8 @@ const UpdateExamModal: React.FC<UpdateExamModalProps> = ({
       endTime: exam.endTime || new Date(new Date(exam.startTime!).getTime() + 90 * 60 * 1000),
       isPublic: exam.isPublic || false,
     };
-    console.log(formattedExam)
     try {
       const response = await ExamListeningQuestionAPI.updateListeningExam(exam.id!,user?._id, formattedExam);
-      console.log(response)
       if (response?.data) {
         message.success("Bài kiểm tra đã được cập nhật thành công!");
         handleClose();

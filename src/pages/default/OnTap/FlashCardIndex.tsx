@@ -2,18 +2,30 @@ import React, { useEffect, useState } from "react";
 import { Button, Card, Space, Spin, message } from "antd";
 import { useNavigate } from "react-router-dom";
 import { FlashCardAPI, FlashCardSet } from "@/services/student/FlashCardAPI";
+import { useAuthContext } from "@/contexts/AuthProvider";
 import "./FlashCardcss.css";
 
 export const FlashCardIndex: React.FC = () => {
   const [flashCardSets, setFlashCardSets] = useState<FlashCardSet[]>([]);
+  const [myFlashCardSets, setMyFlashCardSets] = useState<FlashCardSet[]>([]);
+  const [otherFlashCardSets, setOtherFlashCardSets] = useState<FlashCardSet[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const { user } = useAuthContext();
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchFlashcardSets = async () => {
       try {
         const res = await FlashCardAPI.getAllFlashCardSets();
-        setFlashCardSets(res.flashCardSets ? res.flashCardSets : res);
+        const allSets = res.flashCardSets ? res.flashCardSets : res;
+
+        // Phân loại bộ từ vựng
+        const mySets = allSets.filter((set: FlashCardSet) => set.createdBy === user?._id);
+        const otherSets = allSets.filter((set: FlashCardSet) => set.createdBy !== user?._id);
+
+        setFlashCardSets(allSets);
+        setMyFlashCardSets(mySets);
+        setOtherFlashCardSets(otherSets);
       } catch (error) {
         console.error("Lỗi khi lấy flashcard sets:", error);
       } finally {
@@ -22,7 +34,7 @@ export const FlashCardIndex: React.FC = () => {
     };
 
     fetchFlashcardSets();
-  }, []);
+  }, [user?._id]);
 
   if (loading) {
     return (
@@ -37,7 +49,7 @@ export const FlashCardIndex: React.FC = () => {
   };
 
   const handleEdit = (id: string, e: React.MouseEvent) => {
-    e.stopPropagation(); 
+    e.stopPropagation();
     navigate(`/flashcard/edit/${id}`);
   };
 
@@ -45,13 +57,13 @@ export const FlashCardIndex: React.FC = () => {
     e.stopPropagation();
     if (window.confirm("Bạn có chắc muốn xóa flashcard này không?")) {
       try {
-       const rq=  await FlashCardAPI.deleteFlashCardSet(id);
-       console.log(rq);
-        if(rq.code===200){ 
-       message.success("Flashcard đã được xóa");
+        const rq = await FlashCardAPI.deleteFlashCardSet(id);
+        if (rq.code === 200) {
+          message.success("Flashcard đã được xóa");
+          setMyFlashCardSets((prev) => prev.filter((set) => set._id !== id));
+        } else {
+          message.error(rq.message);
         }
-        else message.error(rq.message);
-        setFlashCardSets((prev) => prev.filter((set) => set._id !== id));
       } catch (error) {
         console.error("Xóa flashcard thất bại", error);
         message.error("Xóa flashcard thất bại");
@@ -72,13 +84,10 @@ export const FlashCardIndex: React.FC = () => {
       </button>
       <hr />
       <h2>
-        <center>Bộ từ vựng có sẵn</center>
+        <center>Bộ từ vựng của tôi</center>
       </h2>
-      <div
-        className="flash-card-grid"
-        style={{ margin: "1rem", }}
-      >
-        {flashCardSets.map((set) => (
+      <div className="flash-card-grid" style={{ margin: "1rem" }}>
+        {myFlashCardSets.map((set) => (
           <div
             key={set._id}
             className="flash-card-link cursor-pointer"
@@ -96,26 +105,55 @@ export const FlashCardIndex: React.FC = () => {
                 </span>
                 <div className="flex space-x-2">
                   <Space size={"small"}>
-                <Button
-                    color="default"
-                    variant="outlined"
-                    style={{ backgroundColor: "orange" }}
-                    onClick={(e) => handleEdit(set._id || "", e)}
-                  >
-                    Sửa 
-                  </Button>
-                  <Button
-                    color="danger"
-                    variant="solid"
-                    onClick={(e) => handleDelete(set._id || "", e)}
-                  >
-                    Xóa
-                  </Button>
+                    <Button
+                      color="default"
+                      variant="outlined"
+                      style={{ backgroundColor: "orange" }}
+                      onClick={(e) => handleEdit(set._id || "", e)}
+                    >
+                      Sửa
+                    </Button>
+                    <Button
+                      color="danger"
+                      variant="solid"
+                      onClick={(e) => handleDelete(set._id || "", e)}
+                    >
+                      Xóa
+                    </Button>
                   </Space>
                 </div>
               </div>
             </Card>
           </div>
+        ))}
+      </div>
+      <hr />
+      <h2>
+        <center>Bộ từ vựng có sẵn</center>
+      </h2>
+      <div className="flash-card-grid" style={{ margin: "1rem" }}>
+        {otherFlashCardSets.map((set) => (
+          set.public && ( 
+          <div
+            key={set._id}
+            className="flash-card-link cursor-pointer"
+            onClick={() => set._id && handleExam(set._id)}
+          >
+            <Card
+              hoverable
+              title={set.title}
+              className="shadow-lg hover:shadow-2xl transition-shadow duration-300"
+            >
+              <p>{set.description}</p>
+              <div className="flex justify-between items-center mt-2">
+                <span className="text-gray-500 text-sm">
+                  Số lượng từ vựng: {set.vocabs.length}
+                </span>
+              </div>
+            </Card>
+          </div>
+          )
+
         ))}
       </div>
     </div>

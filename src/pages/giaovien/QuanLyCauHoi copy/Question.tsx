@@ -91,7 +91,7 @@ const QuestionComponent: React.FC<QuestionComponentProps> = ({
         <Tag
           color={clsx(
             question.level === "easy" && "green",
-            question.level === "medium" && "yellow",
+            // question.level === "medium" && "yellow",
             question.level === "hard" && "red"
           )}
           className="type-question"

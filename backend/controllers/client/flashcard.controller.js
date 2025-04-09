@@ -4,7 +4,6 @@ export const index = async (req, res) => {
   try {
     const flashCardSets = await FlashCardSet.find({
       deleted: false,
-      createdBy: req.user._id,
     }).populate("vocabs");
     res.status(200).json({ flashCardSets });
   } catch (error) {

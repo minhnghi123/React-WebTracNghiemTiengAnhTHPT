@@ -33,6 +33,7 @@ export interface QuestionAnswerResult {
   selectedAnswerId?: string;
   userAnswers: UserAnswer[];
   isCorrect: boolean;
+  correctAnswerForTrueFalseNGV?: string;
 }
 
 interface UserAnswer {

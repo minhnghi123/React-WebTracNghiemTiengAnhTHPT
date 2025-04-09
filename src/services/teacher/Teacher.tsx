@@ -1,6 +1,5 @@
 import { request } from "@/config/request";
 import { ExamDataRecieve } from "./ListeningQuestion";
-import ImportExamExcel from "@/pages/giaovien/QuanLyDeThi/ImportExamExcel";
 export interface Answer {
   _id?: string;
   text?: string;
@@ -22,7 +21,9 @@ export interface Question {
   level: "easy" | "hard";
   questionType?: string;
   sourceType?: string;
-  passageId?: string;
+  passageId?: Passage;
+  passage: Passage;
+  correctAnswerForTrueFalseNGV?: string;
   answers: Answer[];
   subject: string;
   knowledge: string;
@@ -34,6 +35,13 @@ export interface Question {
   audioInfo?: Audio;
   text?: string;
   __v?: number;
+}
+export interface Passage
+{
+  _id?: string;
+  title: string;
+  content: string;
+  passageId?:string;
 }
 export interface Exam {
   _id?: string;
@@ -101,6 +109,7 @@ export interface QuestionDetail {
   answers: Answer[];
   userAnswers: UserAnswer[];
   correctAnswerForBlank?: string[];
+  correctAnswerForTrueFalseNGV?: string;
   audio?: string | null;
   isCorrect: boolean;
 }
@@ -217,12 +226,7 @@ export const ExamAPI = {
     duration: number,
     questionTypes: string[]
   ) => {
-    // console.log({
-    //   level,
-    //   numberOfQuestions,
-    //   duration,
-    //   questionTypes,
-    // });
+
     const response = await request.post("/teacher/exam/auto-generate-exam", {
       level,
       numberOfQuestions,

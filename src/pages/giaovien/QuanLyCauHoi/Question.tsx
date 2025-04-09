@@ -1,7 +1,6 @@
 import { QuestionAPI, Question } from "@/services/teacher/Teacher";
 import { cleanString } from "@/utils/cn";
-import { Divider, Flex, Modal, Tag } from "antd";
-import clsx from "clsx";
+import { Divider, Modal, Tag } from "antd";
 import "./cauhoi.css";
 import { useState } from "react";
 import UpdateQuestionModal from "./CreateQuestion/UpdateQuestion";
@@ -29,28 +28,9 @@ const QuestionComponent: React.FC<QuestionComponentProps> = ({
 }) => {
   const [open, setOpen] = useState(false);
   const [openAudioUpdate, setOpenAudioUpdate] = useState(false);
-  const handleOk = () => {
-    handleDeleteQuestion(question._id || "");
 
-    setOpen(false);
-  };
 
-  const handleCancel = () => {
-    setOpen(false);
-  };
-  const handleDeleteQuestion = async (id: string) => {
-    try {
-      const rq = await QuestionAPI.deleteQuestion(id);
-      if (rq?.code === 200) {
-        alert("Xóa câu hỏi thành công");
-        onUpdateSuccess();
-      }
-    } catch (error: any) {
-      if (error.response) {
-        console.log(error.response.data.message);
-      }
-    }
-  };
+
   const handleAudioUpdateSuccess = () => {
     setOpenAudioUpdate(false);
     window.location.reload();
@@ -123,8 +103,7 @@ const QuestionComponent: React.FC<QuestionComponentProps> = ({
           color={
             question.level === "easy"
               ? "green"
-              : question.level === "medium"
-              ? "yellow"
+  
               : "red"
           }
         >

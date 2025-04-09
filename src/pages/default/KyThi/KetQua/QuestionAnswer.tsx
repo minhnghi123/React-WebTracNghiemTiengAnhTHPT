@@ -1,7 +1,7 @@
 import React from "react";
 import { QuestionAnswerResult } from "@/services/student";
 import { cleanString } from "@/utils/cn";
-import { Divider } from "antd";
+import { Divider, Tag } from "antd";
 import "./question.css";
 
 type QuestionComponentProps = {
@@ -21,6 +21,8 @@ const QuestionAnswerComponent: React.FC<QuestionComponentProps> = ({ question })
     // Nếu có trường blankAnswer thì cũng coi là dạng điền khuyết
     (question as any).blankAnswer;
 
+  const isTrueFalseNotGiven = question.correctAnswerForTrueFalseNGV !== undefined;
+
   return (
     <div className="bg-white p-4 rounded shadow mb-4">
       {question.isCorrect ? (
@@ -39,7 +41,41 @@ const QuestionAnswerComponent: React.FC<QuestionComponentProps> = ({ question })
         />
       </h3>
 
-      {isFillInTheBlank ? (
+      {isTrueFalseNotGiven ? (
+        // Hiển thị cho câu hỏi True/False/Not Given
+        <div className="ml-2 rounded my-2 p-2 border flex flex-col">
+          {["true", "false", "not given"].map((choice) => (
+            <div
+              key={choice}
+              className={`p-2 my-1 rounded ${
+                question.correctAnswerForTrueFalseNGV === choice
+                  ? "bg-green-100"
+                  : question.selectedAnswerId === choice
+                  ? "bg-red-100"
+                  : ""
+              }`}
+              style={{
+                border: "1px solid #ddd",
+                whiteSpace: "pre-wrap",
+              }}
+            >
+              <span>
+                <strong>{choice.toUpperCase()}</strong>
+              </span>
+              {question.correctAnswerForTrueFalseNGV === choice && (
+                <Tag color="green" style={{ marginLeft: "8px" }}>
+                  Đúng
+                </Tag>
+              )}
+              {question.selectedAnswerId === choice && question.correctAnswerForTrueFalseNGV !== choice && (
+                <Tag color="red" style={{ marginLeft: "8px" }}>
+                  Sai
+                </Tag>
+              )}
+            </div>
+          ))}
+        </div>
+      ) : isFillInTheBlank ? (
         // Hiển thị cho câu hỏi điền khuyết
         <>
           {question.answers && question.answers.length > 0 ? (

@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { Spin, Button, Modal, Radio } from "antd";
+import { Spin, Button, Modal, Radio, Table } from "antd";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { FlashCardAPI, FlashCardSet } from "@/services/student/FlashCardAPI";
+import {
+  FlashCardAPI,
+  FlashCardSet,
+  Vocab,
+} from "@/services/student/FlashCardAPI";
 
 export const FlashCardDetail: React.FC = () => {
   const { _id } = useParams<{ _id: string }>(); // Lấy id từ URL
@@ -43,7 +47,11 @@ export const FlashCardDetail: React.FC = () => {
           Flashcard set không tồn tại
         </h2>
         <div className="mt-4 text-center">
-          <Link to="/flashcards" className="text-blue-500 underline" style={{fontSize: "1.25rem"}}>
+          <Link
+            to="/flashcards"
+            className="text-blue-500 underline"
+            style={{ fontSize: "1.25rem" }}
+          >
             Quay lại danh sách flashcard
           </Link>
         </div>
@@ -69,29 +77,32 @@ export const FlashCardDetail: React.FC = () => {
       )}`
     );
   };
-
   return (
     <div className="container mx-auto px-4 py-6">
-      <h1 className="text-3xl font-bold mb-4">{flashCardSet.title}</h1>
-      <p className="mb-6 text-lg">{flashCardSet.description}</p>
+      <h1 className="text-3xl font-bold mb-4"><center>{flashCardSet.title}</center></h1>
+      <p className="mb-6 text-lg">Mô tả: {flashCardSet.description}</p>
 
-      {/* Hiển thị danh sách từ vựng dưới dạng bảng 2 cột */}
-      <div className="table-container border rounded-md">
-        <div className="table-header bg-gray-200 p-2 flex">
-          <div className="table-column flex-1 font-bold">Từ vựng</div>
-          <div className="table-column flex-1 font-bold">Định nghĩa</div>
-        </div>
-        {flashCardSet.vocabs.map((vocab) =>
-          typeof vocab === "string" ? null : (
-            <div key={vocab._id} className="table-row flex p-2 border-b">
-              <div className="table-column-2 flex-1">{vocab.term}</div>
-              <div className="table-column-2 flex-1">{vocab.definition}</div>
-            </div>
-          )
-        )}
-      </div>
 
-      <div className="mt-6 text-center" style={{marginTop: "6px"}}>
+      <Table
+        dataSource={flashCardSet.vocabs as Vocab[]}
+        showSorterTooltip={false}
+        columns={[
+          {
+            title: "Từ vựng",
+            dataIndex: "term",
+            key: "term",
+            width: "50%",
+          },
+          {
+            title: "Định nghĩa",
+            dataIndex: "definition",
+            key: "definition",
+            width: "50%",
+          },
+        ]}
+      />
+
+      <div className="mt-6 text-center" style={{ marginTop: "6px" }}>
         <Button type="primary" onClick={openExamModal}>
           Làm bài
         </Button>

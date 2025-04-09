@@ -41,6 +41,7 @@ interface Question {
   questionType: string;
   options: Option[];
   correctAnswer: CorrectAnswer[];
+  correctAnswerForTrueFalseNGV?: string;
   difficulty: string;
   isDeleted: boolean;
   createdAt: string;

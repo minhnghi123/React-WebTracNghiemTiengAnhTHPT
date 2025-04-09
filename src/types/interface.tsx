@@ -11,6 +11,7 @@ export interface Question {
   content: string;
   level: string;
   answers: Answer[];
+  correctAnswerForTrueFalseNGV?: string;
   subject: string;
   knowledge: string;
   translation: string;

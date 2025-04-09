@@ -29,7 +29,7 @@ const QuanLyBaoLoi: React.FC = () => {
   const [response, setResponse] = useState("");
   const [selectedReport, setSelectedReport] = useState<ErrorReport | null>(null);
   const [questionModalVisible, setQuestionModalVisible] = useState(false);
-  const [selectedQuestionId, setSelectedQuestionId] = useState<Question>("");
+  const [selectedQuestionId, setSelectedQuestionId] = useState<Question>({} as Question);
 
   const {user} = useAuthContext()
   useEffect(() => {

@@ -3,6 +3,7 @@ import { Question } from "../../models/Question.model.js";
 import { formatExamHeader } from "../../utils/examHeader.helper.js";
 import { QuestionType } from "../../models/QuestionType.model.js";
 import { Passage } from "../../models/Passage.model.js";
+
 import { generateMultipleExamVariants } from "../../utils/generateMultipleExamVariants.js";
 import {
   formatExamQuestions,
@@ -77,8 +78,11 @@ export const getExamDetail = async (req, res) => {
 
     // Tìm đề thi theo slug và populate danh sách câu hỏi và listeningExams
     const exam = await Exam.findOne({ slug })
-      .populate("questions")
-      .populate("listeningExams"); // Add this line
+      .populate({
+        path: "questions",
+        populate: { path: "passageId", strictPopulate: false }, // Populate passageId for each question
+      })
+      .populate("listeningExams");
 
     // Nếu không tìm thấy đề thi, trả về lỗi 404
     if (!exam) {

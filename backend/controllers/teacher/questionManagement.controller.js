@@ -1,6 +1,7 @@
 import { Question } from "../../models/Question.model.js";
 import { QuestionType } from "../../models/QuestionType.model.js";
 import { Audio } from "../../models/Audio.model.js";
+import { Passage } from "../../models/Passage.model.js";
 import XLSX from "xlsx";
 import fs from "fs";
 
@@ -24,22 +25,35 @@ export const questionManagement = async (req, res) => {
   }
   const skip = (currentPage - 1) * limitItems;
   const totalPage = Math.ceil(totalItems / limitItems);
-  const questions = await Question.find(condition).limit(limitItems).skip(skip);
+  const questions = await Question.find(condition)
+    .limit(limitItems)
+    .skip(skip)
+    .populate("passageId"); // Populate the passageId field with the corresponding Passage document
 
-  const questionsWithAudioInfo = await Promise.all(
+  const questionsWithDetails = await Promise.all(
     questions.map(async (element) => {
+      element = element.toObject();
+
+      // Include audio info if available
       if (element.audio) {
         const infoAudio = await Audio.findById(element.audio);
-        element = element.toObject();
         element.audioInfo = infoAudio;
       }
+
+      // Include passage info if passageId exists
+      // if (element.passageId) {
+      //   const passage = await Passage.findById(element.passageId);
+      //   element.passage = passage;
+      // }
+
       return element;
     })
   );
+
   res.status(200).json({
     code: 200,
     message: "Get all questions successfully !",
-    questions: questionsWithAudioInfo,
+    questions: questionsWithDetails,
     questionTypes: questionTypes,
     currentPage: currentPage,
     totalItems: totalItems,
@@ -57,10 +71,17 @@ export const detail = async (req, res) => {
       message: "Question not found",
     });
   }
+
+  let passage = null;
+  if (question.passage) {
+    passage = await Passage.findById(question.passageId); 
+  }
+
   res.status(200).json({
     code: 200,
     message: "Get question detail successfully",
     question: question,
+    passage: passage, // Include passage content
   });
 };
 
