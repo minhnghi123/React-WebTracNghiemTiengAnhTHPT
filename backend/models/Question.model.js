@@ -26,7 +26,7 @@ const QuestionSchema = new mongoose.Schema({
   ],
   correctAnswerForTrueFalseNGV: {
     type: String,
-    enum: ["true", "false", "notgiven"],
+    enum: ["true", "false", "notgiven", ""],
     default: "",
   },
   subject: { type: String, default: "English" },

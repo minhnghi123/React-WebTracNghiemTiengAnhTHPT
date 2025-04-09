@@ -167,7 +167,7 @@ export const QuanLyDeThi = () => {
           className="btn btn-primary mx-3"
           onClick={() => navigatetor("/giaovien/QuanLyDeThi/CreateExam")}
         >
-          Tạo đề thi
+          Tạo đề thi thủ công
         </button>
         <button
           className="btn btn-primary mx-3"

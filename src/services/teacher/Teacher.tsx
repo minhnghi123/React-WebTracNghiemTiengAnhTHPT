@@ -36,12 +36,11 @@ export interface Question {
   text?: string;
   __v?: number;
 }
-export interface Passage
-{
+export interface Passage {
   _id?: string;
   title: string;
   content: string;
-  passageId?:string;
+  passageId?: string;
 }
 export interface Exam {
   _id?: string;
@@ -226,7 +225,6 @@ export const ExamAPI = {
     duration: number,
     questionTypes: string[]
   ) => {
-
     const response = await request.post("/teacher/exam/auto-generate-exam", {
       level,
       numberOfQuestions,
@@ -241,6 +239,18 @@ export const ExamAPI = {
         "Content-Type": "multipart/form-data",
       },
     });
+    return response.data;
+  },
+  ImportExamExcelSimple: async (formData: FormData) => {
+    const response = await request.post(
+      "/teacher/exam/import-exam/exam-only",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
     return response.data;
   },
 };
