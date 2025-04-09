@@ -1,5 +1,6 @@
 import { request } from "@/config/request";
 import { ExamDataRecieve } from "./ListeningQuestion";
+import ImportExamExcel from "@/pages/giaovien/QuanLyDeThi/ImportExamExcel";
 export interface Answer {
   _id?: string;
   text?: string;
@@ -244,6 +245,18 @@ export const ExamAPI = {
   ImportExamExcelSimple: async (formData: FormData) => {
     const response = await request.post(
       "/teacher/exam/import-exam/exam-only",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+    return response.data;
+  },
+  ImportExamExcelListening: async (formData: FormData) => {
+    const response = await request.post(
+      "/teacher/listening-exam/import-excel",
       formData,
       {
         headers: {

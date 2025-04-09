@@ -39,14 +39,15 @@ const ImportExamExcel = () => {
     formData.append("examFile", examFile);
     formData.append("examType", examType);
     if (examType === "reading") formData.append("passageFile", passageFile!);
-    if (examType === "listening")
-      formData.append("listeningFile", listeningFile!);
+    if (examType === "listening") formData.append("audioFile", listeningFile!);
 
     try {
       setLoading(true);
       const res =
         examType === "reading"
           ? await ExamAPI.ImportExamExcel(formData)
+          : examType === "listening"
+          ? await ExamAPI.ImportExamExcelListening(formData)
           : await ExamAPI.ImportExamExcelSimple(formData);
 
       if (res.success) {
@@ -106,8 +107,8 @@ const ImportExamExcel = () => {
             như:
             <br />
             <code>
-              AudioId, AudioUrl, Content, AnswerA, AnswerB, AnswerC, AnswerD,
-              CorrectAnswers, Script, Explanation
+              Content, QuestionType, Level, AnswerA, AnswerB, AnswerC, AnswerD,
+              CorrectAnswers
             </code>
           </Paragraph>
         );
@@ -187,7 +188,7 @@ const ImportExamExcel = () => {
                 return false;
               }}
               maxCount={1}
-              accept=".xlsx, .xls"
+              accept="audio/*"
             >
               <Button icon={<UploadOutlined />}>Chọn file bài nghe</Button>
             </Upload>
