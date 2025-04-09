@@ -611,8 +611,9 @@ export const importExamFromExcel = async (req, res) => {
           if (question.QuestionType === "True/False/Not Given") {
             groupedQuestions.get(question.PassageId).push({
               ...baseData,
-              correctAnswerForTrueFalseNGV:
-                question.CorrectAnswers.toString().toLowerCase(),
+              correctAnswerForTrueFalseNGV: question.CorrectAnswers.toString()
+                .replace(/\s+/g, "")
+                .toLowerCase(),
             });
           } else if (question.QuestionType === "Fill in the blank") {
             groupedQuestions.get(question.PassageId).push({
@@ -634,8 +635,9 @@ export const importExamFromExcel = async (req, res) => {
           if (question.QuestionType === "True/False/Not Given") {
             singleQuestions.push({
               ...baseData,
-              correctAnswerForTrueFalseNGV:
-                question.CorrectAnswers.toString().toLowerCase(),
+              correctAnswerForTrueFalseNGV: question.CorrectAnswers.toString()
+                .replace(/\s+/g, "")
+                .toLowerCase(),
             });
           } else if (question.QuestionType === "Fill in the blank") {
             singleQuestions.push({
@@ -733,8 +735,9 @@ export const importExamFromExcel = async (req, res) => {
         if (question.QuestionType === "True/False/Not Given") {
           singleQuestions.push({
             ...baseData,
-            correctAnswerForTrueFalseNGV:
-              question.CorrectAnswers.toString().toLowerCase(),
+            correctAnswerForTrueFalseNGV: question.CorrectAnswers.toString()
+              .replace(/\s+/g, "")
+              .toLowerCase(),
           });
         } else if (question.QuestionType === "Fill in the blank") {
           singleQuestions.push({
