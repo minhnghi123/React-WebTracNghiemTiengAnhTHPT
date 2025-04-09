@@ -51,8 +51,8 @@ router.post(
 //import exam with only exam file
 router.post(
   "/import-exam/exam-only",
-  fileUpload.single("examFile"),
-  upload,
+  fileUpload.fields([{ name: "examFile", maxCount: 1 }]),
+  uploadMultiple,
   importExamFromExcel
 );
 
