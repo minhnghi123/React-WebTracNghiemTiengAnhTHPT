@@ -96,3 +96,19 @@ export const questionPost = async (req, res) => {
     });
   }
 };
+
+export const getQuestionForStudent = async (req, res) => {
+  try {
+    const questionId = req.params.id;
+    const question = await Question.findById(questionId).select(
+      "_id content questionType answers knowledge translation explanation"
+    );
+    if (!question) {
+      return res.status(404).json({ code: 404, message: "Question not found" });
+    }
+    res.status(200).json({ code: 200, question });
+  } catch (error) {
+    console.error("Error fetching question for student:", error);
+    res.status(500).json({ code: 500, message: "Internal server error" });
+  }
+};

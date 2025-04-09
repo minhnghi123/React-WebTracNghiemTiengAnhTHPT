@@ -14,6 +14,7 @@ type ListeningQuestionComponentProps = {
   questionType: string;
   onAnswerChange: (newAnswer: UserAnswer) => void;
   currentAnswer?: UserAnswer;
+  viewOnly?: boolean; // Add viewOnly prop
 };
 
 const ListeningQuestionSubmit: React.FC<ListeningQuestionComponentProps> = ({
@@ -21,6 +22,7 @@ const ListeningQuestionSubmit: React.FC<ListeningQuestionComponentProps> = ({
   questionType,
   onAnswerChange,
   currentAnswer,
+  viewOnly = false, // Add viewOnly prop with default value
 }) => {
   const displayContent = question.questionText || "";
 
@@ -38,6 +40,7 @@ const ListeningQuestionSubmit: React.FC<ListeningQuestionComponentProps> = ({
     questionId: string,
     selectedAnswerId: string
   ) => {
+    if (viewOnly) return; // Prevent interaction if viewOnly
     const newAnswer: UserAnswer = { questionId, selectedAnswerId };
     setLocalAnswer(newAnswer);
     onAnswerChange(newAnswer);
@@ -48,6 +51,7 @@ const ListeningQuestionSubmit: React.FC<ListeningQuestionComponentProps> = ({
     index: number,
     value: string
   ) => {
+    if (viewOnly) return; // Prevent interaction if viewOnly
     // Nếu giá trị mới giống với giá trị hiện tại thì không cần cập nhật
     if (localAnswer.userAnswer && localAnswer.userAnswer[index] === value)
       return;
@@ -98,7 +102,8 @@ const ListeningQuestionSubmit: React.FC<ListeningQuestionComponentProps> = ({
                       e.target.value
                     )
                   }
-                  placeholder={`Blank ${index + 1}`}
+                  placeholder={`Điền khuyết ${index + 1}`}
+                  disabled={viewOnly} // Disable Input if viewOnly
                 />
               )}
             </React.Fragment>
@@ -118,7 +123,8 @@ const ListeningQuestionSubmit: React.FC<ListeningQuestionComponentProps> = ({
             onChange={(e) =>
               handleFillBlankInputChange(question._id, 0, e.target.value)
             }
-            placeholder={`Enter answer`}
+            placeholder={`Nhập câu trả lời`}
+            disabled={viewOnly} // Disable Input if viewOnly
           />
         </div>
       );
@@ -141,6 +147,7 @@ const ListeningQuestionSubmit: React.FC<ListeningQuestionComponentProps> = ({
           <Radio.Group
             onChange={(e) => handleCheckboxChange(question._id, e.target.value)}
             value={localAnswer.selectedAnswerId}
+            disabled={viewOnly} // Disable Radio.Group if viewOnly
           >
             {(question.options || []).map((option) => (
               <div key={String(option.option_id) || ""}>

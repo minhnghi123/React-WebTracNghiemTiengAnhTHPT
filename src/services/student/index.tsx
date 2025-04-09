@@ -100,3 +100,10 @@ export const ExamAPIStudent = {
     return response.data;
   },
 };
+
+export const QuestionAPIStudent = {
+  getQuestionForStudent: async (questionId: string) => {
+    const response = await request.get(`/question/student/${questionId}`);
+    return response.data;
+  },
+};

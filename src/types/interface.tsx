@@ -8,6 +8,7 @@ export interface Answer {
 }
 
 export interface Question {
+  detailsFetched?: Question | undefined;
   passageId?: Passage;
   _id: string;
   content: string;

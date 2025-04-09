@@ -17,6 +17,7 @@ type QuestionComponentProps = {
   onAnswerChange: (newAnswer: UserAnswer) => void;
   currentAnswer?: UserAnswer;
   index: number;
+  viewOnly?: boolean; // Add viewOnly prop
 };
 
 const QuestionSubmit: React.FC<QuestionComponentProps> = ({
@@ -25,6 +26,7 @@ const QuestionSubmit: React.FC<QuestionComponentProps> = ({
   onAnswerChange,
   currentAnswer,
   index,
+  viewOnly = false, // Add viewOnly prop with default value
 }) => {
   const [localAnswer, setLocalAnswer] = useState<UserAnswer>(
     currentAnswer || { questionId: question._id || "", userAnswer: [] }
@@ -40,6 +42,7 @@ const QuestionSubmit: React.FC<QuestionComponentProps> = ({
     questionId: string,
     selectedAnswerId: string
   ) => {
+    if (viewOnly) return; // Disable interaction if viewOnly
     const newAnswer: UserAnswer = { questionId, selectedAnswerId };
     setLocalAnswer(newAnswer);
     onAnswerChange(newAnswer);
@@ -50,6 +53,7 @@ const QuestionSubmit: React.FC<QuestionComponentProps> = ({
     index: number,
     value: string
   ) => {
+    if (viewOnly) return; // Disable interaction if viewOnly
     let currentUserAnswers: string[] = localAnswer.userAnswer
       ? [...localAnswer.userAnswer]
       : new Array(question.answers ? question.answers.length : 0).fill("");
@@ -63,6 +67,7 @@ const QuestionSubmit: React.FC<QuestionComponentProps> = ({
   };
 
   const handleTrueFalseChange = (questionId: string, value: string) => {
+    if (viewOnly) return; // Disable interaction if viewOnly
     const newAnswer: UserAnswer = { questionId, userAnswer: [value] };
     setLocalAnswer(newAnswer);
     onAnswerChange(newAnswer);
@@ -95,7 +100,8 @@ const QuestionSubmit: React.FC<QuestionComponentProps> = ({
                       e.target.value
                     )
                   }
-                  placeholder={`Blank ${idx + 1}`}
+                  placeholder={`Điền khuyết ${idx + 1}`}
+                  disabled={viewOnly} // Disable Input if viewOnly
                 />
               )}
             </React.Fragment>
@@ -145,6 +151,7 @@ const QuestionSubmit: React.FC<QuestionComponentProps> = ({
             }
             value={localAnswer.selectedAnswerId}
             style={{ display: "flex", flexDirection: "column", gap: "12px" }}
+            disabled={viewOnly} // Disable Radio.Group if viewOnly
           >
             {question.answers?.map((answer) => (
               <Radio key={answer._id} value={answer._id}>
@@ -163,6 +170,7 @@ const QuestionSubmit: React.FC<QuestionComponentProps> = ({
             }
             value={localAnswer.userAnswer?.[0]}
             style={{ display: "flex", flexDirection: "column", gap: "12px" }}
+            disabled={viewOnly} // Disable Radio.Group if viewOnly
           >
             <Radio value="true">True</Radio>
             <Radio value="false">False</Radio>
@@ -188,7 +196,8 @@ const QuestionSubmit: React.FC<QuestionComponentProps> = ({
                           e.target.value
                         )
                       }
-                      placeholder={`Blank ${idx + 1}`}
+                      placeholder={`Điền ${idx + 1}`}
+                      disabled={viewOnly} // Disable Input if viewOnly
                     />
                   </div>
                 ))}

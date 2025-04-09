@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { ResultAPI, SubmitAnswer } from "@/services/student";
 import { ExamResult, QuestionAPI } from "@/services/teacher/Teacher";
+import { QuestionAPIStudent } from "@/services/student";
 import {
   Button,
   Card,
@@ -190,6 +191,24 @@ const BaiLam: React.FC = () => {
     setSelectedQuestion(null);
   };
 
+  const handleExpandSuggestedQuestion = async (questionId: string) => {
+    const existingQuestion = suggestedQuestions.find((q) => q._id === questionId);
+    if (existingQuestion && existingQuestion.detailsFetched) return;
+
+    try {
+      let response = await QuestionAPIStudent.getQuestionForStudent(questionId);
+      if (response.code === 200) {
+        setSuggestedQuestions((prev) =>
+          prev.map((q) =>
+            q._id === questionId ? { ...q, ...response.question, detailsFetched: true } : q
+          )
+        );
+      }
+    } catch (error) {
+      console.error("Error fetching question details:", error);
+    }
+  };
+
   // Initialize globalQuestionIndex to 0
   let globalQuestionIndex = 0;
 
@@ -278,6 +297,7 @@ const BaiLam: React.FC = () => {
                                 (ans) => ans.questionId === q._id
                               )}
                               index={questionIndex}
+                              viewOnly={!!Examresult} // Add view-only mode when Examresult exists
                             />
                           </>
                         ) : (
@@ -287,6 +307,7 @@ const BaiLam: React.FC = () => {
                             onAnswerChange={handleAnswerChange}
                             currentAnswer={answers.find((ans) => ans.questionId === q._id)}
                             index={questionIndex}
+                            viewOnly={!!Examresult} // Add view-only mode when Examresult exists
                           />
                         )}
                       </Card>
@@ -335,6 +356,7 @@ const BaiLam: React.FC = () => {
                           (ans) => ans.questionId === q._id
                         )}
                         index={questionIndex}
+                        viewOnly={!!Examresult} // Add view-only mode when Examresult exists
                       />
                     </>
                   ) : (
@@ -344,6 +366,7 @@ const BaiLam: React.FC = () => {
                       onAnswerChange={handleAnswerChange}
                       currentAnswer={answers.find((ans) => ans.questionId === q._id)}
                       index={questionIndex}
+                      viewOnly={!!Examresult} // Add view-only mode when Examresult exists
                     />
                   )}
                 </Card>
@@ -418,13 +441,53 @@ const BaiLam: React.FC = () => {
                         <Panel
                           header={`${id + 1}. ${q.content.slice(0, 200)}...`}
                           key={q._id ?? id}
+                          onClick={() => handleExpandSuggestedQuestion(q._id)}
                         >
-                          <QuestionSubmit
-                            question={q}
-                            questionType={q.questionType || ""}
-                            onAnswerChange={() => {}}
-                            index={0}
-                          />
+                          {q.detailsFetched ? (
+                            <>
+                              <QuestionSubmit
+                                question={q}
+                                questionType={q.questionType || ""}
+                                onAnswerChange={() => {}} // Disable answer change
+                                index={0}
+                                viewOnly={true} // Add view-only mode
+                              />
+                              <div style={{ marginTop: "8px", color: "#52c41a" }}>
+                                <strong>Đáp án đúng:</strong>{" "}
+                                {q.questionType === "6742fb1cd56a2e75dbd817ea" && // Multiple-choice
+                                  q.answers?.map((answer) =>
+                                    answer.isCorrect ? (
+                                      <div key={answer._id} style={{ marginTop: "4px" }}>
+                                        <span>{answer.text}</span>
+                                      </div>
+                                    ) : null
+                                  )}
+                                {q.questionType === "6742fb3bd56a2e75dbd817ec" && // Fill-in-the-blank
+                                  q.answers?.map((answer, index) => (
+                                    <div key={index} style={{ marginTop: "4px" }}>
+                                      <span>Điền khuyết {index + 1}: {answer.correctAnswerForBlank}</span>
+                                    </div>
+                                  ))}
+                                {q.questionType === "6742fb5dd56a2e75dbd817ee" && // True/False/Not Given
+                                  ["true", "false", "not given"].map((choice) => (
+                                    <div
+                                      key={choice}
+                                      style={{
+                                        marginTop: "4px",
+                                        color: q.correctAnswerForTrueFalseNGV === choice ? "#52c41a" : "#000",
+                                      }}
+                                    >
+                                      <span>{choice.toUpperCase()}</span>
+                                      {q.correctAnswerForTrueFalseNGV === choice && (
+                                        <strong style={{ marginLeft: "8px" }}>Đúng</strong>
+                                      )}
+                                    </div>
+                                  ))}
+                              </div>
+                            </>
+                          ) : (
+                            <Spin />
+                          )}
                         </Panel>
                       ))}
                     </Collapse>
