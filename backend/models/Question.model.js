@@ -26,7 +26,6 @@ const QuestionSchema = new mongoose.Schema({
   ],
   correctAnswerForTrueFalseNGV: {
     type: String,
-
     default: "",
   },
   subject: { type: String, default: "English" },
