@@ -555,151 +555,225 @@ export const importExamFromExcel = async (req, res) => {
     const passageFile = req.files?.passageFile?.[0];
     const examFile = req.files?.examFile?.[0];
 
-    if (!passageFile || !examFile) {
+    if (!passageFile && !examFile) {
       return res.status(400).json({
         success: false,
         message: "Missing passageFile or examFile",
       });
     }
+    if (passageFile && examFile) {
+      // Đọc file Excel
+      const passageWorkbook = XLSX.read(passageFile.buffer, { type: "buffer" });
+      const examWorkbook = XLSX.read(examFile.buffer, { type: "buffer" });
 
-    // Đọc file Excel
-    const passageWorkbook = XLSX.read(passageFile.buffer, { type: "buffer" });
-    const examWorkbook = XLSX.read(examFile.buffer, { type: "buffer" });
+      const passageSheet =
+        passageWorkbook.Sheets[passageWorkbook.SheetNames[0]];
+      const examSheet = examWorkbook.Sheets[examWorkbook.SheetNames[0]];
 
-    const passageSheet = passageWorkbook.Sheets[passageWorkbook.SheetNames[0]];
-    const examSheet = examWorkbook.Sheets[examWorkbook.SheetNames[0]];
+      const passageData = XLSX.utils.sheet_to_json(passageSheet);
+      const examData = XLSX.utils.sheet_to_json(examSheet);
 
-    const passageData = XLSX.utils.sheet_to_json(passageSheet);
-    const examData = XLSX.utils.sheet_to_json(examSheet);
+      const questionTypes = await QuestionType.find({ deleted: false });
+      const questionTypeMap = Object.fromEntries(
+        questionTypes.map((q) => [q.name, q._id])
+      );
 
-    const questionTypes = await QuestionType.find({ deleted: false });
-    const questionTypeMap = Object.fromEntries(
-      questionTypes.map((q) => [q.name, q._id])
-    );
+      const passageMap = new Map();
+      for (const item of passageData) {
+        passageMap.set(item.PassageId, {
+          title: item.Title,
+          content: item.Content,
+        });
+      }
 
-    const passageMap = new Map();
-    for (const item of passageData) {
-      passageMap.set(item.PassageId, {
-        title: item.Title,
-        content: item.Content,
-      });
-    }
+      const groupedQuestions = new Map(); // passageId -> questions[]
+      const singleQuestions = [];
 
-    const groupedQuestions = new Map(); // passageId -> questions[]
-    const singleQuestions = [];
+      for (const question of examData) {
+        const baseData = {
+          content: question.Content,
+          questionType: questionTypeMap[question.QuestionType],
+          author: req.user._id,
+          knowledge: question?.Knowledge,
+          translation: question?.Translation,
+          explanation: question?.Explaination,
+        };
 
-    for (const question of examData) {
-      const baseData = {
-        content: question.Content,
-        questionType: questionTypeMap[question.QuestionType],
-        author: req.user._id,
-      };
+        if (question.PassageId) {
+          if (!groupedQuestions.has(question.PassageId)) {
+            groupedQuestions.set(question.PassageId, []);
+          }
 
-      if (question.PassageId) {
-        if (!groupedQuestions.has(question.PassageId)) {
-          groupedQuestions.set(question.PassageId, []);
-        }
-
-        if (question.QuestionType === "True/False/Not Given") {
-          groupedQuestions.get(question.PassageId).push({
-            ...baseData,
-            correctAnswerForTrueFalseNGV:
-              question.CorrectAnswers.toString().toLowerCase(),
-          });
-        } else if (question.QuestionType === "Fill in the blank") {
-          groupedQuestions.get(question.PassageId).push({
-            ...baseData,
-            answers: [
-              { correctAnswerForBlank: question.CorrectAnswers.toString() },
-            ],
-          });
-        } else if (question.QuestionType === "Mutiple Choices") {
-          groupedQuestions.get(question.PassageId).push({
-            ...baseData,
-            answers: ["A", "B", "C", "D"].map((option) => ({
-              text: question["Answer" + option],
-              isCorrect: question.CorrectAnswers.includes(option),
-            })),
-          });
-        }
-      } else {
-        if (question.QuestionType === "True/False/Not Given") {
-          singleQuestions.push({
-            ...baseData,
-            correctAnswerForTrueFalseNGV:
-              question.CorrectAnswers.toString().toLowerCase(),
-          });
-        } else if (question.QuestionType === "Fill in the blank") {
-          singleQuestions.push({
-            ...baseData,
-            answers: [
-              { correctAnswerForBlank: question.CorrectAnswers.toString() },
-            ],
-          });
-        } else if (question.QuestionType === "Mutiple Choices") {
-          singleQuestions.push({
-            ...baseData,
-            answers: ["A", "B", "C", "D"].map((option) => ({
-              text: question["Answer" + option],
-              isCorrect: question.CorrectAnswers.includes(option),
-            })),
-          });
+          if (question.QuestionType === "True/False/Not Given") {
+            groupedQuestions.get(question.PassageId).push({
+              ...baseData,
+              correctAnswerForTrueFalseNGV:
+                question.CorrectAnswers.toString().toLowerCase(),
+            });
+          } else if (question.QuestionType === "Fill in the blank") {
+            groupedQuestions.get(question.PassageId).push({
+              ...baseData,
+              answers: [
+                { correctAnswerForBlank: question.CorrectAnswers.toString() },
+              ],
+            });
+          } else if (question.QuestionType === "Mutiple Choices") {
+            groupedQuestions.get(question.PassageId).push({
+              ...baseData,
+              answers: ["A", "B", "C", "D"].map((option) => ({
+                text: question["Answer" + option],
+                isCorrect: question.CorrectAnswers.includes(option),
+              })),
+            });
+          }
+        } else {
+          if (question.QuestionType === "True/False/Not Given") {
+            singleQuestions.push({
+              ...baseData,
+              correctAnswerForTrueFalseNGV:
+                question.CorrectAnswers.toString().toLowerCase(),
+            });
+          } else if (question.QuestionType === "Fill in the blank") {
+            singleQuestions.push({
+              ...baseData,
+              answers: [
+                { correctAnswerForBlank: question.CorrectAnswers.toString() },
+              ],
+            });
+          } else if (question.QuestionType === "Mutiple Choices") {
+            singleQuestions.push({
+              ...baseData,
+              answers: ["A", "B", "C", "D"].map((option) => ({
+                text: question["Answer" + option],
+                isCorrect: question.CorrectAnswers.includes(option),
+              })),
+            });
+          }
         }
       }
-    }
 
-    const questionSaves = [];
+      const questionSaves = [];
 
-    for (const [passageId, questions] of groupedQuestions.entries()) {
-      const passageInfo = passageMap.get(passageId);
-      if (!passageInfo) continue;
+      for (const [passageId, questions] of groupedQuestions.entries()) {
+        const passageInfo = passageMap.get(passageId);
+        if (!passageInfo) continue;
 
-      const newPassage = new Passage({
-        title: passageInfo.title,
-        content: passageInfo.content,
-      });
-
-      await newPassage.save();
-
-      for (const q of questions) {
-        const question = new Question({
-          ...q,
-          passageId: newPassage._id,
+        const newPassage = new Passage({
+          title: passageInfo.title,
+          content: passageInfo.content,
         });
+
+        await newPassage.save();
+
+        for (const q of questions) {
+          const question = new Question({
+            ...q,
+            passageId: newPassage._id,
+          });
+          questionSaves.push(question.save());
+        }
+      }
+
+      // Add single questions
+      for (const q of singleQuestions) {
+        const question = new Question(q);
         questionSaves.push(question.save());
       }
+
+      // Lưu tất cả câu hỏi song song
+      const savedQuestions = await Promise.all(questionSaves);
+      const questionIds = savedQuestions.map((q) => q._id);
+
+      // Tạo đề thi
+      const randomCode = Math.floor(100000 + Math.random() * 900000).toString();
+      const newExam = new Exam({
+        title: "Đề thi được nhập từ excel mã: " + randomCode,
+        description: "Đề thi được nhập từ excel mã: " + randomCode,
+        questions: questionIds,
+        duration: 90,
+        isPublic: true,
+        startTime: new Date(),
+        endTime: new Date(Date.now() + 60 * 60 * 1000),
+        createdBy: req.user._id,
+      });
+
+      await newExam.save();
+
+      return res.status(200).json({
+        success: true,
+        message: "Import exam successfully!",
+        data: { exam: newExam },
+      });
+    } else if (examFile && !passageFile) {
+      const examWorkbook = XLSX.read(examFile.buffer, { type: "buffer" });
+      const examSheet = examWorkbook.Sheets[examWorkbook.SheetNames[0]];
+      const examData = XLSX.utils.sheet_to_json(examSheet);
+
+      const questionTypes = await QuestionType.find({ deleted: false });
+      const questionTypeMap = Object.fromEntries(
+        questionTypes.map((q) => [q.name, q._id])
+      );
+
+      const singleQuestions = [];
+
+      for (const question of examData) {
+        const baseData = {
+          content: question.Content,
+          questionType: questionTypeMap[question.QuestionType],
+          author: req.user._id,
+          knowledge: question?.Knowledge,
+          translation: question?.Translation,
+          explanation: question?.Explaination,
+        };
+
+        if (question.QuestionType === "True/False/Not Given") {
+          singleQuestions.push({
+            ...baseData,
+            correctAnswerForTrueFalseNGV:
+              question.CorrectAnswers.toString().toLowerCase(),
+          });
+        } else if (question.QuestionType === "Fill in the blank") {
+          singleQuestions.push({
+            ...baseData,
+            answers: [
+              { correctAnswerForBlank: question.CorrectAnswers.toString() },
+            ],
+          });
+        } else if (question.QuestionType === "Mutiple Choices") {
+          singleQuestions.push({
+            ...baseData,
+            answers: ["A", "B", "C", "D"].map((option) => ({
+              text: question["Answer" + option],
+              isCorrect: question.CorrectAnswers.includes(option),
+            })),
+          });
+        }
+      }
+
+      const questionSaves = singleQuestions.map((q) => new Question(q).save());
+      const savedQuestions = await Promise.all(questionSaves);
+      const questionIds = savedQuestions.map((q) => q._id);
+
+      const randomCode = Math.floor(100000 + Math.random() * 900000).toString();
+      const newExam = new Exam({
+        title: "Đề thi được nhập từ excel mã: " + randomCode,
+        description: "Đề thi được nhập từ excel mã: " + randomCode,
+        questions: questionIds,
+        duration: 90,
+        isPublic: true,
+        startTime: new Date(),
+        endTime: new Date(Date.now() + 60 * 60 * 1000),
+        createdBy: req.user._id,
+      });
+
+      await newExam.save();
+
+      return res.status(200).json({
+        success: true,
+        message: "Import exam successfully (only questions)!",
+        data: { exam: newExam },
+      });
     }
-
-    // Add single questions
-    for (const q of singleQuestions) {
-      const question = new Question(q);
-      questionSaves.push(question.save());
-    }
-
-    // Lưu tất cả câu hỏi song song
-    const savedQuestions = await Promise.all(questionSaves);
-    const questionIds = savedQuestions.map((q) => q._id);
-
-    // Tạo đề thi
-    const randomCode = Math.floor(100000 + Math.random() * 900000).toString();
-    const newExam = new Exam({
-      title: "Đề thi được nhập từ excel mã: " + randomCode,
-      description: "Đề thi được nhập từ excel mã: " + randomCode,
-      questions: questionIds,
-      duration: 90,
-      isPublic: true,
-      startTime: new Date(),
-      endTime: new Date(Date.now() + 60 * 60 * 1000),
-      createdBy: req.user._id,
-    });
-
-    await newExam.save();
-
-    return res.status(200).json({
-      success: true,
-      message: "Import exam successfully!",
-      data: { exam: newExam },
-    });
   } catch (error) {
     console.error("Error processing file:", error);
     return res.status(500).json({ msg: "Internal server error" });
