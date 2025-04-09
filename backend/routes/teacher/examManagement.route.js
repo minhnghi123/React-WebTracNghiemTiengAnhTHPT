@@ -10,11 +10,15 @@ import {
   autoGenerateExam,
   exportExamIntoWord,
   copyExamFromOthers,
-  importExamFromWord,
+  importExamFromExcel,
 } from "../../controllers/teacher/examManagement.controller.js";
+import multer from "multer";
+import upload, {
+  uploadMultiple,
+} from "../../middlewares/teacher/upLoadCloud.middleware.js";
 
 const router = express.Router();
-
+const fileUpload = multer();
 router.get("/", getAllExams);
 
 router.get("/detail/:slug", getExamDetail);
@@ -34,7 +38,22 @@ router.post("/auto-generate-exam", autoGenerateExam);
 router.post("/export-exam", exportExamIntoWord);
 
 router.post("/copy-exam", copyExamFromOthers);
-
-router.post("/import-exam", importExamFromWord);
+//import exam with both passage and exam file
+router.post(
+  "/import-exam",
+  fileUpload.fields([
+    { name: "passageFile", maxCount: 1 },
+    { name: "examFile", maxCount: 1 },
+  ]),
+  uploadMultiple,
+  importExamFromExcel
+);
+//import exam with only exam file
+router.post(
+  "/import-exam/exam-only",
+  fileUpload.single("examFile"),
+  upload,
+  importExamFromExcel
+);
 
 export default router;
