@@ -552,195 +552,153 @@ export const copyExamFromOthers = async (req, res) => {
 //Import Excel Exam
 export const importExamFromExcel = async (req, res) => {
   try {
-    const passageFile = req.files?.passageFile?.[0]; // file bài đọc
-    const examFile = req.files?.examFile?.[0]; // file đề thi
+    const passageFile = req.files?.passageFile?.[0];
+    const examFile = req.files?.examFile?.[0];
+
     if (!passageFile || !examFile) {
       return res.status(400).json({
         success: false,
         message: "Missing passageFile or examFile",
       });
     }
-    // Đọc file Excel từ buffer
+
+    // Đọc file Excel
     const passageWorkbook = XLSX.read(passageFile.buffer, { type: "buffer" });
     const examWorkbook = XLSX.read(examFile.buffer, { type: "buffer" });
 
-    // Lấy sheet đầu tiên
     const passageSheet = passageWorkbook.Sheets[passageWorkbook.SheetNames[0]];
     const examSheet = examWorkbook.Sheets[examWorkbook.SheetNames[0]];
 
-    // Chuyển sheet thành JSON
     const passageData = XLSX.utils.sheet_to_json(passageSheet);
     const examData = XLSX.utils.sheet_to_json(examSheet);
-    //get all question Type
+
     const questionTypes = await QuestionType.find({ deleted: false });
-    //get each question type
-    const questionTypeMap = {};
-    for (const questionType of questionTypes) {
-      questionTypeMap[questionType.name] = questionType._id;
-    }
-    const passages = passageData.map((item) => {
-      return {
-        id: item.PassageId,
+    const questionTypeMap = Object.fromEntries(
+      questionTypes.map((q) => [q.name, q._id])
+    );
+
+    const passageMap = new Map();
+    for (const item of passageData) {
+      passageMap.set(item.PassageId, {
         title: item.Title,
         content: item.Content,
-      };
-    });
-    //tao 1 kieu du lieu de luu question cung voi passage theo passageId
-    let ans = {};
-    //1 kieu du lieu cho ca question le
-    let singleQuestion = [];
-    //gom cau hoi theo bai doc
+      });
+    }
+
+    const groupedQuestions = new Map(); // passageId -> questions[]
+    const singleQuestions = [];
+
     for (const question of examData) {
+      const baseData = {
+        content: question.Content,
+        questionType: questionTypeMap[question.QuestionType],
+        author: req.user._id,
+      };
+
       if (question.PassageId) {
-        if (!ans[question.PassageId]) {
-          ans[question.PassageId] = {
-            passageId: question.PassageId,
-            questions: [],
-          };
+        if (!groupedQuestions.has(question.PassageId)) {
+          groupedQuestions.set(question.PassageId, []);
         }
+
         if (question.QuestionType === "True/False/Not Given") {
-          ans[question.PassageId].questions.push({
-            content: question.Content,
-            questionType: questionTypeMap[question.QuestionType],
+          groupedQuestions.get(question.PassageId).push({
+            ...baseData,
             correctAnswerForTrueFalseNGV:
               question.CorrectAnswers.toString().toLowerCase(),
           });
         } else if (question.QuestionType === "Fill in the blank") {
-          ans[question.PassageId].questions.push({
-            content: question.Content,
-            questionType: questionTypeMap[question.QuestionType],
+          groupedQuestions.get(question.PassageId).push({
+            ...baseData,
             answers: [
-              {
-                correctAnswerForBlank: question.CorrectAnswers.toString(),
-              },
+              { correctAnswerForBlank: question.CorrectAnswers.toString() },
             ],
           });
         } else if (question.QuestionType === "Mutiple Choices") {
-          ans[question.PassageId].questions.push({
-            content: question.Content,
-            questionType: questionTypeMap[question.QuestionType],
-            answers: [
-              {
-                text: question.AnswerA,
-                isCorrect: question.CorrectAnswers.includes("A"),
-              },
-              {
-                text: question.AnswerB,
-                isCorrect: question.CorrectAnswers.includes("B"),
-              },
-              {
-                text: question.AnswerC,
-                isCorrect: question.CorrectAnswers.includes("C"),
-              },
-              {
-                text: question.AnswerD,
-                isCorrect: question.CorrectAnswers.includes("D"),
-              },
-            ],
+          groupedQuestions.get(question.PassageId).push({
+            ...baseData,
+            answers: ["A", "B", "C", "D"].map((option) => ({
+              text: question["Answer" + option],
+              isCorrect: question.CorrectAnswers.includes(option),
+            })),
           });
         }
       } else {
         if (question.QuestionType === "True/False/Not Given") {
-          singleQuestion.push({
-            content: question.Content,
-            questionType: questionTypeMap[question.QuestionType],
+          singleQuestions.push({
+            ...baseData,
             correctAnswerForTrueFalseNGV:
               question.CorrectAnswers.toString().toLowerCase(),
-            author: req.user._id,
           });
         } else if (question.QuestionType === "Fill in the blank") {
-          singleQuestion.push({
-            content: question.Content,
-            questionType: questionTypeMap[question.QuestionType],
+          singleQuestions.push({
+            ...baseData,
             answers: [
-              {
-                correctAnswerForBlank: question.CorrectAnswers.toString(),
-              },
+              { correctAnswerForBlank: question.CorrectAnswers.toString() },
             ],
-            author: req.user._id,
           });
         } else if (question.QuestionType === "Mutiple Choices") {
-          singleQuestion.push({
-            content: question.Content,
-            questionType: questionTypeMap[question.QuestionType],
+          singleQuestions.push({
+            ...baseData,
+            answers: ["A", "B", "C", "D"].map((option) => ({
+              text: question["Answer" + option],
+              isCorrect: question.CorrectAnswers.includes(option),
+            })),
+          });
+        }
+      }
+    }
 
-            answers: [
-              {
-                text: question.AnswerA,
-                isCorrect: question.CorrectAnswers.includes("A"),
-              },
-              {
-                text: question.AnswerB,
-                isCorrect: question.CorrectAnswers.includes("B"),
-              },
-              {
-                text: question.AnswerC,
-                isCorrect: question.CorrectAnswers.includes("C"),
-              },
-              {
-                text: question.AnswerD,
-                isCorrect: question.CorrectAnswers.includes("D"),
-              },
-            ],
-            author: req.user._id,
-          });
-        }
-      }
-    }
-    //datatype to save id of question
-    let questionId = [];
-    //save data
-    for (const o of Object.values(ans)) {
-      //find passage by id
-      const passage = passages.find((p) => p.id === o.passageId);
-      if (passage) {
-        const newPassage = new Passage({
-          title: passage.title,
-          content: passage.content,
+    const questionSaves = [];
+
+    for (const [passageId, questions] of groupedQuestions.entries()) {
+      const passageInfo = passageMap.get(passageId);
+      if (!passageInfo) continue;
+
+      const newPassage = new Passage({
+        title: passageInfo.title,
+        content: passageInfo.content,
+      });
+
+      await newPassage.save();
+
+      for (const q of questions) {
+        const question = new Question({
+          ...q,
+          passageId: newPassage._id,
         });
-        await newPassage.save();
-        //save each question with passageId
-        for (const q of o.questions) {
-          const question = new Question({
-            content: q.content,
-            questionType: q.questionType,
-            answers: q.answers,
-            passageId: newPassage._id,
-            author: req.user._id,
-          });
-          await question.save();
-          questionId.push(question._id);
-        }
+        questionSaves.push(question.save());
       }
     }
-    //save all single question
-    for (const q of singleQuestion) {
+
+    // Add single questions
+    for (const q of singleQuestions) {
       const question = new Question(q);
-      await question.save();
-      questionId.push(question._id);
+      questionSaves.push(question.save());
     }
-    //create Exam
-    //random code
+
+    // Lưu tất cả câu hỏi song song
+    const savedQuestions = await Promise.all(questionSaves);
+    const questionIds = savedQuestions.map((q) => q._id);
+
+    // Tạo đề thi
+    const randomCode = Math.floor(100000 + Math.random() * 900000).toString();
     const newExam = new Exam({
-      title:
-        "Đề thi được nhập từ excel mã: " + Math.floor(Math.random() * 1000000),
-      description:
-        "Đề thi được nhập từ excel mã: " + Math.floor(Math.random() * 1000000),
-      questions: questionId,
+      title: "Đề thi được nhập từ excel mã: " + randomCode,
+      description: "Đề thi được nhập từ excel mã: " + randomCode,
+      questions: questionIds,
       duration: 90,
       isPublic: true,
       startTime: new Date(),
-      endTime: new Date(Date.now() + 60 * 60 * 1000), // 1 hour sau
+      endTime: new Date(Date.now() + 60 * 60 * 1000),
       createdBy: req.user._id,
     });
-    //save exam
+
     await newExam.save();
+
     return res.status(200).json({
       success: true,
       message: "Import exam successfully!",
-      data: {
-        exam: newExam,
-      },
+      data: { exam: newExam },
     });
   } catch (error) {
     console.error("Error processing file:", error);
