@@ -73,7 +73,6 @@ const QuestionComponent: React.FC<QuestionComponentProps> = ({
     }
     setOpen(false);
   };
-
   return (
     <Card
       bordered={false}

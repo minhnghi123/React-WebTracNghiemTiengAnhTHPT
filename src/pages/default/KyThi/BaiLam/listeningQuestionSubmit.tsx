@@ -34,7 +34,10 @@ const ListeningQuestionSubmit: React.FC<ListeningQuestionComponentProps> = ({
     }
   }, [currentAnswer]);
 
-  const handleCheckboxChange = (questionId: string, selectedAnswerId: string) => {
+  const handleCheckboxChange = (
+    questionId: string,
+    selectedAnswerId: string
+  ) => {
     const newAnswer: UserAnswer = { questionId, selectedAnswerId };
     setLocalAnswer(newAnswer);
     onAnswerChange(newAnswer);
@@ -46,7 +49,8 @@ const ListeningQuestionSubmit: React.FC<ListeningQuestionComponentProps> = ({
     value: string
   ) => {
     // Nếu giá trị mới giống với giá trị hiện tại thì không cần cập nhật
-    if (localAnswer.userAnswer && localAnswer.userAnswer[index] === value) return;
+    if (localAnswer.userAnswer && localAnswer.userAnswer[index] === value)
+      return;
 
     // Ở trường hợp không có placeholder, chỉ cần 1 ô input
     const expectedCount = displayContent.match(/_+/g)
@@ -56,7 +60,10 @@ const ListeningQuestionSubmit: React.FC<ListeningQuestionComponentProps> = ({
       ? [...localAnswer.userAnswer]
       : new Array(expectedCount).fill("");
     currentUserAnswers[index] = value;
-    const newAnswer: UserAnswer = { questionId, userAnswer: currentUserAnswers };
+    const newAnswer: UserAnswer = {
+      questionId,
+      userAnswer: currentUserAnswers,
+    };
     setLocalAnswer(newAnswer);
     onAnswerChange(newAnswer);
   };
@@ -85,7 +92,11 @@ const ListeningQuestionSubmit: React.FC<ListeningQuestionComponentProps> = ({
                   }}
                   value={localAnswer.userAnswer?.[index] || ""}
                   onChange={(e) =>
-                    handleFillBlankInputChange(question._id, index, e.target.value)
+                    handleFillBlankInputChange(
+                      question._id,
+                      index,
+                      e.target.value
+                    )
                   }
                   placeholder={`Blank ${index + 1}`}
                 />
@@ -117,20 +128,18 @@ const ListeningQuestionSubmit: React.FC<ListeningQuestionComponentProps> = ({
   return (
     <div className="bg-white p-4 rounded shadow mb-4">
       <h5 className="text-xl font-bold mb-2" style={{ whiteSpace: "pre-wrap" }}>
-        {questionType === "6742fb3bd56a2e75dbd817ec"
-          ? renderFillInTheBlanks()
-          : (
-              <span
-                dangerouslySetInnerHTML={{ __html: cleanString(displayContent) }}
-              />
-            )}
+        {questionType === "6742fb3bd56a2e75dbd817ec" ? (
+          renderFillInTheBlanks()
+        ) : (
+          <span
+            dangerouslySetInnerHTML={{ __html: cleanString(displayContent) }}
+          />
+        )}
       </h5>
       <div className="mt-1">
         {questionType === "6742fb1cd56a2e75dbd817ea" ? (
           <Radio.Group
-            onChange={(e) =>
-              handleCheckboxChange(question._id, e.target.value)
-            }
+            onChange={(e) => handleCheckboxChange(question._id, e.target.value)}
             value={localAnswer.selectedAnswerId}
           >
             {(question.options || []).map((option) => (

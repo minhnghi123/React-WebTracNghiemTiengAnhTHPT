@@ -71,7 +71,7 @@ export const KetQua: React.FC<KetQuaProps> = ({ DeThi }) => {
       ),
     },
   ];
-
+  // console.log(detail);
   return (
     <div>
       <center>
