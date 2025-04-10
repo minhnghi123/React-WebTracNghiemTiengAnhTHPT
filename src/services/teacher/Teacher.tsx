@@ -269,30 +269,30 @@ export const ExamAPI = {
 };
 export const QuestionTypeAPI = {
   getAllQuestionType: async (page: number) => {
-    const response = await request.get(`/teacher/question-types?page=${page}`);
+    const response = await request.get(`/admin/question-types?page=${page}`);
     return response.data;
   },
   createQuestionType: async (question: QuestionType) => {
     const response = await request.post(
-      "/teacher/question-types/create",
+      "/admin/question-types/create",
       question
     );
     return response.data;
   },
   getQuestionType: async (id: string) => {
-    const response = await request.get(`/teacher/question-types/update/${id}`);
+    const response = await request.get(`/admin/question-types/update/${id}`);
     return response.data;
   },
   UpdateQuestionType: async (question: QuestionType, _id: string) => {
     const response = await request.patch(
-      `/teacher/question-types/update/${_id}`,
+      `/admin/question-types/update/${_id}`,
       question
     );
     return response.data;
   },
   deleteQuestionType: async (id: string) => {
     const response = await request.patch(
-      `/teacher/question-types/delete/${id}`
+      `/admin/question-types/delete/${id}`
     );
     return response.data;
   },

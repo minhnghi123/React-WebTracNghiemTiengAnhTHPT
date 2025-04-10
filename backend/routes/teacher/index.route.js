@@ -8,6 +8,7 @@ import listeningExamManagementRoute from "./listeningExamManagement.route.js";
 import {
   protectedRoute,
   isTeacher,
+  isAdmin,
 } from "../../middlewares/protectedRoute.middleware.js";
 
 
@@ -17,8 +18,6 @@ const indexTeacher = (app) => {
   app.use("/teacher", isTeacher, questionManagementRoute);
 
   app.use("/teacher/exam", isTeacher, examManagementRoute);
-
-  app.use("/teacher/question-types", isTeacher, questionTypeManagementRoute);
 
   app.use("/teacher/audio", isTeacher, audioManagementRoute);
 
