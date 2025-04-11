@@ -554,6 +554,13 @@ export const importExamFromExcel = async (req, res) => {
   try {
     const passageFile = req.files?.passageFile?.[0];
     const examFile = req.files?.examFile?.[0];
+    const originalName = Buffer.from(examFile.originalname, "latin1").toString(
+      "utf8"
+    );
+    const title = originalName
+      .split(".")[0]
+      .replace(/[^a-zA-Z0-9\u00C0-\u1EF9\s]/g, "_")
+      .replace(/\s+/g, "_");
 
     if (!passageFile && !examFile) {
       return res.status(400).json({
@@ -634,7 +641,7 @@ export const importExamFromExcel = async (req, res) => {
 
         const normalizedType = normalize(question.QuestionType);
         const questionTypeId = questionTypeMap[normalizedType];
-
+        console.log(normalizedType, questionTypeId);
         if (!questionTypeId) {
           return res.status(400).json({
             success: false,
@@ -770,7 +777,6 @@ export const importExamFromExcel = async (req, res) => {
 
       const randomCode = Math.floor(100000 + Math.random() * 900000).toString();
       //title là tên của file excel
-      const title = examFile.originalname.split(".")[0];
       const newExam = new Exam({
         title: title,
         description: "Đề thi được nhập từ excel mã: " + randomCode,
@@ -898,7 +904,7 @@ export const importExamFromExcel = async (req, res) => {
       const questionIds = savedQuestions.map((q) => q._id);
       const randomCode = Math.floor(100000 + Math.random() * 900000).toString();
       //title là tên của file excel
-      const title = examFile.originalname.split(".")[0];
+      //hiển thị title có dấu
       const newExam = new Exam({
         title: title,
         description: "Đề thi được nhập từ excel mã: " + randomCode,

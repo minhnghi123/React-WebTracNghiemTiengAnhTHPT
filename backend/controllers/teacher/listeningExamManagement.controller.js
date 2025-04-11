@@ -155,7 +155,7 @@ export const importListeningExamController = async (req, res) => {
     });
 
     const questionType = await QuestionType.findOne({
-      name: "Mutiple Choices",
+      name: "Multiple Choices",
     });
     console.log(questionType);
 

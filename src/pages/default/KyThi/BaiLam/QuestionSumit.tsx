@@ -75,6 +75,7 @@ const QuestionSubmit: React.FC<QuestionComponentProps> = ({
 
   const renderFillInBlankContent = () => {
     const placeholderRegex = /_+\d+_+/g;
+    // console.log(question);
     const matchedPlaceholders = question.content.match(placeholderRegex);
 
     if (
