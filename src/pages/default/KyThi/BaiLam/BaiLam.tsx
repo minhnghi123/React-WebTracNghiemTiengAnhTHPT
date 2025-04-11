@@ -13,6 +13,8 @@ import {
   Col,
   Affix,
   Divider,
+  Modal,
+  Statistic,
 } from "antd";
 import { gemini } from "@/services/GoogleApi";
 import QuestionSubmit from "./QuestionSumit";
@@ -26,6 +28,7 @@ const { Title, Paragraph } = Typography;
 const { Sider, Content } = Layout;
 
 const BaiLam: React.FC = () => {
+  const [isSubmitModalVisible, setIsSubmitModalVisible] = useState(false);
   const [examDetails, setExamDetails] = useState<any>(null);
   const [remainingTime, setRemainingTime] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
@@ -36,13 +39,44 @@ const BaiLam: React.FC = () => {
   const [answers, setAnswers] = useState<any[]>([]);
   const [listeningAnswers, setListeningAnswers] = useState<any[]>([]);
   const [showErrorModal, setShowErrorModal] = useState<boolean>(false);
-  const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
-  const [groupedQuestions, setGroupedQuestions] = useState<Record<string, any[]>>({});
+  const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(
+    null
+  );
+  const [groupedQuestions, setGroupedQuestions] = useState<
+    Record<string, any[]>
+  >({});
   const questionRefs = useRef<any[]>([]);
   const resultSectionRef = useRef<HTMLDivElement>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const endTimeRef = useRef<Date | null>(null);
+  const showSubmitModal = () => {
+    setIsSubmitModalVisible(true);
+  };
 
+  const handleCancelSubmit = () => {
+    setIsSubmitModalVisible(false);
+  };
+  //xac dinh cau nao chua lam
+  const getUnansweredQuestions = () => {
+    const unanswered = [];
+
+    for (const passageId of Object.keys(groupedQuestions)) {
+      const questions = groupedQuestions[passageId];
+      for (const question of questions) {
+        const isAnswered =
+          answers.some((ans) => ans.questionId === question._id) ||
+          listeningAnswers.some((ans) => ans.questionId === question._id);
+
+        if (!isAnswered) {
+          unanswered.push(question);
+        }
+      }
+    }
+    //chỉ lấy id
+    const unansweredIds = unanswered.map((question) => question._id);
+
+    return unansweredIds; // Trả về id các câu hỏi chưa được trả lời
+  };
   useEffect(() => {
     const fetchExamDetails = async () => {
       try {
@@ -57,12 +91,16 @@ const BaiLam: React.FC = () => {
               (le: any) => le.questions || []
             ) || []),
           ];
-          const grouped = questions.reduce((acc: Record<string, any[]>, question: any) => {
-            const passageId = question.passageId?._id || question.passageId || "no-passage";
-            if (!acc[passageId]) acc[passageId] = [];
-            acc[passageId].push(question);
-            return acc;
-          }, {});
+          const grouped = questions.reduce(
+            (acc: Record<string, any[]>, question: any) => {
+              const passageId =
+                question.passageId?._id || question.passageId || "no-passage";
+              if (!acc[passageId]) acc[passageId] = [];
+              acc[passageId].push(question);
+              return acc;
+            },
+            {}
+          );
           setGroupedQuestions(grouped);
 
           const endTime = new Date(response.results.endTime);
@@ -142,11 +180,14 @@ const BaiLam: React.FC = () => {
     if (!examDetails) return;
 
     if (intervalRef.current) clearInterval(intervalRef.current);
-
+    //xac dinh cau hoi chua tra loi
+    const unansweredQuestions = getUnansweredQuestions();
+    console.log("Unanswered Questions:", unansweredQuestions);
     const submitAnswer: SubmitAnswer = {
       resultId: examDetails._id,
       answers,
       listeningAnswers,
+      unansweredQuestions,
     };
     const response = await ResultAPI.submitAnswer(submitAnswer);
     if (response.code === 200) {
@@ -192,7 +233,9 @@ const BaiLam: React.FC = () => {
   };
 
   const handleExpandSuggestedQuestion = async (questionId: string) => {
-    const existingQuestion = suggestedQuestions.find((q) => q._id === questionId);
+    const existingQuestion = suggestedQuestions.find(
+      (q) => q._id === questionId
+    );
     if (existingQuestion && existingQuestion.detailsFetched) return;
 
     try {
@@ -200,7 +243,9 @@ const BaiLam: React.FC = () => {
       if (response.code === 200) {
         setSuggestedQuestions((prev) =>
           prev.map((q) =>
-            q._id === questionId ? { ...q, ...response.question, detailsFetched: true } : q
+            q._id === questionId
+              ? { ...q, ...response.question, detailsFetched: true }
+              : q
           )
         );
       }
@@ -219,7 +264,8 @@ const BaiLam: React.FC = () => {
           {examDetails?.examId.title}
         </Title>
 
-        {Object.keys(groupedQuestions).length > 1 || !groupedQuestions["no-passage"] ? (
+        {Object.keys(groupedQuestions).length > 1 ||
+        !groupedQuestions["no-passage"] ? (
           // Case: Questions grouped by passages
           Object.keys(groupedQuestions).map((passageId, groupIndex) => {
             return (
@@ -246,7 +292,9 @@ const BaiLam: React.FC = () => {
                         borderRight: "1px solid #ddd",
                       }}
                       dangerouslySetInnerHTML={{
-                        __html: groupedQuestions[passageId][0].passageId.content.replace(/\n/g, "<br />"),
+                        __html: groupedQuestions[
+                          passageId
+                        ][0].passageId.content.replace(/\n/g, "<br />"),
                       }}
                     ></div>
                   )}
@@ -275,19 +323,32 @@ const BaiLam: React.FC = () => {
                           boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
                         }}
                       >
-                        <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "flex-end",
+                          }}
+                        >
                           <img
                             src={errorrIcon}
                             alt="Báo lỗi"
                             onClick={() => handleReportError(q)}
-                            style={{ marginTop: 8, height: 20, width: 20, cursor: "pointer" }}
+                            style={{
+                              marginTop: 8,
+                              height: 20,
+                              width: 20,
+                              cursor: "pointer",
+                            }}
                           />
                         </div>
 
                         {q.audio ? (
                           <>
                             <audio controls style={{ marginBottom: 8 }}>
-                              <source src={q.audio.filePath} type="audio/mpeg" />
+                              <source
+                                src={q.audio.filePath}
+                                type="audio/mpeg"
+                              />
                             </audio>
                             <ListeningQuestionSubmit
                               question={q}
@@ -305,7 +366,9 @@ const BaiLam: React.FC = () => {
                             question={q}
                             questionType={q.questionType || ""}
                             onAnswerChange={handleAnswerChange}
-                            currentAnswer={answers.find((ans) => ans.questionId === q._id)}
+                            currentAnswer={answers.find(
+                              (ans) => ans.questionId === q._id
+                            )}
                             index={questionIndex}
                             viewOnly={!!Examresult} // Add view-only mode when Examresult exists
                           />
@@ -339,7 +402,12 @@ const BaiLam: React.FC = () => {
                       src={errorrIcon}
                       alt="Báo lỗi"
                       onClick={() => handleReportError(q)}
-                      style={{ marginTop: 8, height: 20, width: 20, cursor: "pointer" }}
+                      style={{
+                        marginTop: 8,
+                        height: 20,
+                        width: 20,
+                        cursor: "pointer",
+                      }}
                     />
                   </div>
 
@@ -364,7 +432,9 @@ const BaiLam: React.FC = () => {
                       question={q}
                       questionType={q.questionType || ""}
                       onAnswerChange={handleAnswerChange}
-                      currentAnswer={answers.find((ans) => ans.questionId === q._id)}
+                      currentAnswer={answers.find(
+                        (ans) => ans.questionId === q._id
+                      )}
                       index={questionIndex}
                       viewOnly={!!Examresult} // Add view-only mode when Examresult exists
                     />
@@ -387,19 +457,35 @@ const BaiLam: React.FC = () => {
         {Examresult && (
           <div className="my-4" ref={resultSectionRef}>
             <Card>
-              <Title level={4}>Kết quả</Title>
-              <p>
-                Điểm số:{" "}
-                <strong>
-                  {Examresult.correctAnswer} /{" "}
-                  {Examresult.correctAnswer + Examresult.wrongAnswer}
-                </strong>
-              </p>
+              <Title level={4}>🎯 Kết quả làm bài</Title>
+
+              <Row gutter={[24, 24]} justify="center">
+                <Col xs={24} sm={12} md={8}>
+                  <Statistic
+                    title="Điểm số"
+                    value={Examresult.score}
+                    precision={1}
+                    suffix="/ 10"
+                  />
+                </Col>
+                <Col xs={24} sm={12} md={8}>
+                  <Statistic
+                    title="Câu đúng"
+                    value={Examresult.correctAnswer}
+                    suffix={`/ ${Examresult.totalQuestion}`}
+                  />
+                </Col>
+              </Row>
+
+              <Divider />
+
               <Button type="link" onClick={() => setShowDetails(!showDetails)}>
                 {showDetails ? "Ẩn chi tiết" : "Xem chi tiết"}
               </Button>
+
               {showDetails && (
                 <Collapse>
+                  {/* Lời khuyên */}
                   <Panel header="Lời khuyên" key="advice">
                     {loading ? (
                       <Spin />
@@ -409,6 +495,8 @@ const BaiLam: React.FC = () => {
                       </Paragraph>
                     )}
                   </Panel>
+
+                  {/* Video liên quan */}
                   <Panel header="Video liên quan" key="videos">
                     {Examresult.videos &&
                       Object.keys(Examresult.videos).map((key) => (
@@ -435,6 +523,8 @@ const BaiLam: React.FC = () => {
                         </div>
                       ))}
                   </Panel>
+
+                  {/* Câu hỏi đề nghị */}
                   <Panel header="Câu hỏi đề nghị" key="suggested">
                     <Collapse>
                       {suggestedQuestions.map((q: Question, id: number) => (
@@ -448,41 +538,15 @@ const BaiLam: React.FC = () => {
                               <QuestionSubmit
                                 question={q}
                                 questionType={q.questionType || ""}
-                                onAnswerChange={() => {}} // Disable answer change
+                                onAnswerChange={() => {}}
                                 index={0}
-                                viewOnly={true} // Add view-only mode
+                                viewOnly={true}
                               />
-                              <div style={{ marginTop: "8px", color: "#52c41a" }}>
+                              <div
+                                style={{ marginTop: "8px", color: "#52c41a" }}
+                              >
                                 <strong>Đáp án đúng:</strong>{" "}
-                                {q.questionType === "6742fb1cd56a2e75dbd817ea" && // Multiple-choice
-                                  q.answers?.map((answer) =>
-                                    answer.isCorrect ? (
-                                      <div key={answer._id} style={{ marginTop: "4px" }}>
-                                        <span>{answer.text}</span>
-                                      </div>
-                                    ) : null
-                                  )}
-                                {q.questionType === "6742fb3bd56a2e75dbd817ec" && // Fill-in-the-blank
-                                  q.answers?.map((answer, index) => (
-                                    <div key={index} style={{ marginTop: "4px" }}>
-                                      <span>Điền khuyết {index + 1}: {answer.correctAnswerForBlank}</span>
-                                    </div>
-                                  ))}
-                                {q.questionType === "6742fb5dd56a2e75dbd817ee" && // True/False/Not Given
-                                  ["true", "false", "not given"].map((choice) => (
-                                    <div
-                                      key={choice}
-                                      style={{
-                                        marginTop: "4px",
-                                        color: q.correctAnswerForTrueFalseNGV === choice ? "#52c41a" : "#000",
-                                      }}
-                                    >
-                                      <span>{choice.toUpperCase()}</span>
-                                      {q.correctAnswerForTrueFalseNGV === choice && (
-                                        <strong style={{ marginLeft: "8px" }}>Đúng</strong>
-                                      )}
-                                    </div>
-                                  ))}
+                                {/* Your answer display logic here */}
                               </div>
                             </>
                           ) : (
@@ -537,7 +601,9 @@ const BaiLam: React.FC = () => {
                   // Determine if the question is answered
                   const isAnswered =
                     answers.some((ans) => ans.questionId === questionId) ||
-                    listeningAnswers.some((ans) => ans.questionId === questionId);
+                    listeningAnswers.some(
+                      (ans) => ans.questionId === questionId
+                    );
 
                   return (
                     <Button
@@ -576,7 +642,7 @@ const BaiLam: React.FC = () => {
 
             <Button
               type="primary"
-              onClick={handleSubmit}
+              onClick={showSubmitModal}
               disabled={!!Examresult || loading}
               block
             >
@@ -585,6 +651,19 @@ const BaiLam: React.FC = () => {
           </div>
         </Affix>
       </Sider>
+      <Modal
+        title="Xác nhận nộp bài"
+        visible={isSubmitModalVisible}
+        onOk={() => {
+          handleSubmit(); // Gọi hàm handleSubmit khi người dùng xác nhận
+          setIsSubmitModalVisible(false); // Đóng Modal sau khi xác nhận
+        }}
+        onCancel={handleCancelSubmit}
+        okText="Có"
+        cancelText="Không"
+      >
+        <p>Bạn có chắc chắn muốn nộp bài không?</p>
+      </Modal>
     </Layout>
   );
 };

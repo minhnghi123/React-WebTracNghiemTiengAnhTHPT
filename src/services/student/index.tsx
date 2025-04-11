@@ -8,6 +8,7 @@ export interface Result {
   score: number;
   correctAnswer: number;
   wrongAnswer: number;
+  totalQuestion: number;
   questions: QuestionAnswerResult[];
   listeningQuestions: QuestionAnswerResult[];
   suggestionQuestion: Question[];
@@ -46,6 +47,7 @@ interface UserAnswer {
 export interface SubmitAnswer {
   resultId: string;
   answers: SubmitAnswerDetail[];
+  unansweredQuestions: SubmitAnswerDetail[];
   listeningAnswers: SubmitAnswerDetail[];
 }
 
@@ -79,7 +81,7 @@ export const ResultAPI = {
   saveAnswer: async (data: SubmitAnswer) => {
     const response = await request.post(`/result/save`, data);
     return response.data;
-  }
+  },
 };
 
 export const ExamAPIStudent = {
