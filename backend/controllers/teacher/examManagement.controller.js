@@ -549,7 +549,7 @@ export const copyExamFromOthers = async (req, res) => {
     res.status(500).send({ error: error.message });
   }
 };
-//Import Excel Exam
+// Import Excel Exam
 export const importExamFromExcel = async (req, res) => {
   try {
     const passageFile = req.files?.passageFile?.[0];
@@ -561,38 +561,93 @@ export const importExamFromExcel = async (req, res) => {
         message: "Missing passageFile or examFile",
       });
     }
+
+    const questionTypes = await QuestionType.find({ deleted: false });
+    const questionTypeMap = Object.fromEntries(
+      questionTypes.map((q) => [q.name.toLowerCase().trim(), q._id])
+    );
+
+    const normalize = (str) => str?.toLowerCase()?.trim();
+
+    const getFormattedHtml = (sheet, row, colName) => {
+      const cellAddress = `${colName}${row}`;
+      const cell = sheet[cellAddress];
+      if (!cell || !cell.v) return "";
+      if (cell.h) return cell.h; // If HTML formatted string exists
+      return cell.v.toString(); // fallback to plain text
+    };
+    const groupedQuestions = new Map(); // passageId -> questions[]
     if (passageFile && examFile) {
-      // Đọc file Excel
-      const passageWorkbook = XLSX.read(passageFile.buffer, { type: "buffer" });
-      const examWorkbook = XLSX.read(examFile.buffer, { type: "buffer" });
+      const passageWorkbook = XLSX.read(passageFile.buffer, {
+        type: "buffer",
+        cellStyles: true,
+      });
+      const examWorkbook = XLSX.read(examFile.buffer, {
+        type: "buffer",
+        cellStyles: true,
+      });
 
       const passageSheet =
         passageWorkbook.Sheets[passageWorkbook.SheetNames[0]];
       const examSheet = examWorkbook.Sheets[examWorkbook.SheetNames[0]];
 
-      const passageData = XLSX.utils.sheet_to_json(passageSheet);
-      const examData = XLSX.utils.sheet_to_json(examSheet);
+      const passageData = XLSX.utils.sheet_to_json(passageSheet, { header: 1 });
+      const examData = XLSX.utils.sheet_to_json(examSheet, { header: 1 });
 
-      const questionTypes = await QuestionType.find({ deleted: false });
-      const questionTypeMap = Object.fromEntries(
-        questionTypes.map((q) => [q.name, q._id])
-      );
+      const passageHeaders = passageData[0];
+      const passageRows = passageData.slice(1);
 
       const passageMap = new Map();
-      for (const item of passageData) {
-        passageMap.set(item.PassageId, {
-          title: item.Title,
-          content: item.Content,
+      for (let i = 0; i < passageRows.length; i++) {
+        const row = passageRows[i];
+        const obj = {};
+        for (let j = 0; j < passageHeaders.length; j++) {
+          const col = passageHeaders[j];
+          obj[col] = getFormattedHtml(
+            passageSheet,
+            i + 2,
+            String.fromCharCode(65 + j)
+          ); // e.g., A, B, C
+        }
+        passageMap.set(obj.PassageId, {
+          title: obj.Title,
+          content: obj.Content,
         });
       }
 
-      const groupedQuestions = new Map(); // passageId -> questions[]
+      const examHeaders = examData[0];
+      const examRows = examData.slice(1);
+
       const singleQuestions = [];
 
-      for (const question of examData) {
+      for (let i = 0; i < examRows.length; i++) {
+        const row = examRows[i];
+        const question = {};
+        for (let j = 0; j < examHeaders.length; j++) {
+          const col = examHeaders[j];
+          question[col] = getFormattedHtml(
+            examSheet,
+            i + 2,
+            String.fromCharCode(65 + j)
+          );
+        }
+
+        const normalizedType = normalize(question.QuestionType);
+        const questionTypeId = questionTypeMap[normalizedType];
+
+        if (!questionTypeId) {
+          return res.status(400).json({
+            success: false,
+            message: `Invalid QuestionType: ${question.QuestionType}`,
+          });
+        }
+
         const baseData = {
           content: question.Content,
-          questionType: questionTypeMap[question.QuestionType],
+          instruction: question?.Instruction,
+          topic: question?.Topic,
+          questionType: questionTypeId,
+          level: normalize(question.Level),
           author: req.user._id,
           knowledge: question?.Knowledge,
           translation: question?.Translation,
@@ -604,21 +659,21 @@ export const importExamFromExcel = async (req, res) => {
             groupedQuestions.set(question.PassageId, []);
           }
 
-          if (question.QuestionType === "True/False/Not Given") {
+          if (normalizedType === "true/false/not given") {
             groupedQuestions.get(question.PassageId).push({
               ...baseData,
               correctAnswerForTrueFalseNGV: question.CorrectAnswers.toString()
                 .replace(/\s+/g, "")
                 .toLowerCase(),
             });
-          } else if (question.QuestionType === "Fill in the blank") {
+          } else if (normalizedType === "fill in the blank") {
             groupedQuestions.get(question.PassageId).push({
               ...baseData,
               answers: [
                 { correctAnswerForBlank: question.CorrectAnswers.toString() },
               ],
             });
-          } else if (question.QuestionType === "Mutiple Choices") {
+          } else if (normalizedType === "multiple choices") {
             groupedQuestions.get(question.PassageId).push({
               ...baseData,
               answers: ["A", "B", "C", "D"].map((option) => ({
@@ -628,21 +683,21 @@ export const importExamFromExcel = async (req, res) => {
             });
           }
         } else {
-          if (question.QuestionType === "True/False/Not Given") {
+          if (normalizedType === "true/false/not given") {
             singleQuestions.push({
               ...baseData,
               correctAnswerForTrueFalseNGV: question.CorrectAnswers.toString()
                 .replace(/\s+/g, "")
                 .toLowerCase(),
             });
-          } else if (question.QuestionType === "Fill in the blank") {
+          } else if (normalizedType === "fill in the blank") {
             singleQuestions.push({
               ...baseData,
               answers: [
                 { correctAnswerForBlank: question.CorrectAnswers.toString() },
               ],
             });
-          } else if (question.QuestionType === "Mutiple Choices") {
+          } else if (normalizedType === "multiple choices") {
             singleQuestions.push({
               ...baseData,
               answers: ["A", "B", "C", "D"].map((option) => ({
@@ -675,21 +730,49 @@ export const importExamFromExcel = async (req, res) => {
           questionSaves.push(question.save());
         }
       }
+      // Tính top 3 topic và knowledge phổ biến nhất
+      const countFrequency = (arr) => {
+        const map = {};
+        for (const item of arr) {
+          if (!item) continue;
+          map[item] = (map[item] || 0) + 1;
+        }
+        return Object.entries(map)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 3)
+          .map(([key]) => key);
+      };
 
-      // Add single questions
+      const allTopics = [
+        ...singleQuestions,
+        ...Array.from(groupedQuestions.values()).flat(),
+      ]
+        .map((q) => q.topic?.trim())
+        .filter(Boolean);
+
+      const allKnowledges = [
+        ...singleQuestions,
+        ...Array.from(groupedQuestions.values()).flat(),
+      ]
+        .map((q) => q.knowledge?.trim())
+        .filter(Boolean);
+
+      const topTopics = countFrequency(allTopics);
+      const topKnowledges = countFrequency(allKnowledges);
+
       for (const q of singleQuestions) {
         const question = new Question(q);
         questionSaves.push(question.save());
       }
 
-      // Lưu tất cả câu hỏi song song
       const savedQuestions = await Promise.all(questionSaves);
       const questionIds = savedQuestions.map((q) => q._id);
 
-      // Tạo đề thi
       const randomCode = Math.floor(100000 + Math.random() * 900000).toString();
+      //title là tên của file excel
+      const title = examFile.originalname.split(".")[0];
       const newExam = new Exam({
-        title: "Đề thi được nhập từ excel mã: " + randomCode,
+        title: title,
         description: "Đề thi được nhập từ excel mã: " + randomCode,
         questions: questionIds,
         duration: 90,
@@ -697,6 +780,8 @@ export const importExamFromExcel = async (req, res) => {
         startTime: new Date(),
         endTime: new Date(Date.now() + 60 * 60 * 1000),
         createdBy: req.user._id,
+        topic: topTopics,
+        knowledge: topKnowledges,
       });
 
       await newExam.save();
@@ -707,42 +792,66 @@ export const importExamFromExcel = async (req, res) => {
         data: { exam: newExam },
       });
     } else if (examFile && !passageFile) {
-      const examWorkbook = XLSX.read(examFile.buffer, { type: "buffer" });
+      const examWorkbook = XLSX.read(examFile.buffer, {
+        type: "buffer",
+        cellStyles: true,
+      });
       const examSheet = examWorkbook.Sheets[examWorkbook.SheetNames[0]];
-      const examData = XLSX.utils.sheet_to_json(examSheet);
+      const examData = XLSX.utils.sheet_to_json(examSheet, { header: 1 });
 
-      const questionTypes = await QuestionType.find({ deleted: false });
-      const questionTypeMap = Object.fromEntries(
-        questionTypes.map((q) => [q.name, q._id])
-      );
-
+      const headers = examData[0];
+      const rows = examData.slice(1);
       const singleQuestions = [];
 
-      for (const question of examData) {
+      for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+        const question = {};
+        for (let j = 0; j < headers.length; j++) {
+          const col = headers[j];
+          question[col] = getFormattedHtml(
+            examSheet,
+            i + 2,
+            String.fromCharCode(65 + j)
+          );
+        }
+
+        const normalizedType = normalize(question.QuestionType);
+        const questionTypeId = questionTypeMap[normalizedType];
+
+        if (!questionTypeId) {
+          return res.status(400).json({
+            success: false,
+            message: `Invalid QuestionType: ${question.QuestionType}`,
+          });
+        }
+
         const baseData = {
           content: question.Content,
-          questionType: questionTypeMap[question.QuestionType],
+          topic: question?.Topic,
+          instruction: question?.Instruction,
+          questionType: questionTypeId,
+          level: normalize(question.Level),
           author: req.user._id,
           knowledge: question?.Knowledge,
           translation: question?.Translation,
           explanation: question?.Explaination,
         };
 
-        if (question.QuestionType === "True/False/Not Given") {
+        if (normalizedType === "true/false/not given") {
           singleQuestions.push({
             ...baseData,
             correctAnswerForTrueFalseNGV: question.CorrectAnswers.toString()
               .replace(/\s+/g, "")
               .toLowerCase(),
           });
-        } else if (question.QuestionType === "Fill in the blank") {
+        } else if (normalizedType === "fill in the blank") {
           singleQuestions.push({
             ...baseData,
             answers: [
               { correctAnswerForBlank: question.CorrectAnswers.toString() },
             ],
           });
-        } else if (question.QuestionType === "Mutiple Choices") {
+        } else if (normalizedType === "multiple choices") {
           singleQuestions.push({
             ...baseData,
             answers: ["A", "B", "C", "D"].map((option) => ({
@@ -752,14 +861,46 @@ export const importExamFromExcel = async (req, res) => {
           });
         }
       }
+      //topic && knowledge của exam tính trong câu hỏi
+      // Tính top 3 topic và knowledge phổ biến nhất
+      const countFrequency = (arr) => {
+        const map = {};
+        for (const item of arr) {
+          if (!item) continue;
+          map[item] = (map[item] || 0) + 1;
+        }
+        return Object.entries(map)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 3)
+          .map(([key]) => key);
+      };
 
+      const allTopics = [
+        ...singleQuestions,
+        ...Array.from(groupedQuestions.values()).flat(),
+      ]
+        .map((q) => q.topic?.trim())
+        .filter(Boolean);
+
+      const allKnowledges = [
+        ...singleQuestions,
+        ...Array.from(groupedQuestions.values()).flat(),
+      ]
+        .map((q) => q.knowledge?.trim())
+        .filter(Boolean);
+
+      const topTopics = countFrequency(allTopics);
+      const topKnowledges = countFrequency(allKnowledges);
+
+      // Save all questions to the database
       const questionSaves = singleQuestions.map((q) => new Question(q).save());
       const savedQuestions = await Promise.all(questionSaves);
       const questionIds = savedQuestions.map((q) => q._id);
-
       const randomCode = Math.floor(100000 + Math.random() * 900000).toString();
+      //title là tên của file excel
+      const title = examFile.originalname.split(".")[0];
       const newExam = new Exam({
-        title: "Đề thi được nhập từ excel mã: " + randomCode,
+        title: title,
         description: "Đề thi được nhập từ excel mã: " + randomCode,
         questions: questionIds,
         duration: 90,
@@ -767,8 +908,9 @@ export const importExamFromExcel = async (req, res) => {
         startTime: new Date(),
         endTime: new Date(Date.now() + 60 * 60 * 1000),
         createdBy: req.user._id,
+        topic: topTopics,
+        knowledge: topKnowledges,
       });
-
       await newExam.save();
 
       return res.status(200).json({
@@ -778,8 +920,11 @@ export const importExamFromExcel = async (req, res) => {
       });
     }
   } catch (error) {
-    console.error("Error processing file:", error);
-    return res.status(500).json({ msg: "Internal server error" });
+    console.error("Error in importExamFromExcel:", error);
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred during the import.",
+    });
   }
 };
 

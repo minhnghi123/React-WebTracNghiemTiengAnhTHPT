@@ -10,9 +10,14 @@ import {
   Pagination,
   Select,
   Tabs,
-  Table,
+  Collapse,
 } from "antd";
-import { PlusOutlined, MinusOutlined, EditOutlined, CopyOutlined } from "@ant-design/icons";
+import {
+  PlusOutlined,
+  MinusOutlined,
+  EditOutlined,
+  CopyOutlined,
+} from "@ant-design/icons";
 import clsx from "clsx";
 import { useParams } from "react-router-dom";
 import UpdateExamModal from "./UpdateExam";
@@ -24,10 +29,17 @@ import {
   ExamDataRecieve,
 } from "@/services/teacher/ListeningQuestion";
 import { Card } from "antd";
+import Panel from "antd/es/splitter/Panel";
 const { Search } = Input;
 const { Option } = Select;
 
-export const TruncatedText = ({ text, maxLength }: { text: string; maxLength: number }) => {
+export const TruncatedText = ({
+  text,
+  maxLength,
+}: {
+  text: string;
+  maxLength: number;
+}) => {
   const [expanded, setExpanded] = useState(false);
 
   if (text.length <= maxLength) {
@@ -55,7 +67,10 @@ export const UpdateExamQuestion = () => {
   const [data, setData] = useState<Question[]>([]);
   const [otherQuestions, setOtherQuestions] = useState<Question[]>([]);
   const [selectedQuestions, setSelectedQuestions] = useState<Question[]>([]);
-  const [selectedQuestionsGroup, setSelectedQuestionsGroup] = useState<Record<string, Question[]>>({});
+  const [selectedQuestionsGroup, setSelectedQuestionsGroup] = useState<
+    Record<string, Question[]>
+  >({});
+  console.log("selectedQuestionsGroup", selectedQuestionsGroup);
   // --- State cho kỳ thi nghe ---
   const [allListeningExams, setAllListeningExams] = useState<ExamDataRecieve[]>(
     []
@@ -133,6 +148,7 @@ export const UpdateExamQuestion = () => {
   const getAllListeningExams = async () => {
     try {
       const response = await ExamListeningQuestionAPI.getAllListeningExams();
+      // console.log("response", response);
       if (response?.data) {
         setAllListeningExams(response.data);
       }
@@ -189,7 +205,10 @@ export const UpdateExamQuestion = () => {
   // --- Group selectedQuestions by passageId whenever it changes ---
   useEffect(() => {
     const grouped = selectedQuestions.reduce((acc, question) => {
-      const passageId = question.passageId?._id?.toString() || question.passageId?.toString() || "no-passage";
+      const passageId =
+        question.passageId?._id?.toString() ||
+        question.passageId?.toString() ||
+        "no-passage";
       if (!acc[passageId]) {
         acc[passageId] = [];
       }
@@ -272,11 +291,11 @@ export const UpdateExamQuestion = () => {
   const handleRemoveListeningExam = (exam: ExamDataRecieve) => {
     setSelectedListeningExams((prev) => prev.filter((e) => e._id !== exam._id));
   };
+
   // --- Tính danh sách ngân hàng kỳ thi nghe (loại trừ các đã chọn) ---
   const bankListeningExams = allListeningExams.filter(
     (exam) => !selectedListeningExams.some((e) => e._id === exam._id)
   );
-
   // --- Lọc câu hỏi theo tìm kiếm và filter ---
   const filteredOtherQuestions = otherQuestions.filter((q) => {
     const term = searchTerm.toLowerCase();
@@ -371,265 +390,344 @@ export const UpdateExamQuestion = () => {
               >
                 {Object.keys(selectedQuestionsGroup).length > 0 ? (
                   <>
-                    {Object.entries(selectedQuestionsGroup).map(([passageId, questions], groupIndex) => (
-                      <div key={groupIndex} style={{ marginBottom: "16px" }}>
-                        {passageId !== "no-passage" && questions[0]?.passageId?.content ? (
-                          <div style={{ marginBottom: "8px", fontWeight: "bold", color: "#333" }}>
-                            <TruncatedText text={questions[0].passageId.content} maxLength={100} />
-                          </div>
-                        ) : null}
-
-                        {/* Display questions in the group */}
-                        {questions.map((question, index) => (
-                          <div
-                            key={question._id || index}
-                            style={{
-                              marginBottom: "12px",
-                              padding: "8px",
-                              border: "1px solid #ddd",
-                              borderRadius: "8px",
-                              backgroundColor: "#f9f9f9",
-                            }}
-                          >
-
-                            <div style={{ marginBottom: "8px" }}>
-                              <strong>
-                                {index + 1}. {question.content}
-                              </strong>
+                    {Object.entries(selectedQuestionsGroup).map(
+                      ([passageId, questions], groupIndex) => (
+                        <div key={groupIndex} style={{ marginBottom: "16px" }}>
+                          {passageId !== "no-passage" &&
+                          questions[0]?.passageId?.content ? (
+                            <div
+                              style={{
+                                marginBottom: "8px",
+                                fontWeight: "bold",
+                                color: "#333",
+                              }}
+                            >
+                              <TruncatedText
+                                text={questions[0].passageId.content}
+                                maxLength={100}
+                              />
                             </div>
-                            <div style={{ marginBottom: "8px" }}>
-                              <Tag
-                                color={clsx(
-                                  question.level === "easy" && "green",
-                                  question.level === "hard" && "red"
-                                )}
+                          ) : null}
+
+                          {/* Display questions in the group */}
+                          {questions.map((question, index) => (
+                            <div
+                              key={question._id || index}
+                              style={{
+                                marginBottom: "12px",
+                                padding: "8px",
+                                border: "1px solid #ddd",
+                                borderRadius: "8px",
+                                backgroundColor: "#f9f9f9",
+                              }}
+                            >
+                              <div style={{ marginBottom: "8px" }}>
+                                <strong>
+                                  {index + 1}. {question.content}
+                                </strong>
+                              </div>
+                              <div style={{ marginBottom: "8px" }}>
+                                <Tag
+                                  color={clsx(
+                                    question.level === "easy" && "green",
+                                    question.level === "hard" && "red"
+                                  )}
+                                >
+                                  {question.level}
+                                </Tag>
+                                <Tag color="blue">{question.subject}</Tag>
+                                <Tag color="cyan">{question.knowledge}</Tag>
+                              </div>
+                              {/* Determine question type and render accordingly */}
+                              <div style={{ marginBottom: "8px" }}>
+                                {question.questionType ===
+                                  "6742fb1cd56a2e75dbd817ea" &&
+                                  // Render for multiple-choice questions
+                                  question.answers?.map(
+                                    (answer, answerIndex) => (
+                                      <div
+                                        key={answer._id || answerIndex}
+                                        style={{
+                                          padding: "4px 8px",
+                                          border: "1px solid #ddd",
+                                          borderRadius: "4px",
+                                          marginBottom: "4px",
+                                          backgroundColor: answer.isCorrect
+                                            ? "#f6ffed"
+                                            : "#fff",
+                                        }}
+                                      >
+                                        <span>
+                                          <strong>
+                                            {String.fromCharCode(
+                                              65 + answerIndex
+                                            )}
+                                            .
+                                          </strong>{" "}
+                                          {answer.text}
+                                        </span>
+                                        {answer.isCorrect && (
+                                          <Tag
+                                            color="green"
+                                            style={{ marginLeft: "8px" }}
+                                          >
+                                            Đúng
+                                          </Tag>
+                                        )}
+                                      </div>
+                                    )
+                                  )}
+
+                                {question.questionType ===
+                                  "6742fb3bd56a2e75dbd817ec" &&
+                                  // Render for fill-in-the-blank questions
+                                  question.answers?.map(
+                                    (answer, answerIndex) => (
+                                      <div
+                                        key={answer._id || answerIndex}
+                                        style={{
+                                          padding: "4px 8px",
+                                          border: "1px solid #ddd",
+                                          borderRadius: "4px",
+                                          marginBottom: "4px",
+                                        }}
+                                      >
+                                        <span>
+                                          <strong>
+                                            Điền khuyết {answerIndex + 1}:
+                                          </strong>{" "}
+                                          {answer.correctAnswerForBlank}
+                                        </span>
+                                      </div>
+                                    )
+                                  )}
+
+                                {question.questionType ===
+                                  "6742fb5dd56a2e75dbd817ee" &&
+                                  // Render for True/False/Not Given questions
+                                  ["true", "false", "not given"].map(
+                                    (choice) => (
+                                      <div
+                                        key={choice}
+                                        style={{
+                                          padding: "4px 8px",
+                                          border: "1px solid #ddd",
+                                          borderRadius: "4px",
+                                          marginBottom: "4px",
+                                          backgroundColor:
+                                            question.correctAnswerForTrueFalseNGV ===
+                                            choice
+                                              ? "#f6ffed"
+                                              : "#fff",
+                                        }}
+                                      >
+                                        <span>
+                                          <strong>
+                                            {choice.toUpperCase()}
+                                          </strong>
+                                        </span>
+                                        {question.correctAnswerForTrueFalseNGV ===
+                                          choice && (
+                                          <Tag
+                                            color="green"
+                                            style={{ marginLeft: "8px" }}
+                                          >
+                                            Đúng
+                                          </Tag>
+                                        )}
+                                      </div>
+                                    )
+                                  )}
+                              </div>
+                              <Button
+                                size="small"
+                                onClick={() => moveQuestion(question)}
+                                icon={
+                                  <MinusOutlined style={{ color: "red" }} />
+                                }
                               >
-                                {question.level}
-                              </Tag>
-                              <Tag color="blue">{question.subject}</Tag>
-                              <Tag color="cyan">{question.knowledge}</Tag>
+                                Gỡ
+                              </Button>
+                              <Button
+                                size="small"
+                                onClick={() => handleEditQuestion(question)}
+                                icon={
+                                  <EditOutlined style={{ color: "blue" }} />
+                                }
+                                style={{ marginLeft: "8px" }}
+                              >
+                                Sửa
+                              </Button>
                             </div>
-                            {/* Determine question type and render accordingly */}
-                            <div style={{ marginBottom: "8px" }}>
-                              {question.questionType === "6742fb1cd56a2e75dbd817ea" && (
-                                // Render for multiple-choice questions
-                                question.answers?.map((answer, answerIndex) => (
-                                  <div
-                                    key={answer._id || answerIndex}
-                                    style={{
-                                      padding: "4px 8px",
-                                      border: "1px solid #ddd",
-                                      borderRadius: "4px",
-                                      marginBottom: "4px",
-                                      backgroundColor: answer.isCorrect ? "#f6ffed" : "#fff",
-                                    }}
-                                  >
-                                    <span>
-                                      <strong>{String.fromCharCode(65 + answerIndex)}.</strong> {answer.text}
-                                    </span>
-                                    {answer.isCorrect && (
-                                      <Tag color="green" style={{ marginLeft: "8px" }}>
-                                        Đúng
-                                      </Tag>
-                                    )}
-                                  </div>
-                                ))
-                              )}
-
-                              {question.questionType === "6742fb3bd56a2e75dbd817ec" && (
-                                // Render for fill-in-the-blank questions
-                                question.answers?.map((answer, answerIndex) => (
-                                  <div
-                                    key={answer._id || answerIndex}
-                                    style={{
-                                      padding: "4px 8px",
-                                      border: "1px solid #ddd",
-                                      borderRadius: "4px",
-                                      marginBottom: "4px",
-                                    }}
-                                  >
-                                    <span>
-                                      <strong>Điền khuyết {answerIndex + 1}:</strong>{" "}
-                                      {answer.correctAnswerForBlank}
-                                    </span>
-                                  </div>
-                                ))
-                              )}
-
-                              {question.questionType === "6742fb5dd56a2e75dbd817ee" && (
-                                // Render for True/False/Not Given questions
-                                ["true", "false", "not given"].map((choice) => (
-                                  <div
-                                    key={choice}
-                                    style={{
-                                      padding: "4px 8px",
-                                      border: "1px solid #ddd",
-                                      borderRadius: "4px",
-                                      marginBottom: "4px",
-                                      backgroundColor:
-                                        question.correctAnswerForTrueFalseNGV === choice
-                                          ? "#f6ffed"
-                                          : "#fff",
-                                    }}
-                                  >
-                                    <span>
-                                      <strong>{choice.toUpperCase()}</strong>
-                                    </span>
-                                    {question.correctAnswerForTrueFalseNGV === choice && (
-                                      <Tag color="green" style={{ marginLeft: "8px" }}>
-                                        Đúng
-                                      </Tag>
-                                    )}
-                                  </div>
-                                ))
-                              )}
-                            </div>
-                            <Button
-                              size="small"
-                              onClick={() => moveQuestion(question)}
-                              icon={<MinusOutlined style={{ color: "red" }} />}
-                            >
-                              Gỡ
-                            </Button>
-                            <Button
-                              size="small"
-                              onClick={() => handleEditQuestion(question)}
-                              icon={<EditOutlined style={{ color: "blue" }} />}
-                              style={{ marginLeft: "8px" }}
-                            >
-                              Sửa
-                            </Button>
-                          </div>
-                        ))}
-                      </div>
-                    ))}
+                          ))}
+                        </div>
+                      )
+                    )}
 
                     {/* Display questions without a passage */}
                     {selectedQuestionsGroup["no-passage"] && (
                       <div>
-                        <h4 style={{ marginTop: "16px", fontWeight: "bold", color: "#333" }}>
+                        <h4
+                          style={{
+                            marginTop: "16px",
+                            fontWeight: "bold",
+                            color: "#333",
+                          }}
+                        >
                           Câu hỏi không có bài đọc
                         </h4>
-                        {selectedQuestionsGroup["no-passage"].map((question, index) => (
-                          <div
-                            key={question._id || index}
-                            style={{
-                              marginBottom: "12px",
-                              padding: "8px",
-                              border: "1px solid #ddd",
-                              borderRadius: "8px",
-                              backgroundColor: "#f9f9f9",
-                            }}
-                          >
-                            <div style={{ marginBottom: "8px" }}>
-                              <strong>
-                                {index + 1}. {question.content}
-                              </strong>
-                            </div>
-                            <div style={{ marginBottom: "8px" }}>
-                              <Tag
-                                color={clsx(
-                                  question.level === "easy" && "green",
-                                  question.level === "hard" && "red"
-                                )}
+                        {selectedQuestionsGroup["no-passage"].map(
+                          (question, index) => (
+                            <div
+                              key={question._id || index}
+                              style={{
+                                marginBottom: "12px",
+                                padding: "8px",
+                                border: "1px solid #ddd",
+                                borderRadius: "8px",
+                                backgroundColor: "#f9f9f9",
+                              }}
+                            >
+                              <div style={{ marginBottom: "8px" }}>
+                                <strong>
+                                  {index + 1}. {question.content}
+                                </strong>
+                              </div>
+                              <div style={{ marginBottom: "8px" }}>
+                                <Tag
+                                  color={clsx(
+                                    question.level === "easy" && "green",
+                                    question.level === "hard" && "red"
+                                  )}
+                                >
+                                  {question.level}
+                                </Tag>
+                                <Tag color="blue">{question.subject}</Tag>
+                                <Tag color="cyan">{question.knowledge}</Tag>
+                              </div>
+                              {/* Determine question type and render accordingly */}
+                              <div style={{ marginBottom: "8px" }}>
+                                {question.questionType ===
+                                  "6742fb1cd56a2e75dbd817ea" &&
+                                  // Render for multiple-choice questions
+                                  question.answers?.map(
+                                    (answer, answerIndex) => (
+                                      <div
+                                        key={answer._id || answerIndex}
+                                        style={{
+                                          padding: "4px 8px",
+                                          border: "1px solid #ddd",
+                                          borderRadius: "4px",
+                                          marginBottom: "4px",
+                                          backgroundColor: answer.isCorrect
+                                            ? "#f6ffed"
+                                            : "#fff",
+                                        }}
+                                      >
+                                        <span>
+                                          <strong>
+                                            {String.fromCharCode(
+                                              65 + answerIndex
+                                            )}
+                                            .
+                                          </strong>{" "}
+                                          {answer.text}
+                                        </span>
+                                        {answer.isCorrect && (
+                                          <Tag
+                                            color="green"
+                                            style={{ marginLeft: "8px" }}
+                                          >
+                                            Đúng
+                                          </Tag>
+                                        )}
+                                      </div>
+                                    )
+                                  )}
+
+                                {question.questionType ===
+                                  "6742fb3bd56a2e75dbd817ec" &&
+                                  // Render for fill-in-the-blank questions
+                                  question.answers?.map(
+                                    (answer, answerIndex) => (
+                                      <div
+                                        key={answer._id || answerIndex}
+                                        style={{
+                                          padding: "4px 8px",
+                                          border: "1px solid #ddd",
+                                          borderRadius: "4px",
+                                          marginBottom: "4px",
+                                        }}
+                                      >
+                                        <span>
+                                          <strong>
+                                            Điền khuyết {answerIndex + 1}:
+                                          </strong>{" "}
+                                          {answer.correctAnswerForBlank}
+                                        </span>
+                                      </div>
+                                    )
+                                  )}
+
+                                {question.questionType ===
+                                  "6742fb5dd56a2e75dbd817ee" &&
+                                  // Render for True/False/Not Given questions
+                                  ["true", "false", "not given"].map(
+                                    (choice) => (
+                                      <div
+                                        key={choice}
+                                        style={{
+                                          padding: "4px 8px",
+                                          border: "1px solid #ddd",
+                                          borderRadius: "4px",
+                                          marginBottom: "4px",
+                                          backgroundColor:
+                                            question.correctAnswerForTrueFalseNGV ===
+                                            choice
+                                              ? "#f6ffed"
+                                              : "#fff",
+                                        }}
+                                      >
+                                        <span>
+                                          <strong>
+                                            {choice.toUpperCase()}
+                                          </strong>
+                                        </span>
+                                        {question.correctAnswerForTrueFalseNGV ===
+                                          choice && (
+                                          <Tag
+                                            color="green"
+                                            style={{ marginLeft: "8px" }}
+                                          >
+                                            Đúng
+                                          </Tag>
+                                        )}
+                                      </div>
+                                    )
+                                  )}
+                              </div>
+                              <Button
+                                size="small"
+                                onClick={() => moveQuestion(question)}
+                                icon={
+                                  <MinusOutlined style={{ color: "red" }} />
+                                }
                               >
-                                {question.level}
-                              </Tag>
-                              <Tag color="blue">{question.subject}</Tag>
-                              <Tag color="cyan">{question.knowledge}</Tag>
+                                Gỡ
+                              </Button>
+                              <Button
+                                size="small"
+                                onClick={() => handleEditQuestion(question)}
+                                icon={
+                                  <EditOutlined style={{ color: "blue" }} />
+                                }
+                                style={{ marginLeft: "8px" }}
+                              >
+                                Sửa
+                              </Button>
                             </div>
-                            {/* Determine question type and render accordingly */}
-                            <div style={{ marginBottom: "8px" }}>
-                              {question.questionType === "6742fb1cd56a2e75dbd817ea" && (
-                                // Render for multiple-choice questions
-                                question.answers?.map((answer, answerIndex) => (
-                                  <div
-                                    key={answer._id || answerIndex}
-                                    style={{
-                                      padding: "4px 8px",
-                                      border: "1px solid #ddd",
-                                      borderRadius: "4px",
-                                      marginBottom: "4px",
-                                      backgroundColor: answer.isCorrect ? "#f6ffed" : "#fff",
-                                    }}
-                                  >
-                                    <span>
-                                      <strong>{String.fromCharCode(65 + answerIndex)}.</strong> {answer.text}
-                                    </span>
-                                    {answer.isCorrect && (
-                                      <Tag color="green" style={{ marginLeft: "8px" }}>
-                                        Đúng
-                                      </Tag>
-                                    )}
-                                  </div>
-                                ))
-                              )}
-
-                              {question.questionType === "6742fb3bd56a2e75dbd817ec" && (
-                                // Render for fill-in-the-blank questions
-                                question.answers?.map((answer, answerIndex) => (
-                                  <div
-                                    key={answer._id || answerIndex}
-                                    style={{
-                                      padding: "4px 8px",
-                                      border: "1px solid #ddd",
-                                      borderRadius: "4px",
-                                      marginBottom: "4px",
-                                    }}
-                                  >
-                                    <span>
-                                      <strong>Điền khuyết {answerIndex + 1}:</strong>{" "}
-                                      {answer.correctAnswerForBlank}
-                                    </span>
-                                  </div>
-                                ))
-                              )}
-
-                              {question.questionType === "6742fb5dd56a2e75dbd817ee" && (
-                                // Render for True/False/Not Given questions
-                                ["true", "false", "not given"].map((choice) => (
-                                  <div
-                                    key={choice}
-                                    style={{
-                                      padding: "4px 8px",
-                                      border: "1px solid #ddd",
-                                      borderRadius: "4px",
-                                      marginBottom: "4px",
-                                      backgroundColor:
-                                        question.correctAnswerForTrueFalseNGV === choice
-                                          ? "#f6ffed"
-                                          : "#fff",
-                                    }}
-                                  >
-                                    <span>
-                                      <strong>{choice.toUpperCase()}</strong>
-                                    </span>
-                                    {question.correctAnswerForTrueFalseNGV === choice && (
-                                      <Tag color="green" style={{ marginLeft: "8px" }}>
-                                        Đúng
-                                      </Tag>
-                                    )}
-                                  </div>
-                                ))
-                              )}
-                            </div>
-                            <Button
-                              size="small"
-                              onClick={() => moveQuestion(question)}
-                              icon={<MinusOutlined style={{ color: "red" }} />}
-                            >
-                              Gỡ
-                            </Button>
-                            <Button
-                              size="small"
-                              onClick={() => handleEditQuestion(question)}
-                              icon={<EditOutlined style={{ color: "blue" }} />}
-                              style={{ marginLeft: "8px" }}
-                            >
-                              Sửa
-                            </Button>
-                          </div>
-                        ))}
+                          )
+                        )}
                       </div>
                     )}
                   </>
@@ -703,7 +801,8 @@ export const UpdateExamQuestion = () => {
                       >
                         <div style={{ marginBottom: "8px" }}>
                           <strong>
-                            {index + 1 + (bankPage - 1) * pageSize}. {question.content}
+                            {index + 1 + (bankPage - 1) * pageSize}.{" "}
+                            {question.content}
                           </strong>
                         </div>
                         <div style={{ marginBottom: "8px" }}>
@@ -719,7 +818,8 @@ export const UpdateExamQuestion = () => {
                           <Tag color="cyan">{question.knowledge}</Tag>
                         </div>
                         <div style={{ marginBottom: "8px" }}>
-                          {question.questionType === "6742fb1cd56a2e75dbd817ea" &&
+                          {question.questionType ===
+                            "6742fb1cd56a2e75dbd817ea" &&
                             question.answers?.map((answer, answerIndex) => (
                               <div
                                 key={answer._id || answerIndex}
@@ -728,21 +828,29 @@ export const UpdateExamQuestion = () => {
                                   border: "1px solid #ddd",
                                   borderRadius: "4px",
                                   marginBottom: "4px",
-                                  backgroundColor: answer.isCorrect ? "#f6ffed" : "#fff",
+                                  backgroundColor: answer.isCorrect
+                                    ? "#f6ffed"
+                                    : "#fff",
                                 }}
                               >
                                 <span>
-                                  <strong>{String.fromCharCode(65 + answerIndex)}.</strong>{" "}
+                                  <strong>
+                                    {String.fromCharCode(65 + answerIndex)}.
+                                  </strong>{" "}
                                   {answer.text}
                                 </span>
                                 {answer.isCorrect && (
-                                  <Tag color="green" style={{ marginLeft: "8px" }}>
+                                  <Tag
+                                    color="green"
+                                    style={{ marginLeft: "8px" }}
+                                  >
                                     Đúng
                                   </Tag>
                                 )}
                               </div>
                             ))}
-                          {question.questionType === "6742fb3bd56a2e75dbd817ec" &&
+                          {question.questionType ===
+                            "6742fb3bd56a2e75dbd817ec" &&
                             question.answers?.map((answer, answerIndex) => (
                               <div
                                 key={answer._id || answerIndex}
@@ -754,12 +862,15 @@ export const UpdateExamQuestion = () => {
                                 }}
                               >
                                 <span>
-                                  <strong>Điền khuyết {answerIndex + 1}:</strong>{" "}
+                                  <strong>
+                                    Điền khuyết {answerIndex + 1}:
+                                  </strong>{" "}
                                   {answer.correctAnswerForBlank}
                                 </span>
                               </div>
                             ))}
-                          {question.questionType === "6742fb5dd56a2e75dbd817ee" &&
+                          {question.questionType ===
+                            "6742fb5dd56a2e75dbd817ee" &&
                             ["true", "false", "not given"].map((choice) => (
                               <div
                                 key={choice}
@@ -769,7 +880,8 @@ export const UpdateExamQuestion = () => {
                                   borderRadius: "4px",
                                   marginBottom: "4px",
                                   backgroundColor:
-                                    question.correctAnswerForTrueFalseNGV === choice
+                                    question.correctAnswerForTrueFalseNGV ===
+                                    choice
                                       ? "#f6ffed"
                                       : "#fff",
                                 }}
@@ -777,8 +889,12 @@ export const UpdateExamQuestion = () => {
                                 <span>
                                   <strong>{choice.toUpperCase()}</strong>
                                 </span>
-                                {question.correctAnswerForTrueFalseNGV === choice && (
-                                  <Tag color="green" style={{ marginLeft: "8px" }}>
+                                {question.correctAnswerForTrueFalseNGV ===
+                                  choice && (
+                                  <Tag
+                                    color="green"
+                                    style={{ marginLeft: "8px" }}
+                                  >
                                     Đúng
                                   </Tag>
                                 )}
@@ -815,54 +931,30 @@ export const UpdateExamQuestion = () => {
         <Tabs.TabPane tab="Danh sách các phần thi nghe" key="3">
           <h3>Danh sách các phần nghe trong đề thi</h3>
           {selectedListeningExams && selectedListeningExams.length > 0 ? (
-            <Table
-              dataSource={selectedListeningExams}
-              rowKey={(exam) => exam._id}
-              columns={[
-                {
-                  title: "STT",
-                  dataIndex: "index",
-                  key: "index",
-                  render: (_text, _record, index) => index + 1,
-                },
-                {
-                  title: "Tiêu đề",
-                  dataIndex: "title",
-                  key: "title",
-                },
-                {
-                  title: "Mô tả",
-                  dataIndex: "description",
-                  key: "description",
-                },
-                {
-                  title: "Thời gian",
-                  dataIndex: "duration",
-                  key: "duration",
-                  render: (duration) => `${duration} phút`,
-                },
-                {
-                  title: "Trạng thái",
-                  dataIndex: "isPublished",
-                  key: "isPublished",
-                  render: (isPublished) => (isPublished ? "Đã phát hành" : "Chưa phát hành"),
-                },
-                {
-                  title: "Hành động",
-                  key: "action",
-                  render: (_text, record) => (
-                    <Button
-                      size="small"
-                      onClick={() => handleRemoveListeningExam(record)}
-                      icon={<MinusOutlined style={{ color: "red" }} />}
-                    >
-                      Gỡ
-                    </Button>
-                  ),
-                },
-              ]}
-              pagination={{ pageSize: 5 }}
-            />
+            <Collapse accordion>
+              {selectedListeningExams.map((exam, index) => (
+                <Panel key={exam._id || index}>
+                  <div>
+                    <strong>
+                      {index + 1}. {exam.title}
+                    </strong>
+                  </div>
+                  <p>{exam.description}</p>
+                  <p>
+                    Thời gian: {exam.duration} phút - Điểm qua:{" "}
+                    {exam.passingScore} -{" "}
+                    {exam.isPublished ? "Đã phát hành" : "Chưa phát hành"}
+                  </p>
+                  <Button
+                    size="small"
+                    onClick={() => handleRemoveListeningExam(exam)}
+                    icon={<MinusOutlined style={{ color: "red" }} />}
+                  >
+                    Gỡ
+                  </Button>
+                </Panel>
+              ))}
+            </Collapse>
           ) : (
             <p>Chưa có kỳ thi nghe nào được chọn.</p>
           )}
@@ -872,54 +964,30 @@ export const UpdateExamQuestion = () => {
         <Tabs.TabPane tab="Ngân hàng phần thi nghe" key="4">
           <h3>Ngân hàng phần thi nghe</h3>
           {bankListeningExams && bankListeningExams.length > 0 ? (
-            <Table
-              dataSource={bankListeningExams}
-              rowKey={(exam) => exam._id}
-              columns={[
-                {
-                  title: "STT",
-                  dataIndex: "index",
-                  key: "index",
-                  render: (_text, _record, index) => index + 1,
-                },
-                {
-                  title: "Tiêu đề",
-                  dataIndex: "title",
-                  key: "title",
-                },
-                {
-                  title: "Mô tả",
-                  dataIndex: "description",
-                  key: "description",
-                },
-                {
-                  title: "Thời gian",
-                  dataIndex: "duration",
-                  key: "duration",
-                  render: (duration) => `${duration} phút`,
-                },
-                {
-                  title: "Trạng thái",
-                  dataIndex: "isPublished",
-                  key: "isPublished",
-                  render: (isPublished) => (isPublished ? "Đã phát hành" : "Chưa phát hành"),
-                },
-                {
-                  title: "Hành động",
-                  key: "action",
-                  render: (_text, record) => (
-                    <Button
-                      size="small"
-                      onClick={() => handleAddListeningExam(record)}
-                      icon={<PlusOutlined style={{ color: "green" }} />}
-                    >
-                      Thêm
-                    </Button>
-                  ),
-                },
-              ]}
-              pagination={{ pageSize: 5 }}
-            />
+            <Collapse accordion>
+              {bankListeningExams.map((exam, index) => (
+                <Panel key={exam._id || ""}>
+                  <div>
+                    <strong>
+                      {index + 1}. {exam.title}
+                    </strong>
+                  </div>
+                  <p>{exam.description}</p>
+                  <p>
+                    Thời gian: {exam.duration} phút - Điểm qua:{" "}
+                    {exam.passingScore} -{" "}
+                    {exam.isPublished ? "Đã phát hành" : "Chưa phát hành"}
+                  </p>
+                  <Button
+                    size="small"
+                    onClick={() => handleAddListeningExam(exam)}
+                    icon={<PlusOutlined style={{ color: "green" }} />}
+                  >
+                    Thêm
+                  </Button>
+                </Panel>
+              ))}
+            </Collapse>
           ) : (
             <p>Không có kỳ thi nghe phù hợp.</p>
           )}
