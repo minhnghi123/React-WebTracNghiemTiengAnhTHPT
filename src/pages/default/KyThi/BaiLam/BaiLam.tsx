@@ -28,6 +28,9 @@ const { Title, Paragraph } = Typography;
 const { Sider, Content } = Layout;
 
 const BaiLam: React.FC = () => {
+  const [isAlertModalVisible, setIsAlertModalVisible] = useState(false);
+  const [alertMessage, setAlertMessage] = useState<string>("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitModalVisible, setIsSubmitModalVisible] = useState(false);
   const [examDetails, setExamDetails] = useState<any>(null);
   const [remainingTime, setRemainingTime] = useState<number>(0);
@@ -52,7 +55,10 @@ const BaiLam: React.FC = () => {
   const showSubmitModal = () => {
     setIsSubmitModalVisible(true);
   };
-
+  const showAlertModal = (message: string) => {
+    setAlertMessage(message);
+    setIsAlertModalVisible(true);
+  };
   const handleCancelSubmit = () => {
     setIsSubmitModalVisible(false);
   };
@@ -127,7 +133,7 @@ const BaiLam: React.FC = () => {
       setRemainingTime(timeLeft);
 
       if (timeLeft <= 0) {
-        alert("Hết thời gian làm bài");
+        showAlertModal("Hết thời gian làm bài");
         handleSubmit();
       }
     };
@@ -174,28 +180,36 @@ const BaiLam: React.FC = () => {
 
   const handleSubmit = async () => {
     if (Examresult) {
-      alert("Bạn đã nộp bài rồi");
+      showAlertModal("Bạn đã nộp bài rồi");
       return;
     }
     if (!examDetails) return;
 
     if (intervalRef.current) clearInterval(intervalRef.current);
-    //xac dinh cau hoi chua tra loi
+
+    // Xác định các câu hỏi chưa trả lời
     const unansweredQuestions = getUnansweredQuestions();
     console.log("Unanswered Questions:", unansweredQuestions);
+
     const submitAnswer: SubmitAnswer = {
       resultId: examDetails._id,
       answers,
       listeningAnswers,
       unansweredQuestions,
     };
-    const response = await ResultAPI.submitAnswer(submitAnswer);
-    if (response.code === 200) {
-      alert("Nộp bài thành công");
-      setExamresult(response);
-      setSuggestedQuestions(response.suggestionQuestion);
-      setRemainingTime(0);
-      resultSectionRef.current?.scrollIntoView({ behavior: "smooth" });
+
+    try {
+      const response = await ResultAPI.submitAnswer(submitAnswer);
+      if (response.code === 200) {
+        showAlertModal("Nộp bài thành công");
+        setExamresult(response);
+        setSuggestedQuestions(response.suggestionQuestion);
+        setRemainingTime(0);
+        resultSectionRef.current?.scrollIntoView({ behavior: "smooth" });
+      }
+    } catch (error) {
+      console.error("Error submitting exam:", error);
+      showAlertModal("Đã xảy ra lỗi khi nộp bài.");
     }
   };
 
@@ -651,6 +665,7 @@ const BaiLam: React.FC = () => {
           </div>
         </Affix>
       </Sider>
+      {/*  */}
       <Modal
         title="Xác nhận nộp bài"
         visible={isSubmitModalVisible}
@@ -663,6 +678,33 @@ const BaiLam: React.FC = () => {
         cancelText="Không"
       >
         <p>Bạn có chắc chắn muốn nộp bài không?</p>
+      </Modal>
+      {/*modal xac nhan nop bai  */}
+      <Modal
+        title="Xác nhận nộp bài"
+        visible={isSubmitModalVisible}
+        onOk={async () => {
+          setIsSubmitting(true); // Bật trạng thái loading
+          await handleSubmit(); // Gọi hàm handleSubmit
+          setIsSubmitting(false); // Tắt trạng thái loading
+          setIsSubmitModalVisible(false); // Đóng Modal
+        }}
+        onCancel={handleCancelSubmit}
+        okText="Có"
+        cancelText="Không"
+        confirmLoading={isSubmitting} // Hiển thị loading trên nút "Có"
+      >
+        <p>Bạn có chắc chắn muốn nộp bài không?</p>
+        <p>Còn {getUnansweredQuestions().length} câu hỏi chưa được làm.</p>
+      </Modal>
+      {/* modal alert */}
+      <Modal
+        title="Thông báo"
+        visible={isAlertModalVisible}
+        onOk={() => setIsAlertModalVisible(false)}
+        okText="Đóng"
+      >
+        <p>{alertMessage}</p>
       </Modal>
     </Layout>
   );
