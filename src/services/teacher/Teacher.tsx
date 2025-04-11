@@ -96,11 +96,13 @@ export interface ExamResult {
   score: number;
   correctAnswer: number;
   wrongAnswer: number;
+  unAnswerQ: number;
   details: QuestionDetail[];
   wrongAnswerByKnowledge: Record<string, number>;
   suggestionQuestion: SuggestionQuestion[];
   videos: Record<string, Video[]>;
   arrResponse: string;
+  totalQuestion: number;
 }
 
 export interface QuestionDetail {

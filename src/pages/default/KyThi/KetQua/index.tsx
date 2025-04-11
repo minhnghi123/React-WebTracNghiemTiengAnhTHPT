@@ -39,10 +39,15 @@ export const KetQua: React.FC<KetQuaProps> = ({ DeThi }) => {
       render: (val: string) => new Date(val).toLocaleString(),
     },
     {
-      title: "Kết quả",
+      title: "Điểm",
+      key: "score",
+      render: (record: Result) => `${record.score}/${10.0} điểm`,
+    },
+    {
+      title: "Số câu đúng",
       key: "score",
       render: (record: Result) =>
-        `${record.score}/${record.questions.length} câu đúng`,
+        `${record.correctAnswer}/${record.questions.length} câu đúng`,
     },
     {
       title: "Thời gian làm",
