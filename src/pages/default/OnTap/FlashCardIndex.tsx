@@ -73,14 +73,17 @@ export const FlashCardIndex: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-6">
-      <h1 className="text-3xl font-bold mb-6 text-center">Trang Ôn Tập</h1>
+      <h1 className="text-3xl font-bold mb-6 text-center">Ôn tập theo bộ từ vựng</h1>
+      <p className="text-center text-gray-600 mb-4">
+        Trang này cho phép bạn quản lý và sử dụng các bộ từ vựng. Bạn có thể tạo mới, chỉnh sửa, hoặc xóa các bộ từ vựng của mình. Ngoài ra, bạn cũng có thể truy cập các bộ từ vựng công khai khác để ôn tập.
+      </p>
       <button
         className="btn btn-primary my-3 mx-3"
         onClick={() => {
           navigate("/flashcard/create");
         }}
       >
-        Tạo FlashCard mới
+        Tạo bộ từ vựng mới
       </button>
       <hr />
       <h2>

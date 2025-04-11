@@ -220,7 +220,7 @@ export const ClassroomDetail = () => {
               </Row>
             </TabPane>
 
-            <TabPane tab="Học sinh" key="3">
+            <TabPane tab="Thành viên" key="3">
               <List
                 itemLayout="horizontal"
                 dataSource={classroom.students || []}

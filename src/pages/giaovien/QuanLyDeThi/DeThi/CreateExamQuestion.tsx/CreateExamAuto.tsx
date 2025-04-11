@@ -33,9 +33,11 @@ export const CreateExamModalAuTo: React.FC<CreateExamModalProps> = ({
 
   const getAllQT = async (page: number) => {
     try {
-      const rq = await QuestionTypeAPI.getAllQuestionType(page);
-      if (rq?.code === 200) {
-        setQuestionTypesData(rq?.questionTypes);
+      const rq = await QuestionTypeAPI.getAllQuestionTypeTeacher(page);
+     
+      if (rq?.success) {
+        console.log(rq?.data, "rq?.questionTypes");
+        setQuestionTypesData(rq?.data);
       }
     } catch (error: any) {
       if (error.response) {
@@ -43,6 +45,7 @@ export const CreateExamModalAuTo: React.FC<CreateExamModalProps> = ({
       }
     }
   };
+  console.log(questionTypesData, "questionTypesData");
 
   useEffect(() => {
     getAllQT(1);

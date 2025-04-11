@@ -1,7 +1,5 @@
 import { request } from "@/config/request";
-import { Audio } from "./Teacher";
 import { Answer } from "@/types/interface";
-import { useAuthContext } from "@/contexts/AuthProvider";
 
 export interface ListeningQuestion {
   id?: string;
@@ -82,19 +80,63 @@ export interface Question {
 
 export interface ExamDataRecieve {
   _id: string;
-  teacherId: Teacher;
+  teacherId: {
+    _id: string;
+    username: string;
+    email: string;
+    password: string;
+    avatar: string;
+    role: string;
+    __v: number;
+    deleted: boolean;
+    status: string;
+  };
   title: string;
   description: string;
-  audio: Audio;
-  questions: Question[];
+  audio: {
+    _id: string;
+    filePath: string;
+    description: string;
+    transcription: string;
+    deletedAt: string | null;
+    isDeleted: boolean;
+    createdAt: string;
+    __v: number;
+  };
+  questions: {
+    correctAnswerForTrueFalseNGV: string;
+    _id: string;
+    teacherId: string;
+    questionText: string;
+    questionType: string;
+    difficulty: string;
+    isDeleted: boolean;
+    blankAnswer?: string;
+    options: {
+      option_id: string;
+      optionText: string;
+      _id: string;
+    }[];
+    correctAnswer: {
+      answer_id: string;
+      answer: string;
+      _id: string;
+    }[];
+    createdAt: string;
+    updatedAt: string;
+    __v: number;
+  }[];
   duration: number;
   difficulty: string;
-  passingScore: number;
   isPublished: boolean;
   isDeleted: boolean;
   createdAt: string;
   updatedAt: string;
   __v: number;
+  endTime: string;
+  isPublic: boolean;
+  startTime: string;
+  slug: string;
 }
 
 export const listenQuestionAPI = {
@@ -169,7 +211,7 @@ export const ExamListeningQuestionAPI = {
   },
   updateListeningExam: async (
     id: string,
-    teacherId,
+    teacherId: any,
     data: Partial<ListeningExamData>
   ) => {
     // Chỉ gửi các trường cần thiết theo cấu trúc mới

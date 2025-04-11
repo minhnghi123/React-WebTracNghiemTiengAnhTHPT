@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Spin, Button, Modal, Radio, Table } from "antd";
+import { Spin, Button, Modal,  Table, Card } from "antd";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import {
   FlashCardAPI,
@@ -49,7 +49,7 @@ export const FlashCardDetail: React.FC = () => {
         <div className="mt-4 text-center">
           <Link
             to="/flashcards"
-            className="text-blue-500 underline"
+            className="text-blue-500 btn underline"
             style={{ fontSize: "1.25rem" }}
           >
             Quay lại danh sách flashcard
@@ -115,21 +115,57 @@ export const FlashCardDetail: React.FC = () => {
         onOk={handleExamStart}
         okText="Bắt đầu"
       >
-        <Radio.Group
-          onChange={(e) => setExamType(e.target.value)}
-          value={examType}
-        >
-          <Radio value="true false">True / False</Radio>
-          <Radio value="multiple choices">Multiple Choices</Radio>
-          <Radio value="written">Written</Radio>
-          <Radio value="match">Match</Radio>
-        </Radio.Group>
+        <div className="grid grid-cols-2 gap-4">
+          <Card
+            hoverable
+            onClick={() => setExamType("true false")}
+            style={{
+              backgroundColor: examType === "true false" ? "#e6f7ff" : "#fff",
+            }}
+          >
+            <h3>True / False</h3>
+            <p>Chọn đúng hoặc sai cho mỗi câu hỏi.</p>
+          </Card>
+          <Card
+            hoverable
+            onClick={() => setExamType("multiple choices")}
+            style={{
+              backgroundColor:
+                examType === "multiple choices" ? "#e6f7ff" : "#fff",
+            }}
+          >
+            <h3>Multiple Choices</h3>
+            <p>Chọn một đáp án đúng từ nhiều lựa chọn.</p>
+          </Card>
+          <Card
+            hoverable
+            onClick={() => setExamType("written")}
+            style={{
+              backgroundColor: examType === "written" ? "#e6f7ff" : "#fff",
+            }}
+          >
+            <h3>Written</h3>
+            <p>Viết từ vựng tiếng Anh cho mỗi câu hỏi.</p>
+          </Card>
+          <Card
+            hoverable
+            onClick={() => setExamType("match")}
+            style={{
+              backgroundColor: examType === "match" ? "#e6f7ff" : "#fff",
+            }}
+          >
+            <h3>Match</h3>
+            <p>Ghép các từ hoặc cụm từ tương ứng.</p>
+          </Card>
+        </div>
       </Modal>
 
       <div className="mt-6">
-        <Link to="/Ontap" className="text-blue-500 underline">
+        <Button> 
+        <Link to="/Ontap" className="btn text-blue-500 underline">
           Quay lại danh sách flashcard
         </Link>
+        </Button>
       </div>
     </div>
   );

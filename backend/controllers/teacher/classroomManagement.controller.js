@@ -486,12 +486,12 @@ export const downloadStudentResultsExcel = async (req, res) => {
       const studentEmail = result.userId.email;
       const examTitle = result.examId.title;
       const totalQuestions = result.examId.questions.length;
-      const percentage = totalQuestions ? (result.score / totalQuestions) * 100 : 0;
+      const scoreOnScaleOf10 = totalQuestions ? (result.score / totalQuestions) * 10 : 0;
       if (!highestResults[studentEmail]) {
         highestResults[studentEmail] = {};
       }
-      if (!highestResults[studentEmail][examTitle] || highestResults[studentEmail][examTitle] < percentage) {
-        highestResults[studentEmail][examTitle] = Number(percentage.toFixed(2));
+      if (!highestResults[studentEmail][examTitle] || highestResults[studentEmail][examTitle] < scoreOnScaleOf10) {
+        highestResults[studentEmail][examTitle] = Number(scoreOnScaleOf10.toFixed(2));
       }
     });
 

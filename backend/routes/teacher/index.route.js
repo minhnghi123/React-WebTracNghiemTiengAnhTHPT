@@ -24,5 +24,7 @@ const indexTeacher = (app) => {
   app.use("/teacher/listening-question", isTeacher, listeningQuestionManagementRoute);
 
   app.use("/teacher/classroom", isTeacher, classroomManagementRoute);
+
+  app.use("/teacher/question-types", questionTypeManagementRoute);
 };
 export default indexTeacher;

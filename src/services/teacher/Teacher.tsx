@@ -272,6 +272,10 @@ export const QuestionTypeAPI = {
     const response = await request.get(`/admin/question-types?page=${page}`);
     return response.data;
   },
+  getAllQuestionTypeTeacher: async (page: number) => {
+    const response = await request.get(`/teacher/question-types?page=${page}`);
+    return response.data;
+  },
   createQuestionType: async (question: QuestionType) => {
     const response = await request.post(
       "/admin/question-types/create",

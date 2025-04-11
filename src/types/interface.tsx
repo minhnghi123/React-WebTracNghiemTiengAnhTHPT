@@ -72,7 +72,6 @@ export interface ListeningExam {
   questions: ListeningQuestion[];
   duration: number;
   difficulty: string;
-  passingScore: number;
   isPublished: boolean;
   isDeleted: boolean;
   createdAt: string;

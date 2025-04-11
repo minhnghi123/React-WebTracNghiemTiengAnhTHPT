@@ -24,7 +24,7 @@ export const CreateExamQuestion = () => {
   >([]);
   const [total, setTotal] = useState<number>(1);
   const [easyLimit, setEasyLimit] = useState<number>(0);
-  const [mediumLimit, setMediumLimit] = useState<number>(0);
+  // const [mediumLimit, setMediumLimit] = useState<number>(0);
   const [hardLimit, setHardLimit] = useState<number>(0);
   const [openModal, setOpenModal] = useState<boolean>(false);
   const [openInfoModal, setOpenInfoModal] = useState<boolean>(false);
@@ -96,9 +96,7 @@ export const CreateExamQuestion = () => {
     const easyQuestions = shuffleArray(
       otherQuestions.filter((q) => q.level === "easy")
     ).slice(0, easyLimit);
-    const mediumQuestions = shuffleArray(
-      otherQuestions.filter((q) => q.level === "medium")
-    ).slice(0, mediumLimit);
+
     const hardQuestions = shuffleArray(
       otherQuestions.filter((q) => q.level === "hard")
     ).slice(0, hardLimit);
@@ -106,7 +104,6 @@ export const CreateExamQuestion = () => {
     setSelectedQuestions([
       ...selectedQuestions,
       ...easyQuestions,
-      ...mediumQuestions,
       ...hardQuestions,
     ]);
 
@@ -114,7 +111,6 @@ export const CreateExamQuestion = () => {
       prev.filter(
         (q) =>
           !easyQuestions.includes(q) &&
-          !mediumQuestions.includes(q) &&
           !hardQuestions.includes(q)
       )
     );
@@ -259,11 +255,6 @@ export const CreateExamQuestion = () => {
       render: (duration: number) => `${duration} phút`,
     },
     {
-      title: "Điểm qua",
-      dataIndex: "passingScore",
-      key: "passingScore",
-    },
-    {
       title: "Trạng thái",
       dataIndex: "isPublished",
       key: "isPublished",
@@ -399,22 +390,7 @@ export const CreateExamQuestion = () => {
               }}
             />
           </Form.Item>
-          <Form.Item
-            label={`Số câu trung bình (còn lại: ${
-              otherQuestions.filter((q) => q.level === "medium").length
-            })`}
-          >
-            <InputNumber
-              min={0}
-              max={otherQuestions.filter((q) => q.level === "medium").length}
-              value={mediumLimit}
-              onChange={(value) => {
-                if (value !== null) {
-                  setMediumLimit(value);
-                }
-              }}
-            />
-          </Form.Item>
+ 
           <Form.Item
             label={`Số câu khó (còn lại: ${
               otherQuestions.filter((q) => q.level === "hard").length

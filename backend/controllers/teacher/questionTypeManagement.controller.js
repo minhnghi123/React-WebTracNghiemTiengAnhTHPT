@@ -111,3 +111,21 @@ export const deletePatch = async (req, res) => {
     });
   }
 };
+
+export const getAllQuestionTypes = async (req, res) => {
+  try {
+    const questionTypes = await QuestionType.find({ deleted: false });
+    res.status(200).json({
+      success: true,
+      message: "Question types retrieved successfully",
+      data: questionTypes,
+    });
+  } catch (error) {
+    console.error("Error fetching question types:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching question types",
+      error: error.message,
+    });
+  }
+};

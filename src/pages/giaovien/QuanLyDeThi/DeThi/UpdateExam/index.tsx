@@ -10,7 +10,7 @@ import {
   Pagination,
   Select,
   Tabs,
-  Collapse,
+  Table,
 } from "antd";
 import { PlusOutlined, MinusOutlined, EditOutlined, CopyOutlined } from "@ant-design/icons";
 import clsx from "clsx";
@@ -24,7 +24,6 @@ import {
   ExamDataRecieve,
 } from "@/services/teacher/ListeningQuestion";
 import { Card } from "antd";
-import Panel from "antd/es/splitter/Panel";
 const { Search } = Input;
 const { Option } = Select;
 
@@ -57,7 +56,6 @@ export const UpdateExamQuestion = () => {
   const [otherQuestions, setOtherQuestions] = useState<Question[]>([]);
   const [selectedQuestions, setSelectedQuestions] = useState<Question[]>([]);
   const [selectedQuestionsGroup, setSelectedQuestionsGroup] = useState<Record<string, Question[]>>({});
-  console.log("selectedQuestionsGroup",selectedQuestionsGroup)
   // --- State cho kỳ thi nghe ---
   const [allListeningExams, setAllListeningExams] = useState<ExamDataRecieve[]>(
     []
@@ -274,11 +272,11 @@ export const UpdateExamQuestion = () => {
   const handleRemoveListeningExam = (exam: ExamDataRecieve) => {
     setSelectedListeningExams((prev) => prev.filter((e) => e._id !== exam._id));
   };
-
   // --- Tính danh sách ngân hàng kỳ thi nghe (loại trừ các đã chọn) ---
   const bankListeningExams = allListeningExams.filter(
     (exam) => !selectedListeningExams.some((e) => e._id === exam._id)
   );
+
   // --- Lọc câu hỏi theo tìm kiếm và filter ---
   const filteredOtherQuestions = otherQuestions.filter((q) => {
     const term = searchTerm.toLowerCase();
@@ -300,6 +298,7 @@ export const UpdateExamQuestion = () => {
     (bankPage - 1) * pageSize,
     bankPage * pageSize
   );
+
   return (
     <div style={{ padding: 16 }}>
       {/* Card chứa các nút hành động */}
@@ -816,32 +815,54 @@ export const UpdateExamQuestion = () => {
         <Tabs.TabPane tab="Danh sách các phần thi nghe" key="3">
           <h3>Danh sách các phần nghe trong đề thi</h3>
           {selectedListeningExams && selectedListeningExams.length > 0 ? (
-            <Collapse accordion>
-              {selectedListeningExams.map((exam, index) => (
-                <Panel
-                  key={exam._id || index}
-                >
-                  <div>
-                    <strong>
-                      {index + 1}. {exam.title}
-                    </strong>
-                  </div>
-                  <p>{exam.description}</p>
-                  <p>
-                    Thời gian: {exam.duration} phút - Điểm qua:{" "}
-                    {exam.passingScore} -{" "}
-                    {exam.isPublished ? "Đã phát hành" : "Chưa phát hành"}
-                  </p>
-                  <Button
-                    size="small"
-                    onClick={() => handleRemoveListeningExam(exam)}
-                    icon={<MinusOutlined style={{ color: "red" }} />}
-                  >
-                    Gỡ
-                  </Button>
-                </Panel>
-              ))}
-            </Collapse>
+            <Table
+              dataSource={selectedListeningExams}
+              rowKey={(exam) => exam._id}
+              columns={[
+                {
+                  title: "STT",
+                  dataIndex: "index",
+                  key: "index",
+                  render: (_text, _record, index) => index + 1,
+                },
+                {
+                  title: "Tiêu đề",
+                  dataIndex: "title",
+                  key: "title",
+                },
+                {
+                  title: "Mô tả",
+                  dataIndex: "description",
+                  key: "description",
+                },
+                {
+                  title: "Thời gian",
+                  dataIndex: "duration",
+                  key: "duration",
+                  render: (duration) => `${duration} phút`,
+                },
+                {
+                  title: "Trạng thái",
+                  dataIndex: "isPublished",
+                  key: "isPublished",
+                  render: (isPublished) => (isPublished ? "Đã phát hành" : "Chưa phát hành"),
+                },
+                {
+                  title: "Hành động",
+                  key: "action",
+                  render: (_text, record) => (
+                    <Button
+                      size="small"
+                      onClick={() => handleRemoveListeningExam(record)}
+                      icon={<MinusOutlined style={{ color: "red" }} />}
+                    >
+                      Gỡ
+                    </Button>
+                  ),
+                },
+              ]}
+              pagination={{ pageSize: 5 }}
+            />
           ) : (
             <p>Chưa có kỳ thi nghe nào được chọn.</p>
           )}
@@ -851,32 +872,54 @@ export const UpdateExamQuestion = () => {
         <Tabs.TabPane tab="Ngân hàng phần thi nghe" key="4">
           <h3>Ngân hàng phần thi nghe</h3>
           {bankListeningExams && bankListeningExams.length > 0 ? (
-            <Collapse accordion>
-              {bankListeningExams.map((exam, index) => (
-                <Panel
-                  key={exam._id || ""}
-                >
-                  <div>
-                    <strong>
-                      {index + 1}. {exam.title}
-                    </strong>
-                  </div>
-                  <p>{exam.description}</p>
-                  <p>
-                    Thời gian: {exam.duration} phút - Điểm qua:{" "}
-                    {exam.passingScore} -{" "}
-                    {exam.isPublished ? "Đã phát hành" : "Chưa phát hành"}
-                  </p>
-                  <Button
-                    size="small"
-                    onClick={() => handleAddListeningExam(exam)}
-                    icon={<PlusOutlined style={{ color: "green" }} />}
-                  >
-                    Thêm
-                  </Button>
-                </Panel>
-              ))}
-            </Collapse>
+            <Table
+              dataSource={bankListeningExams}
+              rowKey={(exam) => exam._id}
+              columns={[
+                {
+                  title: "STT",
+                  dataIndex: "index",
+                  key: "index",
+                  render: (_text, _record, index) => index + 1,
+                },
+                {
+                  title: "Tiêu đề",
+                  dataIndex: "title",
+                  key: "title",
+                },
+                {
+                  title: "Mô tả",
+                  dataIndex: "description",
+                  key: "description",
+                },
+                {
+                  title: "Thời gian",
+                  dataIndex: "duration",
+                  key: "duration",
+                  render: (duration) => `${duration} phút`,
+                },
+                {
+                  title: "Trạng thái",
+                  dataIndex: "isPublished",
+                  key: "isPublished",
+                  render: (isPublished) => (isPublished ? "Đã phát hành" : "Chưa phát hành"),
+                },
+                {
+                  title: "Hành động",
+                  key: "action",
+                  render: (_text, record) => (
+                    <Button
+                      size="small"
+                      onClick={() => handleAddListeningExam(record)}
+                      icon={<PlusOutlined style={{ color: "green" }} />}
+                    >
+                      Thêm
+                    </Button>
+                  ),
+                },
+              ]}
+              pagination={{ pageSize: 5 }}
+            />
           ) : (
             <p>Không có kỳ thi nghe phù hợp.</p>
           )}
