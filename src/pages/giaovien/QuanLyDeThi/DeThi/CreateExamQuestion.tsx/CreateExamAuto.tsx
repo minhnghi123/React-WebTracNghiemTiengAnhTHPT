@@ -77,14 +77,14 @@ export const CreateExamModalAuTo: React.FC<CreateExamModalProps> = ({
         questionTypeIds
       );
       if (response?.code === 200) {
-        message.success("Tạo đề thi thành công");
+        message.success(response?.message);
         handleClose();
       } else {
-        message.error("Failed to create exam.");
+        message.error(response?.message || "Failed to create exam.");
         console.log(response);
       }
     } catch (error) {
-      message.error("An error occurred while creating the exam.");
+      message.error(error?.response?.data?.message || "An error occurred.");
       console.error(error);
     }
   };

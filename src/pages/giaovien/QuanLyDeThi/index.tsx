@@ -236,14 +236,6 @@ export const QuanLyDeThi = () => {
               render: (_, record) => (
                 <Space size="small">
                   <Button
-                    color="default"
-                    variant="outlined"
-                    style={{ backgroundColor: "orange" }}
-                    onClick={() => setShowModalSchedule(record._id || "")}
-                  >
-                    Sửa lịch
-                  </Button>
-                  <Button
                     color="primary"
                     variant="solid"
                     onClick={() =>
@@ -255,7 +247,7 @@ export const QuanLyDeThi = () => {
                     Chi tiết
                   </Button>
                   <Button
-                    color="primary"
+                    color="default"
                     variant="solid"
                     onClick={() => {
                       setCurrentSlug(record.slug);
