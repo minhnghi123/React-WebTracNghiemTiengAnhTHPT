@@ -31,7 +31,7 @@ export const Footer = () => {
               <ul>
                 <li>
                   <a className="nav-link" href="/Ontap">
-                    Ôn tập
+                    FlashCard Ôn Tập
                   </a>
                 </li>
                 <li>

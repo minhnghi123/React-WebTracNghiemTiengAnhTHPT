@@ -3,7 +3,7 @@ import { Question } from "../../models/Question.model.js";
 import { formatExamHeader } from "../../utils/examHeader.helper.js";
 import { QuestionType } from "../../models/QuestionType.model.js";
 import { Passage } from "../../models/Passage.model.js";
-
+import mongoose from "mongoose";
 import { generateMultipleExamVariants } from "../../utils/generateMultipleExamVariants.js";
 import {
   formatExamQuestions,
@@ -388,67 +388,134 @@ export const autoGenerateExam = async (req, res) => {
     ) {
       return res.status(400).json({
         code: 400,
-        message: "Question types are required!",
+        message: "Yêu cầu nhập loại câu hỏi ! ",
       });
     }
 
-    let numberOfEasyQuestions = 0,
-      numberOfHardQuestions = 0;
+    let easyCount = 0,
+      mediumCount = 0,
+      hardCount = 0;
 
-    if (level === "Easy") {
-      numberOfEasyQuestions = numberOfQuestions;
-    } else if (level === "Medium") {
-      numberOfHardQuestions = Math.ceil(numberOfQuestions / 2);
-      numberOfEasyQuestions = numberOfQuestions - numberOfHardQuestions;
+    if (level === "easy") {
+      easyCount = numberOfQuestions;
+    } else if (level === "medium") {
+      mediumCount = Math.ceil(numberOfQuestions / 2);
+      easyCount = numberOfQuestions - mediumCount;
+    } else if (level === "hard") {
+      hardCount = numberOfQuestions;
     } else {
-      numberOfHardQuestions = numberOfQuestions;
-    }
-
-    // Lấy câu hỏi khó trước
-    let hardQuestions = await Question.aggregate([
-      { $match: { level: "hard", questionType: { $in: questionTypes } } },
-      { $sample: { size: numberOfHardQuestions } },
-    ]);
-
-    let remainingHardNeeded = numberOfHardQuestions - hardQuestions.length;
-
-    // Nếu không đủ câu hỏi khó, thì bù bằng câu hỏi dễ
-    let easyQuestions = await Question.aggregate([
-      { $match: { level: "easy", questionType: { $in: questionTypes } } },
-      { $sample: { size: numberOfEasyQuestions + remainingHardNeeded } },
-    ]);
-
-    if (easyQuestions.length < numberOfEasyQuestions + remainingHardNeeded) {
       return res.status(400).json({
         code: 400,
-        message: `Not enough questions! Found: ${
-          hardQuestions.length + easyQuestions.length
-        }, Required: ${numberOfQuestions}`,
+        message: "Cấp độ phải là Easy, Medium hoặc Hard!",
       });
     }
 
-    // Nếu không đủ câu khó, lấy từ câu dễ để bù vào
-    if (remainingHardNeeded > 0) {
-      hardQuestions = [
-        ...hardQuestions,
-        ...easyQuestions.splice(0, remainingHardNeeded),
-      ];
+    const selectedIds = new Set();
+    let questions = [];
+
+    const getQuestions = async (level, count) => {
+      const results = await Question.aggregate([
+        {
+          $match: {
+            level,
+            questionType: {
+              $in: questionTypes.map((id) => new mongoose.Types.ObjectId(id)),
+            },
+            _id: { $nin: [...selectedIds] },
+          },
+        },
+        { $sample: { size: count } },
+      ]);
+      results.forEach((q) => selectedIds.add(q._id.toString()));
+      return results;
+    };
+
+    const fillMissingQuestions = async (missingCount, preferredLevels) => {
+      let added = [];
+      for (let lvl of preferredLevels) {
+        if (added.length >= missingCount) break;
+        const more = await getQuestions(lvl, missingCount - added.length);
+        added.push(...more);
+      }
+      return added;
+    };
+
+    // Lấy câu hỏi ban đầu theo từng mức độ
+    let hardQuestions = await getQuestions("hard", hardCount);
+    let mediumQuestions = await getQuestions("medium", mediumCount);
+    let easyQuestions = await getQuestions("easy", easyCount);
+
+    const missing = {
+      hard: hardCount - hardQuestions.length,
+      medium: mediumCount - mediumQuestions.length,
+      easy: easyCount - easyQuestions.length,
+    };
+
+    // Bù thiếu theo chiến lược linh hoạt
+    if (missing.hard > 0) {
+      const filled = await fillMissingQuestions(missing.hard, [
+        "medium",
+        "easy",
+      ]);
+      hardQuestions.push(...filled);
+    }
+    if (missing.medium > 0) {
+      const filled = await fillMissingQuestions(missing.medium, [
+        "easy",
+        "hard",
+      ]);
+      mediumQuestions.push(...filled);
+    }
+    if (missing.easy > 0) {
+      const filled = await fillMissingQuestions(missing.easy, [
+        "medium",
+        "hard",
+      ]);
+      easyQuestions.push(...filled);
     }
 
-    const questions = [...easyQuestions, ...hardQuestions];
+    // Gộp lại
+    questions = [...hardQuestions, ...mediumQuestions, ...easyQuestions];
 
-    // Xáo trộn danh sách câu hỏi
+    // Nếu vẫn thiếu => bù bất kỳ
+    const stillNeed = numberOfQuestions - questions.length;
+    if (stillNeed > 0) {
+      const filler = await fillMissingQuestions(stillNeed, [
+        "easy",
+        "medium",
+        "hard",
+      ]);
+      questions.push(...filler);
+    }
+
+    if (questions.length < numberOfQuestions) {
+      return res.status(400).json({
+        code: 400,
+        message: "Không đủ câu hỏi theo yêu cầu !",
+        detail: {
+          required: numberOfQuestions,
+          found: questions.length,
+          missing: {
+            hard: Math.max(0, hardCount - hardQuestions.length),
+            medium: Math.max(0, mediumCount - mediumQuestions.length),
+            easy: Math.max(0, easyCount - easyQuestions.length),
+          },
+        },
+      });
+    }
+
+    // Shuffle
     questions.sort(() => Math.random() - 0.5);
 
     const randomCode = Math.floor(100000 + Math.random() * 900000).toString();
     const newExam = new Exam({
-      title: `Auto-generated exam(${randomCode})`,
-      description: `This is an auto-generated exam with ${numberOfQuestions} questions`,
-      questions: questions.map((q) => q._id),
+      title: `Đề thi tạo tự động - (${randomCode})`,
+      description: `Đề thi được tạo tự động với ${numberOfQuestions} câu hỏi`,
+      questions: questions.slice(0, numberOfQuestions).map((q) => q._id),
       duration: duration || 90,
       isPublic: true,
       startTime: new Date(),
-      endTime: new Date(Date.now() + 60 * 60 * 1000), // 1 hour sau
+      endTime: new Date(Date.now() + (duration || 90) * 60 * 1000),
       createdBy: req.user._id,
     });
 
@@ -456,14 +523,14 @@ export const autoGenerateExam = async (req, res) => {
 
     res.status(200).json({
       code: 200,
-      message: "Create exam successfully!",
+      message: "Tạo đề thi thành công!",
       exam: newExam,
     });
   } catch (error) {
     console.error(error.message);
     res.status(500).json({
       code: 500,
-      message: "Internal server error!",
+      message: "Lỗi server! Không thể tạo đề thi.",
     });
   }
 };
