@@ -30,8 +30,6 @@ const QuestionComponent: React.FC<QuestionComponentProps> = ({
   const [open, setOpen] = useState(false);
   const [openAudioUpdate, setOpenAudioUpdate] = useState(false);
 
-
-
   const handleAudioUpdateSuccess = () => {
     setOpenAudioUpdate(false);
     window.location.reload();
@@ -82,9 +80,11 @@ const QuestionComponent: React.FC<QuestionComponentProps> = ({
               border: "1px solid #d9d9d9",
               color: "#595959",
             }}
-          >
-            {question.correctAnswerForTrueFalseNGV?.toUpperCase()}
-          </div>
+            dangerouslySetInnerHTML={{
+              __html:
+                question.correctAnswerForTrueFalseNGV?.toUpperCase() || "",
+            }}
+          />
         ) : (
           question.answers.map((answer) => (
             <div
@@ -98,9 +98,12 @@ const QuestionComponent: React.FC<QuestionComponentProps> = ({
                   : "1px solid #d9d9d9",
                 color: answer.isCorrect ? "#52c41a" : "#595959",
               }}
-            >
-              {cleanString(answer.text || answer.correctAnswerForBlank || "")}
-            </div>
+              dangerouslySetInnerHTML={{
+                __html: cleanString(
+                  answer.text || answer.correctAnswerForBlank || ""
+                ),
+              }}
+            />
           ))
         )}
       </div>
@@ -111,14 +114,7 @@ const QuestionComponent: React.FC<QuestionComponentProps> = ({
       </Divider>
       <div style={{ marginBottom: 16 }}>
         <Text strong>Mức độ: </Text>
-        <Tag
-          color={
-            question.level === "easy"
-              ? "green"
-  
-              : "red"
-          }
-        >
+        <Tag color={question.level === "easy" ? "green" : "red"}>
           {question.level}
         </Tag>
       </div>
@@ -206,9 +202,7 @@ const QuestionComponent: React.FC<QuestionComponentProps> = ({
           question2={question}
         />
       ) : (
-        <div>
-          {/* Placeholder for future modals */}
-        </div>
+        <div>{/* Placeholder for future modals */}</div>
       )}
       {question.audioInfo && (
         <div>
