@@ -33,7 +33,7 @@ const LayoutGiaoVien = () => {
 
   return (
     <div id="main">
-      <Navbar rule={false} />
+      {/* <Navbar rule={false} /> */}
       <div className="container-fluid">
         <div className="row">
           <nav className="col-md-3 col-lg-2 d-md-block bg-light sidebar">

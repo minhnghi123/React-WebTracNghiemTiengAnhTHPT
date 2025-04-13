@@ -4,6 +4,7 @@ import { LinkProps } from "react-router-dom";
 import {
   ProtectedRouteAdmin,
   ProtectedRouteUser,
+  ProtectedRouteTeacher,
 } from "@/components/ProtectedRoute";
 import Layout from "@/pages/default/Layout";
 import Home from "@/pages/default/Home";
@@ -57,7 +58,7 @@ export const createRoute = (
   roleAccess?: number
 ) => {
   if (roleAccess) {
-    const Wrapper = roleAccess === 1 ? ProtectedRouteUser : ProtectedRouteAdmin;
+    const Wrapper = roleAccess === 2 ? ProtectedRouteAdmin : (roleAccess === 3? ProtectedRouteTeacher : ProtectedRouteUser ) ;
     element = <Wrapper>{element}</Wrapper>;
   }
 
@@ -106,43 +107,43 @@ export const router = [
     path: "/",
     element: <LayoutGiaoVien />,
     children: [
-      createRoute("/GiaoVien", <DashBoardGiaoVien />, ERolePath.USER),
-      createRoute("/giaovien/NganHangCauHoi", <QuanLyCauHoi />, ERolePath.USER),
+      createRoute("/GiaoVien", <DashBoardGiaoVien />, ERolePath.GIAOVIEN),
+      createRoute("/giaovien/NganHangCauHoi", <QuanLyCauHoi />, ERolePath.GIAOVIEN),
       createRoute(
         "/giaovien/QuanLyDeThi",
         <QuanLyDeThiIndex />,
-        ERolePath.USER
+        ERolePath.GIAOVIEN
       ),
       createRoute(
         "/giaovien/QuanLyDeThi/CreateExam",
         <CreateExamQuestion />,
-        ERolePath.USER
+        ERolePath.GIAOVIEN
       ),
       createRoute(
         "/giaovien/QuanLyDeThi/UpdateExam/:_id",
         <UpdateExamQuestion />,
-        ERolePath.USER
+        ERolePath.GIAOVIEN
       ),
       createRoute(
         "/giaovien/QuanLyLopHoc/:_classroom_id",
         <DetailClass />,
-        ERolePath.USER
+        ERolePath.GIAOVIEN
       ),
-      createRoute("/giaovien/QuanLyLopHoc", <QuanLyLopHoc />, ERolePath.USER),
-      createRoute("/giaovien/QuanLyAudio", <QuanLyAudio />, ERolePath.USER),
-      createRoute("/GiaoVien/QuanLyBaoLoi", <QuanLyBaoLoi />, ERolePath.USER),
+      createRoute("/giaovien/QuanLyLopHoc", <QuanLyLopHoc />, ERolePath.GIAOVIEN),
+      createRoute("/giaovien/QuanLyAudio", <QuanLyAudio />, ERolePath.GIAOVIEN),
+      createRoute("/GiaoVien/QuanLyBaoLoi", <QuanLyBaoLoi />, ERolePath.GIAOVIEN),
     ],
   },
   {
     path: "/",
     element: <LayoutAdmin />,
     children: [
-      createRoute("/Admin", <DashBoarAdmin />, ERolePath.USER),
-      createRoute("/Admin/DangCauHoi", <QuanLyDangCauHoi />, ERolePath.USER),
+      createRoute("/Admin", <DashBoarAdmin />, ERolePath.ADMIN),
+      createRoute("/Admin/DangCauHoi", <QuanLyDangCauHoi />, ERolePath.ADMIN),
       createRoute(
         "/Admin/QuanLyTaiKhoan",
         <VerificationTeacher />,
-        ERolePath.USER
+        ERolePath.ADMIN
       ),
     ],
   },
