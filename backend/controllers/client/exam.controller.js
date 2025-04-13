@@ -2,6 +2,8 @@ import Exam from "../../models/Exam.model.js";
 import { redisService } from "../../config/redis.config.js";
 import Result from "../../models/Result.model.js";
 import { Passage } from "../../models/Passage.model.js";
+import ListeningExam from "../../models/listeningExam.model.js";
+
 function shuffleArray(array) {
   for (let i = array.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -9,6 +11,7 @@ function shuffleArray(array) {
   }
   return array;
 }
+
 export const index = async (req, res) => {
   try {
     //pagination
@@ -56,6 +59,7 @@ export const index = async (req, res) => {
     res.status(400).json({ code: 400, message: error.message });
   }
 };
+
 export const detailExam = async (req, res) => {
   try {
     const { slug } = req.params;
@@ -190,5 +194,141 @@ export const joinedExam = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ code: 500, message: "Lỗi khi tham gia đề thi." });
+  }
+};
+
+export const getListeningExams = async (req, res) => {
+  try {
+    let currentPage = req.query.page ? parseInt(req.query.page) : 1;
+    let limitItems = req.query.limit ? parseInt(req.query.limit) : 4;
+
+    const condition = { isPublic: true };
+    const totalItems = await ListeningExam.countDocuments(condition);
+    const skip = (currentPage - 1) * limitItems;
+    const totalPage = Math.ceil(totalItems / limitItems);
+
+    const listeningExams = await ListeningExam.find(condition)
+      .populate("questions")
+      .limit(limitItems)
+      .skip(skip);
+
+    res.status(200).json({
+      code: 200,
+      listeningExams,
+      currentPage,
+      totalItems,
+      totalPage,
+      limitItems,
+      hasNextPage: currentPage < totalPage,
+    });
+  } catch (error) {
+    res.status(400).json({ code: 400, message: error.message });
+  }
+};
+
+export const detailListeningExam = async (req, res) => {
+  try {
+    const { slug } = req.params;
+    const listeningExam = await ListeningExam.findOne({ slug }).populate({
+      path: "questions",
+      populate: { path: "options" },
+    });
+
+    if (!listeningExam) {
+      return res.status(404).json({ message: "Listening exam not found" });
+    }
+
+    res.status(200).json({ code: 200, listeningExam });
+  } catch (error) {
+    res.status(400).json({ code: 400, message: error.message });
+  }
+};
+
+export const joinListeningExam = async (req, res) => {
+  try {
+    const listeningExam = await ListeningExam.findOne({
+      _id: req.params.examId,
+    }).populate({
+      path: "questions",
+      populate: { path: "options" },
+    });
+
+    if (!listeningExam) {
+      return res.status(404).json({ message: "Listening exam not found" });
+    }
+
+    const shuffledQuestions = shuffleArray(listeningExam.questions).map(
+      (question) => ({
+        ...question.toObject(),
+        options: shuffleArray(question.options),
+      })
+    );
+
+    const endTime = new Date();
+    endTime.setMinutes(endTime.getMinutes() + listeningExam.duration);
+
+    const result = new Result({
+      examId: listeningExam._id,
+      userId: req.user._id,
+      score: 0,
+      correctAnswer: 0,
+      wrongAnswer: 0,
+      isCompleted: false,
+      endTime,
+    });
+
+    await result.save();
+
+    res.status(200).json({
+      code: 200,
+      title: listeningExam.title,
+      description: listeningExam.description,
+      duration: listeningExam.duration,
+      questions: shuffledQuestions,
+      resultId: result._id,
+    });
+  } catch (error) {
+    res.status(500).json({ code: 500, message: "Error joining listening exam." });
+  }
+};
+
+export const calculateListeningExamScore = async (req, res) => {
+  try {
+    const { resultId } = req.params;
+    const result = await Result.findById(resultId).populate({
+      path: "examId",
+      populate: { path: "questions" },
+    });
+
+    if (!result || result.isCompleted) {
+      return res.status(400).json({ message: "Invalid or completed result." });
+    }
+
+    const userAnswers = req.body.answers; // { questionId: selectedOptionId }
+    let score = 0;
+    let correctAnswer = 0;
+    let wrongAnswer = 0;
+
+    for (const question of result.examId.questions) {
+      const userAnswer = userAnswers[question._id];
+      const correctOption = question.options.find((opt) => opt.isCorrect);
+
+      if (userAnswer && correctOption && userAnswer === correctOption._id.toString()) {
+        score += 1;
+        correctAnswer += 1;
+      } else {
+        wrongAnswer += 1;
+      }
+    }
+
+    result.score = score;
+    result.correctAnswer = correctAnswer;
+    result.wrongAnswer = wrongAnswer;
+    result.isCompleted = true;
+    await result.save();
+
+    res.status(200).json({ code: 200, score, correctAnswer, wrongAnswer });
+  } catch (error) {
+    res.status(500).json({ code: 500, message: "Error calculating score." });
   }
 };

@@ -82,6 +82,15 @@ export const ResultAPI = {
     const response = await request.post(`/result/save`, data);
     return response.data;
   },
+  saveSingleAnswer: async (data: {
+    resultId: string;
+    questionId: string;
+    answer: string | string[];
+    isListening: boolean;
+  }) => {
+    const response = await request.post(`/result/save-single-answer`, data);
+    return response.data;
+  },
 };
 
 export const ExamAPIStudent = {

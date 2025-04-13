@@ -42,7 +42,6 @@ const CreateExamModalShedule: React.FC<CreateExamModalProps> = ({
         handleClose();
       } else {
         message.error("Failed to update exam schedule.");
-        console.log(response);
       }
     } catch (error) {
       message.error("An error occurred while updating the exam schedule.");

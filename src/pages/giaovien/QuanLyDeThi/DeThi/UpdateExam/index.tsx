@@ -16,7 +16,6 @@ import {
   PlusOutlined,
   MinusOutlined,
   EditOutlined,
-  CopyOutlined,
 } from "@ant-design/icons";
 import clsx from "clsx";
 import { useParams } from "react-router-dom";
@@ -85,7 +84,7 @@ export const UpdateExamQuestion = () => {
   const [hardLimit, setHardLimit] = useState<number>(0);
   const [openModal, setOpenModal] = useState<boolean>(false);
   const [openModalCreate, setOpenModalCreate] = useState<boolean>(false);
-  const [examID, setExamID] = useState<string>("");
+  const [, setExamID] = useState<string>("");
 
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [filterType, setFilterType] = useState<string>("");
@@ -942,7 +941,6 @@ export const UpdateExamQuestion = () => {
                   <p>{exam.description}</p>
                   <p>
                     Thời gian: {exam.duration} phút - Điểm qua:{" "}
-                    {exam.passingScore} -{" "}
                     {exam.isPublished ? "Đã phát hành" : "Chưa phát hành"}
                   </p>
                   <Button
@@ -975,7 +973,6 @@ export const UpdateExamQuestion = () => {
                   <p>{exam.description}</p>
                   <p>
                     Thời gian: {exam.duration} phút - Điểm qua:{" "}
-                    {exam.passingScore} -{" "}
                     {exam.isPublished ? "Đã phát hành" : "Chưa phát hành"}
                   </p>
                   <Button
@@ -1065,6 +1062,3 @@ export const UpdateExamQuestion = () => {
   );
 };
 
-function copyExam() {
-  alert("Sao chép đề thi thành công");
-}

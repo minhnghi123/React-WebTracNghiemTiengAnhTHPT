@@ -1,17 +1,19 @@
-import { QuestionAPI } from "@/services/teacher/Teacher";
 import { cleanString } from "@/utils/cn";
 import { Divider, Flex, Modal, Tag, Button } from "antd";
 import clsx from "clsx";
 import "./cauhoi.css";
 import { useEffect, useState } from "react";
 import UpdateListeningQuestionModal from "./CreateQuestion/UpdateListeningQuestion";
-import { ListeningQuestionData } from "@/services/teacher/ListeningQuestion";
+import {
+  ListeningQuestionData,
+  listenQuestionAPI,
+} from "@/services/teacher/ListeningQuestion";
 
 export interface ListeningQuestion {
-  id: string;
-  teacherId: any; // Bạn có thể định nghĩa chi tiết hơn nếu cần
+  _id: string;
+  teacherId: { _id: string; name?: string }; // Updated to reflect the expected structure
   questionText: string;
-  questionType: any; // API trả về object, nếu cần chuyển đổi bạn có thể xử lý lại ở đây
+  questionType: { _id: string; name?: string }; // Updated to reflect the expected structure
   options?: { option_id: string; optionText: string }[];
   correctAnswer?: { answer_id: string; answer: string }[];
   difficulty: "easy" | "medium" | "hard";
@@ -41,7 +43,7 @@ export const ListeningQuestionComponent: React.FC<
   });
   useEffect(() => {
     setQuestionData({
-      id: question.id,
+      _id: question._id,
       teacherId: question.teacherId?._id || "",
       questionText: question.questionText,
       difficulty: question.difficulty,
@@ -50,11 +52,12 @@ export const ListeningQuestionComponent: React.FC<
       blankAnswer: question.blankAnswer || "",
     });
   }, [question]);
+
   const [open, setOpen] = useState(false);
   const [openModal, setOpenModal] = useState<boolean>(false);
 
   const handleOk = () => {
-    handleDeleteQuestion(question.id);
+    handleDeleteQuestion(question._id);
     setOpen(false);
   };
 
@@ -64,7 +67,7 @@ export const ListeningQuestionComponent: React.FC<
 
   const handleDeleteQuestion = async (id: string) => {
     try {
-      const rq = await QuestionAPI.deleteQuestion(id);
+      const rq = await listenQuestionAPI.deleteListeningQuestion(id);
       if (rq?.code === 200) {
         alert("Xóa câu hỏi thành công");
         onUpdateSuccess();
@@ -75,7 +78,6 @@ export const ListeningQuestionComponent: React.FC<
       }
     }
   };
-  console.log(question);
 
   return (
     <div className="bg-white p-4 rounded shadow mb-4">
@@ -90,8 +92,7 @@ export const ListeningQuestionComponent: React.FC<
         {question.questionType._id != "6742fb3bd56a2e75dbd817ec" &&
           question.options?.map((option) => {
             const isCorrect = question.correctAnswer?.some(
-              (ans) =>
-                ans.answer_id?.toString() === option.option_id?.toString()
+              (ans) => ans.answer?.trim() === option.optionText?.trim()
             );
 
             return (
@@ -99,10 +100,14 @@ export const ListeningQuestionComponent: React.FC<
                 key={option.option_id}
                 className={clsx("ml-2 rounded mb-2 p-2", {
                   "bg-green-100": isCorrect,
-                  "bg-red-100": !isCorrect,
                 })}
-                style={{ whiteSpace: "pre-wrap" }}
+                style={{
+                  whiteSpace: "pre-wrap",
+                  border: isCorrect ? "1px solid #52c41a" : "1px solid #d9d9d9",
+                  color: isCorrect ? "#52c41a" : "#595959",
+                }}
               >
+               
                 {cleanString(option.optionText)}
               </div>
             );
@@ -135,18 +140,20 @@ export const ListeningQuestionComponent: React.FC<
       {editable && (
         <>
           <hr />
-          <Button
-            type="primary"
-            className="my-3 mx-3"
-            onClick={() => setOpenModal(true)}
-          >
-            Sửa câu hỏi
-          </Button>
-          {deletetalbe && (
-            <Button danger className="my-3 mx-3" onClick={() => setOpen(true)}>
-              Xóa câu hỏi
+          <div style={{ display: "flex", gap: "10px", justifyContent: "flex-start" }}>
+            <Button
+              type="primary"
+              className="my-3"
+              onClick={() => setOpenModal(true)}
+            >
+              Sửa câu hỏi
             </Button>
-          )}
+            {deletetalbe && (
+              <Button danger className="my-3" onClick={() => setOpen(true)}>
+                Xóa câu hỏi
+              </Button>
+            )}
+          </div>
           <Modal
             open={open}
             title="Xóa câu hỏi"

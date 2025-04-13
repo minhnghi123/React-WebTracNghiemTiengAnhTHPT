@@ -2,7 +2,7 @@ import { request } from "@/config/request";
 import { Answer } from "@/types/interface";
 
 export interface ListeningQuestion {
-  id?: string;
+  _id?: string;
   teacherId: string;
   questionText: string;
   questionType: string;
@@ -14,7 +14,7 @@ export interface ListeningQuestion {
   blankAnswer?: string;
 }
 export interface ListeningQuestionData {
-  id?: string;
+  _id?: string;
   teacherId: string;
   questionText: string;
   questionType: string;
@@ -27,12 +27,12 @@ export interface ListeningQuestionData {
 }
 
 export interface ListeningExamData {
-  id?: string;
+  _id?: string;
   teacherId: string; // ID của giáo viên
   title: string; // Tiêu đề bài kiểm tra
   description: string; // Mô tả bài kiểm tra
   audio: string; // ID của audio
-  questions: string[]; // Mảng các ID câu hỏi
+  questions: string[] | Question ; // Mảng các ID câu hỏi
   duration?: number; // Thời lượng bài kiểm tra (mặc định: 90 phút)
   startTime?: Date; // Thời gian bắt đầu
   endTime?: Date; // Thời gian kết thúc
@@ -173,9 +173,11 @@ export const listenQuestionAPI = {
     return response.data;
   },
   deleteListeningQuestion: async (id: string) => {
-    const response = await request.patch(
-      `/teacher/listening-question/delete/${id}`
-    );
+    const response = await request.delete(`/teacher/listening-question/delete/${id}`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`, // Gửi token trong header
+      },
+    });
     return response.data;
   },
 };
@@ -234,7 +236,6 @@ export const ExamListeningQuestionAPI = {
     return response.data;
   },
   deleteListeningExam: async (id: string, teacherId: string) => {
-    console.log(id, teacherId);
     const response = await request.delete(
       `/teacher/listening-exam/delete/${id}`
     );

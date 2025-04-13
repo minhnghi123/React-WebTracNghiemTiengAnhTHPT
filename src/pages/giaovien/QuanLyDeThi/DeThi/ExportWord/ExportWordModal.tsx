@@ -61,10 +61,12 @@ const ExportWordModal: React.FC<ExportWordModalProps> = ({ visible, handleClose,
         )
         .map((q) => ({
           content: q.content,
-          answers: q.answers.map((answer) => ({
-            text: answer.text,
-            isCorrect: answer.isCorrect,
-          })),
+          answers: q.answers
+            .filter((answer) => answer.text !== undefined)
+            .map((answer) => ({
+              text: answer.text || "",
+              isCorrect: answer.isCorrect,
+            })),
         })),
 
       // Câu hỏi điền khuyết (Fill in the Blank)
@@ -88,15 +90,17 @@ const ExportWordModal: React.FC<ExportWordModalProps> = ({ visible, handleClose,
         )
         .map((q) => ({
           transcript: q.audioInfo?.transcription || "",
-          audio: q.audioInfo?.filePath || "",
-          questions: q.answers.map((answer) => ({
-            content: answer.text,
-            isCorrect: answer.isCorrect,
-            answers: q.answers.map((ans) => ({
-              text: ans.text,
-              isCorrect: ans.isCorrect,
+          audio: typeof q.audioInfo?.filePath === "string" ? q.audioInfo.filePath : "",
+          questions: q.answers
+            .filter((answer) => answer.text !== undefined)
+            .map((answer) => ({
+              content: answer.text || "", // Ensure content is always a string
+              isCorrect: answer.isCorrect,
+              answers: q.answers.map((ans) => ({
+                text: ans.text || "", // Ensure text is always a string
+                isCorrect: ans.isCorrect,
+              })),
             })),
-          })),
         })),
     };
 

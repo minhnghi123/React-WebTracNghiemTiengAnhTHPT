@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Modal, Form, Input, Select, Button } from "antd";
+import { Modal, Form, Input, Select } from "antd";
 import { Question, QuestionAPI } from "@/services/teacher/Teacher";
 
 interface UpdateQuestionTFModalProps {

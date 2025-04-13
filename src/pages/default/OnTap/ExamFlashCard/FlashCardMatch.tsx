@@ -227,7 +227,6 @@ export const FlashCardMatch: React.FC<FlashCardMatchProps> = ({
 
   const handleReset = () => {
     setIsSubmitted(false);
-    setScore(null);
     setCorrectCount(0);
   };
 
@@ -257,7 +256,4 @@ export const FlashCardMatch: React.FC<FlashCardMatchProps> = ({
     </div>
   );
 };
-function setScore() {
-  throw new Error("Function not implemented.");
-}
 

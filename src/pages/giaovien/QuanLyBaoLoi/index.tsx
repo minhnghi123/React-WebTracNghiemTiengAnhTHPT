@@ -24,7 +24,7 @@ export interface ErrorReport {
 }
 
 const QuanLyBaoLoi: React.FC = () => {
-  const [errorReports, setErrorReports] = useState<ErrorReport[]>([]);
+  const [, setErrorReports] = useState<ErrorReport[]>([]);
   const [filteredReports, setFilteredReports] = useState<ErrorReport[]>([]); // Danh sách đã lọc
   const [response, setResponse] = useState("");
   const [selectedReport, setSelectedReport] = useState<ErrorReport | null>(null);

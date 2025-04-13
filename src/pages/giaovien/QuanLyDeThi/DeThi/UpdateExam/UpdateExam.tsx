@@ -81,9 +81,7 @@ const UpdateExamModal: React.FC<UpdateExamModalProps> = ({
       alert("Thời gian kết thúc phải lớn hơn thời gian bắt đầu.");
       return;
     }
-    console.log("gửi",exam);
     const response = await ExamAPI.UpdateExam(exam as Exam, slug);
-    console.log(response);
     if (response?.success === true) {
       alert("Sửa đề thi thành công");
       navigate("/giaovien/QuanLyDeThi/");

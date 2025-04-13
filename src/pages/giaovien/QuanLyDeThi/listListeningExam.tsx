@@ -22,7 +22,6 @@ export const ListListeningExam = () => {
   const getAllExams = async () => {
     try {
       const rq = await ExamListeningQuestionAPI.getListeningExamMySelf();
-      console.log(rq);
       if (rq.data) {
         const examList = rq.data.map((exam: any) => ({
           ...exam,
@@ -73,7 +72,7 @@ export const ListListeningExam = () => {
       onOk: async () => {
         try {
           const response = await ExamListeningQuestionAPI.deleteListeningExam(
-            record.id!,
+            record._id!,
             user?._id || ""
           );
           if (response) {

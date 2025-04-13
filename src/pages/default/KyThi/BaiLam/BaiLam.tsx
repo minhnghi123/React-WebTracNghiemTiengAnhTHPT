@@ -154,6 +154,25 @@ const BaiLam: React.FC = () => {
       .padStart(2, "0")}`;
   };
 
+  const handleSaveSingleAnswer = async (
+    questionId: string,
+    answer: string | string[],
+    isListening: boolean
+  ) => {
+    if (!examDetails) return;
+
+    try {
+      await ResultAPI.saveSingleAnswer({
+        resultId: examDetails._id,
+        questionId,
+        answer,
+        isListening,
+      });
+    } catch (error) {
+      console.error("Error saving single answer:", error);
+    }
+  };
+
   const handleAnswerChange = (newAnswer: any) => {
     setAnswers((prev) => {
       const updated = [...prev];
@@ -162,6 +181,10 @@ const BaiLam: React.FC = () => {
       );
       if (index !== -1) updated[index] = newAnswer;
       else updated.push(newAnswer);
+
+      // Save single answer
+      handleSaveSingleAnswer(newAnswer.questionId, newAnswer.userAnswer, false);
+
       return updated;
     });
   };
@@ -174,6 +197,10 @@ const BaiLam: React.FC = () => {
       );
       if (index !== -1) updated[index] = newAnswer;
       else updated.push(newAnswer);
+
+      // Save single listening answer
+      handleSaveSingleAnswer(newAnswer.questionId, newAnswer.userAnswer, true);
+
       return updated;
     });
   };
@@ -371,7 +398,7 @@ const BaiLam: React.FC = () => {
                               currentAnswer={listeningAnswers.find(
                                 (ans) => ans.questionId === q._id
                               )}
-                              index={questionIndex}
+                              // index={questionIndex} // Removed as it is not part of ListeningQuestionComponentProps
                               viewOnly={!!Examresult} // Add view-only mode when Examresult exists
                             />
                           </>
@@ -437,7 +464,7 @@ const BaiLam: React.FC = () => {
                         currentAnswer={listeningAnswers.find(
                           (ans) => ans.questionId === q._id
                         )}
-                        index={questionIndex}
+                        // index={questionIndex}
                         viewOnly={!!Examresult} // Add view-only mode when Examresult exists
                       />
                     </>

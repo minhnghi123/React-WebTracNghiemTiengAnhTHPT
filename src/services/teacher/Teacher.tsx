@@ -1,6 +1,6 @@
 import { request } from "@/config/request";
 import { ExamDataRecieve } from "./ListeningQuestion";
-import ImportExamExcel from "@/pages/giaovien/QuanLyDeThi/ImportExamExcel";
+// import ImportExamExcel from "@/pages/giaovien/QuanLyDeThi/ImportExamExcel";
 export interface Answer {
   _id?: string;
   text?: string;
@@ -19,7 +19,7 @@ export interface Audio {
 export interface Question {
   _id?: string;
   content: string;
-  level: "easy" | "hard";
+  level: "easy" |  "medium" | "hard";
   questionType?: string;
   sourceType?: string;
   passageId?: Passage;

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Modal, Button, Input, Select, Form } from "antd";
 import { CloseCircleOutlined } from "@ant-design/icons";
 import clsx from "clsx";
-import { Question, QuestionAPI, AudioAPI, Audio, Passage } from "@/services/teacher/Teacher";
+import { Question, QuestionAPI, AudioAPI, Audio } from "@/services/teacher/Teacher";
 import { CreateAudioModal } from "../../QuanLyFileAudio/FileAudio/CreateDangCauHoiModal";
 
 const { Option } = Select;
@@ -27,7 +27,7 @@ const CreateQuestionModal: React.FC<CreateQuestionModalProps> = ({
     explanation: "",
     audio: "",
   });
-  const [audioFile, setAudioFile] = useState<File | null>(null);
+  const [audioFile] = useState<File | null>(null);
   const [existingAudios, setExistingAudios] = useState<Audio[]>([]);
   const [isCreateAudioModalVisible, setIsCreateAudioModalVisible] = useState(false); // State to manage CreateAudioModal visibility
   const handleAudioCreated = (audioId: string) => {
@@ -56,7 +56,7 @@ const CreateQuestionModal: React.FC<CreateQuestionModalProps> = ({
     setQuestion((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleLevelChange = (value: "easy" | "hard") => {
+  const handleLevelChange = (value: "easy" | "medium" | "hard") => {
     setQuestion((prev) => ({ ...prev, level: value }));
   };
 

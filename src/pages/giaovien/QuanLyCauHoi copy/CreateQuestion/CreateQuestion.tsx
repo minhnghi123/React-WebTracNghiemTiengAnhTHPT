@@ -27,7 +27,7 @@ const CreateQuestionModal: React.FC<CreateQuestionModalProps> = ({
     explanation: "",
     audio: "",
   });
-  const [audioFile, setAudioFile] = useState<File | null>(null);
+  const [audioFile] = useState<File | null>(null);
   const [existingAudios, setExistingAudios] = useState<Audio[]>([]);
   const [isCreateAudioModalVisible, setIsCreateAudioModalVisible] = useState(false); // State to manage CreateAudioModal visibility
   const handleAudioCreated = (audioId: string) => {

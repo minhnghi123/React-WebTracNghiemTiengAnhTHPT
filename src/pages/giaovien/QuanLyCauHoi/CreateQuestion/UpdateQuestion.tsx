@@ -155,7 +155,7 @@ const UpdateQuestionModal: React.FC<UpdateQuestionModalProps> = ({
 
   const handleExplain = async () => {
     const text = `${question.content}\n${question.answers
-      .map((answer, index) => `$ ${answer.text}`)
+      .map((answer, _index) => `$ ${answer.text}`)
       .join("\n")}`;
     const confirm = window.confirm(
       "Bạn có muốn giải thích câu hỏi không? Sẽ xóa dữ liệu giải thích cũ"

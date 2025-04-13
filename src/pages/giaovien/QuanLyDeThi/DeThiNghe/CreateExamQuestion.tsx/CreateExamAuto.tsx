@@ -43,7 +43,6 @@ export const CreateExamModalAuTo: React.FC<CreateExamModalProps> = ({
       }
     }
   };
-  console.log(questionTypesData, "questionTypesData");
   useEffect(() => {
     getAllQT(1);
   }, []);

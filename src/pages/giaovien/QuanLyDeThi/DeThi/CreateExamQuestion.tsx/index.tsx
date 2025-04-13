@@ -57,7 +57,6 @@ export const CreateExamQuestion = () => {
   const getAllListeningExams = async () => {
     try {
       const response = await ExamListeningQuestionAPI.getAllListeningExams();
-      console.log(response);
       if (response?.data) {
         setListeningExams(response?.data);
       }

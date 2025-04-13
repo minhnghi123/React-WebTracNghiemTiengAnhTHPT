@@ -36,7 +36,6 @@ export const CreateExamModalAuTo: React.FC<CreateExamModalProps> = ({
       const rq = await QuestionTypeAPI.getAllQuestionTypeTeacher(page);
      
       if (rq?.success) {
-        console.log(rq?.data, "rq?.questionTypes");
         setQuestionTypesData(rq?.data);
       }
     } catch (error: any) {
@@ -45,7 +44,6 @@ export const CreateExamModalAuTo: React.FC<CreateExamModalProps> = ({
       }
     }
   };
-  console.log(questionTypesData, "questionTypesData");
 
   useEffect(() => {
     getAllQT(1);
@@ -84,7 +82,6 @@ export const CreateExamModalAuTo: React.FC<CreateExamModalProps> = ({
         handleClose();
       } else {
         message.error(response?.message || "Failed to create exam.");
-        console.log(response);
       }
     } catch (error) {
       message.error(error?.response?.data?.message || "An error occurred.");

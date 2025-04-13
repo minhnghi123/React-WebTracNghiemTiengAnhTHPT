@@ -122,7 +122,7 @@ const UpdateListeningQuestionModal: React.FC<UpdateListeningQuestionModalProps> 
     }
 
     try {
-      const response = await listenQuestionAPI.updateListeningQuestion(question.id!, updatedQuestion);
+      const response = await listenQuestionAPI.updateListeningQuestion(question._id!, updatedQuestion);
       console.log(response);
       if (response) {
         Modal.success({

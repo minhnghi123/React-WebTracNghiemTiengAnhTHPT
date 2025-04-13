@@ -1,4 +1,4 @@
-import { QuestionAPI, Question } from "@/services/teacher/Teacher";
+import {  Question } from "@/services/teacher/Teacher";
 import { cleanString } from "@/utils/cn";
 import { Divider, Flex, Modal, Tag } from "antd";
 import clsx from "clsx";
@@ -7,6 +7,7 @@ import { useState } from "react";
 import UpdateQuestionModal from "./CreateQuestion/UpdateQuestion";
 import UpdateBlankQuestionModal from "./CreateQuestion/UpdateQuestionBlank";
 import { UpdateAudioModal } from "../QuanLyFileAudio/FileAudio/UpdateDangCauHoiModal";
+import { listenQuestionAPI } from "@/services/teacher/ListeningQuestion";
 type QuestionComponentProps = {
   question: Question;
   onUpdateSuccess: () => void;
@@ -35,7 +36,7 @@ const QuestionComponent: React.FC<QuestionComponentProps> = ({
   };
   const handleDeleteQuestion = async (id: string) => {
     try {
-      const rq = await QuestionAPI.deleteQuestion(id);
+      const rq = await listenQuestionAPI.deleteListeningQuestion(id);
       if (rq?.code === 200) {
         alert("Xóa câu hỏi thành công");
         onUpdateSuccess();

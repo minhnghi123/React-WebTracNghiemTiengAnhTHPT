@@ -8,6 +8,7 @@ import { gemini } from "../../utils/gemini.util.js";
 import jwt from "jsonwebtoken";
 import { ENV_VARS } from "../../config/envVars.config.js";
 import { Audio } from "../../models/Audio.model.js";
+import ListeningExam from "../../models/listeningExam.model.js";
 
 // Map database question type names to standardized names
 const questionTypeMapping = {
@@ -47,6 +48,34 @@ export const getAllResults = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch results", error });
   }
 };
+
+// [GET]: /result/listening
+// Lấy tất cả kết quả ListeningExam (không bị xóa và đã hoàn thành)
+export const getAllListeningResults = async (req, res) => {
+  try {
+    const filter = {
+      userId: req.user._id,
+      isDeleted: false,
+      isCompleted: true,
+    };
+    const results = await Result.find(filter).populate({
+      path: "examId",
+      model: "ListeningExam",
+      populate: {
+        path: "questions",
+        select: "questionText options correctAnswer audio",
+      },
+    });
+
+    res.status(200).json({
+      code: 200,
+      data: results,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch listening results", error });
+  }
+};
+
 // [POST]: /result/submit
 // Xử lý nộp bài thi: kiểm tra thời gian, tính điểm, cập nhật kết quả và trả về phản hồi
 export const submitExam = async (req, res) => {
@@ -601,6 +630,135 @@ export const submitExam = async (req, res) => {
   }
 };
 
+// [POST]: /result/listening/submit
+// Xử lý nộp bài thi ListeningExam
+export const submitListeningExam = async (req, res) => {
+  try {
+    const { resultId, answers } = req.body;
+
+    if (!resultId || !Array.isArray(answers)) {
+      return res.status(400).json({ message: "Invalid input data." });
+    }
+
+    const existingResult = await Result.findOne({
+      _id: resultId,
+      isCompleted: false,
+    }).populate({
+      path: "examId",
+      model: "ListeningExam",
+      populate: {
+        path: "questions",
+        select: "questionText options correctAnswer blankAnswer",
+      },
+    });
+
+    if (!existingResult) {
+      return res.status(400).json({
+        code: 400,
+        message: "No ongoing listening exam found for this user.",
+      });
+    }
+
+    const listeningExam = existingResult.examId;
+    if (!listeningExam) {
+      return res.status(400).json({ code: 400, message: "Listening exam not found." });
+    }
+
+    let score = 0;
+    let correctAnswer = 0;
+    let wrongAnswer = 0;
+    const questionDetails = [];
+
+    for (const answer of answers) {
+      const { questionId, selectedAnswerId, userAnswer } = answer;
+      const question = listeningExam.questions.find(
+        (q) => String(q._id) === String(questionId)
+      );
+
+      if (!question) {
+        return res.status(400).json({
+          code: 400,
+          message: `Question ${questionId} not found in the listening exam.`,
+        });
+      }
+
+      let isCorrect = false;
+      let detail = {};
+
+      if (question.correctAnswer && question.correctAnswer.length > 0) {
+        const correctAnswerObj = question.correctAnswer[0];
+        isCorrect =
+          String(correctAnswerObj.answer_id) === String(selectedAnswerId);
+
+        detail = {
+          questionId: question._id,
+          content: question.questionText,
+          answers: question.options,
+          selectedAnswerId,
+          isCorrect,
+        };
+      } else if (question.blankAnswer) {
+        const correctAnswers = question.blankAnswer
+          .split(",")
+          .map((ans) => ans.trim().toLowerCase());
+        const userAnswers = Array.isArray(userAnswer)
+          ? userAnswer.map((ua) => ua.trim().toLowerCase())
+          : [];
+        const correctCount = userAnswers.filter((ua) =>
+          correctAnswers.includes(ua)
+        ).length;
+
+        isCorrect = correctCount === correctAnswers.length;
+
+        detail = {
+          questionId: question._id,
+          content: question.questionText,
+          userAnswers,
+          correctAnswers,
+          isCorrect,
+        };
+      }
+
+      if (isCorrect) {
+        score++;
+        correctAnswer++;
+      } else {
+        wrongAnswer++;
+      }
+
+      questionDetails.push(detail);
+    }
+
+    const totalQuestions = listeningExam.questions.length;
+    const finalScore = (correctAnswer / totalQuestions) * 10;
+    const roundedScore = Math.round(finalScore * 100) / 100;
+
+    existingResult.score = roundedScore;
+    existingResult.correctAnswer = correctAnswer;
+    existingResult.wrongAnswer = wrongAnswer;
+    existingResult.questions = questionDetails;
+    existingResult.isCompleted = true;
+    existingResult.endTime = new Date();
+
+    await existingResult.save();
+
+    res.status(200).json({
+      code: 200,
+      message: "Listening exam submitted successfully!",
+      score: roundedScore,
+      correctAnswer,
+      wrongAnswer,
+      totalQuestions,
+      details: questionDetails,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error submitting listening exam.",
+      error: error.message,
+    });
+  }
+};
+
 // [PATCH]: /result/delete/:id
 export const deleteResult = async (req, res) => {
   const { id } = req.params;
@@ -667,7 +825,6 @@ export const getWrongQuestions = async (req, res) => {
 export const getDontCompletedExam = async (req, res) => {
   try {
     const now = new Date();
-    // Tìm các kết quả chưa hoàn thành mà đã vượt thời gian
     const expiredResults = await Result.find({
       isCompleted: false,
       endTime: { $lt: now },
@@ -676,60 +833,110 @@ export const getDontCompletedExam = async (req, res) => {
       populate: [
         {
           path: "questions",
-          populate: [
-            { path: "passageId", select: "title content createdAt updatedAt" }, // Include all fields of passageId
-          ],
+          populate: { path: "questionType", select: "name" },
         },
         { path: "listeningExams", populate: { path: "questions audio" } },
       ],
     });
 
-    // Cập nhật các kết quả đã hết thời gian
     if (expiredResults && expiredResults.length > 0) {
       for (const result of expiredResults) {
+        const exam = result.examId;
         let score = 0;
         let correctAnswer = 0;
         let wrongAnswer = 0;
+        const questionDetails = [];
+        const listeningQuestionDetails = [];
+        let wrongAnswerByKnowledge = {};
 
-        // Tính điểm từ các câu hỏi của đề thi chính
-        if (Array.isArray(result.questions)) {
-          result.questions.forEach((q) => {
-            if (q.isCorrect === true) {
+        // Process regular questions
+        for (const question of exam.questions) {
+          const userAnswer = result.questions.find(
+            (q) => String(q.questionId) === String(question._id)
+          );
+          const isCorrect = userAnswer?.isCorrect || false;
+
+          if (isCorrect) {
+            score++;
+            correctAnswer++;
+          } else {
+            wrongAnswer++;
+            const knowledge = question.knowledge;
+            if (!wrongAnswerByKnowledge[knowledge]) {
+              wrongAnswerByKnowledge[knowledge] = 0;
+            }
+            wrongAnswerByKnowledge[knowledge]++;
+          }
+
+          questionDetails.push({
+            questionId: question._id,
+            content: question.content || " ",
+            answers: question.answers,
+            userAnswers: userAnswer?.userAnswers || [],
+            correctAnswerForBlank: question.answers.map(
+              (ans) => ans.correctAnswerForBlank
+            ),
+            audio: question.audio || null,
+            isCorrect,
+          });
+        }
+
+        // Process listening questions
+        for (const listeningExam of exam.listeningExams) {
+          for (const question of listeningExam.questions) {
+            const userAnswer = result.listeningQuestions.find(
+              (q) => String(q.questionId) === String(question._id)
+            );
+            const isCorrect = userAnswer?.isCorrect || false;
+
+            if (isCorrect) {
               score++;
               correctAnswer++;
             } else {
               wrongAnswer++;
+              const knowledge = question.knowledge;
+              if (!wrongAnswerByKnowledge[knowledge]) {
+                wrongAnswerByKnowledge[knowledge] = 0;
+              }
+              wrongAnswerByKnowledge[knowledge]++;
             }
-          });
+
+            listeningQuestionDetails.push({
+              questionId: question._id,
+              content: question.questionText || " ",
+              answers: question.options || [],
+              userAnswers: userAnswer?.userAnswers || [],
+              correctAnswerForBlank: question.blankAnswer
+                ? question.blankAnswer.split(",").map((ans) => ans.trim())
+                : [],
+              audio: question.audio || null,
+              isCorrect,
+            });
+          }
         }
 
-        // Tính điểm từ các câu hỏi phần nghe (lấy từ từng bài nghe trong exam)
-        if (result.examId && Array.isArray(result.examId.listeningExams)) {
-          result.examId.listeningExams.forEach((listeningExam) => {
-            if (Array.isArray(listeningExam.questions)) {
-              listeningExam.questions.forEach((q) => {
-                if (q.isCorrect === true) {
-                  score++;
-                  correctAnswer++;
-                } else {
-                  wrongAnswer++;
-                }
-              });
-            }
-          });
-        }
+        const totalQuestions =
+          (exam.questions?.length || 0) +
+          exam.listeningExams.reduce(
+            (acc, le) => acc + (le.questions?.length || 0),
+            0
+          );
+        const finalScore = (correctAnswer / totalQuestions) * 10;
+        const roundedScore = Math.round(finalScore * 100) / 100;
 
-        // Cập nhật thông tin kết quả
-        result.score = score;
+        result.score = roundedScore;
         result.correctAnswer = correctAnswer;
         result.wrongAnswer = wrongAnswer;
+        result.questions = questionDetails;
+        result.listeningQuestions = listeningQuestionDetails;
+        result.wrongAnswerByKnowledge = wrongAnswerByKnowledge;
         result.isCompleted = true;
         result.endTime = now;
+
         await result.save();
       }
     }
 
-    // Lấy đề thi đang diễn ra của user
     const token = req.cookies["jwt-token"];
     const decoded = jwt.verify(token, ENV_VARS.JWT_SECRET);
     const ongoingExam = await Result.findOne({
@@ -741,31 +948,15 @@ export const getDontCompletedExam = async (req, res) => {
       populate: [
         {
           path: "questions",
-          populate: [
-            { path: "passageId", select: "title content createdAt updatedAt" }, // Include all fields of passageId
-          ],
+          populate: { path: "passageId", select: "title content createdAt updatedAt" },
         },
         { path: "listeningExams", populate: { path: "questions audio" } },
       ],
     });
 
-    // Convert audio field to URL
-    if (
-      ongoingExam &&
-      ongoingExam.examId &&
-      Array.isArray(ongoingExam.examId.listeningExams)
-    ) {
-      for (const listeningExam of ongoingExam.examId.listeningExams) {
-        if (listeningExam.audio && listeningExam.audio.filePath) {
-          listeningExam.audio = listeningExam.audio.filePath;
-        }
-      }
-    }
-
     res.status(200).json({
       code: 200,
-      message:
-        "Final scores computed and incomplete exams updated successfully",
+      message: "Final scores computed and incomplete exams updated successfully",
       results: ongoingExam,
     });
   } catch (error) {
@@ -826,6 +1017,159 @@ export const savedExam = async (req, res) => {
     console.error("Error saving exam progress:", error);
     res.status(500).json({
       message: "Error saving exam progress.",
+      error: error.message,
+    });
+  }
+};
+
+// [POST]: /result/save-single-answer
+// Lưu câu trả lời đơn lẻ
+export const saveSingleAnswer = async (req, res) => {
+  try {
+    const { resultId, questionId, answer, isListening } = req.body;
+
+    // Validate input
+    if (!resultId || !questionId || !answer) {
+      return res.status(400).json({ message: "Invalid input data." });
+    }
+
+    // Find the ongoing result
+    const existingResult = await Result.findOne({
+      _id: resultId,
+      isCompleted: false,
+    }).populate({
+      path: "examId",
+      populate: [
+        { path: "questions", populate: { path: "questionType", select: "name" } },
+        {
+          path: "listeningExams",
+          populate: {
+            path: "questions",
+            populate: { path: "questionType", select: "name" },
+          },
+        },
+      ],
+    });
+
+    if (!existingResult) {
+      return res.status(400).json({
+        code: 400,
+        message: "No ongoing exam found for this user.",
+      });
+    }
+
+    // Check if the exam time has expired
+    if (new Date() > existingResult.endTime) {
+      existingResult.isCompleted = true;
+      await existingResult.save();
+      return res.status(400).json({
+        code: 400,
+        message: "Exam time has expired.",
+      });
+    }
+
+    const exam = existingResult.examId;
+    if (!exam) {
+      return res.status(400).json({ code: 400, message: "Exam not found." });
+    }
+
+    let question, isCorrect = false;
+
+    if (isListening) {
+      // Find the listening question
+      question = exam.listeningExams
+        .flatMap((le) => le.questions)
+        .find((q) => String(q._id) === String(questionId));
+    } else {
+      // Find the regular question
+      question = exam.questions.find((q) => String(q._id) === String(questionId));
+    }
+
+    if (!question) {
+      return res.status(400).json({
+        code: 400,
+        message: `Question ${questionId} not found in the exam.`,
+      });
+    }
+
+    // Determine correctness based on question type
+    switch (
+      questionTypeMapping[question.questionType.name] || question.questionType.name
+    ) {
+      case "Fill in the Blanks":
+        if (Array.isArray(answer)) {
+          const correctAnswers = question.answers.map(
+            (ans) => ans.correctAnswerForBlank.trim().toLowerCase()
+          );
+          const correctCount = answer.filter(
+            (ans, index) =>
+              ans.trim().toLowerCase() === (correctAnswers[index] || "")
+          ).length;
+          isCorrect = correctCount === correctAnswers.length;
+        }
+        break;
+
+      case "Multiple Choices":
+        const correctAnswerObj = question.answers.find((ans) => ans.isCorrect);
+        isCorrect =
+          correctAnswerObj && String(correctAnswerObj._id) === String(answer);
+        break;
+
+      case "True/False/Not Given":
+        const correctAnswers = question.correctAnswerForTrueFalseNGV || [];
+        isCorrect = correctAnswers.includes(answer.trim().toLowerCase());
+        break;
+
+      default:
+        return res.status(400).json({
+          message: `Unsupported question type: ${question.questionType.name}`,
+        });
+    }
+
+    // Update the specific question's answer
+    if (isListening) {
+      const questionIndex = existingResult.listeningQuestions.findIndex(
+        (q) => String(q.questionId) === String(questionId)
+      );
+
+      if (questionIndex !== -1) {
+        existingResult.listeningQuestions[questionIndex].userAnswers = answer;
+        existingResult.listeningQuestions[questionIndex].isCorrect = isCorrect;
+      } else {
+        existingResult.listeningQuestions.push({
+          questionId,
+          userAnswers: answer,
+          isCorrect,
+        });
+      }
+    } else {
+      const questionIndex = existingResult.questions.findIndex(
+        (q) => String(q.questionId) === String(questionId)
+      );
+
+      if (questionIndex !== -1) {
+        existingResult.questions[questionIndex].userAnswers = answer;
+        existingResult.questions[questionIndex].isCorrect = isCorrect;
+      } else {
+        existingResult.questions.push({
+          questionId,
+          userAnswers: answer,
+          isCorrect,
+        });
+      }
+    }
+
+    await existingResult.save();
+
+    res.status(200).json({
+      code: 200,
+      message: "Answer saved successfully!",
+      result: existingResult,
+    });
+  } catch (error) {
+    console.error("Error saving single answer:", error);
+    res.status(500).json({
+      message: "Error saving single answer.",
       error: error.message,
     });
   }

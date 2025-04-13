@@ -6,7 +6,7 @@ import { useAuthContext } from "@/contexts/AuthProvider";
 import "./FlashCardcss.css";
 
 export const FlashCardIndex: React.FC = () => {
-  const [flashCardSets, setFlashCardSets] = useState<FlashCardSet[]>([]);
+  const [, setFlashCardSets] = useState<FlashCardSet[]>([]);
   const [myFlashCardSets, setMyFlashCardSets] = useState<FlashCardSet[]>([]);
   const [otherFlashCardSets, setOtherFlashCardSets] = useState<FlashCardSet[]>(
     []
