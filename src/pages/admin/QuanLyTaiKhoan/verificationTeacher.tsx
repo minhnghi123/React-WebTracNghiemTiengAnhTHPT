@@ -49,7 +49,7 @@ const VerificationTeacher: React.FC = () => {
 
   const getColumns = () => [
     {
-      title: 'Username',
+      title: 'Tên đăng nhập',
       dataIndex: 'username',
       key: 'username',
     },
@@ -59,12 +59,12 @@ const VerificationTeacher: React.FC = () => {
       key: 'email',
     },
     {
-      title: 'Role',
+      title: 'Vai trò',
       dataIndex: 'role',
       key: 'role',
     },
     {
-      title: 'Status',
+      title: 'Trạng thái',
       dataIndex: 'status',
       key: 'status',
       render: (status: string) => (
@@ -74,19 +74,45 @@ const VerificationTeacher: React.FC = () => {
       ),
     },
     {
-      title: 'Created At',
+      title: 'Ngày tạo',
       dataIndex: 'createdAt',
       key: 'createdAt',
-      render: (text: string) => new Date(text).toLocaleString(),
+      render: (text: string) =>
+        text
+          ? new Intl.DateTimeFormat("vi-VN", {
+              day: "2-digit",
+              month: "2-digit",
+              year: "numeric",
+            }).format(new Date(text)) +
+            ` (${new Date(text).toLocaleTimeString("vi-VN", {
+              hour: "2-digit",
+              minute: "2-digit",
+              second: "2-digit",
+              hour12: false, // Use 24-hour format
+            })})`
+          : "N/A",
     },
     {
-      title: 'Updated At',
+      title: 'Ngày cập nhật',
       dataIndex: 'updatedAt',
       key: 'updatedAt',
-      render: (text: string) => new Date(text).toLocaleString(),
+      render: (text: string) =>
+        text
+          ? new Intl.DateTimeFormat("vi-VN", {
+              day: "2-digit",
+              month: "2-digit",
+              year: "numeric",
+            }).format(new Date(text)) +
+            ` (${new Date(text).toLocaleTimeString("vi-VN", {
+              hour: "2-digit",
+              minute: "2-digit",
+              second: "2-digit",
+              hour12: false, // Use 24-hour format
+            })})`
+          : "N/A",
     },
     {
-      title: 'Action',
+      title: 'Hành động',
       key: 'action',
       render: (_: any, record: VerificationRequest) => (
         <Space>

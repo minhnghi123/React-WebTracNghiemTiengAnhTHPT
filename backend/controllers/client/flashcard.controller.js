@@ -7,7 +7,7 @@ export const index = async (req, res) => {
     }).populate("vocabs");
     res.status(200).json({ flashCardSets });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Đã xảy ra lỗi trong quá trình xử lý yêu cầu." });
   }
 };
 
@@ -17,7 +17,7 @@ export const createPost = async (req, res) => {
     if (!vocabs.length) {
       return res
         .status(400)
-        .json({ message: "Please provide at least one vocab" });
+        .json({ message: "Vui lòng cung cấp ít nhất một từ vựng." });
     }
     let vocabsId = [];
     const vocabPromises = vocabs.map((vocab) => {
@@ -44,11 +44,11 @@ export const createPost = async (req, res) => {
     });
     await flashCardSet.save();
     res.status(201).json({
-      message: "Created successfully",
+      message: "Tạo thành công bộ flashcard.",
       flashCardSet,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Đã xảy ra lỗi trong quá trình tạo bộ flashcard." });
   }
 };
 
@@ -58,10 +58,10 @@ export const updateSet = async (req, res) => {
     let updatedSet = req.body;
     const checkExisted = await FlashCardSet.findById(idSet);
     if (!checkExisted) {
-      return res.status(404).json({ message: "Flash card set not found" });
+      return res.status(404).json({ message: "Không tìm thấy bộ flashcard." });
     }
     if (!checkExisted.createdBy.equals(req.user.id)) {
-      return res.status(404).json({ message: "You don't have permission to update this card set" });
+      return res.status(404).json({ message: "Bạn không có quyền chỉnh sửa bộ flashcard này." });
     }
     
     // Xử lý mảng vocabs
@@ -89,9 +89,9 @@ export const updateSet = async (req, res) => {
     }
 
     await FlashCardSet.findByIdAndUpdate(idSet, updatedSet, { new: true });
-    res.status(200).json({ message: "Updated successfully" });
+    res.status(200).json({ message: "Cập nhật thành công bộ flashcard." });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Đã xảy ra lỗi trong quá trình cập nhật bộ flashcard." });
   }
 };
 
@@ -103,16 +103,16 @@ export const detailSet = async (req, res) => {
       deleted: false,
     }).populate("vocabs");
     if (!flashCardSet) {
-      return res.status(404).json({ message: "Flash card set not found" });
+      return res.status(404).json({ message: "Không tìm thấy bộ flashcard." });
     }
     if (!flashCardSet.public && !flashCardSet.createdBy.equals(req.user.id)) {
       return res
         .status(404)
-        .json({ message: "You don't have permission to view this card set" });
+        .json({ message: "Bạn không có quyền xem bộ flashcard này." });
     }
     res.status(200).json({ flashCardSet });
   } catch (error) {
-    return res.status(500).json({ message: error.message });
+    return res.status(500).json({ message: "Đã xảy ra lỗi trong quá trình lấy thông tin bộ flashcard." });
   }
 };
 
@@ -121,16 +121,16 @@ export const deleteSet = async (req, res) => {
     const idSet = req.params.idSet;
     const flashCardSet = await FlashCardSet.findById(idSet);
     if (!flashCardSet) {
-      return res.status(404).json({ message: "Flash card set not found" });
+      return res.status(404).json({ message: "Không tìm thấy bộ flashcard." });
     }
     if (!flashCardSet.createdBy.equals(req.user.id)) {
       return res
         .status(404)
-        .json({ message: "You don't have permission to delete this card set" });
+        .json({ message: "Bạn không có quyền xóa bộ flashcard này." });
     }
     await FlashCardSet.findByIdAndUpdate(idSet, { deleted: true });
-    res.status(200).json({ message: "Deleted successfully" });
+    res.status(200).json({ message: "Xóa bộ flashcard thành công." });
   } catch (error) {
-    return res.status(500).json({ message: error.message });
+    return res.status(500).json({ message: "Đã xảy ra lỗi trong quá trình xóa bộ flashcard." });
   }
 };

@@ -11,14 +11,14 @@ export const createClassroom = async (req, res) => {
 
     return res.status(201).json({
       success: true,
-      message: "Classroom created successfully!",
+      message: "Tạo lớp học thành công!",
       classroom,
     });
   } catch (error) {
     console.error("Error creating classroom:", error);
     return res.status(500).json({
       success: false,
-      message: "Error creating classroom",
+      message: "Lỗi khi tạo lớp học",
       error: error.message,
     });
   }
@@ -31,14 +31,14 @@ export const getAllClassrooms = async (req, res) => {
     );
     return res.status(200).json({
       success: true,
-      message: "Classrooms retrieved successfully",
+      message: "Lấy danh sách lớp học thành công",
       classrooms,
     });
   } catch (error) {
     console.error("Error retrieving classrooms:", error);
     return res.status(500).json({
       success: false,
-      message: "Error retrieving classrooms",
+      message: "Lỗi khi lấy danh sách lớp học",
       error: error.message,
     });
   }
@@ -57,20 +57,20 @@ export const getClassroomById = async (req, res) => {
     if (!classroom) {
       return res.status(404).json({
         success: false,
-        message: "Classroom not found",
+        message: "Không tìm thấy lớp học",
       });
     }
 
     return res.status(200).json({
       success: true,
-      message: "Classroom retrieved successfully",
+      message: "Lấy thông tin lớp học thành công",
       classroom,
     });
   } catch (error) {
     console.error("Error retrieving classroom:", error);
     return res.status(500).json({
       success: false,
-      message: "Error retrieving classroom",
+      message: "Lỗi khi lấy thông tin lớp học",
       error: error.message,
     });
   }
@@ -96,20 +96,20 @@ export const updateClassroom = async (req, res) => {
     if (!updatedClassroom) {
       return res.status(404).json({
         success: false,
-        message: "Classroom not found",
+        message: "Không tìm thấy lớp học",
       });
     }
 
     return res.status(200).json({
       success: true,
-      message: "Classroom updated successfully",
+      message: "Cập nhật lớp học thành công",
       classroom: updatedClassroom,
     });
   } catch (error) {
     console.error("Error updating classroom:", error);
     return res.status(500).json({
       success: false,
-      message: "Error updating classroom",
+      message: "Lỗi khi cập nhật lớp học",
       error: error.message,
     });
   }
@@ -129,20 +129,20 @@ export const deleteClassroom = async (req, res) => {
     if (!updatedClassroom) {
       return res.status(404).json({
         success: false,
-        message: "Classroom not found",
+        message: "Không tìm thấy lớp học",
       });
     }
 
     return res.status(200).json({
       success: true,
-      message: "Classroom deleted successfully (soft delete)",
+      message: "Xóa lớp học thành công (xóa mềm)",
       classroom: updatedClassroom,
     });
   } catch (error) {
     console.error("Error deleting classroom:", error);
     return res.status(500).json({
       success: false,
-      message: "Error deleting classroom",
+      message: "Lỗi khi xóa lớp học",
       error: error.message,
     });
   }
@@ -157,7 +157,7 @@ export const addStudentsToClassroom = async (req, res) => {
   if (!Array.isArray(studentIds) || studentIds.length === 0) {
     return res.status(400).json({
       success: false,
-      message: "Invalid student IDs. Please provide an array of student IDs.",
+      message: "Danh sách học sinh không hợp lệ. Vui lòng cung cấp một mảng ID học sinh.",
     });
   }
 
@@ -171,20 +171,20 @@ export const addStudentsToClassroom = async (req, res) => {
     if (!updatedClassroom) {
       return res.status(404).json({
         success: false,
-        message: "Classroom not found",
+        message: "Không tìm thấy lớp học",
       });
     }
 
     return res.status(200).json({
       success: true,
-      message: "Students added to classroom successfully",
+      message: "Thêm học sinh vào lớp học thành công",
       classroom: updatedClassroom,
     });
   } catch (error) {
     console.error("Error adding students to classroom:", error);
     return res.status(500).json({
       success: false,
-      message: "Error adding students to classroom",
+      message: "Lỗi khi thêm học sinh vào lớp học",
       error: error.message,
     });
   }
@@ -204,20 +204,20 @@ export const removeStudentFromClassroom = async (req, res) => {
     if (!updatedClassroom) {
       return res.status(404).json({
         success: false,
-        message: "Classroom not found",
+        message: "Không tìm thấy lớp học",
       });
     }
 
     return res.status(200).json({
       success: true,
-      message: "Student removed from classroom successfully",
+      message: "Xóa học sinh khỏi lớp học thành công",
       classroom: updatedClassroom,
     });
   } catch (error) {
     console.error("Error removing student from classroom:", error);
     return res.status(500).json({
       success: false,
-      message: "Error removing student from classroom",
+      message: "Lỗi khi xóa học sinh khỏi lớp học",
       error: error.message,
     });
   }
@@ -238,20 +238,20 @@ export const removeStudentsFromClassroom  = async (req, res) => {
     if (!updatedClassroom) {
       return res.status(404).json({
         success: false,
-        message: "Classroom not found",
+        message: "Không tìm thấy lớp học",
       });
     }
 
     return res.status(200).json({
       success: true,
-      message: "Student removed from classroom successfully",
+      message: "Xóa học sinh khỏi lớp học thành công",
       classroom: updatedClassroom,
     });
   } catch (error) {
     console.error("Error removing student from classroom:", error);
     return res.status(500).json({
       success: false,
-      message: "Error removing student from classroom",
+      message: "Lỗi khi xóa học sinh khỏi lớp học",
       error: error.message,
     });
   }
@@ -263,7 +263,7 @@ export const addExamToClassroom = async (req, res) => {
   if (!examId) {
     return res.status(400).json({
       success: false,
-      message: "Invalid request. Please provide examId.",
+      message: "Yêu cầu không hợp lệ. Vui lòng cung cấp examId.",
     });
   }
 
@@ -276,14 +276,14 @@ export const addExamToClassroom = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: "Exam added to classroom successfully",
+      message: "Thêm bài thi vào lớp học thành công",
       classroom: updatedClassroom,
     });
   } catch (error) {
     console.error("Error adding exam to classroom:", error);
     return res.status(500).json({
       success: false,
-      message: "Error adding exam to classroom",
+      message: "Lỗi khi thêm bài thi vào lớp học",
       error: error.message,
     });
   }
@@ -303,14 +303,14 @@ export const removeExamFromClassroom = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: 'Exam removed from classroom successfully'
+      message: 'Xóa bài thi khỏi lớp học thành công'
     });
 
   } catch (error) {
     console.error('Error removing exam from classroom:', error);
     return res.status(500).json({
       success: false,
-      message: 'Error removing exam from classroom',
+      message: 'Lỗi khi xóa bài thi khỏi lớp học',
       error: error.message
     });
   }
@@ -323,14 +323,14 @@ export const getAllStudents = async (req, res) => {
     })
     return res.status(200).json({
       success: true,
-      message: "Students retrieved successfully",
+      message: "Lấy danh sách học sinh thành công",
       students,
     });
   } catch (error) {
     console.error("Error retrieving students:", error);
     return res.status(500).json({
       success: false,
-      message: "Error retrieving students",
+      message: "Lỗi khi lấy danh sách học sinh",
       error: error.message,
     });
   }
@@ -345,7 +345,7 @@ export const getAllStudentResultsByExams = async (req, res) => {
     if (!classroom) {
       return res.status(404).json({
         success: false,
-        message: "Classroom not found",
+        message: "Không tìm thấy lớp học",
       });
     }
 
@@ -402,7 +402,7 @@ export const getAllStudentResultsByExams = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: "Student results categorized successfully",
+      message: "Phân loại kết quả học sinh thành công",
       data: {
         excellent,
         good,
@@ -415,7 +415,7 @@ export const getAllStudentResultsByExams = async (req, res) => {
     console.error("Error retrieving student results:", error);
     return res.status(500).json({
       success: false,
-      message: "Error retrieving student results",
+      message: "Lỗi khi phân loại kết quả học sinh",
       error: error.message,
     });
   }
@@ -441,14 +441,14 @@ export const getStudentResultsByExam = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: "Student results retrieved successfully",
+      message: "Lấy kết quả học sinh thành công",
       data: processedResults,
     });
   } catch (error) {
     console.error("Error retrieving student results by exam:", error);
     return res.status(500).json({
       success: false,
-      message: "Error retrieving student results by exam",
+      message: "Lỗi khi lấy kết quả học sinh",
       error: error.message,
     });
   }
@@ -464,7 +464,7 @@ export const downloadStudentResultsExcel = async (req, res) => {
     if (!classroom) {
       return res.status(404).json({
         success: false,
-        message: "Classroom not found",
+        message: "Không tìm thấy lớp học",
       });
     }
 
@@ -527,7 +527,7 @@ export const downloadStudentResultsExcel = async (req, res) => {
     console.error("Error downloading student results Excel:", error);
     return res.status(500).json({
       success: false,
-      message: "Error downloading student results Excel",
+      message: "Lỗi khi tải xuống kết quả học sinh",
       error: error.message,
     });
   }

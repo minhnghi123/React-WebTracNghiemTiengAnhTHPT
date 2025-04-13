@@ -9,7 +9,7 @@ export async function getVerificationRequests(req, res) {
     res.status(200).json(verificationRequests);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({ message: "Lỗi máy chủ nội bộ" });
   }
 }
 export async function getDetailVerificationRequest(req, res) {
@@ -19,12 +19,12 @@ export async function getDetailVerificationRequest(req, res) {
     if (!verificationRequest) {
       return res
         .status(404)
-        .json({ message: "Verification request not found" });
+        .json({ message: "Không tìm thấy yêu cầu xác minh" });
     }
     res.status(200).json(verificationRequest);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({ message: "Lỗi máy chủ nội bộ" });
   }
 }
 export async function approveTeacher(req, res) {
@@ -35,13 +35,13 @@ export async function approveTeacher(req, res) {
     if (!verificationRequest) {
       return res
         .status(404)
-        .json({ message: "Verification request not found" });
+        .json({ message: "Không tìm thấy yêu cầu xác minh" });
     }
 
     if (verificationRequest.status !== "pending") {
       return res
         .status(400)
-        .json({ message: "Request has already been processed" });
+        .json({ message: "Yêu cầu đã được xử lý" });
     }
 
     // Create a new user account for the teacher
@@ -55,17 +55,17 @@ export async function approveTeacher(req, res) {
     generateTokenAndSetToken(newUser._id, res); //jwt
     sendMail(
       newUser.email,
-      "Account Approved",
-      "Your account has been approved successfully"
+      "Tài khoản đã được phê duyệt",
+      "Tài khoản của bạn đã được phê duyệt thành công"
     );
     // Update the status of the verification request
     verificationRequest.status = "approved";
     await verificationRequest.save();
 
-    res.status(200).json({ message: "Teacher approved successfully" });
+    res.status(200).json({ message: "Phê duyệt giáo viên thành công" });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({ message: "Lỗi máy chủ nội bộ" });
   }
 }
 
@@ -77,13 +77,13 @@ export async function rejectTeacher(req, res) {
     if (!verificationRequest) {
       return res
         .status(404)
-        .json({ message: "Verification request not found" });
+        .json({ message: "Không tìm thấy yêu cầu xác minh" });
     }
 
     if (verificationRequest.status !== "pending") {
       return res
         .status(400)
-        .json({ message: "Request has already been processed" });
+        .json({ message: "Yêu cầu đã được xử lý" });
     }
 
     // Update the status of the verification request
@@ -91,13 +91,13 @@ export async function rejectTeacher(req, res) {
     await verificationRequest.save();
     sendMail(
       verificationRequest.email,
-      "Account Rejected",
-      "Your account has been rejected due to a reason you provided"
+      "Tài khoản bị từ chối",
+      "Tài khoản của bạn đã bị từ chối"
     );
 
-    res.status(200).json({ message: "Teacher rejected successfully" });
+    res.status(200).json({ message: "Từ chối giáo viên thành công" });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({ message: "Lỗi máy chủ nội bộ" });
   }
 }

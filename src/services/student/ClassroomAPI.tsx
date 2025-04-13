@@ -23,6 +23,9 @@ export interface Exam {
   endTime: string;
   startTime: string;
   createdBy?: string;
+  class?: "10" | "11" | "12";
+  topic?: string[];
+  knowledge?: string[];
 }
 
 export interface ClassroomReponse {

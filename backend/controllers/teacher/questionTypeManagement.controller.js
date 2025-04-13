@@ -23,7 +23,7 @@ export const index = async (req, res) => {
 
     res.status(200).json({
       code: 200,
-      message: "Get all question types successfully !",
+      message: "Lấy danh sách loại câu hỏi thành công!",
       questionTypes: questionTypes,
       currentPage: currentPage,
       totalItems: totalItems,
@@ -34,7 +34,7 @@ export const index = async (req, res) => {
   } catch (error) {
     res.status(400).json({
       code: 400,
-      message: "Internal server error !",
+      message: "Lỗi máy chủ nội bộ!",
     });
   }
 };
@@ -44,13 +44,13 @@ export const createPost = async (req, res) => {
     newQuestionType.save();
     res.status(200).json({
       code: 200,
-      message: "Create question type successfully !",
+      message: "Tạo loại câu hỏi mới thành công!",
       questionType: newQuestionType,
     });
   } catch (error) {
     res.status(400).json({
       code: 400,
-      message: "Internal server error !",
+      message: "Lỗi máy chủ nội bộ!",
     });
   }
 };
@@ -61,13 +61,13 @@ export const update = async (req, res) => {
     });
     res.status(200).json({
       code: 200,
-      message: "Get question type successfully !",
+      message: "Lấy thông tin loại câu hỏi thành công!",
       questionType: questionType,
     });
   } catch (error) {
     res.status(400).json({
       code: 400,
-      message: "Internal server error !",
+      message: "Lỗi máy chủ nội bộ!",
     });
   }
 };
@@ -81,12 +81,12 @@ export const updatePatch = async (req, res) => {
     );
     res.status(200).json({
       code: 200,
-      message: "Update question type successfully !",
+      message: "Cập nhật loại câu hỏi thành công!",
     });
   } catch (error) {
     res.status(400).json({
       code: 400,
-      message: "Internal server error !",
+      message: "Lỗi máy chủ nội bộ!",
     });
   }
 };
@@ -102,12 +102,12 @@ export const deletePatch = async (req, res) => {
     );
     res.status(200).json({
       code: 200,
-      message: "Delete question type successfully !",
+      message: "Xóa loại câu hỏi thành công!",
     });
   } catch (error) {
     res.status(400).json({
       code: 400,
-      message: "Internal server error !",
+      message: "Lỗi máy chủ nội bộ!",
     });
   }
 };
@@ -117,14 +117,14 @@ export const getAllQuestionTypes = async (req, res) => {
     const questionTypes = await QuestionType.find({ deleted: false });
     res.status(200).json({
       success: true,
-      message: "Question types retrieved successfully",
+      message: "Lấy danh sách tất cả các loại câu hỏi thành công!",
       data: questionTypes,
     });
   } catch (error) {
     console.error("Error fetching question types:", error);
     res.status(500).json({
       success: false,
-      message: "Error fetching question types",
+      message: "Lỗi khi lấy danh sách các loại câu hỏi!",
       error: error.message,
     });
   }

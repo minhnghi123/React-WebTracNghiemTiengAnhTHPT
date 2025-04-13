@@ -14,13 +14,13 @@ export async function signup(req, res) {
     if (!username || !email || !password || !role) {
       return res.status(400).json({
         code: 400,
-        message: "All fields are required",
+        message: "Tất cả các trường thông tin đều bắt buộc",
       });
     }
     if (password.length < 6) {
       return res
         .status(400)
-        .json({ code: 400, message: "Password must be at least 6 characters" });
+        .json({ code: 400, message: "Mật khẩu phải có ít nhất 6 ký tự" });
     }
     const existingUserByEmail = await TaiKhoan.findOne({
       email: email,
@@ -31,12 +31,12 @@ export async function signup(req, res) {
     if (existingUserByEmail) {
       return res
         .status(400)
-        .json({ code: 400, message: "Email already exists" });
+        .json({ code: 400, message: "Email đã tồn tại trong hệ thống" });
     }
     if (existingUserByUsername) {
       return res
         .status(400)
-        .json({ code: 400, message: "Username already exists" });
+        .json({ code: 400, message: "Tên người dùng đã tồn tại trong hệ thống" });
     }
     const salt = bcryptjs.genSaltSync(10);
     const hashedPassword = await bcryptjs.hash(password, salt);
@@ -59,7 +59,7 @@ export async function signup(req, res) {
 
       return res.status(201).json({
         code: 201,
-        message: "Teacher signup request submitted. Awaiting admin approval.",
+        message: "Yêu cầu đăng ký giáo viên đã được gửi. Vui lòng chờ quản trị viên phê duyệt.",
       });
     } else if (role === "student") {
       // Proceed with normal signup for students
@@ -73,15 +73,15 @@ export async function signup(req, res) {
       generateTokenAndSetToken(newUser._id, res); //jwt
       return res
         .status(201)
-        .json({ code: 201, message: "User created successfully" });
+        .json({ code: 201, message: "Tạo tài khoản người dùng thành công" });
     } else {
-      return res.status(400).json({ code: 400, message: "Invalid role" });
+      return res.status(400).json({ code: 400, message: "Vai trò không hợp lệ" });
     }
   } catch (error) {
     console.error(error);
     return res
       .status(400)
-      .json({ code: 400, message: "Internal server error" });
+      .json({ code: 400, message: "Lỗi máy chủ" });
   }
 }
 export async function login(req, res) {
@@ -90,35 +90,35 @@ export async function login(req, res) {
     if (!email || !password) {
       return res
         .status(400)
-        .json({ code: 400, message: "Email and password are required" });
+        .json({ code: 400, message: "Email và mật khẩu là bắt buộc" });
     }
     const user = await TaiKhoan.findOne({ email: email });
     if (!user) {
-      return res.status(400).json({ code: 400, message: "User not found" });
+      return res.status(400).json({ code: 400, message: "Không tìm thấy người dùng" });
     }
     const isPasswordMatch = await bcryptjs.compare(password, user.password);
     if (!isPasswordMatch) {
-      return res.status(400).json({ code: 400, message: "Invalid password" });
+      return res.status(400).json({ code: 400, message: "Mật khẩu không hợp lệ" });
     }
     generateTokenAndSetToken(user._id, res); //jwt
     res.status(201).json({
       code: 201,
-      message: "Logged in successfully",
+      message: "Đăng nhập thành công",
       user: user,
     });
   } catch (error) {
     res.status(400).json({
       code: 400,
-      message: "Internal server error",
+      message: "Lỗi máy chủ",
     });
   }
 }
 export async function logout(req, res) {
   try {
     res.clearCookie("jwt-token");
-    res.status(201).json({ code: 201, message: "Logged out successfully" });
+    res.status(201).json({ code: 201, message: "Đăng xuất thành công" });
   } catch (error) {
-    res.status(400).json({ code: 400, message: "Internal server error" });
+    res.status(400).json({ code: 400, message: "Lỗi máy chủ" });
   }
 }
 export async function forgotPost(req, res) {
@@ -129,7 +129,7 @@ export async function forgotPost(req, res) {
       status: "active",
     });
     if (!existedUser) {
-      return res.status(400).json({ code: 400, message: "User not found" });
+      return res.status(400).json({ code: 400, message: "Không tìm thấy người dùng" });
     }
     const existedEmailInForgotPassword = await ForgotPassword.findOne({
       email: req.body.email,
@@ -149,11 +149,11 @@ export async function forgotPost(req, res) {
     res.status(201).json({
       code: 201,
       email: req.body.email,
-      message: "OTP sent successfully. And only sent 1 time per 3 mins",
+      message: "Mã OTP đã được gửi thành công. Chỉ gửi 1 lần trong 3 phút.",
     });
   } catch (error) {
     console.log(error);
-    res.status(400).json({ code: 400, message: "Internal server error" });
+    res.status(400).json({ code: 400, message: "Lỗi máy chủ" });
   }
 }
 export async function sendOtpPost(req, res) {
@@ -165,7 +165,7 @@ export async function sendOtpPost(req, res) {
     if (!existedUserInForgotPassword) {
       return res.status(400).json({
         code: 400,
-        message: "OTP is invalid or being expired ! Let try again !",
+        message: "Mã OTP không hợp lệ hoặc đã hết hạn! Vui lòng thử lại!",
       });
     }
     const user = await TaiKhoan.findOne({
@@ -176,10 +176,10 @@ export async function sendOtpPost(req, res) {
     generateTokenAndSetToken(user._id, res); //jwt
     res
       .status(201)
-      .json({ code: 201, message: "OTP is valid ! Let reset password !" });
+      .json({ code: 201, message: "Mã OTP hợp lệ! Vui lòng đặt lại mật khẩu!" });
   } catch (error) {
     console.log(error);
-    res.status(400).json({ code: 400, message: "Internal server error" });
+    res.status(400).json({ code: 400, message: "Lỗi máy chủ" });
   }
 }
 export async function resetPassword(req, res) {
@@ -192,7 +192,7 @@ export async function resetPassword(req, res) {
     if (!token) {
       return res
         .status(401)
-        .send({ message: "No token, authorization denied" });
+        .send({ message: "Không có token, quyền truy cập bị từ chối" });
     }
 
     // Giải mã token và kiểm tra người dùng
@@ -200,7 +200,7 @@ export async function resetPassword(req, res) {
     const user = await TaiKhoan.findOne({ _id: decoded.userId });
 
     if (!user) {
-      return res.status(404).send({ message: "User not found" });
+      return res.status(404).send({ message: "Không tìm thấy người dùng" });
     }
     console.log(user);
     await TaiKhoan.updateOne(
@@ -211,17 +211,19 @@ export async function resetPassword(req, res) {
         password: hashedPassword,
       }
     );
-    res.status(201).json({ code: 201, message: "Password reset successfully" });
+    res.status(201).json({ code: 201, message: "Đặt lại mật khẩu thành công" });
   } catch (error) {
     console.log(error);
-    res.status(400).json({ code: 400, message: "Internal server error" });
+    res.status(400).json({ code: 400, message: "Lỗi máy chủ" });
   }
 }
 export async function getUserInfo(req, res) {
   try {
     const token = req.cookies["jwt-token"];
     if (!token) {
-      return res.status(401).json({ code: 401, message: "Bạn chưa đăng nhập" });
+      return res
+        .status(401)
+        .json({ code: 401, message: "Bạn chưa đăng nhập" });
     }
 
     const decoded = jwt.verify(token, ENV_VARS.JWT_SECRET);
@@ -236,6 +238,6 @@ export async function getUserInfo(req, res) {
     res.status(200).json({ code: 200, user });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ code: 500, message: "Lỗi server" });
+    res.status(500).json({ code: 500, message: "Lỗi máy chủ" });
   }
 }

@@ -107,10 +107,10 @@ export const QuanLyLopHoc = () => {
                   <strong>Trạng thái:</strong> {classroom.status}
                 </p>
                 <p>
-                  <strong>Số lượng học sinh:</strong> {classroom.students.length}
+                  <strong>Số lượng học sinh:</strong> {classroom.students?.length ?? 0}
                 </p>
                 <p>
-                  <strong>Số lượng bài kiểm tra:</strong> {classroom.exams.length}
+                  <strong>Số lượng bài kiểm tra:</strong> {classroom.exams?.length ?? 0}
                 </p>
                 <div className="d-flex justify-content-between mt-3">
                   <Link to={`/giaovien/QuanLyLopHoc/${classroom._id}`}>

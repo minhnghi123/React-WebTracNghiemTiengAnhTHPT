@@ -56,6 +56,9 @@ export interface Exam {
   slug: string;
   createdAt: Date;
   updatedAt?: Date;
+  class?: "10" | "11" | "12";
+  topic?: string[];
+  knowledge?: string[];
 }
 export interface ExamInfo {
   _id?: string;
@@ -68,6 +71,9 @@ export interface ExamInfo {
   isPublic: boolean;
   slug: string;
   createdAt: Date;
+  class?: "10" | "11" | "12";
+  topic?: string[];
+  knowledge?: string[];
 }
 export interface DetailExamType {
   _id?: string;

@@ -52,7 +52,7 @@ export const questionManagement = async (req, res) => {
 
   res.status(200).json({
     code: 200,
-    message: "Get all questions successfully !",
+    message: "Lấy danh sách câu hỏi thành công!",
     questions: questionsWithDetails,
     questionTypes: questionTypes,
     currentPage: currentPage,
@@ -68,7 +68,7 @@ export const detail = async (req, res) => {
   if (!question) {
     return res.status(400).json({
       code: 400,
-      message: "Question not found",
+      message: "Không tìm thấy câu hỏi",
     });
   }
 
@@ -79,9 +79,9 @@ export const detail = async (req, res) => {
 
   res.status(200).json({
     code: 200,
-    message: "Get question detail successfully",
+    message: "Lấy chi tiết câu hỏi thành công",
     question: question,
-    passage: passage, // Include passage content
+    passage: passage, // Bao gồm nội dung đoạn văn
   });
 };
 
@@ -91,19 +91,19 @@ export const update = async (req, res) => {
     if (!question) {
       return res.status(400).json({
         code: 400,
-        message: "Question not found",
+        message: "Không tìm thấy câu hỏi",
       });
     }
     res.status(200).json({
       code: 200,
-      message: "Get question detail successfully",
+      message: "Lấy chi tiết câu hỏi thành công",
       question: question,
     });
   } catch (error) {
     console.error(error);
     return res
       .status(400)
-      .json({ code: 400, message: "Internal server error" });
+      .json({ code: 400, message: "Lỗi máy chủ nội bộ" });
   }
 };
 
@@ -118,14 +118,14 @@ export const createPost = async (req, res) => {
     await newQuestion.save();
     res.status(200).json({
       code: 200,
-      message: "Created a new question",
+      message: "Tạo câu hỏi mới thành công",
       id: newQuestion._id,
     });
   } catch (error) {
     console.error(error);
     return res
       .status(400)
-      .json({ code: 400, message: "Internal server error" });
+      .json({ code: 400, message: "Lỗi máy chủ nội bộ" });
   }
 };
 
@@ -141,13 +141,13 @@ export const deletePatch = async (req, res) => {
     );
     res.status(200).json({
       code: 200,
-      message: "Deleted question successfully",
+      message: "Xóa câu hỏi thành công",
     });
   } catch (error) {
     console.error(error);
     return res
       .status(400)
-      .json({ code: 400, message: "Internal server error" });
+      .json({ code: 400, message: "Lỗi máy chủ nội bộ" });
   }
 };
 
@@ -181,13 +181,13 @@ export const updatePatch = async (req, res) => {
 
     res.status(200).json({
       code: 200,
-      message: "Updated question successfully",
+      message: "Cập nhật câu hỏi thành công",
     });
   } catch (error) {
     console.error(error);
     return res
       .status(400)
-      .json({ code: 400, message: "Internal server error" });
+      .json({ code: 400, message: "Lỗi máy chủ nội bộ" });
   }
 };
 
@@ -200,7 +200,7 @@ export const importExcel = async (req, res) => {
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     ) {
       fs.unlink(excel.tempFilePath);
-      return res.status(400).json({ msg: "file is unvalid" });
+      return res.status(400).json({ msg: "Tệp không hợp lệ" });
     }
     //get all question Type
     const questionTypes = await QuestionType.find({ deleted: false });
@@ -275,11 +275,11 @@ export const importExcel = async (req, res) => {
     });
 
     return res.status(200).json({
-      msg: "Excel file processed successfully",
+      msg: "Xử lý tệp Excel thành công",
       data: collectQuestions,
     });
   } catch (error) {
     console.error("Error processing file:", error);
-    return res.status(500).json({ msg: "Internal server error" });
+    return res.status(500).json({ msg: "Lỗi máy chủ nội bộ" });
   }
 };
