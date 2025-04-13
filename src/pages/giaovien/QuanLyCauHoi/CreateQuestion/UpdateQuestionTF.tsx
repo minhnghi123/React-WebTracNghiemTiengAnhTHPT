@@ -25,7 +25,11 @@ const UpdateQuestionTFModal: React.FC<UpdateQuestionTFModalProps> = ({
       });
     }
 
-    if (!["true", "false", "notgiven"].includes(question.correctAnswerForTrueFalseNGV || "")) {
+    if (
+      !["true", "false", "notgiven"].includes(
+        question.correctAnswerForTrueFalseNGV || ""
+      )
+    ) {
       return Modal.error({
         title: "Lỗi",
         content: "Đáp án đúng phải là True, False hoặc Not Given",
@@ -58,7 +62,9 @@ const UpdateQuestionTFModal: React.FC<UpdateQuestionTFModalProps> = ({
         <Form.Item label="Nội dung">
           <Input.TextArea
             value={question.content}
-            onChange={(e) => setQuestion({ ...question, content: e.target.value })}
+            onChange={(e) =>
+              setQuestion({ ...question, content: e.target.value })
+            }
           />
         </Form.Item>
         <Form.Item label="Mức độ">
@@ -86,25 +92,33 @@ const UpdateQuestionTFModal: React.FC<UpdateQuestionTFModalProps> = ({
         <Form.Item label="Chủ đề">
           <Input
             value={question.subject}
-            onChange={(e) => setQuestion({ ...question, subject: e.target.value })}
+            onChange={(e) =>
+              setQuestion({ ...question, subject: e.target.value })
+            }
           />
         </Form.Item>
         <Form.Item label="Kiến thức">
           <Input
             value={question.knowledge}
-            onChange={(e) => setQuestion({ ...question, knowledge: e.target.value })}
+            onChange={(e) =>
+              setQuestion({ ...question, knowledge: e.target.value })
+            }
           />
         </Form.Item>
         <Form.Item label="Giải thích">
           <Input.TextArea
             value={question.explanation}
-            onChange={(e) => setQuestion({ ...question, explanation: e.target.value })}
+            onChange={(e) =>
+              setQuestion({ ...question, explanation: e.target.value })
+            }
           />
         </Form.Item>
         <Form.Item label="Dịch">
           <Input.TextArea
             value={question.translation}
-            onChange={(e) => setQuestion({ ...question, translation: e.target.value })}
+            onChange={(e) =>
+              setQuestion({ ...question, translation: e.target.value })
+            }
           />
         </Form.Item>
       </Form>

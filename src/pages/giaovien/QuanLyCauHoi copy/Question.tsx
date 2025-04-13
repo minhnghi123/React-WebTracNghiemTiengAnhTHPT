@@ -70,7 +70,11 @@ const QuestionComponent: React.FC<QuestionComponentProps> = ({
                 }`}
                 style={{ whiteSpace: "pre-wrap" }}
               >
-                {cleanString(answer.text || "")}
+                <span
+                  dangerouslySetInnerHTML={{
+                    __html: cleanString(answer.text || ""),
+                  }}
+                />
               </div>
             ) : (
               <div
@@ -78,7 +82,11 @@ const QuestionComponent: React.FC<QuestionComponentProps> = ({
                 className="ml-2 rounded mb-2 bg-green-100"
                 style={{ whiteSpace: "pre-wrap" }}
               >
-                {cleanString(answer.correctAnswerForBlank || "")}
+                <span
+                  dangerouslySetInnerHTML={{
+                    __html: cleanString(answer.correctAnswerForBlank || ""),
+                  }}
+                />
               </div>
             )}
           </div>
