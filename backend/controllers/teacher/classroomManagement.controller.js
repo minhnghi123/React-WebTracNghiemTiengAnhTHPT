@@ -532,3 +532,125 @@ export const downloadStudentResultsExcel = async (req, res) => {
     });
   }
 };
+
+// Lấy tất cả kết quả của 1 bài kiểm tra của tất cả học sinh trong 1 lớp
+export const getAllResultsForExamInClassroom = async (req, res) => {
+  const { classroomId, examId } = req.params;
+
+  try {
+    const classroom = await Classroom.findById(classroomId).populate("students");
+    if (!classroom) {
+      return res.status(404).json({
+        success: false,
+        message: "Không tìm thấy lớp học",
+      });
+    }
+
+    const studentIds = classroom.students.map(student => student._id);
+
+    const results = await Result.find({
+      examId,
+      userId: { $in: studentIds },
+    })
+      .populate("userId", "email")
+      .sort({ score: -1 });
+
+    return res.status(200).json({
+      success: true,
+      message: "Lấy kết quả của bài kiểm tra thành công",
+      data: results,
+    });
+  } catch (error) {
+    console.error("Error retrieving results for exam in classroom:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Lỗi khi lấy kết quả của bài kiểm tra",
+      error: error.message,
+    });
+  }
+};
+
+// Lấy kết quả của 1 học sinh của tất cả kiểm tra có trong lớp
+export const getStudentResultsForAllExamsInClassroom = async (req, res) => {
+  const { classroomId, studentId } = req.params;
+
+  try {
+    const classroom = await Classroom.findById(classroomId).populate("exams");
+    if (!classroom) {
+      return res.status(404).json({
+        success: false,
+        message: "Không tìm thấy lớp học",
+      });
+    }
+
+    const examIds = classroom.exams.map(exam => exam._id);
+
+    const results = await Result.find({
+      userId: studentId,
+      examId: { $in: examIds },
+    })
+      .populate("examId", "title")
+      .sort({ createdAt: 1 });
+
+    return res.status(200).json({
+      success: true,
+      message: "Lấy kết quả của học sinh thành công",
+      data: results,
+    });
+  } catch (error) {
+    console.error("Error retrieving student results for all exams in classroom:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Lỗi khi lấy kết quả của học sinh",
+      error: error.message,
+    });
+  }
+};
+
+// Lấy thông tin kết quả của 1 bài kiểm tra cụ thể
+export const getSpecificExamResult = async (req, res) => {
+  const { examId, studentId } = req.params;
+
+  try {
+    const result = await Result.findOne({
+      examId,
+      userId: studentId,
+    })
+      .populate("userId", "email")
+      .populate("examId", "title questions");
+
+    if (!result) {
+      return res.status(404).json({
+        success: false,
+        message: "Không tìm thấy kết quả của bài kiểm tra",
+      });
+    }
+
+    // Calculate additional details
+    const totalQuestions = result.examId.questions.length;
+    const correctAnswers = result.score;
+    const percentage = totalQuestions ? (correctAnswers / totalQuestions) * 100 : 0;
+
+    return res.status(200).json({
+      success: true,
+      message: "Lấy thông tin kết quả bài kiểm tra thành công",
+      data: {
+        examTitle: result.examId.title,
+        studentEmail: result.userId.email,
+        score: result.score,
+        totalQuestions,
+        correctAnswers,
+        percentage: Number(percentage.toFixed(2)),
+        createdAt: result.createdAt,
+        duration: result.duration, // Assuming `duration` is stored in the result model
+      },
+    });
+  } catch (error) {
+    console.error("Error retrieving specific exam result:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Lỗi khi lấy thông tin kết quả bài kiểm tra",
+      error: error.message,
+    });
+  }
+};

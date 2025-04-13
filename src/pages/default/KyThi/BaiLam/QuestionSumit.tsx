@@ -76,7 +76,9 @@ const QuestionSubmit: React.FC<QuestionComponentProps> = ({
   const renderFillInBlankContent = () => {
     const placeholderRegex = /_+\d+_+/g;
     // console.log(question);
-    const matchedPlaceholders = question.content.match(placeholderRegex);
+    const matchedPlaceholders = typeof question.content === "string" 
+      ? question.content.match(placeholderRegex) 
+      : null;
 
     if (
       matchedPlaceholders &&
@@ -180,7 +182,9 @@ const QuestionSubmit: React.FC<QuestionComponentProps> = ({
         ) : (
           (() => {
             const placeholderRegex = /_+\d+_+/g;
-            const matched = question.content.match(placeholderRegex);
+            const matched = typeof question.content === "string" 
+              ? question.content.match(placeholderRegex) 
+              : null;
             if (matched && matched.length === (question.answers?.length || 0))
               return null;
 

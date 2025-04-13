@@ -175,13 +175,16 @@ export const submitExam = async (req, res) => {
     let answerDetail = "";
     // Xử lý các câu hỏi chưa trả lời
     for (const questionId of unansweredQuestions) {
-      const question = exam.questions.find(
-        (q) => String(q._id) === String(questionId)
-      );
+      const question =
+        exam.questions.find((q) => String(q._id) === String(questionId)) ||
+        exam.listeningExams
+          .flatMap((le) => le.questions)
+          .find((q) => String(q._id) === String(questionId));
+
       if (!question) {
         return res.status(400).json({
           code: 400,
-          message: `Question ${questionId} not found in the exam.`,
+          message: `Question ${questionId} not found in the exam or listening exams.`,
         });
       }
 
@@ -199,31 +202,36 @@ export const submitExam = async (req, res) => {
         content: question.content || " ",
         answers: question.answers,
         userAnswers: [], // Không có câu trả lời
-        correctAnswerForBlank: question.answers.map(
-          (ans) => ans.correctAnswerForBlank
-        ),
+        correctAnswerForBlank: Array.isArray(question.answers)
+          ? question.answers.map((ans) => ans.correctAnswerForBlank)
+          : [], // Ensure answers is an array
         audio: question.audio || null,
         isCorrect: false, // Đánh dấu là sai
       });
 
       incorrectAnswer.push({
         questionContent: question.content,
-        answerDetail: question.answers
-          .map((ans) => ans.text || ans.correctAnswerForBlank)
-          .join("\n"),
+        answerDetail: Array.isArray(question.answers)
+          ? question.answers
+              .map((ans) => ans.text || ans.correctAnswerForBlank)
+              .join("\n")
+          : "", // Ensure answers is an array
         knowledge,
       });
     }
     // Xử lý câu trả lời cho các câu hỏi (questions)
     for (const answer of answers) {
       const { questionId, selectedAnswerId, userAnswer } = answer;
-      const question = exam.questions.find(
-        (q) => String(q._id) === String(questionId)
-      );
+      const question =
+        exam.questions.find((q) => String(q._id) === String(questionId)) ||
+        exam.listeningExams
+          .flatMap((le) => le.questions)
+          .find((q) => String(q._id) === String(questionId));
+
       if (!question) {
         return res.status(400).json({
           code: 400,
-          message: `Question ${questionId} not found in the exam.`,
+          message: `Question ${questionId} not found in the exam or listening exams.`,
         });
       }
       let isCorrect = false;
@@ -400,14 +408,14 @@ export const submitExam = async (req, res) => {
     // Vì cấu trúc của listening question khác, ta sử dụng các trường: questionText, options, correctAnswer, blankAnswer
     for (const answer of listeningAnswers) {
       const { questionId, selectedAnswerId, userAnswer } = answer;
-      // Tìm listening question trong mảng các listeningExam đã populate
       const question = exam.listeningExams
         .flatMap((le) => le.questions)
         .find((q) => String(q._id) === String(questionId));
+
       if (!question) {
         return res.status(400).json({
           code: 400,
-          message: `Listening Question ${questionId} not found in the exam.`,
+          message: `Listening Question ${questionId} not found in the listening exams.`,
         });
       }
       let isCorrect = false;

@@ -1,6 +1,7 @@
-import React from 'react';
-import { Row, Col, Button, List, Avatar, Upload, Table } from 'antd';
-import { Student } from '@/services/teacher/ClassroomAPI';
+import React, { useState } from 'react';
+import { Row, Col, Button, List, Avatar, Upload, Table, Modal, Spin } from 'antd';
+import { Student, ClassroomAPI } from '@/services/teacher/ClassroomAPI';
+import ChiTietKetQua from '@/pages/default/KyThi/KetQua/ChiTietKetQua';
 
 interface StudentsTabProps {
   classroom: any;
@@ -21,6 +22,53 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
   fetchAllStudents,
   setIsStudentListModalOpen,
 }) => {
+  const [isResultsModalOpen, setIsResultsModalOpen] = useState(false);
+  const [loadingResults, setLoadingResults] = useState(false);
+  const [studentResults, setStudentResults] = useState<any[]>([]);
+  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [detailedResult, setDetailedResult] = useState<any | null>(null);
+
+  const fetchStudentResults = async (student: Student) => {
+    setSelectedStudent(student);
+    setIsResultsModalOpen(true);
+    setLoadingResults(true);
+    try {
+      const response = await ClassroomAPI.getStudentResultsForAllExamsInClassroom(
+        classroom._id,
+        student._id
+      );
+      if (response.success) {
+        setStudentResults(response.data);
+      } else {
+        setStudentResults([]);
+      }
+    } catch (error) {
+      setStudentResults([]);
+    } finally {
+      setLoadingResults(false);
+    }
+  };
+
+  const fetchDetailedResult = async (examId: string) => {
+    setLoadingResults(true);
+    try {
+      const response = await ClassroomAPI.getStudentResultForSpecificExam(
+        classroom._id,
+        selectedStudent!._id,
+        examId
+      );
+      if (response.success) {
+        setDetailedResult(response.data);
+        setIsDetailModalOpen(true);
+      }
+    } catch (error) {
+      console.error("Failed to fetch detailed results:", error);
+    } finally {
+      setLoadingResults(false);
+    }
+  };
+
   return (
     <>
       <Row gutter={[16, 16]}>
@@ -38,6 +86,9 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
                   </Button>,
                   <Button type="link" danger onClick={() => handleRemoveStudent(student._id)}>
                     Xóa
+                  </Button>,
+                  <Button type="link" onClick={() => fetchStudentResults(student)}>
+                    Xem kết quả
                   </Button>,
                 ]}
               >
@@ -100,7 +151,85 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
           </Col>
         </Row>
       )}
-      
+
+      {/* Modal hiển thị kết quả học sinh */}
+      <Modal
+        title={`Kết quả của học sinh: ${selectedStudent?.username || ''}`}
+        visible={isResultsModalOpen}
+        onCancel={() => setIsResultsModalOpen(false)}
+        footer={null}
+        width={800}
+      >
+        {loadingResults ? (
+          <Spin tip="Đang tải kết quả..." />
+        ) : studentResults.length > 0 ? (
+          <Table
+            dataSource={studentResults}
+            rowKey="_id"
+            columns={[
+              {
+                title: 'Bài kiểm tra',
+                dataIndex: ['examId', 'title'],
+                key: 'examTitle',
+              },
+              {
+                title: 'Điểm',
+                dataIndex: 'score',
+                key: 'score',
+              },
+              {
+                title: 'Số câu đúng',
+                dataIndex: 'correctAnswers',
+                key: 'correctAnswers',
+              },
+              {
+                title: 'Thời gian làm',
+                dataIndex: 'duration',
+                key: 'duration',
+                render: (text: number) => `${text} phút`,
+              },
+              {
+                title: 'Ngày làm bài',
+                dataIndex: 'createdAt',
+                key: 'createdAt',
+                render: (text: string) => new Date(text).toLocaleString(),
+              },
+              {
+                title: 'Xem chi tiết kết quả',
+                key: 'viewDetails',
+                render: (_: any, record: any) => (
+                  <button
+                    className="btn btn-primary"
+                    onClick={() => fetchDetailedResult(record.examId._id)}
+                  >
+                    Xem
+                  </button>
+                ),
+              },
+            ]}
+            pagination={false}
+          />
+        ) : (
+          <p>Không có kết quả nào.</p>
+        )}
+      </Modal>
+
+      {/* Modal hiển thị chi tiết kết quả */}
+      <Modal
+        title={`Chi tiết kết quả của học sinh: ${selectedStudent?.username || ''}`}
+        visible={isDetailModalOpen}
+        onCancel={() => setIsDetailModalOpen(false)}
+        footer={null}
+        width={800}
+      >
+        {loadingResults ? (
+          <Spin tip="Đang tải chi tiết kết quả..." />
+        ) : detailedResult ? (
+          <ChiTietKetQua result={detailedResult} />
+        ) : (
+          <p>Không có dữ liệu chi tiết kết quả.</p>
+        )}
+      </Modal>
     </>
   );
 };

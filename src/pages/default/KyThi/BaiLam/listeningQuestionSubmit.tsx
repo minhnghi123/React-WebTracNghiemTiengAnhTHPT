@@ -56,9 +56,9 @@ const ListeningQuestionSubmit: React.FC<ListeningQuestionComponentProps> = ({
     if (localAnswer.userAnswer && localAnswer.userAnswer[index] === value)
       return;
 
-    // Ở trường hợp không có placeholder, chỉ cần 1 ô input
-    const expectedCount = displayContent.match(/_+/g)
-      ? displayContent.match(/_+/g)!.length
+    // Ensure displayContent is a string before calling .match()
+    const expectedCount = (displayContent || " ").match(/_+/g)
+      ? (displayContent || "").match(/_+/g)!.length
       : 1;
     let currentUserAnswers: string[] = localAnswer.userAnswer
       ? [...localAnswer.userAnswer]

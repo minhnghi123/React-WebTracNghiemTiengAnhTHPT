@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Button, Table, Space, Card, Spin, Collapse } from 'antd';
+import { Row, Col, Button, Table, Space, Card, Spin, Collapse, Modal } from 'antd';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import { Exam } from '@/services/teacher/Teacher';
 import { ClassroomAPI } from '@/services/teacher/ClassroomAPI';
@@ -44,16 +44,17 @@ const ExamsTab: React.FC<ExamsTabProps> = ({
 }) => {
   const [examFrequencies, setExamFrequencies] = useState<ExamFrequency[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [isResultModalOpen, setIsResultModalOpen] = useState(false);
+  const [loadingResults, setLoadingResults] = useState(false);
+  const [examResults, setExamResults] = useState<any[]>([]);
+  const [selectedExam, setSelectedExam] = useState<Exam | null>(null);
 
   useEffect(() => {
     const fetchExamFrequencyForExam = async (exam: any): Promise<ExamFrequency | null> => {
       try {
-        // Giả sử ClassroomAPI.getStudentResultsByExam nhận vào exam._id và trả về đối tượng API với dữ liệu:
-        // { success: true, message: string, data: ResultItem[] }
-        const res = await ClassroomAPI.getAllStudentResultsbyExam(classroom._id,exam._id);
+        const res = await ClassroomAPI.getAllStudentResultsbyExam(classroom._id, exam._id);
         if (res.success) {
           const results: ResultItem[] = res.data;
-          // Tính điểm cao nhất của mỗi học sinh cho kỳ thi này
           const studentMaxScores: { [studentId: string]: number } = {};
           results.forEach((result) => {
             const studentId = result.userId && result.userId._id ? result.userId._id : "unknown";
@@ -62,7 +63,6 @@ const ExamsTab: React.FC<ExamsTabProps> = ({
               studentMaxScores[studentId] = score;
             }
           });
-          // Tạo bảng tần số cho điểm từ 0 đến 10
           const frequency: { [key: number]: number } = {};
           for (let i = 0; i <= 10; i++) {
             frequency[i] = 0;
@@ -92,7 +92,6 @@ const ExamsTab: React.FC<ExamsTabProps> = ({
     const fetchAllExamFrequencies = async () => {
       setLoading(true);
       try {
-        // Gọi API riêng cho mỗi kỳ thi
         const promises = classroom.exams.map((exam: any) =>
           fetchExamFrequencyForExam(exam)
         );
@@ -110,6 +109,23 @@ const ExamsTab: React.FC<ExamsTabProps> = ({
       fetchAllExamFrequencies();
     }
   }, [classroom._id, classroom.exams]);
+
+  const fetchSpecificExamResult = async (examId: string) => {
+    setIsResultModalOpen(true);
+    setLoadingResults(true);
+    try {
+      const response = await ClassroomAPI.getSpecificExamResult(examId, classroom._id);
+      if (response.success) {
+        setExamResults([response.data]);
+      } else {
+        setExamResults([]);
+      }
+    } catch (error) {
+      setExamResults([]);
+    } finally {
+      setLoadingResults(false);
+    }
+  };
 
   return (
     <Row gutter={[16, 16]}>
@@ -132,18 +148,30 @@ const ExamsTab: React.FC<ExamsTabProps> = ({
                 key: "action",
                 render: (_, record: Exam) => (
                   <Space size="small">
-                    <Button type="link" onClick={() => openExamContent({
-                      _id: record._id,
-                      title: record.title,
-                      questions: record.questions,
-                      duration: record.duration,
-                      startTime: record.startTime,
-                      isPublic: record.isPublic,
-                      slug: '',
-                      createdAt: new Date(),
-                      listeningExams: []
-                    })}>
+                    <Button
+                      type="link"
+                      onClick={() => openExamContent({
+                        _id: record._id,
+                        title: record.title,
+                        questions: record.questions,
+                        duration: record.duration,
+                        startTime: record.startTime,
+                        isPublic: record.isPublic,
+                        slug: '',
+                        createdAt: new Date(),
+                        listeningExams: []
+                      })}
+                    >
                       Xem chi tiết
+                    </Button>
+                    <Button
+                      type="link"
+                      onClick={() => {
+                        setSelectedExam(record);
+                        fetchSpecificExamResult(record._id || "");
+                      }}
+                    >
+                      Xem kết quả
                     </Button>
                     <Button type="link" danger onClick={() => handleRemoveExam(record._id || "")}>
                       Xóa
@@ -180,6 +208,44 @@ const ExamsTab: React.FC<ExamsTabProps> = ({
           <p>Không có dữ liệu kết quả cho bài kiểm tra.</p>
         )}
       </Col>
+
+      <Modal
+        title={`Kết quả bài kiểm tra: ${selectedExam?.title || ''}`}
+        visible={isResultModalOpen}
+        onCancel={() => setIsResultModalOpen(false)}
+        footer={null}
+        width={800}
+      >
+        {loadingResults ? (
+          <Spin tip="Đang tải kết quả..." />
+        ) : examResults.length > 0 ? (
+          <Table
+            dataSource={examResults}
+            rowKey="_id"
+            columns={[
+              {
+                title: 'Học sinh',
+                dataIndex: ['userId', 'email'],
+                key: 'email',
+              },
+              {
+                title: 'Điểm',
+                dataIndex: 'score',
+                key: 'score',
+              },
+              {
+                title: 'Ngày làm bài',
+                dataIndex: 'createdAt',
+                key: 'createdAt',
+                render: (text: string) => new Date(text).toLocaleString(),
+              },
+            ]}
+            pagination={false}
+          />
+        ) : (
+          <p>Không có kết quả nào.</p>
+        )}
+      </Modal>
     </Row>
   );
 };

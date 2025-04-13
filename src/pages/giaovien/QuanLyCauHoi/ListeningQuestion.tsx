@@ -8,6 +8,7 @@ import {
   ListeningQuestionData,
   listenQuestionAPI,
 } from "@/services/teacher/ListeningQuestion";
+import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
 
 export interface ListeningQuestion {
   _id: string;
@@ -143,16 +144,22 @@ export const ListeningQuestionComponent: React.FC<
           <div style={{ display: "flex", gap: "10px", justifyContent: "flex-start" }}>
             <Button
               type="primary"
+              icon={<EditOutlined />}
+
               className="my-3"
               onClick={() => setOpenModal(true)}
             >
               Sửa câu hỏi
             </Button>
             {deletetalbe && (
-              <Button danger className="my-3" onClick={() => setOpen(true)}>
+              <Button danger className="my-3" 
+              icon={<DeleteOutlined />}
+
+              onClick={() => setOpen(true)}>
                 Xóa câu hỏi
               </Button>
             )}
+            
           </div>
           <Modal
             open={open}
