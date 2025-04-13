@@ -1,5 +1,5 @@
 import verificationTeacherRoute from "./verification-teacher.route.js";
-import questionTypeManagementRoute from "../teacher/questionTypeManagement.route.js";
+import questionTypeManagementRoute from "../admin/questionTypeManagement.route.js";
 import {
   protectedRoute,
   isAdmin,

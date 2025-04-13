@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Button, Space, message, Tabs, Input } from 'antd';
+import { Table, Button, Space, message, Tabs, Input, Tag } from 'antd';
 import type { TabsProps } from 'antd';
 import { AdminAPI, VerificationRequest } from '@/services/admin/Admin';
 
@@ -68,9 +68,9 @@ const VerificationTeacher: React.FC = () => {
       dataIndex: 'status',
       key: 'status',
       render: (status: string) => (
-        <span className={`badge ${status === 'pending' ? 'bg-yellow-500' : status === 'approved' ? 'bg-green-500' : 'bg-red-500'} text-white p-1 rounded`}>
+        <Tag color={status === 'pending' ? 'gold' : status === 'approved' ? 'green' : 'red'}>
           {status}
-        </span>
+        </Tag>
       ),
     },
     {

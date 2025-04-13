@@ -101,6 +101,21 @@ export const DashBoardGiaoVien = () => {
             )}
           </div>
         </div>
+        <div
+          className="col-12 col-md-6 col-lg-3 dashboard-item"
+          onClick={() => navigate("/giaovien/QuanLyAudio")}
+        >
+          <div className="bg-white p-4 rounded shadow h-100 text-center">
+            <img
+              src="/src/Content/img/img-audio.jpg"
+              alt="Quản lý file nghe"
+              style={{ width: "64px", height: "64px" }}
+            />
+            <p className="my-3 fw-bold" style={{ fontSize: "20px" }}>
+              Quản lý file nghe
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );
