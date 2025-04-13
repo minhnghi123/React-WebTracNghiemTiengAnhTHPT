@@ -24,6 +24,10 @@ const UpdateQuestionModal: React.FC<UpdateQuestionModalProps> = ({
   const [existingAudios, setExistingAudios] = useState<Audio[]>([]);
 
   useEffect(() => {
+    setQuestion(question2);
+  }, [question2]);
+
+  useEffect(() => {
     const fetchAudios = async () => {
       const response = await AudioAPI.getAllAudio();
       setExistingAudios(response);
