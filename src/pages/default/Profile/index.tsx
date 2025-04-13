@@ -4,15 +4,17 @@ import { Tabs, List, Card } from "antd";
 import { useAuthContext } from "@/contexts/AuthProvider";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { HistoryPage } from "./history";
-import { ClassroomReponse, studentClassroomAPI } from "@/services/student/ClassroomAPI";
+import {
+  ClassroomReponse,
+  studentClassroomAPI,
+} from "@/services/student/ClassroomAPI";
 
 const { TabPane } = Tabs;
 
 export const Profile = () => {
   const { user } = useAuthContext();
   const navigate = useNavigate();
-const [classrooms, setClassrooms] = useState<ClassroomReponse[]>([]);
-
+  const [classrooms, setClassrooms] = useState<ClassroomReponse[]>([]);
 
   const getAllClassrooms = async () => {
     try {
@@ -31,30 +33,22 @@ const [classrooms, setClassrooms] = useState<ClassroomReponse[]>([]);
     getAllClassrooms();
   }, []);
 
-
   return (
     <div className="p-4 max-w-lg mx-auto">
       <h1 className="text-3xl font-bold text-center">Thông tin cá nhân</h1>
       {user ? (
         <div>
-          <div className="text-center">
-            <img
-              src={user.avatar || "https://via.placeholder.com/150"}
-              alt="Avatar"
-              className="w-32 h-32 mx-auto rounded-full mt-4"
-            />
-          </div>
           <div className="mt-4">
             <center>
-            <p>
-              <strong>Tên người dùng:</strong> {user.username}
-            </p>
-            <p>
-              <strong>Email:</strong> {user.email}
-            </p>
-            <p>
-              <strong>Vai trò:</strong> {user.role}
-            </p>
+              <p>
+                <strong>Tên người dùng:</strong> {user.username}
+              </p>
+              <p>
+                <strong>Email:</strong> {user.email}
+              </p>
+              <p>
+                <strong>Vai trò:</strong> {user.role}
+              </p>
             </center>
           </div>
         </div>
@@ -76,7 +70,10 @@ const [classrooms, setClassrooms] = useState<ClassroomReponse[]>([]);
               dataSource={classrooms}
               renderItem={(item) => (
                 <List.Item>
-                  <Card hoverable onClick={() => navigate(`/PhongThi/Detail/${item._id}`)}>
+                  <Card
+                    hoverable
+                    onClick={() => navigate(`/PhongThi/Detail/${item._id}`)}
+                  >
                     {item.title}
                   </Card>
                 </List.Item>

@@ -7,12 +7,11 @@ interface navbarProps {
   rule?: boolean;
 }
 
-export const Navbar: React.FC<navbarProps> = ({ rule= true }) => {
+export const Navbar: React.FC<navbarProps> = ({ rule = true }) => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [userName, setUserName] = useState<string>("");
   const { user, handleLogout } = useAuthContext();
   const navigator = useNavigate();
-
 
   const handleBTNLogout = async () => {
     handleLogout();
@@ -67,58 +66,73 @@ export const Navbar: React.FC<navbarProps> = ({ rule= true }) => {
         >
           <img src="/src/assets/img/P2N 1.svg" alt="Logo"></img>
         </div>
-        
-        { rule &&  <div id="menu">
-          <ul className="dsMenu">
-            <li>
-              <a href="/">Trang chủ </a>
-            </li>
-            { user && 
-                        <><li>
-                <a href="/KyThi">Danh sách kỳ thi</a>
-              </li><li>
-                  <a href="/Ontap">Ôn tập</a>
-                </li><li>
-                  <a href="/PhongThi">Lớp học</a>
-                </li></>
-            }
-            <li>
-              <a href="/About">Về chúng tôi</a>
-            </li>
-            <li>
-              <a href="/Contact">Liên hệ</a>
-            </li>
-          </ul>
-        </div>
-        }
+
+        {rule && (
+          <div id="menu">
+            <ul className="dsMenu">
+              <li>
+                <a href="/">Trang chủ </a>
+              </li>
+              {user && (
+                <>
+                  <li>
+                    <a href="/KyThi">Danh sách kỳ thi</a>
+                  </li>
+                  <li>
+                    <a href="/Ontap">Thẻ Ghi Nhớ</a>
+                  </li>
+                  <li>
+                    <a href="/PhongThi">Lớp học</a>
+                  </li>
+                </>
+              )}
+              <li>
+                <a href="/About">Về chúng tôi</a>
+              </li>
+              <li>
+                <a href="/Contact">Liên hệ</a>
+              </li>
+            </ul>
+          </div>
+        )}
         {isLoggedIn ? (
           <ul className="navbar-nav ml-auto">
-          <Dropdown
-            menu={{ items }}
-            placement="bottomRight"
-            trigger={["hover"]}
-          >
-            <div
-              onClick={() => user && (
-                user.role === "student" ? navigator("/profile") : ( user?.role === "teacher" ? navigator("/giaovien/"):navigator("/admin") ) )}
-              style={{ cursor: "pointer" }}
+            <Dropdown
+              menu={{ items }}
+              placement="bottomRight"
+              trigger={["hover"]}
             >
-              <a
-                onClick={(e) => e.preventDefault()}
-                className="nav-link"
-                style={{ color: "#007bff", fontWeight: "bold" }}
+              <div
+                onClick={() =>
+                  user &&
+                  (user.role === "student"
+                    ? navigator("/profile")
+                    : user?.role === "teacher"
+                    ? navigator("/giaovien/")
+                    : navigator("/admin"))
+                }
+                style={{ cursor: "pointer" }}
               >
-                <li className="nav-item">
-                  <span className="fas fa-user"></span> {userName}
-                </li>
-                <li className="nav-item">
-                  <span className="fas fa-user"></span>{" "}
-                  {user?.role === "student" ? "Học sinh" : (user?.role === "teacher" ? "Giáo viên" : "Admin")}
-                </li>
-              </a>
-            </div>
-          </Dropdown>
-        </ul>
+                <a
+                  onClick={(e) => e.preventDefault()}
+                  className="nav-link"
+                  style={{ color: "#007bff", fontWeight: "bold" }}
+                >
+                  <li className="nav-item">
+                    <span className="fas fa-user"></span> {userName}
+                  </li>
+                  <li className="nav-item">
+                    <span className="fas fa-user"></span>{" "}
+                    {user?.role === "student"
+                      ? "Học sinh"
+                      : user?.role === "teacher"
+                      ? "Giáo viên"
+                      : "Admin"}
+                  </li>
+                </a>
+              </div>
+            </Dropdown>
+          </ul>
         ) : (
           <ul
             className="nav nav-pills justify-content-center gap-3"

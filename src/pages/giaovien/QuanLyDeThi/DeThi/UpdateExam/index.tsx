@@ -353,7 +353,7 @@ export const UpdateExamQuestion = () => {
         >
           Sửa đề thi
         </Button>
-        <Button
+        {/* <Button
           type="default"
           icon={<CopyOutlined />}
           onClick={() => {
@@ -368,7 +368,7 @@ export const UpdateExamQuestion = () => {
           }}
         >
           Sao chép đề thi
-        </Button>
+        </Button> */}
       </Card>
 
       {/* Tabs để phân chia nội dung */}

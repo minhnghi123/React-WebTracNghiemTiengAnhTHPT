@@ -8,7 +8,9 @@ import "./FlashCardcss.css";
 export const FlashCardIndex: React.FC = () => {
   const [flashCardSets, setFlashCardSets] = useState<FlashCardSet[]>([]);
   const [myFlashCardSets, setMyFlashCardSets] = useState<FlashCardSet[]>([]);
-  const [otherFlashCardSets, setOtherFlashCardSets] = useState<FlashCardSet[]>([]);
+  const [otherFlashCardSets, setOtherFlashCardSets] = useState<FlashCardSet[]>(
+    []
+  );
   const [loading, setLoading] = useState<boolean>(true);
   const { user } = useAuthContext();
   const navigate = useNavigate();
@@ -20,8 +22,12 @@ export const FlashCardIndex: React.FC = () => {
         const allSets = res.flashCardSets ? res.flashCardSets : res;
 
         // Phân loại bộ từ vựng
-        const mySets = allSets.filter((set: FlashCardSet) => set.createdBy === user?._id);
-        const otherSets = allSets.filter((set: FlashCardSet) => set.createdBy !== user?._id);
+        const mySets = allSets.filter(
+          (set: FlashCardSet) => set.createdBy === user?._id
+        );
+        const otherSets = allSets.filter(
+          (set: FlashCardSet) => set.createdBy !== user?._id
+        );
 
         setFlashCardSets(allSets);
         setMyFlashCardSets(mySets);
@@ -135,29 +141,29 @@ export const FlashCardIndex: React.FC = () => {
         <center>Bộ từ vựng có sẵn</center>
       </h2>
       <div className="flash-card-grid" style={{ margin: "1rem" }}>
-        {otherFlashCardSets.map((set) => (
-          set.public && ( 
-          <div
-            key={set._id}
-            className="flash-card-link cursor-pointer"
-            onClick={() => set._id && handleExam(set._id)}
-          >
-            <Card
-              hoverable
-              title={set.title}
-              className="shadow-lg hover:shadow-2xl transition-shadow duration-300"
-            >
-              <p>{set.description}</p>
-              <div className="flex justify-between items-center mt-2">
-                <span className="text-gray-500 text-sm">
-                  Số lượng từ vựng: {set.vocabs.length}
-                </span>
+        {otherFlashCardSets.map(
+          (set) =>
+            set.public && (
+              <div
+                key={set._id}
+                className="flash-card-link cursor-pointer"
+                onClick={() => set._id && handleExam(set._id)}
+              >
+                <Card
+                  hoverable
+                  title={set.title}
+                  className="shadow-lg hover:shadow-2xl transition-shadow duration-300"
+                >
+                  <p>{set.description}</p>
+                  <div className="flex justify-between items-center mt-2">
+                    <span className="text-gray-500 text-sm">
+                      Số lượng từ vựng: {set.vocabs.length}
+                    </span>
+                  </div>
+                </Card>
               </div>
-            </Card>
-          </div>
-          )
-
-        ))}
+            )
+        )}
       </div>
     </div>
   );

@@ -20,7 +20,12 @@ const questionTypeMapping = {
 // Lấy tất cả kết quả (không bị xóa và đã hoàn thành) và populate các trường liên quan
 export const getAllResults = async (req, res) => {
   try {
-    const filter = { isDeleted: false, isCompleted: true };
+    const filter = {
+      userId: req.user._id, // Lọc theo userId từ token
+      isDeleted: false,
+      isCompleted: true,
+    };
+    // console.log(filter);
     const results = await Result.find(filter).populate({
       path: "examId",
       populate: [
