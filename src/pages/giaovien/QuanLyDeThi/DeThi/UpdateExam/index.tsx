@@ -12,11 +12,7 @@ import {
   Tabs,
   Table,
 } from "antd";
-import {
-  PlusOutlined,
-  MinusOutlined,
-  EditOutlined,
-} from "@ant-design/icons";
+import { PlusOutlined, MinusOutlined, EditOutlined } from "@ant-design/icons";
 import clsx from "clsx";
 import { useParams } from "react-router-dom";
 import UpdateExamModal from "./UpdateExam";
@@ -399,12 +395,10 @@ export const UpdateExamQuestion = () => {
                                 fontWeight: "bold",
                                 color: "#333",
                               }}
-                            >
-                              <TruncatedText
-                                text={questions[0].passageId.content}
-                                maxLength={100}
-                              />
-                            </div>
+                              dangerouslySetInnerHTML={{
+                                __html: questions[0].passageId.content,
+                              }}
+                            />
                           ) : null}
 
                           {/* Display questions in the group */}
@@ -420,9 +414,14 @@ export const UpdateExamQuestion = () => {
                               }}
                             >
                               <div style={{ marginBottom: "8px" }}>
-                                <strong>
-                                  {index + 1}. {question.content}
-                                </strong>
+                                <strong
+                                  dangerouslySetInnerHTML={{
+                                    __html: `${index + 1}. ${
+                                      question.content ||
+                                      "Nội dung không khả dụng"
+                                    }`,
+                                  }}
+                                />
                               </div>
                               <div style={{ marginBottom: "8px" }}>
                                 <Tag
@@ -588,7 +587,12 @@ export const UpdateExamQuestion = () => {
                             >
                               <div style={{ marginBottom: "8px" }}>
                                 <strong>
-                                  {index + 1}. {question.content}
+                                  {index + 1}.{" "}
+                                  <span
+                                    dangerouslySetInnerHTML={{
+                                      __html: question.content || "",
+                                    }}
+                                  />
                                 </strong>
                               </div>
                               <div style={{ marginBottom: "8px" }}>
@@ -629,7 +633,11 @@ export const UpdateExamQuestion = () => {
                                             )}
                                             .
                                           </strong>{" "}
-                                          {answer.text}
+                                          <span
+                                            dangerouslySetInnerHTML={{
+                                              __html: answer.text || "",
+                                            }}
+                                          />
                                         </span>
                                         {answer.isCorrect && (
                                           <Tag
@@ -661,7 +669,13 @@ export const UpdateExamQuestion = () => {
                                           <strong>
                                             Điền khuyết {answerIndex + 1}:
                                           </strong>{" "}
-                                          {answer.correctAnswerForBlank}
+                                          <span
+                                            dangerouslySetInnerHTML={{
+                                              __html:
+                                                answer.correctAnswerForBlank ||
+                                                "",
+                                            }}
+                                          />
                                         </span>
                                       </div>
                                     )
@@ -760,7 +774,9 @@ export const UpdateExamQuestion = () => {
                   value={filterType || undefined}
                   onChange={(value) => setFilterType(value)}
                 >
-                  <Option value="6742fb1cd56a2e75dbd817ea">Yes/No</Option>
+                  <Option value="6742fb1cd56a2e75dbd817ea">
+                    Multiple Choices
+                  </Option>
                   <Option value="6742fb3bd56a2e75dbd817ec">Điền khuyết</Option>
                 </Select>
                 <Select
@@ -800,7 +816,11 @@ export const UpdateExamQuestion = () => {
                         <div style={{ marginBottom: "8px" }}>
                           <strong>
                             {index + 1 + (bankPage - 1) * pageSize}.{" "}
-                            {question.content}
+                            <span
+                              dangerouslySetInnerHTML={{
+                                __html: question.content || "",
+                              }}
+                            />
                           </strong>
                         </div>
                         <div style={{ marginBottom: "8px" }}>
@@ -835,7 +855,11 @@ export const UpdateExamQuestion = () => {
                                   <strong>
                                     {String.fromCharCode(65 + answerIndex)}.
                                   </strong>{" "}
-                                  {answer.text}
+                                  <span
+                                    dangerouslySetInnerHTML={{
+                                      __html: answer.text || "",
+                                    }}
+                                  />
                                 </span>
                                 {answer.isCorrect && (
                                   <Tag
@@ -863,7 +887,12 @@ export const UpdateExamQuestion = () => {
                                   <strong>
                                     Điền khuyết {answerIndex + 1}:
                                   </strong>{" "}
-                                  {answer.correctAnswerForBlank}
+                                  <span
+                                    dangerouslySetInnerHTML={{
+                                      __html:
+                                        answer.correctAnswerForBlank || "",
+                                    }}
+                                  />
                                 </span>
                               </div>
                             ))}
@@ -1112,4 +1141,3 @@ export const UpdateExamQuestion = () => {
     </div>
   );
 };
-

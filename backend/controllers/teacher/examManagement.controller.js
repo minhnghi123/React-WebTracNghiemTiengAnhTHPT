@@ -20,6 +20,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // [GET]: teacher/exam
+// TODO: EXAM CỦA GIÁO VIÊN ĐÓ THÔI, KHÔNG PHẢI TẤT CẢ .
 export const getAllExams = async (req, res) => {
   try {
     const { page = 1, limit = 10, title, isPublic } = req.query; // Lấy các tham số từ query
