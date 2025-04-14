@@ -552,7 +552,7 @@ export const getAllResultsForExamInClassroom = async (req, res) => {
       examId,
       userId: { $in: studentIds },
     })
-      .populate("userId", "email")
+      .populate("userId", "email username") // Ensure both fields exist in the schema
       .sort({ score: -1 });
 
     return res.status(200).json({
@@ -609,22 +609,27 @@ export const getStudentResultsForAllExamsInClassroom = async (req, res) => {
 
 // Lấy thông tin kết quả của 1 bài kiểm tra cụ thể
 export const getSpecificExamResult = async (req, res) => {
-  const { examId, studentId } = req.params;
-
+  const { id } = req.params;
+  const filter = {
+    _id: id,
+    isDeleted: false,
+  };
+  // console.log(filter);
+ 
   try {
-    const result = await Result.findOne({
-      examId,
-      userId: studentId,
-    })
-      .populate("userId", "email")
-      .populate("examId", "title questions");
-
-    if (!result) {
-      return res.status(404).json({
-        success: false,
-        message: "Không tìm thấy kết quả của bài kiểm tra",
-      });
-    }
+    const result = await Result.findOne(filter).populate({
+      path: "examId",
+      populate: [
+        { path: "questions" },
+        {
+          path: "listeningExams",
+          populate: {
+            path: "questions",
+            select: "questionText options correctAnswer blankAnswer audio", // Include necessary fields
+          },
+        },
+      ],
+    });
 
     // Calculate additional details
     const totalQuestions = result.examId.questions.length;
@@ -635,6 +640,7 @@ export const getSpecificExamResult = async (req, res) => {
       success: true,
       message: "Lấy thông tin kết quả bài kiểm tra thành công",
       data: {
+        result: result,
         examTitle: result.examId.title,
         studentEmail: result.userId.email,
         score: result.score,

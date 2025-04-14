@@ -53,13 +53,12 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
   const fetchDetailedResult = async (examId: string) => {
     setLoadingResults(true);
     try {
-      const response = await ClassroomAPI.getStudentResultForSpecificExam(
-        classroom._id,
-        selectedStudent!._id,
+      const response = await ClassroomAPI.getSpecificExamResult(
         examId
       );
       if (response.success) {
-        setDetailedResult(response.data);
+        setDetailedResult(response.data.result);
+        console.log("response.data.result",response.data.result)
         setIsDetailModalOpen(true);
       }
     } catch (error) {
@@ -183,10 +182,9 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
                 key: 'correctAnswers',
               },
               {
-                title: 'Thời gian làm',
-                dataIndex: 'duration',
-                key: 'duration',
-                render: (text: number) => `${text} phút`,
+                title: 'Số câu sai',
+                dataIndex: 'wrongAnswer',
+                key: 'wrongAnswer',
               },
               {
                 title: 'Ngày làm bài',
@@ -200,7 +198,7 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
                 render: (_: any, record: any) => (
                   <button
                     className="btn btn-primary"
-                    onClick={() => fetchDetailedResult(record.examId._id)}
+                    onClick={() => fetchDetailedResult(record._id)}
                   >
                     Xem
                   </button>

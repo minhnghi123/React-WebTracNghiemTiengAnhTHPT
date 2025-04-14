@@ -90,8 +90,8 @@ export const ClassroomAPI = {
     const response = await request.get(`/teacher/classroom/${classroomId}/student/${studentId}/all-results`);
     return response.data;
   },
-  getSpecificExamResult: async (examId: string, studentId: string) => {
-    const response = await request.get(`/teacher/classroom/exam/${examId}/student/${studentId}/result`);
+  getSpecificExamResult: async (_id: string) => {
+    const response = await request.get(`/teacher/classroom/exam/${_id}`);
     return response.data;
   }
 };

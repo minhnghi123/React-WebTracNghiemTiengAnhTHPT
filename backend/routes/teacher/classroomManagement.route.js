@@ -61,6 +61,6 @@ router.get("/:classroomId/exam/:examId/all-results", getAllResultsForExamInClass
 router.get("/:classroomId/student/:studentId/all-results", getStudentResultsForAllExamsInClassroom);
 
 // Route để lấy thông tin kết quả của 1 bài kiểm tra cụ thể
-router.get("/exam/:examId/student/:studentId/result", getSpecificExamResult);
+router.get("/exam/:id/", getSpecificExamResult);
 
 export default router;
