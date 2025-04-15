@@ -55,6 +55,7 @@ const listeningQuestionSchema = new Schema(
     isDeleted: { type: Boolean, default: false },
     blankAnswer: {
       type: String,
+      default: "",
     },
   },
   {

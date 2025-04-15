@@ -157,10 +157,8 @@ export const importListeningExamController = async (req, res) => {
     const questionType = await QuestionType.findOne({
       name: "Multiple Choices",
     });
-    console.log(questionType);
 
     const createdQuestions = [];
-
     for (const row of rows) {
       const {
         Content,
@@ -170,40 +168,74 @@ export const importListeningExamController = async (req, res) => {
         AnswerC,
         AnswerD,
         CorrectAnswers,
+        QuestionType: RowQuestionType,
       } = row;
 
-      const options = [
-        { optionText: AnswerA },
-        { optionText: AnswerB },
-        { optionText: AnswerC },
-        { optionText: AnswerD },
-      ].map((opt) => ({ option_id: new mongoose.Types.ObjectId(), ...opt }));
-
-      const correctLetters = CorrectAnswers.toUpperCase()
-        .split(",")
-        .map((l) => l.trim());
-
-      const indexMap = { A: 0, B: 1, C: 2, D: 3 };
-
-      const correctAnswer = correctLetters
-        .map((letter) => {
-          const index = indexMap[letter];
-          if (index === undefined) return null;
-          return {
-            answer_id: options[index]?.option_id,
-            answer: options[index]?.optionText,
-          };
-        })
-        .filter(Boolean); // loại bỏ null
-
-      const newQuestion = await ListeningQuestion.create({
-        teacherId: req.user._id,
-        questionText: Content,
-        questionType: questionType?._id,
-        options,
-        correctAnswer,
-        difficulty: Level.toLowerCase(),
+      const questionType = await QuestionType.findOne({
+        name: RowQuestionType || "Multiple Choices",
       });
+
+      let newQuestion;
+
+      if (questionType?.name === "Multiple Choices") {
+        const options = [
+          { optionText: AnswerA },
+          { optionText: AnswerB },
+          { optionText: AnswerC },
+          { optionText: AnswerD },
+        ].map((opt) => ({ option_id: new mongoose.Types.ObjectId(), ...opt }));
+
+        const correctLetters = CorrectAnswers.toUpperCase()
+          .split(",")
+          .map((l) => l.trim());
+
+        const indexMap = { A: 0, B: 1, C: 2, D: 3 };
+
+        const correctAnswer = correctLetters
+          .map((letter) => {
+            const index = indexMap[letter];
+            if (index === undefined) return null;
+            return {
+              answer_id: options[index]?.option_id,
+              answer: options[index]?.optionText,
+            };
+          })
+          .filter(Boolean);
+
+        newQuestion = await ListeningQuestion.create({
+          teacherId: req.user._id,
+          questionText: Content,
+          questionType: questionType?._id,
+          options,
+          correctAnswer,
+          difficulty: Level.toLowerCase(),
+        });
+      } else if (questionType?.name === "Fill in the blank") {
+        newQuestion = await ListeningQuestion.create({
+          teacherId: req.user._id,
+          questionText: Content,
+          questionType: questionType?._id,
+          blankAnswer: CorrectAnswers,
+          difficulty: Level.toLowerCase(),
+        });
+      } else if (questionType?.name === "True/False/Not Given") {
+        const validValues = ["true", "false", "notgiven"];
+        const value = CorrectAnswers?.toLowerCase().trim();
+        if (!validValues.includes(value)) {
+          console.warn(`Giá trị TFNG không hợp lệ: ${CorrectAnswers}`);
+          continue; // bỏ qua nếu không hợp lệ
+        }
+
+        newQuestion = await ListeningQuestion.create({
+          teacherId: req.user._id,
+          questionText: Content,
+          questionType: questionType?._id,
+          correctAnswerForTrueFalseNGV: value,
+          difficulty: Level.toLowerCase(),
+        });
+      } else {
+        continue; // Không xử lý loại khác
+      }
 
       createdQuestions.push(newQuestion._id);
     }

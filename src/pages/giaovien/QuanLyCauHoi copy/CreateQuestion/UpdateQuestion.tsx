@@ -1,10 +1,22 @@
-import { Question, QuestionAPI, AudioAPI, Audio } from "@/services/teacher/Teacher";
+import {
+  Question,
+  QuestionAPI,
+  AudioAPI,
+  Audio,
+} from "@/services/teacher/Teacher";
 import { Button, Form, Input, Modal, Select, Upload } from "antd";
 import { Option } from "antd/es/mentions";
 import { useState, useEffect } from "react";
 import clsx from "clsx";
-import { CloseCircleOutlined, QuestionOutlined, UploadOutlined } from "@ant-design/icons";
-import { explainInVietnamese, translateEnglishToVietnamese } from "@/services/GropApi";
+import {
+  CloseCircleOutlined,
+  QuestionOutlined,
+  UploadOutlined,
+} from "@ant-design/icons";
+import {
+  explainInVietnamese,
+  translateEnglishToVietnamese,
+} from "@/services/GropApi";
 
 interface UpdateQuestionModalProps {
   visible: boolean;
@@ -187,6 +199,14 @@ const UpdateQuestionModal: React.FC<UpdateQuestionModalProps> = ({
             onChange={handleChange}
             required
           />
+          <div
+            dangerouslySetInnerHTML={{ __html: question.content }}
+            style={{
+              marginTop: "10px",
+              border: "1px solid #ccc",
+              padding: "10px",
+            }}
+          />
         </Form.Item>
         <Form.Item label="Mức độ">
           <Select value={question.level} onChange={handleLevelChange}>
@@ -244,7 +264,6 @@ const UpdateQuestionModal: React.FC<UpdateQuestionModalProps> = ({
                     onChange={(e) => handleCheckboxChange(index, e)}
                     style={{ height: "16px" }}
                   />
-
                   <Button
                     type="link"
                     icon={<CloseCircleOutlined />}
@@ -252,6 +271,16 @@ const UpdateQuestionModal: React.FC<UpdateQuestionModalProps> = ({
                     style={{ color: "#FF0000" }}
                   />
                 </div>
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html: DOMPurify.sanitize(answer.text || ""),
+                  }}
+                  style={{
+                    marginTop: "10px",
+                    border: "1px solid #ccc",
+                    padding: "10px",
+                  }}
+                />
               </div>
             </div>
           ))}
@@ -314,7 +343,9 @@ const UpdateQuestionModal: React.FC<UpdateQuestionModalProps> = ({
           <Select
             placeholder="Hoặc chọn audio có sẵn"
             value={question.audio}
-            onChange={(value) => setQuestion((prev) => ({ ...prev, audio: value }))}
+            onChange={(value) =>
+              setQuestion((prev) => ({ ...prev, audio: value }))
+            }
             style={{ width: "100%", marginTop: "10px" }}
           >
             {existingAudios.map((audio) => (

@@ -1,4 +1,4 @@
-import {  Question } from "@/services/teacher/Teacher";
+import { Question } from "@/services/teacher/Teacher";
 import { cleanString } from "@/utils/cn";
 import { Divider, Flex, Modal, Tag } from "antd";
 import clsx from "clsx";
