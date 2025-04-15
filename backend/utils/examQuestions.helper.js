@@ -9,6 +9,8 @@ import {
   BorderStyle,
 } from "docx";
 
+import { renderHtmlToTextRun } from "./renderHtmlToTextRun.js";
+
 /**
  * Xóa tiền tố "A. ", "B. ", ... nếu có trong text.
  * @param {string} text - Nội dung đáp án gốc.
@@ -93,12 +95,15 @@ export const formatExamQuestions = (questionsMultichoice) => [
       // 📝 Hiển thị câu hỏi
       new Paragraph({
         children: [
-          new TextRun({
-            text: `${index + 1}. ${question.content}`,
-            bold: true,
-            font: "Times New Roman",
-            size: 24,
-          }),
+          // Kiểm tra xem câu hỏi có chứa HTML hay không
+          question.content.includes("<")
+            ? renderHtmlToTextRun(question.content) // Nếu có HTML, sử dụng renderHtmlToTextRun
+            : new TextRun({
+                text: `${index + 1}. ${question.content}`,
+                bold: true,
+                font: "Times New Roman",
+                size: 24,
+              }),
         ],
         spacing: { after: 150 },
       }),
@@ -131,7 +136,6 @@ export const formatExamQuestions = (questionsMultichoice) => [
     ];
   }),
 ];
-
 /**
  * Tạo phần câu hỏi điền khuyết đơn giản.
  * @param {Array} questionsFillInBlank - Danh sách câu hỏi điền khuyết.
@@ -153,18 +157,19 @@ export const formatFillInBlankQuestions = (questionsFillInBlank) => [
   }),
 
   // 📝 Hiển Thị Từng Câu Hỏi Điền Khuyết
-  ...questionsFillInBlank.map(
-    (question, index) =>
-      new Paragraph({
-        children: [
-          new TextRun({
-            text: `${index + 1}. ${question.content}`,
-            font: "Times New Roman",
-            size: 24,
-          }),
-        ],
-        spacing: { after: 150 }, // Khoảng cách giữa các câu hỏi
-      })
+  ...questionsFillInBlank.map((question, index) => 
+    new Paragraph({
+      children: [
+        question.content.includes("<")
+          ? renderHtmlToTextRun(question.content)  // Nếu có HTML, render HTML
+          : new TextRun({
+              text: `${index + 1}. ${question.content}`,
+              font: "Times New Roman",
+              size: 24,
+            }),
+      ],
+      spacing: { after: 150 },
+    })
   ),
 ];
 
