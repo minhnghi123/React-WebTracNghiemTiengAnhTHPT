@@ -549,15 +549,27 @@ export const exportExamIntoWord = async (req, res) => {
     for (let i = 0; i < variants.length; i++) {
       const variant = variants[i];
 
+      // Tạo một mảng children cho section
+      const sectionChildren = [
+        ...formatExamHeader(variant, variant.code),
+        ...formatExamQuestions(variant.questionsMultichoice),
+      ];
+
+      // Kiểm tra nếu có câu hỏi điền khuyết (Fill-in-the-blank) và thêm vào section nếu có
+      if (variant.questionsFillInBlank && variant.questionsFillInBlank.length > 0) {
+        sectionChildren.push(...formatFillInBlankQuestions(variant.questionsFillInBlank));
+      }
+
+      // Kiểm tra nếu có câu hỏi bài nghe (Listening) và thêm vào section nếu có
+      if (variant.questionsListening && variant.questionsListening.length > 0) {
+        sectionChildren.push(...formatListeningQuestions(variant.questionsListening));
+      }
+
+      // Tạo tài liệu Word với các câu hỏi
       const doc = new Document({
         sections: [
           {
-            children: [
-              ...formatExamHeader(variant, variant.code),
-              ...formatExamQuestions(variant.questionsMultichoice),
-              ...formatFillInBlankQuestions(variant.questionsFillInBlank),
-              ...formatListeningQuestions(variant.questionsListening),
-            ],
+            children: sectionChildren,
           },
         ],
       });
@@ -565,11 +577,7 @@ export const exportExamIntoWord = async (req, res) => {
       const buffer = await Packer.toBuffer(doc);
 
       const fileName = `${data.title} - ${variant.code}.docx`;
-      const downloadPath = path.join(
-        process.env.USERPROFILE,
-        "Downloads",
-        fileName
-      );
+      const downloadPath = path.join(process.env.USERPROFILE, "Downloads", fileName);
 
       fs.writeFileSync(downloadPath, buffer);
       exportPaths.push(downloadPath);

@@ -1,42 +1,39 @@
-import {  Paragraph, TextRun } from "docx";
+import { Paragraph, TextRun } from "docx";
 import * as htmlparser2 from "htmlparser2";
 
-
+/**
+ * Chuyển HTML thành các TextRun trong một Paragraph.
+ * @param {string} html - Nội dung HTML cần render.
+ * @returns {Paragraph} - Một đoạn văn chứa các TextRun đã chuyển đổi từ HTML.
+ */
 export const renderHtmlToTextRun = (html) => {
-  let paragraphChildren = []; // Chứa tất cả TextRun trong 1 đoạn Paragraph
+  let paragraphChildren = [];
+  let currentStyles = { bold: false, italic: false, underline: false };
+
   const parser = new htmlparser2.Parser(
     {
       onopentag(name, attribs) {
-        // Xử lý các thẻ HTML
-        if (name === "b") {
-          this.bold = true;
-        }
-        if (name === "i") {
-          this.italic = true;
-        }
-        if (name === "u") {
-          this.underline = true;
-        }
-        if (name === "span" && attribs.style && attribs.style.includes("text-decoration: underline")) {
-          this.underline = true;
+        if (name === "b") currentStyles.bold = true;
+        if (name === "i") currentStyles.italic = true;
+        if (name === "u" || attribs.style?.includes("underline")) {
+          currentStyles.underline = true;
         }
       },
       ontext(text) {
-        const options = {};
-        if (this.bold) options.bold = true;
-        if (this.italic) options.italic = true;
-        if (this.underline) options.underline = true;
-
-        // Tạo TextRun với các style đã xác định
-        paragraphChildren.push(new TextRun({ text, ...options }));
-
-        // Reset các thuộc tính sau khi đã áp dụng cho TextRun
-        this.bold = false;
-        this.italic = false;
-        this.underline = false;
+        paragraphChildren.push(
+          new TextRun({
+            text,
+            ...currentStyles,
+            font: "Times New Roman",
+            size: 24,
+          })
+        );
       },
       onclosetag(tagname) {
-        // Reset khi gặp thẻ đóng
+        if (tagname === "b") currentStyles.bold = false;
+        if (tagname === "i") currentStyles.italic = false;
+        if (tagname === "u" || tagname === "span")
+          currentStyles.underline = false;
       },
     },
     { decodeEntities: true }
@@ -45,8 +42,5 @@ export const renderHtmlToTextRun = (html) => {
   parser.write(html);
   parser.end();
 
-  // Tạo một Paragraph chứa tất cả các TextRun
-  return new Paragraph({
-    children: paragraphChildren,
-  });
+  return new Paragraph({ children: paragraphChildren });
 };
