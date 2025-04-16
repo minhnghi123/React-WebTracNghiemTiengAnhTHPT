@@ -90,6 +90,9 @@ export interface Exam {
   isPublic: boolean;
   createdBy: string;
   listeningExams: ListeningExam[];
+  class: "10" | "11" | "12"; // Class level
+  topic: string[]; // Topics covered in the exam
+  knowledge: string[]; // Knowledge areas covered in the exam
   createdAt: string;
   slug: string;
   __v: number;

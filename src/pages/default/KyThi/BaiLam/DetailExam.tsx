@@ -91,6 +91,28 @@ export const DetailExam = () => {
                 <br />
                 <Text type="secondary">{exam.duration} phút</Text>
               </Col>
+
+              <Col span={12}>
+                <Text>
+                  <strong>Lớp:</strong>
+                </Text>
+                <br />
+                <Text type="secondary">{exam.class}</Text>
+              </Col>
+              <Col span={12}>
+                <Text>
+                  <strong>Chủ đề:</strong>
+                </Text>
+                <br />
+                <Text type="secondary">{exam.topic?.join(", ") || "Không có"}</Text>
+              </Col>
+              <Col span={24}>
+                <Text>
+                  <strong>Kiến thức:</strong>
+                </Text>
+                <br />
+                <Text type="secondary">{exam.knowledge?.join(", ") || "Không có"}</Text>
+              </Col>
             </Row>
 
             <Button

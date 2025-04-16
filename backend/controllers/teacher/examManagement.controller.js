@@ -161,7 +161,10 @@ export const createExam = async (req, res) => {
       isPublic,
       startTime,
       endTime,
-      listeningExams, // Add this line
+      listeningExams,
+      class: examClass, // Add this line
+      topic, // Add this line
+      knowledge, // Add this line
     } = req.body;
 
     if (!title || !Array.isArray(questions) || questions.length === 0) {
@@ -188,7 +191,10 @@ export const createExam = async (req, res) => {
       startTime: startTime ? new Date(startTime) : undefined,
       endTime: endTime ? new Date(endTime) : undefined,
       createdBy: req.user._id,
-      listeningExams, // Add this line
+      listeningExams,
+      class: examClass, // Add this line
+      topic: topic || [], // Add this line
+      knowledge: knowledge || [], // Add this line
     });
 
     // Lưu vào database
@@ -224,6 +230,9 @@ export const updateExam = async (req, res) => {
       startTime,
       endTime,
       listeningExams,
+      class: examClass, // Add this line
+      topic, // Add this line
+      knowledge, // Add this line
     } = req.body;
 
     if (startTime && endTime && new Date(startTime) >= new Date(endTime)) {
@@ -232,20 +241,6 @@ export const updateExam = async (req, res) => {
         message: "Thời gian bắt đầu phải nhỏ hơn thời gian kết thúc!",
       });
     }
-
-    // if (startTime && new Date(startTime) < new Date()) {
-    //   return res.status(400).json({
-    //     success: false,
-    //     message: "Thời gian bắt đầu không thể là quá khứ!",
-    //   });
-    // }
-
-    // if (startTime && new Date(startTime) < new Date()) {
-    //   return res.status(400).json({
-    //     success: false,
-    //     message: "Thời gian bắt đầu không thể là quá khứ!",
-    //   });
-    // }
 
     // Cập nhật đề thi dựa trên slug
     const updatedExam = await Exam.findOneAndUpdate(
@@ -259,6 +254,9 @@ export const updateExam = async (req, res) => {
         startTime,
         endTime,
         listeningExams,
+        class: examClass, // Add this line
+        topic: topic || [], // Add this line
+        knowledge: knowledge || [], // Add this line
       },
       { new: true, runValidators: true } // Trả về tài liệu sau khi cập nhật
     );

@@ -26,6 +26,7 @@ export interface Exam {
   class?: "10" | "11" | "12";
   topic?: string[];
   knowledge?: string[];
+  listeningExams?: string[]; // Array of ListeningExam IDs
 }
 
 export interface ClassroomReponse {

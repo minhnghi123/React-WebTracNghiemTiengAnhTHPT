@@ -35,14 +35,18 @@ const UpdateExamModal: React.FC<UpdateExamModalProps> = ({
     isPublic: false,
     slug: "",
     createdAt: new Date(),
+    class: "10", // Default value for class
+    topic: [], // Default value for topic
+    knowledge: [], // Default value for knowledge
   });
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setExam((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSelectChange = (value: boolean) => {
-    setExam((prev) => ({ ...prev, isPublic: value }));
+  const handleSelectChange = (name: string, value: any) => {
+    setExam((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleDateChange = (name: string, date: any) => {
@@ -129,10 +133,31 @@ const UpdateExamModal: React.FC<UpdateExamModalProps> = ({
           />
         </Form.Item>
         <Form.Item label="Công khai">
-          <Select value={exam.isPublic} onChange={handleSelectChange}>
+          <Select value={exam.isPublic} onChange={(value) => handleSelectChange("isPublic", value)}>
             <Option value={true}>Công khai</Option>
             <Option value={false}>Riêng tư</Option>
           </Select>
+        </Form.Item>
+        <Form.Item label="Lớp">
+          <Select value={exam.class} onChange={(value) => handleSelectChange("class", value)}>
+            <Option value="10">Lớp 10</Option>
+            <Option value="11">Lớp 11</Option>
+            <Option value="12">Lớp 12</Option>
+          </Select>
+        </Form.Item>
+        <Form.Item label="Chủ đề">
+          <Select
+            mode="tags"
+            value={exam.topic}
+            onChange={(value) => handleSelectChange("topic", value)}
+          />
+        </Form.Item>
+        <Form.Item label="Kiến thức">
+          <Select
+            mode="tags"
+            value={exam.knowledge}
+            onChange={(value) => handleSelectChange("knowledge", value)}
+          />
         </Form.Item>
       </Form>
     </Modal>

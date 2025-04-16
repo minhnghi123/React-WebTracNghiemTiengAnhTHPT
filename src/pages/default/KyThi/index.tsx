@@ -1,5 +1,5 @@
 import { Exam } from "@/services/teacher/Teacher";
-import { Card, Col, Row, Space, Tag, Typography } from "antd";
+import { Card, Col, Row, Space, Tag, Typography, Input, Select } from "antd";
 import {
   ClockCircleOutlined,
   QuestionCircleOutlined,
@@ -9,13 +9,26 @@ import {
 import { useEffect, useState } from "react";
 import { ExamAPIStudent } from "@/services/student";
 import { useNavigate } from "react-router-dom";
+import flex from "antd/es/flex";
 
 const { Title, Text } = Typography;
+const { Search } = Input;
+const { Option } = Select;
 
 export const KyThi = () => {
   const [data, setData] = useState<Exam[]>([]);
   const [total, setTotal] = useState<number>(0);
+  const [searchText, setSearchText] = useState<string>("");
+  const [selectedClass, setSelectedClass] = useState<string | undefined>();
   const navigator = useNavigate();
+
+  const handleSearch = (value: string) => {
+    setSearchText(value);
+  };
+
+  const handleClassFilter = (value: string | undefined) => {
+    setSelectedClass(value);
+  };
 
   const getAllExam = async (page: number) => {
     try {
@@ -51,14 +64,20 @@ export const KyThi = () => {
     return dateStr ? new Date(dateStr).toLocaleString() : "Không có";
   };
 
+  const filteredData = data.filter((exam) => {
+    const matchesSearch = (exam.title && " ").toLowerCase().includes(searchText.toLowerCase());
+    const matchesClass = selectedClass ? exam.class === selectedClass : true;
+    return matchesSearch && matchesClass;
+  });
+
   const now = new Date().getTime();
-  const ongoing = data.filter((exam) => {
+  const ongoing = filteredData.filter((exam) => {
     const start = new Date(exam.startTime).getTime();
     const end = exam.endTime ? new Date(exam.endTime).getTime() : Infinity;
     return start <= now && now <= end;
   });
 
-  const ended = data.filter((exam) => {
+  const ended = filteredData.filter((exam) => {
     const end = exam.endTime ? new Date(exam.endTime).getTime() : 0;
     return now > end;
   });
@@ -101,6 +120,17 @@ export const KyThi = () => {
                 <Tag icon={<QuestionCircleOutlined />} color="purple">
                   {exam.questions?.length ?? 0} câu hỏi
                 </Tag>
+                <Tag color="gold">Lớp: {exam.class}</Tag>
+                {exam.topic?.map((topic, index) => (
+                  <Tag color="cyan" key={index}>
+                    {topic}
+                  </Tag>
+                ))}
+                {exam.knowledge?.map((knowledge, index) => (
+                  <Tag color="magenta" key={index}>
+                    {knowledge}
+                  </Tag>
+                ))}
               </Space>
             </Space>
           </Card>
@@ -111,7 +141,38 @@ export const KyThi = () => {
 
   return (
     <div className="container mx-auto p-4">
+      <Space
+        direction="horizontal"
+        size="large"
+        style={{
+          justifyContent: "center", 
+          width: "100%",
+          minWidth: "700px",
+          marginBottom: 16,
+        }}
+      >
+        <Search
+          placeholder="Tìm kiếm theo tiêu đề"
+          onSearch={handleSearch}
+          enterButton
+          style={{
+            flex: 1,
+            minWidth: "400px",
+          }}
+        />
+        <Select
+          placeholder="Lọc theo lớp"
+          style={{ flex: 1 }}
+          onChange={handleClassFilter}
+          allowClear
+        >
+          <Option value="10">Lớp 10</Option>
+          <Option value="11">Lớp 11</Option>
+          <Option value="12">Lớp 12</Option>
+        </Select>
+      </Space>
       <center>
+
         <Title level={2}>📋 Danh sách kỳ thi</Title>
       </center>
 
@@ -133,7 +194,7 @@ export const KyThi = () => {
         </>
       )}
 
-      {data.length === 0 && (
+      {filteredData.length === 0 && (
         <center>
           <Text type="secondary">Không có kỳ thi nào.</Text>
         </center>

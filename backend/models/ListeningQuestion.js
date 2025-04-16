@@ -28,6 +28,11 @@ const listeningQuestionSchema = new Schema(
           type: String,
           required: true,
         },
+        isCorrect: {
+          type: Boolean,
+          required: true,
+          default: false, // Set default to false
+        },
       },
     ],
     correctAnswer: [
@@ -39,6 +44,11 @@ const listeningQuestionSchema = new Schema(
         answer: {
           type: String,
           required: true,
+        },
+        isCorrect: {
+          type: Boolean,
+          required: true,
+          default: false, // Set default to false
         },
       },
     ],

@@ -295,6 +295,156 @@ const BaiLam: React.FC = () => {
     }
   };
 
+  const renderListeningSection = (listeningExam: any, sectionIndex: number) => {
+    return (
+      <div key={listeningExam._id} style={{ marginBottom: "24px" }}>
+        <Title level={4}>Phần nghe {sectionIndex}</Title>
+        <audio controls style={{ marginBottom: "16px" }}>
+          <source src={listeningExam.audio.filePath} type="audio/mpeg" />
+        </audio>
+        {listeningExam.questions.map((q: any, idx: number) => {
+          const questionIndex = globalQuestionIndex++;
+          return (
+            <Card
+              key={q._id || idx}
+              ref={(el) => {
+                if (el) questionRefs.current[questionIndex] = el;
+              }}
+              style={{
+                marginBottom: 24,
+                borderRadius: 12,
+                boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+              }}
+            >
+              <ListeningQuestionSubmit
+                question={q}
+                questionType={q.questionType || ""}
+                onAnswerChange={handleListeningAnswerChange}
+                currentAnswer={listeningAnswers.find(
+                  (ans) => ans.questionId === q._id
+                )}
+                viewOnly={!!Examresult}
+              />
+            </Card>
+          );
+        })}
+      </div>
+    );
+  };
+
+  const renderQuestionMap = () => {
+    let questionNumber = 1; // Reset numbering to start from 1
+    const listeningSections = examDetails?.examId.listeningExams || [];
+    const readingSections = Object.keys(groupedQuestions).filter(
+      (key) => key !== "no-passage"
+    );
+    const otherQuestions = groupedQuestions["no-passage"] || [];
+
+    return (
+      <div>
+        {/* Listening Sections */}
+        {listeningSections.map((_, idx) => (
+          <div key={`listening-${idx}`}>
+            <Title level={5}>Phần nghe {idx + 1}</Title>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+              {listeningSections[idx].questions.map((_, qIdx) => {
+                const questionIndex = questionNumber++;
+                const isAnswered = listeningAnswers.some(
+                  (ans) =>
+                    ans.questionId === listeningSections[idx].questions[qIdx]._id
+                );
+                return (
+                  <Button
+                    size="small"
+                    key={`listening-btn-${questionIndex}`}
+                    style={{
+                      backgroundColor: isAnswered ? "#52c41a" : "#f0f0f0",
+                      color: isAnswered ? "#fff" : "#000",
+                    }}
+                    onClick={() =>
+                      questionRefs.current[questionIndex - 1]?.scrollIntoView({
+                        behavior: "smooth",
+                        block: "center",
+                      })
+                    }
+                  >
+                    {questionIndex}
+                  </Button>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+
+        <Divider />
+
+        {/* Reading Sections */}
+        {readingSections.map((passageId, idx) => (
+          <div key={`reading-${idx}`}>
+            <Title level={5}>Phần đọc {idx + 1}</Title>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+              {groupedQuestions[passageId].map((q, qIdx) => {
+                const questionIndex = questionNumber++;
+                const isAnswered = answers.some(
+                  (ans) => ans.questionId === q._id
+                );
+                return (
+                  <Button
+                    size="small"
+                    key={`reading-btn-${questionIndex}`}
+                    style={{
+                      backgroundColor: isAnswered ? "#52c41a" : "#f0f0f0",
+                      color: isAnswered ? "#fff" : "#000",
+                    }}
+                    onClick={() =>
+                      questionRefs.current[questionIndex - 1]?.scrollIntoView({
+                        behavior: "smooth",
+                        block: "center",
+                      })
+                    }
+                  >
+                    {questionIndex}
+                  </Button>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+
+        <Divider />
+
+        {/* Other Questions */}
+        <Title level={5}>Câu hỏi khác</Title>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+          {otherQuestions.map((q, idx) => {
+            const questionIndex = questionNumber++;
+            const isAnswered = answers.some(
+              (ans) => ans.questionId === q._id
+            );
+            return (
+              <Button
+                size="small"
+                key={`other-btn-${questionIndex}`}
+                style={{
+                  backgroundColor: isAnswered ? "#52c41a" : "#f0f0f0",
+                  color: isAnswered ? "#fff" : "#000",
+                }}
+                onClick={() =>
+                  questionRefs.current[questionIndex - 1]?.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center",
+                  })
+                }
+              >
+                {questionIndex}
+              </Button>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
   // Initialize globalQuestionIndex to 0
   let globalQuestionIndex = 0;
 
@@ -305,6 +455,12 @@ const BaiLam: React.FC = () => {
           {examDetails?.examId.title}
         </Title>
 
+        {/* Render Listening Sections */}
+        {examDetails?.examId.listeningExams?.map((le, idx) =>
+          renderListeningSection(le, idx + 1)
+        )}
+
+        {/* Render Non-Listening Questions */}
         {Object.keys(groupedQuestions).length > 1 ||
         !groupedQuestions["no-passage"] ? (
           // Case: Questions grouped by passages
@@ -616,59 +772,8 @@ const BaiLam: React.FC = () => {
         <Affix offsetTop={20}>
           <div>
             <Title level={5}>Sơ đồ câu hỏi</Title>
-            <div
-              style={{
-                display: "flex",
-                flexWrap: "wrap",
-                gap: "6px",
-                marginBottom: 16,
-              }}
-            >
-              {questionRefs.current
-                .filter((ref) => ref) // Filter out any undefined/null elements
-                .map((_, index) => {
-                  let questionId: string | undefined;
-                  let currentIndex = 0;
-
-                  for (const passageId of Object.keys(groupedQuestions)) {
-                    const questions = groupedQuestions[passageId];
-                    if (index < currentIndex + questions.length) {
-                      questionId = questions[index - currentIndex]?._id;
-                      break;
-                    }
-                    currentIndex += questions.length;
-                  }
-
-                  // Determine if the question is answered
-                  const isAnswered =
-                    answers.some((ans) => ans.questionId === questionId) ||
-                    listeningAnswers.some(
-                      (ans) => ans.questionId === questionId
-                    );
-
-                  return (
-                    <Button
-                      size="small"
-                      key={index}
-                      style={{
-                        backgroundColor: isAnswered ? "#52c41a" : "#f0f0f0", // Green for answered, default for unanswered
-                        color: isAnswered ? "#fff" : "#000",
-                      }}
-                      onClick={() =>
-                        questionRefs.current[index]?.scrollIntoView({
-                          behavior: "smooth",
-                          block: "center", // Ensure the question is centered in view
-                        })
-                      }
-                    >
-                      {index + 1}
-                    </Button>
-                  );
-                })}
-            </div>
-
+            {renderQuestionMap()}
             <Divider />
-
             <Title level={5}>
               Thời gian còn lại :{" "}
               <strong
@@ -680,7 +785,6 @@ const BaiLam: React.FC = () => {
                 {formatTime(remainingTime)}
               </strong>
             </Title>
-
             <Button
               type="primary"
               onClick={showSubmitModal}
