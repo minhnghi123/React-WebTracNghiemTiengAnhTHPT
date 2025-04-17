@@ -598,19 +598,39 @@ export const submitExam = async (req, res) => {
 
     // Tạo prompt cho Gemini (ví dụ gửi đến AI để nhận phản hồi)
     let prompt = "";
-    let arrResponse = [];
-    for (const q of incorrectAnswer) {
+    let responseLength = 0;
+    let arrResponse = ""; // Initialize arrResponse to avoid ReferenceError
+
+    for (const q of incorrectAnswer || []) {
       let ex = "Đây là câu hỏi tiếng anh, ";
       prompt += ex;
-      prompt += q.content + "\n";
-      prompt += q.answerDetail;
+
+      // Check if the question is a listening question
+      if (q.isListening) {
+        prompt += "Câu hỏi nghe: ";
+        prompt += (q.questionText || "") + "\n";
+        prompt += "Đáp án: " + (q.answerDetail || "") + "\n";
+      } else {
+        prompt += "Câu hỏi đọc: ";
+        prompt += (q.content || "") + "\n";
+        prompt += "Đáp án: " + (q.answerDetail || "") + "\n";
+      }
+
       let know = "Thuộc loại kiến thức :";
       prompt += know + "\n";
       prompt += q.knowledge + "\n";
       prompt +=
-        "Học sinh đã làm sai câu này, bạn hãy đưa ra lời khuyên, tư vấn lộ trình học để đạt kết quả cao hơn ở chủ đề này";
-      arrResponse.push(prompt);
+        "Học sinh đã làm sai câu này, bạn hãy đưa ra lời khuyên, tư vấn lộ trình học để đạt kết quả cao hơn ở chủ đề này\n";
+      responseLength += prompt.length;
+
+      // If the response exceeds a certain length, summarize
+      if (responseLength > 1000) {
+        prompt = "Học sinh đã làm các câu hỏi tiếng anh của có đề câu này dưới đây. Bạn hãy đưa ra lời khuyên, tư vấn lộ trình học để đạt kết quả cao hơn ở chủ đề này. Có quá nhiều câu hỏi sai. Hãy tập trung vào các kiến thức sau: ";
+        prompt += Object.keys(wrongAnswerByKnowledge || {}).join(", ");
+        break;
+      }
     }
+    arrResponse = prompt;
 
     return res.status(200).json({
       code: 200,

@@ -162,6 +162,24 @@ const ListeningQuestionSubmit: React.FC<ListeningQuestionComponentProps> = ({
             ))}
           </Radio.Group>
         ) : null}
+
+        {questionType === "6742fb5dd56a2e75dbd817ee" ? (
+          <Radio.Group
+            onChange={(e) => handleCheckboxChange(question._id, e.target.value)}
+            value={localAnswer.selectedAnswerId}
+            disabled={viewOnly} // Disable Radio.Group if viewOnly
+          >
+            <div>
+              <Radio value="true">True</Radio>
+            </div>
+            <div>
+              <Radio value="false">False</Radio>
+            </div>
+            <div>
+              <Radio value="notgiven">Not Given</Radio>
+            </div>
+          </Radio.Group>
+        ) : null}
       </div>
       {/* Phần audio của bài nghe có thể được render ở component cha */}
     </div>

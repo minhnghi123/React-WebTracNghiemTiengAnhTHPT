@@ -243,20 +243,24 @@ const BaiLam: React.FC = () => {
   useEffect(() => {
     const fetchPostSubmitData = async () => {
       if (Examresult) {
-        setLoading(true);
-        const advResponse = await gemini(Examresult.arrResponse);
-        setAdvice(advResponse);
-        const updated: Question[] = [];
+        setLoading(true); // Set loading to true before fetching
+        try {
+          const advResponse = await gemini(Examresult.arrResponse);
+          setAdvice(advResponse); // Update advice with fetched data
+        } catch (error) {
+          console.error("Error fetching advice:", error);
+        } finally {
+          setLoading(false); // Ensure loading is set to false after fetching
+        }
 
+        const updated: Question[] = [];
         for (const sug of suggestedQuestions) {
           if (sug._id) {
             const res = await QuestionAPI.getQuestion(sug._id);
             if (res.code === 200) updated.push(res.question);
           }
         }
-
         setSuggestedQuestions(updated);
-        setLoading(false);
       }
     };
 
@@ -338,20 +342,27 @@ const BaiLam: React.FC = () => {
     const readingSections = Object.keys(groupedQuestions).filter(
       (key) => key !== "no-passage"
     );
-    const otherQuestions = groupedQuestions["no-passage"] || [];
+    const otherQuestions =
+      groupedQuestions["no-passage"]?.filter(
+        (q) =>
+          !listeningSections.some((le) =>
+            le.questions.some((lq: any) => lq._id === q._id)
+          )
+      ) || [];
 
     return (
       <div>
         {/* Listening Sections */}
-        {listeningSections.map((_, idx) => (
+        {listeningSections.map((_: any, idx: number) => (
           <div key={`listening-${idx}`}>
             <Title level={5}>Phần nghe {idx + 1}</Title>
             <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
-              {listeningSections[idx].questions.map((_, qIdx) => {
+              {listeningSections[idx].questions.map((_: any, qIdx: number) => {
                 const questionIndex = questionNumber++;
                 const isAnswered = listeningAnswers.some(
                   (ans) =>
-                    ans.questionId === listeningSections[idx].questions[qIdx]._id
+                    ans.questionId ===
+                    listeningSections[idx].questions[qIdx]._id
                 );
                 return (
                   <Button
@@ -418,9 +429,7 @@ const BaiLam: React.FC = () => {
         <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
           {otherQuestions.map((q, idx) => {
             const questionIndex = questionNumber++;
-            const isAnswered = answers.some(
-              (ans) => ans.questionId === q._id
-            );
+            const isAnswered = answers.some((ans) => ans.questionId === q._id);
             return (
               <Button
                 size="small"
@@ -456,7 +465,7 @@ const BaiLam: React.FC = () => {
         </Title>
 
         {/* Render Listening Sections */}
-        {examDetails?.examId.listeningExams?.map((le, idx) =>
+        {examDetails?.examId.listeningExams?.map((le: any, idx: number) =>
           renderListeningSection(le, idx + 1)
         )}
 
@@ -465,6 +474,16 @@ const BaiLam: React.FC = () => {
         !groupedQuestions["no-passage"] ? (
           // Case: Questions grouped by passages
           Object.keys(groupedQuestions).map((passageId, groupIndex) => {
+            // Filter out listening questions
+            const filteredQuestions = groupedQuestions[passageId].filter(
+              (q) =>
+                !examDetails?.examId.listeningExams?.some((le: any) =>
+                  le.questions.some((lq: any) => lq._id === q._id)
+                )
+            );
+
+            if (filteredQuestions.length === 0) return null; // Skip if no questions remain after filtering
+
             return (
               <div
                 key={groupIndex}
@@ -478,7 +497,7 @@ const BaiLam: React.FC = () => {
                 }}
               >
                 {passageId !== "no-passage" &&
-                  groupedQuestions[passageId][0]?.passageId?.content && (
+                  filteredQuestions[0]?.passageId?.content && (
                     // Left Panel: Passage Content
                     <div
                       style={{
@@ -489,9 +508,10 @@ const BaiLam: React.FC = () => {
                         borderRight: "1px solid #ddd",
                       }}
                       dangerouslySetInnerHTML={{
-                        __html: groupedQuestions[
-                          passageId
-                        ][0].passageId.content.replace(/\n/g, "<br />"),
+                        __html: filteredQuestions[0].passageId.content.replace(
+                          /\n/g,
+                          "<br />"
+                        ),
                       }}
                     ></div>
                   )}
@@ -505,7 +525,7 @@ const BaiLam: React.FC = () => {
                     padding: "16px",
                   }}
                 >
-                  {groupedQuestions[passageId].map((q, idx) => {
+                  {filteredQuestions.map((q, idx) => {
                     // Use globalQuestionIndex for consistent numbering
                     const questionIndex = globalQuestionIndex++;
                     return (
@@ -542,10 +562,7 @@ const BaiLam: React.FC = () => {
                         {q.audio ? (
                           <>
                             <audio controls style={{ marginBottom: 8 }}>
-                              <source
-                                src={q.audio.filePath}
-                                type="audio/mpeg"
-                              />
+                              <source src={q.audio.filePath} type="audio/mpeg" />
                             </audio>
                             <ListeningQuestionSubmit
                               question={q}
@@ -554,8 +571,7 @@ const BaiLam: React.FC = () => {
                               currentAnswer={listeningAnswers.find(
                                 (ans) => ans.questionId === q._id
                               )}
-                              // index={questionIndex} // Removed as it is not part of ListeningQuestionComponentProps
-                              viewOnly={!!Examresult} // Add view-only mode when Examresult exists
+                              viewOnly={!!Examresult}
                             />
                           </>
                         ) : (
@@ -567,7 +583,7 @@ const BaiLam: React.FC = () => {
                               (ans) => ans.questionId === q._id
                             )}
                             index={questionIndex}
-                            viewOnly={!!Examresult} // Add view-only mode when Examresult exists
+                            viewOnly={!!Examresult}
                           />
                         )}
                       </Card>
@@ -580,65 +596,73 @@ const BaiLam: React.FC = () => {
         ) : (
           // Case: No passages, display questions in a single column
           <div>
-            {groupedQuestions["no-passage"]?.map((q, idx) => {
-              const questionIndex = globalQuestionIndex++;
-              return (
-                <Card
-                  key={q._id || idx}
-                  ref={(el) => {
-                    if (el) questionRefs.current[questionIndex] = el; // Only add non-null elements
-                  }}
-                  style={{
-                    marginBottom: 24,
-                    borderRadius: 12,
-                    boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
-                  }}
-                >
-                  <div style={{ display: "flex", justifyContent: "flex-end" }}>
-                    <img
-                      src={errorrIcon}
-                      alt="Báo lỗi"
-                      onClick={() => handleReportError(q)}
-                      style={{
-                        marginTop: 8,
-                        height: 20,
-                        width: 20,
-                        cursor: "pointer",
-                      }}
-                    />
-                  </div>
-
-                  {q.audio ? (
-                    <>
-                      <audio controls style={{ marginBottom: 8 }}>
-                        <source src={q.audio.filePath} type="audio/mpeg" />
-                      </audio>
-                      <ListeningQuestionSubmit
-                        question={q}
-                        questionType={q.questionType || ""}
-                        onAnswerChange={handleListeningAnswerChange}
-                        currentAnswer={listeningAnswers.find(
-                          (ans) => ans.questionId === q._id
-                        )}
-                        // index={questionIndex}
-                        viewOnly={!!Examresult} // Add view-only mode when Examresult exists
+            {groupedQuestions["no-passage"]
+              ?.filter(
+                (q) =>
+                  !examDetails?.examId.listeningExams?.some((le: any) =>
+                    le.questions.some((lq: any) => lq._id === q._id)
+                  )
+              )
+              .map((q, idx) => {
+                const questionIndex = globalQuestionIndex++;
+                return (
+                  <Card
+                    key={q._id || idx}
+                    ref={(el) => {
+                      if (el) questionRefs.current[questionIndex] = el; // Only add non-null elements
+                    }}
+                    style={{
+                      marginBottom: 24,
+                      borderRadius: 12,
+                      boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+                    }}
+                  >
+                    <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                      <img
+                        src={errorrIcon}
+                        alt="Báo lỗi"
+                        onClick={() => handleReportError(q)}
+                        style={{
+                          marginTop: 8,
+                          height: 20,
+                          width: 20,
+                          cursor: "pointer",
+                        }}
                       />
-                    </>
-                  ) : (
-                    <QuestionSubmit
-                      question={q}
-                      questionType={q.questionType || ""}
-                      onAnswerChange={handleAnswerChange}
-                      currentAnswer={answers.find(
-                        (ans) => ans.questionId === q._id
-                      )}
-                      index={questionIndex}
-                      viewOnly={!!Examresult} // Add view-only mode when Examresult exists
-                    />
-                  )}
-                </Card>
-              );
-            })}
+                    </div>
+
+                    {q.audio ? (
+                      <>
+                        <audio controls style={{ marginBottom: 8 }}>
+                          <source src={q.audio.filePath} type="audio/mpeg" />
+                        </audio>
+                        <ListeningQuestionSubmit
+                          question={q}
+                          questionType={q.questionType || ""}
+                          onAnswerChange={handleListeningAnswerChange}
+                          currentAnswer={listeningAnswers.find(
+                            (ans) => ans.questionId === q._id
+                          )}
+                          viewOnly={!!Examresult}
+                        />
+                      </>
+                    ) : (
+                      <>
+                        <QuestionSubmit
+                          question={q}
+                          questionType={q.questionType || ""}
+                          onAnswerChange={handleAnswerChange}
+                          currentAnswer={answers.find(
+                            (ans) => ans.questionId === q._id
+                          )}
+                          index={questionIndex}
+                          viewOnly={!!Examresult}
+                        />
+                      </>
+                    )}
+                  </Card>
+                );
+              })}
           </div>
         )}
 
