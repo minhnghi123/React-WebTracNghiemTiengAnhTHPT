@@ -461,7 +461,11 @@ export const UpdateExamQuestion = () => {
                                             )}
                                             .
                                           </strong>{" "}
-                                          {answer.text}
+                                          <span
+                                            dangerouslySetInnerHTML={{
+                                              __html: answer.text || "",
+                                            }}
+                                          />
                                         </span>
                                         {answer.isCorrect && (
                                           <Tag
