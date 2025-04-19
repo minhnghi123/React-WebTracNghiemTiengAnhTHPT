@@ -32,10 +32,13 @@ const Layout = () => {
   }, [user]);
 
   return (
-    <div id="main">
+    <div id="main" style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
       <Navbar />
-      <Outlet />
-      {examDetails && <ExamInfoBox examDetails={examDetails} />}
+      <div style={{ flex: 1, paddingBottom: "80px" }}>
+        {/* Ensure content takes up remaining space and leaves room for the footer */}
+        <Outlet />
+        {examDetails && <ExamInfoBox examDetails={examDetails} />}
+      </div>
       <Footer />
     </div>
   );

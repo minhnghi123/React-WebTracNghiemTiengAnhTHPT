@@ -22,6 +22,7 @@ import ListeningQuestionSubmit from "./listeningQuestionSubmit";
 import { Question } from "@/types/interface";
 import ErrorReportModal from "@/components/ErrorReportModal"; // Import ErrorReportModal
 import errorrIcon from "@/Content/img/errorr.png"; // Import your error icon
+import SuggestedQuestionAnswer from "@/components/SuggestedQuestionAnswer";
 
 const { Panel } = Collapse;
 const { Title, Paragraph } = Typography;
@@ -218,11 +219,43 @@ const BaiLam: React.FC = () => {
     const unansweredQuestions = getUnansweredQuestions();
     console.log("Unanswered Questions:", unansweredQuestions);
 
+    // Map answers and listeningAnswers to the required format
+    const enrichedAnswers = answers.map((ans) => {
+      const question = Object.values(groupedQuestions)
+        .flat()
+        .find((q) => q._id === ans.questionId);
+      return {
+        questionId: ans.questionId,
+        selectedAnswerId: ans.selectedAnswerId,
+        userAnswer: ans.userAnswer,
+        questionType: question?.questionType || "",
+      };
+    });
+
+    const enrichedListeningAnswers = listeningAnswers.map((ans) => {
+      const question = Object.values(groupedQuestions)
+        .flat()
+        .find((q) => q._id === ans.questionId);
+      return {
+        questionId: ans.questionId,
+        selectedAnswerId: ans.selectedAnswerId,
+        userAnswer: ans.userAnswer,
+        questionType: question?.questionType || "",
+      };
+    });
+
+    // Extract questionTypes from answers and listeningAnswers
+    const questionTypes = [
+      ...enrichedAnswers.map((ans) => ans.questionType),
+      ...enrichedListeningAnswers.map((ans) => ans.questionType),
+    ];
+
     const submitAnswer: SubmitAnswer = {
       resultId: examDetails._id,
-      answers,
-      listeningAnswers,
+      answers: enrichedAnswers,
+      listeningAnswers: enrichedListeningAnswers,
       unansweredQuestions,
+      questionTypes, // Include questionTypes as a separate field
     };
 
     try {
@@ -294,6 +327,7 @@ const BaiLam: React.FC = () => {
           )
         );
       }
+    
     } catch (error) {
       console.error("Error fetching question details:", error);
     }
@@ -328,6 +362,7 @@ const BaiLam: React.FC = () => {
                   (ans) => ans.questionId === q._id
                 )}
                 viewOnly={!!Examresult}
+                questionIndex={questionIndex} // Pass questionIndex
               />
             </Card>
           );
@@ -337,7 +372,7 @@ const BaiLam: React.FC = () => {
   };
 
   const renderQuestionMap = () => {
-    let questionNumber = 1; // Reset numbering to start from 1
+    let questionNumber = 1;
     const listeningSections = examDetails?.examId.listeningExams || [];
     const readingSections = Object.keys(groupedQuestions).filter(
       (key) => key !== "no-passage"
@@ -350,27 +385,56 @@ const BaiLam: React.FC = () => {
           )
       ) || [];
 
+    const getButtonColor = (questionId: string) => {
+      if (!Examresult) {
+        // Before submission
+        const isAnswered =
+          answers.some((ans) => ans.questionId === questionId) ||
+          listeningAnswers.some((ans) => ans.questionId === questionId);
+        return isAnswered ? "#52c41a" : "#d9d9d9"; // Green if answered, gray if not
+      } else {
+        // After submission
+        const correctAnswer = Examresult.details?.find(
+          (ans) => ans.questionId === questionId
+        ) || Examresult.listeningQuestions?.find(
+          (ans) => ans.questionId === questionId
+        );
+
+        if (!correctAnswer) {
+          return "#ff4d4f"; // Red for unanswered questions
+        }
+
+        return correctAnswer.isCorrect ? "#52c41a" : "#ff4d4f"; // Green if correct, red if incorrect
+      }
+    };
+
     return (
-      <div>
+      <div
+        style={{
+          maxHeight: "calc(100vh - 200px)", // Adjust height to avoid overlapping navbar and footer
+          paddingRight: "8px",
+          overflowY: "auto"
+        }}
+      >
         {/* Listening Sections */}
         {listeningSections.map((_: any, idx: number) => (
-          <div key={`listening-${idx}`}>
-            <Title level={5}>Phần nghe {idx + 1}</Title>
+          <div key={`listening-${idx}`} style={{ marginBottom: "16px" }}>
+            <Title level={5} style={{ marginBottom: "8px" }}>
+              Phần nghe {idx + 1}
+            </Title>
             <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
               {listeningSections[idx].questions.map((_: any, qIdx: number) => {
                 const questionIndex = questionNumber++;
-                const isAnswered = listeningAnswers.some(
-                  (ans) =>
-                    ans.questionId ===
-                    listeningSections[idx].questions[qIdx]._id
+                const buttonColor = getButtonColor(
+                  listeningSections[idx].questions[qIdx]._id
                 );
                 return (
                   <Button
                     size="small"
                     key={`listening-btn-${questionIndex}`}
                     style={{
-                      backgroundColor: isAnswered ? "#52c41a" : "#f0f0f0",
-                      color: isAnswered ? "#fff" : "#000",
+                      backgroundColor: buttonColor,
+                      color: buttonColor === "#d9d9d9" ? "#000" : "#fff",
                     }}
                     onClick={() =>
                       questionRefs.current[questionIndex - 1]?.scrollIntoView({
@@ -387,25 +451,23 @@ const BaiLam: React.FC = () => {
           </div>
         ))}
 
-        <Divider />
-
         {/* Reading Sections */}
         {readingSections.map((passageId, idx) => (
-          <div key={`reading-${idx}`}>
-            <Title level={5}>Phần đọc {idx + 1}</Title>
+          <div key={`reading-${idx}`} style={{ marginBottom: "16px" }}>
+            <Title level={5} style={{ marginBottom: "8px" }}>
+              Phần đọc {idx + 1}
+            </Title>
             <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
               {groupedQuestions[passageId].map((q, qIdx) => {
                 const questionIndex = questionNumber++;
-                const isAnswered = answers.some(
-                  (ans) => ans.questionId === q._id
-                );
+                const buttonColor = getButtonColor(q._id);
                 return (
                   <Button
                     size="small"
                     key={`reading-btn-${questionIndex}`}
                     style={{
-                      backgroundColor: isAnswered ? "#52c41a" : "#f0f0f0",
-                      color: isAnswered ? "#fff" : "#000",
+                      backgroundColor: buttonColor,
+                      color: buttonColor === "#d9d9d9" ? "#000" : "#fff",
                     }}
                     onClick={() =>
                       questionRefs.current[questionIndex - 1]?.scrollIntoView({
@@ -422,40 +484,42 @@ const BaiLam: React.FC = () => {
           </div>
         ))}
 
-        <Divider />
-
         {/* Other Questions */}
-        <Title level={5}>Câu hỏi khác</Title>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
-          {otherQuestions.map((q, idx) => {
-            const questionIndex = questionNumber++;
-            const isAnswered = answers.some((ans) => ans.questionId === q._id);
-            return (
-              <Button
-                size="small"
-                key={`other-btn-${questionIndex}`}
-                style={{
-                  backgroundColor: isAnswered ? "#52c41a" : "#f0f0f0",
-                  color: isAnswered ? "#fff" : "#000",
-                }}
-                onClick={() =>
-                  questionRefs.current[questionIndex - 1]?.scrollIntoView({
-                    behavior: "smooth",
-                    block: "center",
-                  })
-                }
-              >
-                {questionIndex}
-              </Button>
-            );
-          })}
+        <div>
+          <Title level={5} style={{ marginBottom: "8px" }}>
+            Câu hỏi khác
+          </Title>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+            {otherQuestions.map((q, idx) => {
+              const questionIndex = questionNumber++;
+              const buttonColor = getButtonColor(q._id);
+              return (
+                <Button
+                  size="small"
+                  key={`other-btn-${questionIndex}`}
+                  style={{
+                    backgroundColor: buttonColor,
+                    color: buttonColor === "#d9d9d9" ? "#000" : "#fff",
+                  }}
+                  onClick={() =>
+                    questionRefs.current[questionIndex - 1]?.scrollIntoView({
+                      behavior: "smooth",
+                      block: "center",
+                    })
+                  }
+                >
+                  {questionIndex}
+                </Button>
+              );
+            })}
+          </div>
         </div>
       </div>
     );
   };
 
-  // Initialize globalQuestionIndex to 0
-  let globalQuestionIndex = 0;
+  // Initialize globalQuestionIndex to 1
+  let globalQuestionIndex = 1;
 
   return (
     <Layout style={{ minHeight: "100vh", background: "#fff" }}>
@@ -572,6 +636,7 @@ const BaiLam: React.FC = () => {
                                 (ans) => ans.questionId === q._id
                               )}
                               viewOnly={!!Examresult}
+                              questionIndex={questionIndex} // Pass questionIndex
                             />
                           </>
                         ) : (
@@ -584,6 +649,7 @@ const BaiLam: React.FC = () => {
                             )}
                             index={questionIndex}
                             viewOnly={!!Examresult}
+                            questionIndex={questionIndex} // Pass questionIndex
                           />
                         )}
                       </Card>
@@ -644,6 +710,7 @@ const BaiLam: React.FC = () => {
                             (ans) => ans.questionId === q._id
                           )}
                           viewOnly={!!Examresult}
+                          questionIndex={questionIndex} // Pass questionIndex
                         />
                       </>
                     ) : (
@@ -657,6 +724,7 @@ const BaiLam: React.FC = () => {
                           )}
                           index={questionIndex}
                           viewOnly={!!Examresult}
+                          questionIndex={questionIndex} // Pass questionIndex
                         />
                       </>
                     )}
@@ -711,9 +779,15 @@ const BaiLam: React.FC = () => {
                     {loading ? (
                       <Spin />
                     ) : (
-                      <Paragraph style={{ whiteSpace: "pre-line" }}>
-                        {advice}
-                      </Paragraph>
+                      <div style={{ whiteSpace: "pre-line" }}>
+                        {advice
+                          .split("\n")
+                          .map((line, index) => (
+                            <p key={index} style={{ marginBottom: "8px" }}>
+                              {line.replace(/^\*\*|\*\*$/g, "").replace(/^\*|\*$/g, "")}
+                            </p>
+                          ))}
+                      </div>
                     )}
                   </Panel>
 
@@ -755,21 +829,7 @@ const BaiLam: React.FC = () => {
                           onClick={() => handleExpandSuggestedQuestion(q._id)}
                         >
                           {q.detailsFetched ? (
-                            <>
-                              <QuestionSubmit
-                                question={q}
-                                questionType={q.questionType || ""}
-                                onAnswerChange={() => {}}
-                                index={0}
-                                viewOnly={true}
-                              />
-                              <div
-                                style={{ marginTop: "8px", color: "#52c41a" }}
-                              >
-                                <strong>Đáp án đúng:</strong>{" "}
-                                {/* Your answer display logic here */}
-                              </div>
-                            </>
+                            <SuggestedQuestionAnswer question={q} />
                           ) : (
                             <Spin />
                           )}
@@ -791,10 +851,14 @@ const BaiLam: React.FC = () => {
           background: "#f7f8fa",
           borderLeft: "1px solid #f0f0f0",
           padding: "1rem",
+          position: "sticky",
+          top: 0,
+          height: "100vh",
+          overflowY: "auto", // Ensure scrolling works for long content
         }}
       >
         <Affix offsetTop={20}>
-          <div>
+          <div style={{ paddingBottom: "80px" /* Space for footer */ }}>
             <Title level={5}>Sơ đồ câu hỏi</Title>
             {renderQuestionMap()}
             <Divider />
