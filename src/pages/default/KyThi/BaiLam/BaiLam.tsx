@@ -562,7 +562,10 @@ const BaiLam: React.FC = () => {
                         {q.audio ? (
                           <>
                             <audio controls style={{ marginBottom: 8 }}>
-                              <source src={q.audio.filePath} type="audio/mpeg" />
+                              <source
+                                src={q.audio.filePath}
+                                type="audio/mpeg"
+                              />
                             </audio>
                             <ListeningQuestionSubmit
                               question={q}
@@ -617,7 +620,9 @@ const BaiLam: React.FC = () => {
                       boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
                     }}
                   >
-                    <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                    <div
+                      style={{ display: "flex", justifyContent: "flex-end" }}
+                    >
                       <img
                         src={errorrIcon}
                         alt="Báo lỗi"
@@ -788,37 +793,49 @@ const BaiLam: React.FC = () => {
         width={260}
         theme="light"
         style={{
+          position: "fixed", // Cố định Sider
+          top: 0,
+          right: 0,
+          height: "100vh", // Chiều cao toàn màn hình
           background: "#f7f8fa",
           borderLeft: "1px solid #f0f0f0",
+          display: "flex",
+          flexDirection: "column",
           padding: "1rem",
+          overflow: "hidden", // Ẩn nội dung tràn ra ngoài
         }}
       >
-        <Affix offsetTop={20}>
-          <div>
-            <Title level={5}>Sơ đồ câu hỏi</Title>
-            {renderQuestionMap()}
-            <Divider />
-            <Title level={5}>
-              Thời gian còn lại :{" "}
-              <strong
-                style={{
-                  fontWeight: "bold",
-                  color: remainingTime <= 60 ? "#ff4d4f" : "#000",
-                }}
-              >
-                {formatTime(remainingTime)}
-              </strong>
-            </Title>
-            <Button
-              type="primary"
-              onClick={showSubmitModal}
-              disabled={!!Examresult || loading}
-              block
+        <div style={{ overflow: "auto", flex: 1 }}>
+          <Title level={5}>Sơ đồ câu hỏi</Title>
+          {renderQuestionMap()}
+          <Divider />
+          <Title level={5}>
+            Thời gian còn lại:{" "}
+            <strong
+              style={{
+                fontWeight: "bold",
+                color: remainingTime <= 60 ? "#ff4d4f" : "#000",
+              }}
             >
-              Nộp bài
-            </Button>
-          </div>
-        </Affix>
+              {formatTime(remainingTime)}
+            </strong>
+          </Title>
+        </div>
+        <div
+          style={{
+            position: "sticky",
+            bottom: 16, // Cố định cách đáy 16px
+          }}
+        >
+          <Button
+            type="primary"
+            onClick={showSubmitModal}
+            disabled={!!Examresult || loading}
+            block
+          >
+            Nộp bài
+          </Button>
+        </div>
       </Sider>
       {/*  */}
       <Modal
