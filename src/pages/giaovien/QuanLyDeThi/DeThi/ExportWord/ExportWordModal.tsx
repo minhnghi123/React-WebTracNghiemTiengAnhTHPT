@@ -9,9 +9,11 @@ interface ExportWordModalProps {
   examId: string;
 }
 
-const ExportWordModal: React.FC<ExportWordModalProps> = ({ visible, handleClose, examId }) => {
-  
-
+const ExportWordModal: React.FC<ExportWordModalProps> = ({
+  visible,
+  handleClose,
+  examId,
+}) => {
   const [examData, setExamData] = useState<Exam | null>(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -36,73 +38,76 @@ const ExportWordModal: React.FC<ExportWordModalProps> = ({ visible, handleClose,
 
   const handleExport = async () => {
     try {
-      if(!examData) {
+      if (!examData) {
         throw new Error("Không tìm thấy dữ liệu đề thi");
       }
       // Chuyển đổi câu hỏi thành cấu trúc ExamDataExport
-    const exportData: ExamDataExport = {
-      title,
-      description,
-      school,
-      department,
-      subject,
-      teacher,
-      code,
-      duration,
-      comments,
+      const exportData: ExamDataExport = {
+        title,
+        description,
+        school,
+        department,
+        subject,
+        teacher,
+        code,
+        duration,
+        comments,
 
-      // Câu hỏi dạng nhiều lựa chọn (Multichoice)
-      questionsMultichoice: examData.questions
-        .filter(
-          (q): q is Question =>
-            typeof q !== "string" &&
-            q.questionType === "6742fb1cd56a2e75dbd817ea" &&
-            !q.audio
-        )
-        .map((q) => ({
-          content: q.content,
-          answers: q.answers
-            .filter((answer) => answer.text !== undefined)
-            .map((answer) => ({
-              text: answer.text || "",
-              isCorrect: answer.isCorrect,
-            })),
-        })),
-
-      // Câu hỏi điền khuyết (Fill in the Blank)
-      questionsFillInBlank: examData.questions
-        .filter(
-          (q): q is Question =>
-            typeof q !== "string" &&
-            q.questionType === "6742fb3bd56a2e75dbd817ec"
-        )
-        .map((q) => ({
-          content: q.content,
-        })),
-
-      // Câu hỏi nghe (Listening)
-      questionsListening: examData.questions
-        .filter(
-          (q): q is Question =>
-            typeof q !== "string" &&
-            q.questionType === "6742fb1cd56a2e75dbd817ea" &&
-            !!q.audio
-        )
-        .map((q) => ({
-          transcript: q.audioInfo?.transcription || "",
-          audio: typeof q.audioInfo?.filePath === "string" ? q.audioInfo.filePath : "",
-          questions: q.answers
-            .filter((answer) => answer.text !== undefined)
-            .map((answer) => ({
-              content: answer.text || "", // Ensure content is always a string
-              isCorrect: answer.isCorrect,
-              answers: q.answers.map((ans) => ({
-                text: ans.text || "", // Ensure text is always a string
-                isCorrect: ans.isCorrect,
+        // Câu hỏi dạng nhiều lựa chọn (Multichoice)
+        questionsMultichoice: examData.questions
+          .filter(
+            (q): q is Question =>
+              typeof q !== "string" &&
+              q.questionType === "6742fb1cd56a2e75dbd817ea" &&
+              !q.audio
+          )
+          .map((q) => ({
+            content: q.content,
+            answers: q.answers
+              .filter((answer) => answer.text !== undefined)
+              .map((answer) => ({
+                text: answer.text || "",
+                isCorrect: answer.isCorrect,
               })),
-            })),
-        })),
-    };
+          })),
+
+        // Câu hỏi điền khuyết (Fill in the Blank)
+        questionsFillInBlank: examData.questions
+          .filter(
+            (q): q is Question =>
+              typeof q !== "string" &&
+              q.questionType === "6742fb3bd56a2e75dbd817ec"
+          )
+          .map((q) => ({
+            content: q.content,
+          })),
+
+        // Câu hỏi nghe (Listening)
+        questionsListening: examData.questions
+          .filter(
+            (q): q is Question =>
+              typeof q !== "string" &&
+              q.questionType === "6742fb1cd56a2e75dbd817ea" &&
+              !!q.audio
+          )
+          .map((q) => ({
+            transcript: q.audioInfo?.transcription || "",
+            audio:
+              typeof q.audioInfo?.filePath === "string"
+                ? q.audioInfo.filePath
+                : "",
+            questions: q.answers
+              .filter((answer) => answer.text !== undefined)
+              .map((answer) => ({
+                content: answer.text || "", // Ensure content is always a string
+                isCorrect: answer.isCorrect,
+                answers: q.answers.map((ans) => ({
+                  text: ans.text || "", // Ensure text is always a string
+                  isCorrect: ans.isCorrect,
+                })),
+              })),
+          })),
+      };
 
       await ExportAPI.exportWord(exportData);
       alert("Xuất file Word thành công!");
@@ -132,13 +137,19 @@ const ExportWordModal: React.FC<ExportWordModalProps> = ({ visible, handleClose,
           <Input value={title} onChange={(e) => setTitle(e.target.value)} />
         </Form.Item>
         <Form.Item label="Mô tả">
-          <Input value={description} onChange={(e) => setDescription(e.target.value)} />
+          <Input
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
         </Form.Item>
         <Form.Item label="Trường">
           <Input value={school} onChange={(e) => setSchool(e.target.value)} />
         </Form.Item>
         <Form.Item label="Khoa">
-          <Input value={department} onChange={(e) => setDepartment(e.target.value)} />
+          <Input
+            value={department}
+            onChange={(e) => setDepartment(e.target.value)}
+          />
         </Form.Item>
         <Form.Item label="Môn học">
           <Input value={subject} onChange={(e) => setSubject(e.target.value)} />
@@ -157,7 +168,10 @@ const ExportWordModal: React.FC<ExportWordModalProps> = ({ visible, handleClose,
           />
         </Form.Item>
         <Form.Item label="Ghi chú">
-          <Input value={comments} onChange={(e) => setComments(e.target.value)} />
+          <Input
+            value={comments}
+            onChange={(e) => setComments(e.target.value)}
+          />
         </Form.Item>
       </Form>
     </Modal>
