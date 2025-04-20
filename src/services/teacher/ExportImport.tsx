@@ -40,6 +40,7 @@ export interface ExamDataExport {
 }
 export const ExportAPI = {
   exportWord: async (examDataExport: ExamDataExport) => {
+    console.log("Exporting exam data:", examDataExport);
     const response = await request.post(
       `/teacher/exam/export-exam`,
       examDataExport

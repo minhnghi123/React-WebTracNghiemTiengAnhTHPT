@@ -327,7 +327,6 @@ const BaiLam: React.FC = () => {
           )
         );
       }
-    
     } catch (error) {
       console.error("Error fetching question details:", error);
     }
@@ -394,11 +393,11 @@ const BaiLam: React.FC = () => {
         return isAnswered ? "#52c41a" : "#d9d9d9"; // Green if answered, gray if not
       } else {
         // After submission
-        const correctAnswer = Examresult.details?.find(
-          (ans) => ans.questionId === questionId
-        ) || Examresult.listeningQuestions?.find(
-          (ans) => ans.questionId === questionId
-        );
+        const correctAnswer =
+          Examresult.details?.find((ans) => ans.questionId === questionId) ||
+          Examresult.listeningQuestions?.find(
+            (ans) => ans.questionId === questionId
+          );
 
         if (!correctAnswer) {
           return "#ff4d4f"; // Red for unanswered questions
@@ -413,7 +412,7 @@ const BaiLam: React.FC = () => {
         style={{
           maxHeight: "calc(100vh - 200px)", // Adjust height to avoid overlapping navbar and footer
           paddingRight: "8px",
-          overflowY: "auto"
+          overflowY: "auto",
         }}
       >
         {/* Listening Sections */}
@@ -626,7 +625,10 @@ const BaiLam: React.FC = () => {
                         {q.audio ? (
                           <>
                             <audio controls style={{ marginBottom: 8 }}>
-                              <source src={q.audio.filePath} type="audio/mpeg" />
+                              <source
+                                src={q.audio.filePath}
+                                type="audio/mpeg"
+                              />
                             </audio>
                             <ListeningQuestionSubmit
                               question={q}
@@ -683,7 +685,9 @@ const BaiLam: React.FC = () => {
                       boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
                     }}
                   >
-                    <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                    <div
+                      style={{ display: "flex", justifyContent: "flex-end" }}
+                    >
                       <img
                         src={errorrIcon}
                         alt="Báo lỗi"
@@ -780,13 +784,13 @@ const BaiLam: React.FC = () => {
                       <Spin />
                     ) : (
                       <div style={{ whiteSpace: "pre-line" }}>
-                        {advice
-                          .split("\n")
-                          .map((line, index) => (
-                            <p key={index} style={{ marginBottom: "8px" }}>
-                              {line.replace(/^\*\*|\*\*$/g, "").replace(/^\*|\*$/g, "")}
-                            </p>
-                          ))}
+                        {advice.split("\n").map((line, index) => (
+                          <p key={index} style={{ marginBottom: "8px" }}>
+                            {line
+                              .replace(/^\*\*|\*\*$/g, "")
+                              .replace(/^\*|\*$/g, "")}
+                          </p>
+                        ))}
                       </div>
                     )}
                   </Panel>
@@ -848,8 +852,14 @@ const BaiLam: React.FC = () => {
         width={260}
         theme="light"
         style={{
+          position: "fixed", // Cố định Sider
+          top: 0,
+          right: 0,
+          height: "100vh", // Chiều cao toàn màn hình
           background: "#f7f8fa",
           borderLeft: "1px solid #f0f0f0",
+          display: "flex",
+          flexDirection: "column",
           padding: "1rem",
           position: "sticky",
           top: 0,

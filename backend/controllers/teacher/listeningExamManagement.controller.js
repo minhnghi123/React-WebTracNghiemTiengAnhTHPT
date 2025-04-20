@@ -134,7 +134,7 @@ export const importListeningExamController = async (req, res) => {
   try {
     const examFile = req.files?.examFile?.[0];
     const audioFile = req.files?.audioFile?.[0];
-    console.log(examFile, audioFile);
+
     if (!examFile || !audioFile) {
       return res
         .status(400)
@@ -148,12 +148,19 @@ export const importListeningExamController = async (req, res) => {
     const rows = XLSX.utils.sheet_to_json(sheet);
 
     // Tạo audio document
+    // console.log("filePath: ", req?.body?.audioFile);
+    const originalName = Buffer.from(examFile.originalname, "latin1").toString(
+      "utf8"
+    );
+    const title = originalName
+      .split(".")[0]
+      .replace(/[^a-zA-Z0-9\u00C0-\u1EF9\s]/g, "_")
+      .replace(/\s+/g, "_");
     const audioDoc = await Audio.create({
-      filePath: audioFile.filePath,
-      description: "Audio bài nghe thử nghiệm",
+      filePath: req?.body?.audioFile,
+      description: title,
       transcription: "Transcription bài nghe thử nghiệm",
     });
-
     const questionType = await QuestionType.findOne({
       name: "Multiple Choices",
     });
@@ -220,7 +227,7 @@ export const importListeningExamController = async (req, res) => {
         });
       } else if (questionType?.name === "True/False/Not Given") {
         const validValues = ["true", "false", "notgiven"];
-        const value = CorrectAnswers?.toLowerCase().trim();
+        const value = String(CorrectAnswers).toLowerCase().trim();
         if (!validValues.includes(value)) {
           console.warn(`Giá trị TFNG không hợp lệ: ${CorrectAnswers}`);
           continue; // bỏ qua nếu không hợp lệ
@@ -242,7 +249,7 @@ export const importListeningExamController = async (req, res) => {
 
     const newExam = await ListeningExam.create({
       teacherId: req.user._id,
-      title: `Bài kiểm tra nghe ${Date.now()}`,
+      title: title,
       description: "Bài kiểm tra nghe tự động tạo từ file Excel",
       audio: audioDoc._id,
       questions: createdQuestions,
