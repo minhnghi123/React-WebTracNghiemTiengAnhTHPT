@@ -9,10 +9,8 @@ const extractContent = (response: any): string => {
 };
 
 export const gemini = async (prompt: string) => {
-  console.log("promptgemini", prompt);
   try {
     const result = await model.generateContent(prompt);
-    console.log("resultgemini", result);
 
     // Use the utility function to extract content
     const content = extractContent(result.response);

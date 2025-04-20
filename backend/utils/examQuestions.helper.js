@@ -29,22 +29,45 @@ const sanitizeAnswerText = (text) => {
 
 const getAnswerCell = (answerText, index) => {
   const sanitizedAnswer = sanitizeAnswerText(answerText || "");
+  const isHtml = sanitizedAnswer.includes("<");
+  const label = `${["A", "B", "C", "D"][index]}. `;
+
+  const cellChildren = [];
+
+  // Đoạn đầu là nhãn A., B., ...
+  cellChildren.push(
+    new Paragraph({
+      children: [
+        new TextRun({
+          text: label,
+          bold: true,
+          font: "Times New Roman",
+          size: 22,
+        }),
+      ],
+    })
+  );
+
+  // Phần nội dung của đáp án
+  if (isHtml) {
+    cellChildren.push(renderHtmlToTextRun(sanitizedAnswer));
+  } else {
+    cellChildren.push(
+      new Paragraph({
+        children: [
+          new TextRun({
+            text: sanitizedAnswer,
+            font: "Times New Roman",
+            size: 22,
+          }),
+        ],
+      })
+    );
+  }
 
   return new TableCell({
     margins: { top: 100, bottom: 100, left: 200, right: 200 },
-    children: [
-      new Paragraph({
-        children: [
-          sanitizedAnswer.includes("<")
-            ? renderHtmlToTextRun(sanitizedAnswer) 
-            : new TextRun({
-                text: `${["A", "B", "C", "D"][index]}. ${sanitizedAnswer}`,
-                font: "Times New Roman",
-                size: 22,
-              }),
-        ],
-      }),
-    ],
+    children: cellChildren,
     borders: {
       top: { style: BorderStyle.SINGLE, color: "FFFFFF" },
       bottom: { style: BorderStyle.SINGLE, color: "FFFFFF" },
@@ -54,6 +77,7 @@ const getAnswerCell = (answerText, index) => {
     width: { size: 50, type: WidthType.PERCENTAGE },
   });
 };
+
 
 /**
  * Hàm tạo đoạn câu hỏi, hỗ trợ HTML
@@ -253,67 +277,109 @@ const buildAudioLinkParagraph = (audio) =>
  * @returns {Array<Paragraph | Table>}
  */
 const buildListeningQuestion = (question, qIndex) => [
+  // 📌 Hiển thị câu hỏi
   new Paragraph({
     children: [
-      question.content.includes("<")
-        ? renderHtmlToTextRun(`${qIndex + 1} ${question.content}`)  // Render HTML nếu có trong câu hỏi
-        : new TextRun({
-            text: `${qIndex + 1} ${question.content}`,
-            bold: true,
-            font: "Times New Roman",
-            size: 24,
-          }),
+      new TextRun({
+        text: `${qIndex + 1}. `,
+        bold: true,
+        font: "Times New Roman",
+        size: 24,
+      }),
     ],
-    spacing: { after: 100 },
   }),
+  ...(question.content.includes("<")
+    ? [renderHtmlToTextRun(question.content)]
+    : [
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: question.content,
+              bold: true,
+              font: "Times New Roman",
+              size: 24,
+            }),
+          ],
+        }),
+      ]),
 
+  // 📌 Hiển thị bảng đáp án
   new Table({
     width: { size: 100, type: WidthType.PERCENTAGE },
     rows: [
       new TableRow({
         children: [
-          question.answers[0]?.text.includes("<") 
-            ? renderHtmlToTextRun(question.answers[0]?.text) 
-            : new TextRun({
-                text: question.answers[0]?.text || "",
-                font: "Times New Roman",
-                size: 22,
-              }),
-          question.answers[1]?.text.includes("<") 
-            ? renderHtmlToTextRun(question.answers[1]?.text) 
-            : new TextRun({
-                text: question.answers[1]?.text || "",
-                font: "Times New Roman",
-                size: 22,
-              }),
+          new TableCell({
+            children: [
+              question.answers[0]?.text.includes("<")
+                ? renderHtmlToTextRun(question.answers[0]?.text)
+                : new Paragraph({
+                    children: [
+                      new TextRun({
+                        text: question.answers[0]?.text || "",
+                        font: "Times New Roman",
+                        size: 22,
+                      }),
+                    ],
+                  }),
+            ],
+          }),
+          new TableCell({
+            children: [
+              question.answers[1]?.text.includes("<")
+                ? renderHtmlToTextRun(question.answers[1]?.text)
+                : new Paragraph({
+                    children: [
+                      new TextRun({
+                        text: question.answers[1]?.text || "",
+                        font: "Times New Roman",
+                        size: 22,
+                      }),
+                    ],
+                  }),
+            ],
+          }),
         ],
       }),
       new TableRow({
         children: [
-          question.answers[2]?.text.includes("<") 
-            ? renderHtmlToTextRun(question.answers[2]?.text) 
-            : new TextRun({
-                text: question.answers[2]?.text || "",
-                font: "Times New Roman",
-                size: 22,
-              }),
-          question.answers[3]?.text.includes("<") 
-            ? renderHtmlToTextRun(question.answers[3]?.text) 
-            : new TextRun({
-                text: question.answers[3]?.text || "",
-                font: "Times New Roman",
-                size: 22,
-              }),
+          new TableCell({
+            children: [
+              question.answers[2]?.text.includes("<")
+                ? renderHtmlToTextRun(question.answers[2]?.text)
+                : new Paragraph({
+                    children: [
+                      new TextRun({
+                        text: question.answers[2]?.text || "",
+                        font: "Times New Roman",
+                        size: 22,
+                      }),
+                    ],
+                  }),
+            ],
+          }),
+          new TableCell({
+            children: [
+              question.answers[3]?.text.includes("<")
+                ? renderHtmlToTextRun(question.answers[3]?.text)
+                : new Paragraph({
+                    children: [
+                      new TextRun({
+                        text: question.answers[3]?.text || "",
+                        font: "Times New Roman",
+                        size: 22,
+                      }),
+                    ],
+                  }),
+            ],
+          }),
         ],
       }),
     ],
     spacing: { before: 100, after: 200 },
   }),
 
-  new Paragraph({
-    children: [],
-    spacing: { after: 200 },
-  }),
+  new Paragraph({ children: [], spacing: { after: 200 } }),
 ];
 
 
@@ -352,3 +418,81 @@ export const formatListeningQuestions = (questionsListening) => [
   ]),
 ];
 
+
+
+
+export const formatReadingQuestions = (questionsReading) => {
+  const formattedReading = [];
+
+  // Tiêu đề phần Đọc hiểu
+  formattedReading.push(
+    new Paragraph({
+      children: [
+        new TextRun({
+          text: "CÂU HỎI ĐỌC HIỂU:",
+          bold: true,
+          font: "Times New Roman",
+          size: 26,
+        }),
+      ],
+      alignment: AlignmentType.CENTER,
+      spacing: { before: 200, after: 200 },
+    })
+  );
+
+  questionsReading.forEach((readingItem, readingIndex) => {
+    // In đoạn bài đọc
+    formattedReading.push(
+      new Paragraph({
+        children: [
+          new TextRun({
+            text: `Đoạn ${readingIndex + 1}:`,
+            bold: true,
+            font: "Times New Roman",
+            size: 24,
+          }),
+        ],
+        spacing: { after: 100 },
+      }),
+      renderHtmlToTextRun(readingItem.passage)
+    );
+
+    // In từng câu hỏi liên quan đến đoạn đó
+    readingItem.questions.forEach((question, qIndex) => {
+      const questionContent = `${readingIndex + 1}.${qIndex + 1}. ${question.content}`;
+      formattedReading.push(renderHtmlToTextRun(questionContent));
+
+      // Bảng đáp án
+      formattedReading.push(
+        new Table({
+          width: { size: 100, type: WidthType.PERCENTAGE },
+          rows: [
+            new TableRow({
+              children: [
+                getAnswerCell(question.answers[0]?.text, 0),
+                getAnswerCell(question.answers[1]?.text, 1),
+              ],
+            }),
+            new TableRow({
+              children: [
+                getAnswerCell(question.answers[2]?.text, 2),
+                getAnswerCell(question.answers[3]?.text, 3),
+              ],
+            }),
+          ],
+          spacing: { before: 100, after: 200 },
+        })
+      );
+
+      // Khoảng cách giữa các câu
+      formattedReading.push(
+        new Paragraph({
+          children: [],
+          spacing: { after: 200 },
+        })
+      );
+    });
+  });
+
+  return formattedReading;
+};

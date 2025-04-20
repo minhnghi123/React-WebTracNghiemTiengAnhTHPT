@@ -15,6 +15,7 @@ type ListeningQuestionComponentProps = {
   onAnswerChange: (newAnswer: UserAnswer) => void;
   currentAnswer?: UserAnswer;
   viewOnly?: boolean; // Add viewOnly prop
+  questionIndex: number; // Add questionIndex prop
 };
 
 const ListeningQuestionSubmit: React.FC<ListeningQuestionComponentProps> = ({
@@ -23,6 +24,7 @@ const ListeningQuestionSubmit: React.FC<ListeningQuestionComponentProps> = ({
   onAnswerChange,
   currentAnswer,
   viewOnly = false, // Add viewOnly prop with default value
+  questionIndex, // Add questionIndex
 }) => {
   const displayContent = question.questionText || "";
 
@@ -134,6 +136,7 @@ const ListeningQuestionSubmit: React.FC<ListeningQuestionComponentProps> = ({
   return (
     <div className="bg-white p-4 rounded shadow mb-4">
       <h5 className="text-xl font-bold mb-2" style={{ whiteSpace: "pre-wrap" }}>
+        {questionIndex}. {/* Use questionIndex for numbering */}
         {questionType === "6742fb3bd56a2e75dbd817ec" ? (
           renderFillInTheBlanks()
         ) : (

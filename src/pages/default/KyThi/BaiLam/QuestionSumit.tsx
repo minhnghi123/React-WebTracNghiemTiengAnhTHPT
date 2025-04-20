@@ -9,6 +9,7 @@ export type UserAnswer = {
   questionId: string;
   selectedAnswerId?: string;
   userAnswer?: string[];
+  qu
 };
 
 type QuestionComponentProps = {
@@ -18,6 +19,7 @@ type QuestionComponentProps = {
   currentAnswer?: UserAnswer;
   index: number;
   viewOnly?: boolean; // Add viewOnly prop
+  questionIndex: number; // Add questionIndex prop
 };
 
 const QuestionSubmit: React.FC<QuestionComponentProps> = ({
@@ -27,6 +29,7 @@ const QuestionSubmit: React.FC<QuestionComponentProps> = ({
   currentAnswer,
   index,
   viewOnly = false, // Add viewOnly prop with default value
+  questionIndex, // Add questionIndex
 }) => {
   const [localAnswer, setLocalAnswer] = useState<UserAnswer>(
     currentAnswer || { questionId: question._id || "", userAnswer: [] }
@@ -45,7 +48,7 @@ const QuestionSubmit: React.FC<QuestionComponentProps> = ({
     if (viewOnly) return; // Disable interaction if viewOnly
     const newAnswer: UserAnswer = { questionId, selectedAnswerId };
     setLocalAnswer(newAnswer);
-    onAnswerChange(newAnswer);
+    onAnswerChange({ ...newAnswer, questionType }); // Include questionType
   };
 
   const handleFillBlankInputChange = (
@@ -63,14 +66,14 @@ const QuestionSubmit: React.FC<QuestionComponentProps> = ({
       userAnswer: currentUserAnswers,
     };
     setLocalAnswer(newAnswer);
-    onAnswerChange(newAnswer);
+    onAnswerChange({ ...newAnswer, questionType }); // Include questionType
   };
 
   const handleTrueFalseChange = (questionId: string, value: string) => {
     if (viewOnly) return; // Disable interaction if viewOnly
     const newAnswer: UserAnswer = { questionId, userAnswer: [value] };
     setLocalAnswer(newAnswer);
-    onAnswerChange(newAnswer);
+    onAnswerChange({ ...newAnswer, questionType }); // Include questionType
   };
 
   const renderFillInBlankContent = () => {
@@ -134,7 +137,7 @@ const QuestionSubmit: React.FC<QuestionComponentProps> = ({
           marginBottom: 16,
         }}
       >
-        {index + 1}.{" "}
+        {questionIndex}. {/* Use questionIndex for numbering */}
         {questionType === "6742fb3bd56a2e75dbd817ec" ? (
           renderFillInBlankContent()
         ) : (

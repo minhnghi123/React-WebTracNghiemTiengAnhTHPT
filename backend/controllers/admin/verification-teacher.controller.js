@@ -3,6 +3,9 @@ import { TaiKhoan } from "../../models/Taikhoan.model.js";
 import { generateTokenAndSetToken } from "../../utils/generateToken.util.js";
 import { sendMail } from "../../helpers/sendMail.helper.js";
 
+// Ensure the sendMail helper is configured with valid SMTP credentials
+// Example: Check the sendMail.helper.js file for proper configuration
+
 export async function getVerificationRequests(req, res) {
   try {
     const verificationRequests = await VerificationRequest.find();
@@ -52,7 +55,7 @@ export async function approveTeacher(req, res) {
       role: verificationRequest.role,
     });
     await newUser.save();
-    generateTokenAndSetToken(newUser._id, res); //jwt
+    // generateTokenAndSetToken(newUser._id, res); //jwt
     sendMail(
       newUser.email,
       "Tài khoản đã được phê duyệt",

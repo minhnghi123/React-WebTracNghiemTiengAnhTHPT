@@ -293,37 +293,45 @@ const CreateQuestionModal: React.FC<CreateQuestionModalProps> = ({
             <Form.Item label="Đáp án">
               {question.answers.map((answer, index) => (
                 <div
-                  key={index}
-                  className={clsx(
-                    "answer-container",
-                    answer.isCorrect
-                      ? "answer-correct"
-                      : "answer-incorrect"
-                  )}
-                >
-                  <div className="answer-input">
-                    <Input
-                      name="text"
-                      value={answer.text}
-                      onChange={(e) => handleAnswerChange(index, e)}
-                      placeholder={`Đáp án ${index + 1}`}
-                    />
-                  </div>
-                  <div className="answer-actions">
-                    <Input
-                      type="checkbox"
-                      name="isCorrect"
-                      checked={answer.isCorrect}
-                      onChange={(e) => handleCheckboxChange(index, e)}
-                    />
-                    <Button
-                      type="link"
-                      icon={<CloseCircleOutlined />}
-                      onClick={() => handleRemoveAnswer(index)}
-                      danger
-                    />
-                  </div>
+                key={index}
+                className={clsx(
+                  "answer-container",
+                  answer.isCorrect ? "answer-correct" : "answer-incorrect"
+                )}
+                style={{ display: "flex", alignItems: "flex-start", gap: "16px" }}
+              >
+                <div className="answer-input" style={{ flex: 1 }}>
+                  <Input
+                    name="text"
+                    value={answer.text}
+                    onChange={(e) => handleAnswerChange(index, e)}
+                    placeholder={`Đáp án ${index + 1}`}
+                  />
                 </div>
+                <div
+                  className="answer-actions"
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    gap: "8px",
+                  }}
+                >
+                  <Input
+                    type="checkbox"
+                    name="isCorrect"
+                    checked={answer.isCorrect}
+                    onChange={(e) => handleCheckboxChange(index, e)}
+                  />
+                  <Button
+                    type="link"
+                    icon={<CloseCircleOutlined />}
+                    onClick={() => handleRemoveAnswer(index)}
+                    danger
+                  />
+                </div>
+              </div>
+              
               ))}
               <Button type="dashed" onClick={handleAddAnswer}>
                 Thêm đáp án

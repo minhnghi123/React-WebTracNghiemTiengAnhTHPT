@@ -10,7 +10,6 @@ const listeningQuestionSchema = new Schema(
     },
     questionText: {
       type: String,
-      required: true,
       trim: true,
     },
     questionType: {
@@ -26,7 +25,7 @@ const listeningQuestionSchema = new Schema(
         },
         optionText: {
           type: String,
-          required: true,
+          default: "",
         },
         isCorrect: {
           type: Boolean,

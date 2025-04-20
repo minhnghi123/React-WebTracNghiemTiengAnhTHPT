@@ -10,12 +10,7 @@ import { ENV_VARS } from "../../config/envVars.config.js";
 import { Audio } from "../../models/Audio.model.js";
 import ListeningExam from "../../models/listeningExam.model.js";
 
-// Map database question type names to standardized names
-const questionTypeMapping = {
-  "Mutiple Choices": "Multiple Choice Questions",
-  "Fill in the blank": "Fill in the Blanks",
-  "True/False/Not Given": "True/False/Not Given",
-};
+
 
 // [GET]: /result/
 // Lấy tất cả kết quả (không bị xóa và đã hoàn thành) và populate các trường liên quan
@@ -78,566 +73,223 @@ export const getAllListeningResults = async (req, res) => {
 
 // [POST]: /result/submit
 // Xử lý nộp bài thi: kiểm tra thời gian, tính điểm, cập nhật kết quả và trả về phản hồi
+// Map database type names to switch-case labels
+const questionTypeMapping = {
+  "Multiple Choices":      "Multiple Choices",
+  "Fill in the blank":     "Fill in the Blanks",
+  "True/False/Not Given":  "True/False/Not Given",
+};
+
 export const submitExam = async (req, res) => {
   try {
-    const { resultId, answers, listeningAnswers, unansweredQuestions } =
-      req.body;
-    // Kiểm tra tính hợp lệ của dữ liệu đầu vào
-    if (
-      !resultId ||
-      !Array.isArray(answers) ||
-      !Array.isArray(listeningAnswers)
-    ) {
+    const { resultId, answers = [], listeningAnswers = [], unansweredQuestions = [] } = req.body;
+    if (!resultId || !Array.isArray(answers) || !Array.isArray(listeningAnswers)) {
       return res.status(400).json({ message: "Invalid input data." });
     }
 
-    // Tìm kết quả bài thi đang trong trạng thái chưa hoàn thành
-    const existingResult = await Result.findOne({
-      _id: resultId,
-      isCompleted: false,
-    }).populate({
-      path: "examId",
-      populate: [
-        {
-          path: "questions",
-          populate: { path: "questionType", select: "name" },
-        },
-        {
-          path: "listeningExams",
-          populate: {
-            path: "questions",
-            populate: { path: "questionType", select: "name" },
-          },
-        },
-      ],
-    });
+    // Fetch ongoing exam result
+    const existingResult = await Result.findOne({ _id: resultId, isCompleted: false })
+      .populate({
+        path: "examId",
+        populate: [
+          { path: "questions", populate: { path: "questionType", select: "name" } },
+          { path: "listeningExams", populate: { path: "questions", populate: { path: "questionType", select: "name" } } }
+        ]
+      });
 
     if (!existingResult) {
-      return res.status(400).json({
-        code: 400,
-        message: "No ongoing exam found for this user.",
-      });
+      return res.status(400).json({ code: 400, message: "No ongoing exam found for this user." });
     }
-
     const exam = existingResult.examId;
     if (!exam) {
       return res.status(400).json({ code: 400, message: "Exam not found." });
     }
 
-    // Nếu thời gian kết thúc đã vượt quá thì vẫn tính điểm dựa trên câu trả lời đã lưu
+    // If time expired, finalize existing answers
     if (new Date() > existingResult.endTime) {
-      let score = 0;
-      let correctAnswer = 0;
-      let wrongAnswer = 0;
-      if (Array.isArray(existingResult.questions)) {
-        existingResult.questions.forEach((q) => {
-          if (q.isCorrect) {
-            score++;
-            correctAnswer++;
-          } else {
-            wrongAnswer++;
-          }
-        });
-      }
-      if (Array.isArray(existingResult.listeningQuestions)) {
-        existingResult.listeningQuestions.forEach((q) => {
-          if (q.isCorrect) {
-            score++;
-            correctAnswer++;
-          } else {
-            wrongAnswer++;
-          }
-        });
-      }
-      existingResult.score = score;
-      existingResult.correctAnswer = correctAnswer;
-      existingResult.wrongAnswer = wrongAnswer;
-      existingResult.isCompleted = true;
-      existingResult.endTime = new Date();
+      let score = 0, correctAnswer = 0, wrongAnswer = 0;
+      existingResult.questions?.forEach(q => q.isCorrect ? (score++, correctAnswer++) : wrongAnswer++);
+      existingResult.listeningQuestions?.forEach(q => q.isCorrect ? (score++, correctAnswer++) : wrongAnswer++);
+      Object.assign(existingResult, { score, correctAnswer, wrongAnswer, isCompleted: true, endTime: new Date() });
       await existingResult.save();
-      return res.status(400).json({
-        code: 400,
-        message: "Exam time has expired. Final score computed.",
-        result: existingResult,
-      });
+      return res.status(400).json({ code: 400, message: "Exam time has expired. Final score computed.", result: existingResult });
     }
-    console.log("existingResult", existingResult);
 
-    // Khởi tạo các biến tính điểm và lưu chi tiết câu trả lời
-    let score = 0;
-    let correctAnswer = 0;
-    let wrongAnswer = 0;
-    let unAnswerQ = unansweredQuestions?.length || 0;
+    // Initialize scoring and details
+    let score = 0, correctAnswer = 0, wrongAnswer = 0;
+    let unAnswerQ = unansweredQuestions.length;
     const questionDetails = [];
     const listeningQuestionDetails = [];
-    let wrongAnswerByKnowledge = {};
-    let incorrectAnswer = [];
+    const wrongAnswerByKnowledge = {};
+    const incorrectAnswer = [];
     let answerDetail = "";
-    // Xử lý các câu hỏi chưa trả lời
-    for (const questionId of unansweredQuestions) {
-      const question =
-        exam.questions.find((q) => String(q._id) === String(questionId)) ||
-        exam.listeningExams
-          .flatMap((le) => le.questions)
-          .find((q) => String(q._id) === String(questionId));
 
+    // Handle unanswered questions
+    for (const qId of unansweredQuestions) {
+      const question = exam.questions.find(q => String(q._id) === String(qId))
+        || exam.listeningExams.flatMap(le => le.questions).find(q => String(q._id) === String(qId));
       if (!question) {
-        return res.status(400).json({
-          code: 400,
-          message: `Question ${questionId} not found in the exam or listening exams.`,
-        });
+        return res.status(400).json({ code: 400, message: `Question ${qId} not found.` });
       }
-
-      // Thêm câu hỏi chưa trả lời vào danh sách câu sai
       wrongAnswer++;
-      const knowledge = question?.knowledge;
-      if (!wrongAnswerByKnowledge[knowledge]) {
-        wrongAnswerByKnowledge[knowledge] = 0;
-      }
-      wrongAnswerByKnowledge[knowledge]++;
-
-      // Thêm chi tiết câu hỏi chưa trả lời
+      const know = question.knowledge;
+      wrongAnswerByKnowledge[know] = (wrongAnswerByKnowledge[know] || 0) + 1;
       questionDetails.push({
         questionId: question._id,
-        content: question.content || " ",
-        answers: question.answers,
-        userAnswers: [], // Không có câu trả lời
-        correctAnswerForBlank: Array.isArray(question.answers)
-          ? question.answers.map((ans) => ans.correctAnswerForBlank)
-          : [], // Ensure answers is an array
+        content: question.content || question.questionText || "",
+        answers: question.answers || question.options,
+        userAnswers: [],
+        correctAnswerForBlank: question.answers?.map(a => a.correctAnswerForBlank) || [],
         audio: question.audio || null,
-        isCorrect: false, // Đánh dấu là sai
+        isCorrect: false
       });
-
       incorrectAnswer.push({
-        questionContent: question.content,
-        answerDetail: Array.isArray(question.answers)
-          ? question.answers
-              .map((ans) => ans.text || ans.correctAnswerForBlank)
-              .join("\n")
-          : "", // Ensure answers is an array
-        knowledge,
+        questionContent: question.content || question.questionText,
+        answerDetail: (question.answers || question.options).map(a => a.text || a.correctAnswerForBlank || a.optionText).join("\n"),
+        knowledge: know
       });
     }
-    // Xử lý câu trả lời cho các câu hỏi (questions)
-    for (const answer of answers) {
-      const { questionId, selectedAnswerId, userAnswer } = answer;
-      const question =
-        exam.questions.find((q) => String(q._id) === String(questionId)) ||
-        exam.listeningExams
-          .flatMap((le) => le.questions)
-          .find((q) => String(q._id) === String(questionId));
 
+    // Process standard answers
+    for (const ans of answers) {
+      const { questionId, selectedAnswerId, userAnswer } = ans;
+      const question = exam.questions.find(q => String(q._id) === String(questionId))
+        || exam.listeningExams.flatMap(le => le.questions).find(q => String(q._id) === String(questionId));
       if (!question) {
-        return res.status(400).json({
-          code: 400,
-          message: `Question ${questionId} not found in the exam or listening exams.`,
-        });
+        return res.status(400).json({ code: 400, message: `Question ${questionId} not found.` });
       }
+      const typeName = questionTypeMapping[question.questionType.name] || question.questionType.name;
       let isCorrect = false;
       let detail = {};
 
-      switch (
-        questionTypeMapping[question.questionType.name] ||
-        question.questionType.name
-      ) {
-        case "Fill in the Blanks":
-          if (Array.isArray(userAnswer)) {
-            let correctCount = 0;
-            const correctAnswers = question.answers.map(
-              (ans) => ans.correctAnswerForBlank
-            );
-            const userAnswersDetail = userAnswer.map((ua, index) => {
-              const correctAns = correctAnswers[index]
-                ? correctAnswers[index].trim().toLowerCase()
-                : "";
-              const userAns = ua ? ua.trim().toLowerCase() : "";
-              const answerIsCorrect = correctAns === userAns;
-              if (answerIsCorrect) correctCount++;
-              return {
-                userAnswer: ua,
-                answerId: question.answers[index]?._id,
-                isCorrect: answerIsCorrect,
-              };
-            });
-            isCorrect = correctCount === question?.answers?.length;
-            detail = {
-              questionId: question._id,
-              content: question.content || " ",
-              answers: question.answers,
-              userAnswers: userAnswersDetail,
-              correctAnswerForBlank: correctAnswers,
-              audio: question.audio || null,
-              isCorrect,
-            };
-          } else if (question.audio) {
-            const correctAnswers = question.answers
-              .map((ans) => ({
-                correctAnswer: ans.correctAnswerForBlank,
-                answerId: ans._id,
-              }))
-              .filter((ans) => Boolean(ans.correctAnswer));
-            if (!correctAnswers.length) {
-              return res.status(500).json({
-                message: `Question ${questionId} has no correct answers.`,
-              });
-            }
-            if (!Array.isArray(userAnswer)) {
-              return res.status(400).json({
-                message:
-                  "Invalid format for userAnswer. It should be an array.",
-              });
-            }
-            const userAnswersDetail = userAnswer.map((ua) => {
-              const matchedAnswer = correctAnswers.find(
-                (correct) =>
-                  ua.trim().toLowerCase() ===
-                  correct.correctAnswer.trim().toLowerCase()
-              );
-              return {
-                userAnswer: ua,
-                answerId: matchedAnswer ? matchedAnswer.answerId : null,
-                isCorrect: !!matchedAnswer,
-              };
-            });
-            const correctCount = userAnswersDetail.filter(
-              (ans) => ans.isCorrect
-            ).length;
-            isCorrect = correctCount === correctAnswers.length;
-            detail = {
-              questionId: question._id,
-              content: question.content || " ",
-              answers: question.answers,
-              userAnswers: userAnswersDetail,
-              correctAnswerForBlank: correctAnswers.map(
-                (correct) => correct.correctAnswer
-              ),
-              audio: question.audio,
-              isCorrect,
-            };
-          }
-          break;
-
-        case "Multiple Choices":
-          const correctAnswerObj = question.answers.find(
-            (ans) => ans.isCorrect
-          );
-          if (!correctAnswerObj) {
-            return res.status(500).json({
-              message: `Question ${questionId} has no correct answer.`,
-            });
-          }
-          isCorrect =
-            selectedAnswerId &&
-            String(correctAnswerObj._id) === String(selectedAnswerId);
-          detail = {
-            questionId: question._id,
-            content: question.content || " ",
-            answers: question.answers,
-            selectedAnswerId,
-            userAnswers: [{ userAnswer: selectedAnswerId }],
-            correctAnswerForBlank: null,
-            audio: question.audio || null,
-            isCorrect,
-          };
-          break;
-
-        case "True/False/Not Given":
-          if (!Array.isArray(userAnswer)) {
-            return res.status(400).json({
-              message: `Invalid answer format for question ${questionId}.`,
-            });
-          }
-          const correctAnswers = question.correctAnswerForTrueFalseNGV || [];
-          const userAnswersDetail = userAnswer.map((ua) => ({
-            userAnswer: ua,
-            isCorrect: correctAnswers.includes(ua.trim().toLowerCase()),
-          }));
-          const correctCount = userAnswersDetail.filter(
-            (ans) => ans.isCorrect
-          ).length;
-          isCorrect = correctCount === correctAnswers.length;
-          detail = {
-            questionId: question._id,
-            content: question.content || " ",
-            answers: [], // No options for True/False/Not Given
-            userAnswers: userAnswersDetail,
-            correctAnswerForBlank: correctAnswers,
-            audio: question.audio || null,
-            isCorrect,
-          };
-          break;
-
-        default:
-          return res.status(400).json({
-            message: `Unsupported question type: ${question.questionType.name}`,
+      switch (typeName) {
+        case "Fill in the Blanks": {
+          const blanks = question.answers.map(a => a.correctAnswerForBlank.trim().toLowerCase());
+          const userDetails = (userAnswer || []).map((ua, i) => {
+            const ansClean = ua?.trim().toLowerCase() || "";
+            const correct = blanks[i] || "";
+            const ok = ansClean === correct;
+            return { userAnswer: ua, answerId: question.answers[i]?._id, isCorrect: ok };
           });
+          isCorrect = userDetails.length === blanks.length && userDetails.every(d => d.isCorrect);
+          detail = { questionId: question._id, content: question.content || "", answers: question.answers, userAnswers: userDetails, correctAnswerForBlank: blanks, audio: question.audio, isCorrect };
+          break;
+        }
+        case "Multiple Choices": {
+          const correctObj = question.answers.find(a => a.isCorrect);
+          if (!correctObj) return res.status(500).json({ message: `Question ${questionId} has no correct answer.` });
+          isCorrect = String(correctObj._id) === String(selectedAnswerId);
+          detail = { questionId: question._id, content: question.content || "", answers: question.answers, selectedAnswerId, userAnswers: [{ userAnswer: selectedAnswerId }], correctAnswerForBlank: null, audio: question.audio, isCorrect };
+          break;
+        }
+        case "True/False/Not Given": {
+          const correctTF = question.correctAnswerForTrueFalseNGV || [];
+          const userTF = (userAnswer || []).map(ua => ({ userAnswer: ua, isCorrect: correctTF.includes(ua.trim().toLowerCase()) }));
+          isCorrect = userTF.length === correctTF.length && userTF.every(d => d.isCorrect);
+          detail = { questionId: question._id, content: question.content || "", answers: [], userAnswers: userTF, correctAnswerForBlank: correctTF, audio: question.audio, isCorrect };
+          break;
+        }
+        default:
+          return res.status(400).json({ message: `Unsupported question type: ${question.questionType.name}` });
       }
 
-      if (isCorrect) {
-        correctAnswer++;
-        score++;
-      } else {
+      if (isCorrect) { correctAnswer++; score++; } else {
         wrongAnswer++;
-        let questionContent = question?.content;
-        let answerTmp = question?.answers;
-        for (const ans of answerTmp) {
-          if (!ans.text) {
-            answerDetail += ans.correctAnswerForBlank;
-          } else {
-            answerDetail += ans.text;
-          }
-          answerDetail += "\n";
-        }
-        const knowledge = question?.knowledge;
-        if (!wrongAnswerByKnowledge[knowledge]) {
-          wrongAnswerByKnowledge[knowledge] = 0;
-        }
-        wrongAnswerByKnowledge[knowledge]++;
-        incorrectAnswer.push({
-          questionContent,
-          answerDetail,
-          knowledge,
-        });
+        const know = question.knowledge;
+        wrongAnswerByKnowledge[know] = (wrongAnswerByKnowledge[know] || 0) + 1;
+        answerDetail += (question.answers || []).map(a => a.text || a.correctAnswerForBlank).join("\n") + "\n";
+        incorrectAnswer.push({ questionContent: question.content, answerDetail, knowledge: know });
       }
-
       questionDetails.push(detail);
     }
 
-    // Xử lý câu trả lời cho listeningQuestions
-    // Vì cấu trúc của listening question khác, ta sử dụng các trường: questionText, options, correctAnswer, blankAnswer
-    for (const answer of listeningAnswers) {
-      const { questionId, selectedAnswerId, userAnswer } = answer;
-      const question = exam.listeningExams
-        .flatMap((le) => le.questions)
-        .find((q) => String(q._id) === String(questionId));
-
+    // Process listening answers
+    for (const ans of listeningAnswers) {
+      const { questionId, selectedAnswerId, userAnswer } = ans;
+      const question = exam.listeningExams.flatMap(le => le.questions).find(q => String(q._id) === String(questionId));
       if (!question) {
-        return res.status(400).json({
-          code: 400,
-          message: `Listening Question ${questionId} not found in the listening exams.`,
-        });
+        return res.status(400).json({ code: 400, message: `Listening Question ${questionId} not found.` });
       }
+      const typeName = questionTypeMapping[question.questionType.name] || question.questionType.name;
       let isCorrect = false;
       let detail = {};
-      switch (
-        questionTypeMapping[question.questionType.name] ||
-        question.questionType.name
-      ) {
-        case "Fill in the Blanks":
-          if (Array.isArray(userAnswer)) {
-            let correctCount = 0;
-            const correctAnswers = question.blankAnswer
-              .split(",")
-              .map((ans) => ans.trim().toLowerCase());
-            const userAnswersDetail = userAnswer.map((ua, index) => {
-              const correctAns = correctAnswers[index] || "";
-              const userAns = ua ? ua.trim().toLowerCase() : "";
-              const answerIsCorrect = correctAns === userAns;
-              if (answerIsCorrect) correctCount++;
-              return {
-                userAnswer: ua,
-                answerId: null,
-                isCorrect: answerIsCorrect,
-              };
-            });
-            isCorrect = correctCount === correctAnswers.length;
-            detail = {
-              questionId: question._id,
-              content: question.questionText || " ",
-              answers: question.options || [],
-              userAnswers: userAnswersDetail,
-              correctAnswerForBlank: correctAnswers,
-              audio: question.audio || null,
-              isCorrect,
-            };
-          } else if (question.audio) {
-            const correctAnswers = question.blankAnswer
-              .split(",")
-              .map((ans) => ans.trim().toLowerCase());
-            if (!correctAnswers.length) {
-              return res.status(500).json({
-                message: `Listening Question ${questionId} has no correct answers.`,
-              });
-            }
-            if (!Array.isArray(userAnswer)) {
-              return res.status(400).json({
-                message:
-                  "Invalid format for userAnswer. It should be an array.",
-              });
-            }
-            const userAnswersDetail = userAnswer.map((ua) => {
-              const matchedAnswer = correctAnswers.find(
-                (correct) => ua.trim().toLowerCase() === correct
-              );
-              return {
-                userAnswer: ua,
-                answerId: null,
-                isCorrect: !!matchedAnswer,
-              };
-            });
-            const correctCount = userAnswersDetail.filter(
-              (ans) => ans.isCorrect
-            ).length;
-            isCorrect = correctCount === correctAnswers.length;
-            detail = {
-              questionId: question._id,
-              content: question.questionText || " ",
-              answers: question.options || [],
-              userAnswers: userAnswersDetail,
-              correctAnswerForBlank: correctAnswers,
-              audio: question.audio,
-              isCorrect,
-            };
-          }
-          break;
 
-        case "Multiple Choices":
-          // Lấy câu trả lời đúng từ mảng correctAnswer (giả sử chỉ có 1 phần tử đúng)
-          const correctAnswerObj = question.correctAnswer[0];
-          if (!correctAnswerObj) {
-            return res.status(400).json({
-              message: `Listening Question ${question._id} has no correct ans`,
-            });
-          }
-          // Transform các option của câu hỏi để thêm trường isCorrect cho mỗi option
-          const transformedOptions = question.options.map((opt) => {
-            // opt.option_id chứa id của option, so sánh với correctAnswerObj.answer_id
-            return {
-              ...opt.toObject(),
-              isCorrect:
-                String(opt.option_id) === String(correctAnswerObj.answer_id),
-              optionText: opt.optionText, // Include optionText field
-            };
-          });
-          isCorrect =
-            String(correctAnswerObj.answer_id) === String(selectedAnswerId);
-          detail = {
-            questionId: question._id,
-            content: question.questionText || " ",
-            answers: transformedOptions,
-            selectedAnswerId,
-            userAnswers: [{ userAnswer: selectedAnswerId }],
-            correctAnswerForBlank: null,
-            audio: question.audio || null,
-            isCorrect,
-          };
+      switch (typeName) {
+        case "Fill in the Blanks": {
+          const blanks = question.blankAnswer.split(",").map(a => a.trim().toLowerCase());
+          const userDetails = (userAnswer || []).map((ua, i) => ({ userAnswer: ua, answerId: null, isCorrect: ua.trim().toLowerCase() === blanks[i] }));
+          isCorrect = userDetails.length === blanks.length && userDetails.every(d => d.isCorrect);
+          detail = { questionId: question._id, content: question.questionText || "", answers: question.options || [], userAnswers: userDetails, correctAnswerForBlank: blanks, audio: question.audio, isCorrect };
           break;
-
+        }
+        case "Multiple Choices": {
+          const correctObj = question.correctAnswer[0];
+          if (!correctObj) return res.status(500).json({ message: `Listening Question ${questionId} has no correct answer.` });
+          const transformed = (question.options || []).map(opt => ({ ...opt.toObject(), isCorrect: String(opt.option_id) === String(correctObj.answer_id) }));
+          isCorrect = String(correctObj.answer_id) === String(selectedAnswerId);
+          detail = { questionId: question._id, content: question.questionText || "", answers: transformed, selectedAnswerId, userAnswers: [{ userAnswer: selectedAnswerId }], correctAnswerForBlank: null, audio: question.audio, isCorrect };
+          break;
+        }
+        case "True/False/Not Given": {
+          const correctTF = question.correctAnswerForTrueFalseNGV || [];
+          const userTF = (userAnswer || []).map(ua => ({ userAnswer: ua, isCorrect: correctTF.includes(ua.trim().toLowerCase()) }));
+          isCorrect = userTF.length === correctTF.length && userTF.every(d => d.isCorrect);
+          detail = { questionId: question._id, content: question.questionText || "", answers: [], userAnswers: userTF, correctAnswerForBlank: correctTF, audio: question.audio, isCorrect };
+          break;
+        }
         default:
-          return res.status(400).json({
-            message: `Unsupported question type: ${question.questionType.name}`,
-          });
+          return res.status(400).json({ message: `Unsupported question type: ${question.questionType.name}` });
       }
 
-      if (isCorrect) {
-        correctAnswer++;
-        score++;
-      } else {
+      if (isCorrect) { correctAnswer++; score++; } else {
         wrongAnswer++;
-        let questionContent = question?.questionText;
-        let answerTmp = question?.options || [];
-        for (const ans of answerTmp) {
-          if (!ans.optionText) {
-            answerDetail += ans.correctAnswerForBlank;
-          } else {
-            answerDetail += ans.optionText;
-          }
-          answerDetail += "\n";
-        }
-        const knowledge = question?.knowledge;
-        if (!wrongAnswerByKnowledge[knowledge]) {
-          wrongAnswerByKnowledge[knowledge] = 0;
-        }
-        wrongAnswerByKnowledge[knowledge]++;
-        incorrectAnswer.push({
-          questionContent,
-          answerDetail,
-          knowledge,
-        });
+        const know = question.knowledge;
+        wrongAnswerByKnowledge[know] = (wrongAnswerByKnowledge[know] || 0) + 1;
+        answerDetail += (question.options || []).map(a => a.optionText || a.correctAnswerForBlank).join("\n") + "\n";
+        incorrectAnswer.push({ questionContent: question.questionText, answerDetail, knowledge: know });
       }
       listeningQuestionDetails.push(detail);
     }
 
-    // Lấy gợi ý bài tập cho các kiến thức bị sai
-    const suggestionQuestion = await Question.find({
-      knowledge: { $in: Object.keys(wrongAnswerByKnowledge) },
-    }).select("_id content");
-    //tong cau
-    const totalQuestions =
-      (exam.questions?.length || 0) +
-      exam.listeningExams.reduce(
-        (acc, le) => acc + (le.questions?.length || 0),
-        0
-      );
-    // / Tính điểm theo hệ 10.0
-    const finalScore = (correctAnswer / totalQuestions) * 10;
+    // Finalize and save
+    const suggestionQuestion = await Question.find({ knowledge: { $in: Object.keys(wrongAnswerByKnowledge) } }).select("_id content");
+    const totalQuestions = (exam.questions?.length || 0) + exam.listeningExams.reduce((a, le) => a + (le.questions?.length || 0), 0);
+    const finalScore = Math.round((correctAnswer / totalQuestions * 10) * 100) / 100;
 
-    // Làm tròn điểm đến 2 chữ số thập phân
-    const roundedScore = Math.round(finalScore * 100) / 100;
-    // Cập nhật kết quả vào CSDL
-    existingResult.score = roundedScore;
-    existingResult.correctAnswer = correctAnswer;
-    existingResult.wrongAnswer = wrongAnswer;
-    existingResult.questions = questionDetails;
-    existingResult.listeningQuestions = listeningQuestionDetails;
-    existingResult.suggestionQuestion = suggestionQuestion;
-    existingResult.wrongAnswerByKnowledge = wrongAnswerByKnowledge;
-    existingResult.answerDetail = answerDetail;
-    existingResult.isCompleted = true; // Đánh dấu hoàn thành
-    existingResult.endTime = new Date(); // Cập nhật thời gian kết thúc
-
+    Object.assign(existingResult, {
+      score: finalScore,
+      correctAnswer,
+      wrongAnswer,
+      questions: questionDetails,
+      listeningQuestions: listeningQuestionDetails,
+      suggestionQuestion,
+      wrongAnswerByKnowledge,
+      answerDetail,
+      isCompleted: true,
+      endTime: new Date()
+    });
     await existingResult.save();
 
-    // Lấy video từ Youtube dựa trên kiến thức bị sai (giả sử hàm getYoutubeVideos đã được định nghĩa)
-    let videos = {};
-    for (const key in wrongAnswerByKnowledge) {
-      const video = await getYoutubeVideos(key);
-      videos[key] = video;
-    }
-
-    // Tạo prompt cho Gemini (ví dụ gửi đến AI để nhận phản hồi)
-    let prompt = "";
-    let responseLength = 0;
-    let arrResponse = ""; // Initialize arrResponse to avoid ReferenceError
-
-    for (const q of incorrectAnswer || []) {
-      let ex = "Đây là câu hỏi tiếng anh, ";
-      prompt += ex;
-
-      // Check if the question is a listening question
-      if (q.isListening) {
-        prompt += "Câu hỏi nghe: ";
-        prompt += (q.questionText || "") + "\n";
-        prompt += "Đáp án: " + (q.answerDetail || "") + "\n";
-      } else {
-        prompt += "Câu hỏi đọc: ";
-        prompt += (q.content || "") + "\n";
-        prompt += "Đáp án: " + (q.answerDetail || "") + "\n";
-      }
-
-      let know = "Thuộc loại kiến thức :";
-      prompt += know + "\n";
-      prompt += q.knowledge + "\n";
-      prompt +=
-        "Học sinh đã làm sai câu này, bạn hãy đưa ra lời khuyên, tư vấn lộ trình học để đạt kết quả cao hơn ở chủ đề này\n";
-      responseLength += prompt.length;
-
-      // If the response exceeds a certain length, summarize
-      if (responseLength > 1000) {
-        prompt = "Học sinh đã làm các câu hỏi tiếng anh của có đề câu này dưới đây. Bạn hãy đưa ra lời khuyên, tư vấn lộ trình học để đạt kết quả cao hơn ở chủ đề này. Có quá nhiều câu hỏi sai. Hãy tập trung vào các kiến thức sau: ";
-        prompt += Object.keys(wrongAnswerByKnowledge || {}).join(", ");
-        break;
+    // Fetch YouTube videos
+    const videos = {};
+    for (const key of Object.keys(wrongAnswerByKnowledge)) {
+      try {
+        videos[key] = await getYoutubeVideos(key);
+      } catch (error) {
+        console.error(`Error fetching YouTube videos for knowledge: ${key}`, error.message);
+        videos[key] = []; // Fallback to an empty array if the API call fails
       }
     }
-    arrResponse = prompt;
 
+    // Build AI prompt
+    let prompt2 = incorrectAnswer.map(q => `Đây là câu hỏi tiếng anh (${q.questionContent}), đáp án: ${q.answerDetail}, kiến thức: ${q.knowledge}.`).join(" ");
+    let prompt = "Hãy đưa ra lời khuyên, lộ trình học tiếng Anh biết học sinh đẫ làm các câu trả lời sai sau đây: " + prompt2;
     return res.status(200).json({
       code: 200,
       message: "Exam submitted successfully!",
       examId: exam._id,
       userId: existingResult.userId,
-      score: roundedScore,
+      score: finalScore,
       correctAnswer,
       wrongAnswer,
       unAnswerQ,
@@ -647,14 +299,11 @@ export const submitExam = async (req, res) => {
       wrongAnswerByKnowledge,
       suggestionQuestion,
       videos,
-      arrResponse,
+      arrResponse: prompt
     });
   } catch (error) {
     console.error("Error processing exam:", error);
-    return res.status(500).json({
-      message: "Error submitting exam.",
-      error: error.message,
-    });
+    return res.status(500).json({ message: "Error submitting exam.", error: error.message });
   }
 };
 

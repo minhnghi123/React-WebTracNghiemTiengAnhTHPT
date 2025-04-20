@@ -13,11 +13,13 @@ const VerificationTeacher: React.FC = () => {
 
   const fetchTeachers = async () => {
     setLoading(true);
+    setError(null); // Reset error state before fetching
     try {
       const response = await AdminAPI.getVerificationRequests();
       setTeachers(response);
     } catch (err) {
-      setError('Failed to fetch teachers');
+      console.error("Error fetching teachers:", err);
+      setError("Không thể tải danh sách giáo viên. Vui lòng thử lại sau.");
     } finally {
       setLoading(false);
     }
@@ -30,20 +32,22 @@ const VerificationTeacher: React.FC = () => {
   const handleApprove = async (teacherId: string) => {
     try {
       await AdminAPI.approveTeacher(teacherId);
-      message.success('Teacher approved successfully');
-      fetchTeachers(); 
+      message.success("Phê duyệt giáo viên thành công");
+      setTimeout(fetchTeachers, 500); // Add delay to ensure backend updates are reflected
     } catch (err) {
-      message.error('Failed to approve teacher');
+      console.error("Error approving teacher:", err);
+      message.error("Không thể phê duyệt giáo viên. Vui lòng thử lại sau.");
     }
   };
 
   const handleReject = async (teacherId: string) => {
     try {
       await AdminAPI.rejectTeacher(teacherId);
-      message.success('Teacher rejected successfully');
-      fetchTeachers(); 
+      message.success("Từ chối giáo viên thành công");
+      setTimeout(fetchTeachers, 500); // Add delay to ensure backend updates are reflected
     } catch (err) {
-      message.error('Failed to reject teacher');
+      console.error("Error rejecting teacher:", err);
+      message.error("Không thể từ chối giáo viên. Vui lòng thử lại sau.");
     }
   };
 
@@ -184,11 +188,11 @@ const VerificationTeacher: React.FC = () => {
   ];
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <div>Đang tải dữ liệu...</div>;
   }
 
   if (error) {
-    return <div>{error}</div>;
+    return <div className="text-red-500">{error}</div>; // Display error in red for better visibility
   }
 
   return (

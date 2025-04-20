@@ -2,6 +2,8 @@ import Classroom from "../../models/Classroom.model.js";
 import { TaiKhoan } from "../../models/Taikhoan.model.js";
 import Result from "../../models/Result.model.js"; // Import model kết quả
 import XLSX from "xlsx"; // Import thư viện XLSX
+import jwt from "jsonwebtoken";
+import { ENV_VARS } from "../../config/envVars.config.js";
 
 export const createClassroom = async (req, res) => {
   try {
@@ -26,9 +28,22 @@ export const createClassroom = async (req, res) => {
 
 export const getAllClassrooms = async (req, res) => {
   try {
-    const classrooms = await Classroom.find({ isDeleted: false }).populate(
-      "teacherId students exams"
-    );
+    const token = req.cookies["jwt-token"];
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        message: "Bạn chưa đăng nhập",
+      });
+    }
+
+    const decoded = jwt.verify(token, ENV_VARS.JWT_SECRET);
+    const teacherId = decoded.userId;
+
+    const classrooms = await Classroom.find({
+      isDeleted: false,
+      teacherId,
+    }).populate("teacherId students exams");
+
     return res.status(200).json({
       success: true,
       message: "Lấy danh sách lớp học thành công",
