@@ -9,6 +9,7 @@ import {
   formatExamQuestions,
   formatFillInBlankQuestions,
   formatListeningQuestions,
+  formatReadingQuestions,
 } from "../../utils/examQuestions.helper.js";
 import fs from "fs";
 import path from "path";
@@ -561,6 +562,10 @@ export const exportExamIntoWord = async (req, res) => {
       // Kiểm tra nếu có câu hỏi bài nghe (Listening) và thêm vào section nếu có
       if (variant.questionsListening && variant.questionsListening.length > 0) {
         sectionChildren.push(...formatListeningQuestions(variant.questionsListening));
+      }
+
+      if (variant.questionsReading && variant.questionsReading.length > 0) {
+        sectionChildren.push(...formatReadingQuestions(variant.questionsReading));
       }
 
       // Tạo tài liệu Word với các câu hỏi
