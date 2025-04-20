@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import {
   Card,
   List,
@@ -13,19 +13,22 @@ import {
   Tabs,
   Avatar,
   Form,
-} from 'antd';
-import * as XLSX from 'xlsx';
-import { ClassroomAPI, Classroom, Student } from '@/services/teacher/ClassroomAPI';
-import { ExamAPI, Exam } from '@/services/teacher/Teacher';
-import ViewExamDetail from '../QuanLyDeThi/DeThi/deltailExam';
-import '../DetailClass.css';
-import { ColumnsType } from 'antd/es/table';
-import { ClassCodeCopy } from './copyClassID';
-import OverviewTab from './OverviewTab';
-import ExamsTab from './ExamsTab';
-import StudentsTab from './StudentsTab';
-import UpdateClassTab from './UpdateClassTab';
-
+} from "antd";
+import * as XLSX from "xlsx";
+import {
+  ClassroomAPI,
+  Classroom,
+  Student,
+} from "@/services/teacher/ClassroomAPI";
+import { ExamAPI, Exam } from "@/services/teacher/Teacher";
+import ViewExamDetail from "../QuanLyDeThi/DeThi/deltailExam";
+import "../DetailClass.css";
+import { ColumnsType } from "antd/es/table";
+import { ClassCodeCopy } from "./copyClassID";
+import OverviewTab from "./OverviewTab";
+import ExamsTab from "./ExamsTab";
+import StudentsTab from "./StudentsTab";
+import UpdateClassTab from "./UpdateClassTab";
 
 const { TabPane } = Tabs;
 
@@ -80,16 +83,18 @@ const DetailClass: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [listExam, setListExam] = useState<Exam[]>([]);
   const [listAllStudents, setListAllStudents] = useState<Student[]>([]);
-  const [searchExamTerm, setSearchExamTerm] = useState<string>('');
+  const [searchExamTerm, setSearchExamTerm] = useState<string>("");
   const [examCurrentPage, setExamCurrentPage] = useState<number>(1);
   const examPageSize = 5;
 
   // Các state của modal đã được giữ nguyên cho các tab liên quan đến bài thi, học sinh,...
   const [isExamModalOpen, setIsExamModalOpen] = useState<boolean>(false);
   const [examToView, setExamToView] = useState<Exam | null>(null);
-  const [isExamContentModalOpen, setIsExamContentModalOpen] = useState<boolean>(false);
-  const [isStudentListModalOpen, setIsStudentListModalOpen] = useState<boolean>(false);
-  const [searchStudentTerm, setSearchStudentTerm] = useState<string>('');
+  const [isExamContentModalOpen, setIsExamContentModalOpen] =
+    useState<boolean>(false);
+  const [isStudentListModalOpen, setIsStudentListModalOpen] =
+    useState<boolean>(false);
+  const [searchStudentTerm, setSearchStudentTerm] = useState<string>("");
   const [isStudentModalOpen, setIsStudentModalOpen] = useState<boolean>(false);
   const [studentToView, setStudentToView] = useState<Student | null>(null);
   const [failedStudents, setFailedStudents] = useState<Student[]>([]);
@@ -116,7 +121,7 @@ const DetailClass: React.FC = () => {
         }
       }
     } catch (error) {
-      setError('Lỗi khi lấy thông tin lớp học');
+      setError("Lỗi khi lấy thông tin lớp học");
     } finally {
       setLoading(false);
     }
@@ -135,13 +140,13 @@ const DetailClass: React.FC = () => {
           totalPages = response.pagination.totalPages;
           currentPage++;
         } else {
-          message.error('Lỗi khi lấy danh sách bài kiểm tra');
+          message.error("Lỗi khi lấy danh sách bài kiểm tra");
           break;
         }
       }
       setListExam(exams);
     } catch (error) {
-      message.error('Lỗi khi lấy danh sách bài kiểm tra');
+      message.error("Lỗi khi lấy danh sách bài kiểm tra");
     }
   };
 
@@ -175,13 +180,16 @@ const DetailClass: React.FC = () => {
         status: values.status,
       };
       if (classroom?._id) {
-        const updatedClassroom = await ClassroomAPI.updateClassroom(classroom._id, updateData);
-        message.success('Cập nhật lớp học thành công');
+        const updatedClassroom = await ClassroomAPI.updateClassroom(
+          classroom._id,
+          updateData
+        );
+        message.success("Cập nhật lớp học thành công");
         // Cập nhật lại thông tin lớp học sau khi update
         fetchClassroom();
       }
     } catch (error) {
-      message.error('Lỗi khi cập nhật lớp học');
+      message.error("Lỗi khi cập nhật lớp học");
     } finally {
       setUpdating(false);
     }
@@ -204,7 +212,7 @@ const DetailClass: React.FC = () => {
       fetchClassroom();
       message.success("Xóa học sinh thành công");
     } catch (err) {
-      setError('Lỗi khi xóa học sinh');
+      setError("Lỗi khi xóa học sinh");
       message.error("Lỗi khi xóa học sinh");
     }
   };
@@ -225,7 +233,7 @@ const DetailClass: React.FC = () => {
       fetchClassroom();
       message.success("Xóa bài kiểm tra thành công");
     } catch (err) {
-      setError('Lỗi khi xóa bài kiểm tra');
+      setError("Lỗi khi xóa bài kiểm tra");
       message.error("Lỗi khi xóa bài kiểm tra");
     }
   };
@@ -245,82 +253,98 @@ const DetailClass: React.FC = () => {
     reader.onload = async (evt: any) => {
       try {
         const binaryStr = evt.target.result;
-        const workbook = XLSX.read(binaryStr, { type: 'binary' });
+        const workbook = XLSX.read(binaryStr, { type: "binary" });
         const sheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[sheetName];
-        const jsonData: any[] = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+        const jsonData: any[] = XLSX.utils.sheet_to_json(worksheet, {
+          header: 1,
+        });
         if (jsonData.length <= 1) {
           message.error("File không có dữ liệu");
           return;
         }
-        const headers = jsonData[0].map((header: any) => header.toString().toLowerCase());
-        const idIndex = headers.indexOf('id');
-        const usernameIndex = headers.indexOf('username');
-        const emailIndex = headers.indexOf('email');
-  
+        const headers = jsonData[0].map((header: any) =>
+          header.toString().toLowerCase()
+        );
+        const idIndex = headers.indexOf("id");
+        const usernameIndex = headers.indexOf("username");
+        const emailIndex = headers.indexOf("email");
+
         if (idIndex === -1 && usernameIndex === -1 && emailIndex === -1) {
-          message.error("Không tìm thấy cột 'id', 'username' hoặc 'email' trong file Excel");
+          message.error(
+            "Không tìm thấy cột 'id', 'username' hoặc 'email' trong file Excel"
+          );
           return;
         }
-  
+
         const failed: Student[] = [];
         for (let i = 1; i < jsonData.length; i++) {
           const row = jsonData[i];
           const studentId = row[idIndex];
           const username = row[usernameIndex];
           const email = row[emailIndex];
-  
+
           if (!studentId && !username && !email) continue;
-  
+
           try {
             if (studentId) {
-              await ClassroomAPI.addStudentsToClassroom(_classroom_id || "", [studentId]);
+              await ClassroomAPI.addStudentsToClassroom(_classroom_id || "", [
+                studentId,
+              ]);
             } else if (username) {
-              const newid = listAllStudents.find((student) => student.username === username);
+              const newid = listAllStudents.find(
+                (student) => student.username === username
+              );
               if (newid) {
-                await ClassroomAPI.addStudentsToClassroom(_classroom_id || "", [newid._id]);
+                await ClassroomAPI.addStudentsToClassroom(_classroom_id || "", [
+                  newid._id,
+                ]);
               } else {
                 failed.push({
-                  _id: '',
-                  username: username || '',
-                  email: email || '',
-                  password: '',
-                  avatar: '',
-                  role: '',
+                  _id: "",
+                  username: username || "",
+                  email: email || "",
+                  password: "",
+                  avatar: "",
+                  role: "",
                   deleted: false,
-                  status: '',
-                  __v: 0
+                  status: "",
+                  __v: 0,
                 });
               }
             } else if (email) {
-              const newid = listAllStudents.find((student) => student.email === email);
+              const newid = listAllStudents.find(
+                (student) => student.email === email
+              );
               if (newid) {
-                await ClassroomAPI.addStudentsToClassroom(_classroom_id || "", [newid._id]);
+                await ClassroomAPI.addStudentsToClassroom(_classroom_id || "", [
+                  newid._id,
+                ]);
               } else {
                 failed.push({
-                  _id: '',
-                  username: username || '',
-                  email: email || '',
-                  password: '',
-                  avatar: '',
-                  role: '',
+                  _id: "",
+                  username: username || "",
+                  email: email || "",
+                  password: "",
+                  avatar: "",
+                  role: "",
                   deleted: false,
-                  status: '',
-                  __v: 0
+                  status: "",
+                  __v: 0,
                 });
               }
             }
           } catch (err) {
             failed.push({
-              _id: studentId || '',
-              username: username || '',
-              email: email || '',
-              password: '',
-              avatar: '',
-              role: '',
+              _id: studentId || "",
+              username: username || "",
+              email: email || "",
+              password: "",
+              avatar: "",
+              role: "",
               deleted: false,
-              status: '',
-              __v: 0
+              status: "",
+              __v: 0,
             });
           }
         }
@@ -341,11 +365,13 @@ const DetailClass: React.FC = () => {
 
   const handleDownloadExcel = async () => {
     try {
-      const response = await ClassroomAPI.downloadStudentResultsExcel(_classroom_id || "");
+      const response = await ClassroomAPI.downloadStudentResultsExcel(
+        _classroom_id || ""
+      );
       const url = window.URL.createObjectURL(new Blob([response]));
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = url;
-      link.setAttribute('download', `student_results_${_classroom_id}.xlsx`);
+      link.setAttribute("download", `student_results_${_classroom_id}.xlsx`);
       document.body.appendChild(link);
       link.click();
       link.parentNode?.removeChild(link);
@@ -367,7 +393,7 @@ const DetailClass: React.FC = () => {
   }
 
   const teacherName =
-    typeof classroom.teacherId === 'object'
+    typeof classroom.teacherId === "object"
       ? (classroom.teacherId as any).username
       : classroom.teacherId;
 
@@ -396,27 +422,41 @@ const DetailClass: React.FC = () => {
     <div className="detail-class-container">
       <Row style={{ marginBottom: 16 }}>
         <Col>
-          <Button onClick={() => navigate('/giaovien/quanlylophoc')}>Quay lại danh sách lớp học</Button>
+          <Button onClick={() => navigate("/giaovien/quanlylophoc")}>
+            Quay lại danh sách lớp học
+          </Button>
         </Col>
       </Row>
       <Row style={{ marginBottom: 16 }}>
         <Col span={24}>
-          <h3 style={{ textAlign: 'center' }}>{classroom.title}</h3>
-          <ClassCodeCopy classCode={classroom._id || 'N/A'} />
-          <p><strong>Giáo viên: </strong>{teacherName}</p>
-          <p><strong>Trạng thái: </strong>{classroom.status}</p>
-          <p><strong>Mật khẩu lớp: </strong>{classroom.password}</p>
+          <h3 style={{ textAlign: "center" }}>{classroom.title}</h3>
+          <ClassCodeCopy classCode={classroom._id || "N/A"} />
+          <p>
+            <strong>Giáo viên: </strong>
+            {teacherName}
+          </p>
+          <p>
+            <strong>Trạng thái: </strong>
+            {classroom.status}
+          </p>
+          <p>
+            <strong>Mật khẩu lớp: </strong>
+            {classroom.password}
+          </p>
         </Col>
       </Row>
       <Card bordered={false} className="detail-card">
         <Tabs defaultActiveKey="1">
           {/* Tab Tổng quan */}
           <TabPane tab="Tổng quan" key="1">
-            <OverviewTab classroom={classroom}  handleDownloadExcel={handleDownloadExcel}/>
+            <OverviewTab
+              classroom={classroom}
+              handleDownloadExcel={handleDownloadExcel}
+            />
           </TabPane>
 
-          {/* Tab Kỳ thi */}
-          <TabPane tab="Kỳ thi" key="2">
+          {/* Tab Đề Thi */}
+          <TabPane tab="Đề Thi" key="2">
             <ExamsTab
               classroom={classroom}
               examColumns={examColumns}
@@ -472,7 +512,10 @@ const DetailClass: React.FC = () => {
           renderItem={(exam: any) => (
             <List.Item
               actions={[
-                <Button type="primary" onClick={() => handleAddExamItem(exam._id)}>
+                <Button
+                  type="primary"
+                  onClick={() => handleAddExamItem(exam._id)}
+                >
                   Thêm
                 </Button>,
                 <Button onClick={() => openExamContent(exam)}>
@@ -503,9 +546,7 @@ const DetailClass: React.FC = () => {
         width={800}
         className="detail-modal"
       >
-        {examToView && (
-          <ViewExamDetail _id={examToView.slug || ""} />
-        )}
+        {examToView && <ViewExamDetail _id={examToView.slug || ""} />}
       </Modal>
 
       {/* Modal hiển thị thông tin học sinh */}
@@ -519,10 +560,12 @@ const DetailClass: React.FC = () => {
         {studentToView && (
           <div className="detail-student-info">
             <p>
-              <strong>Username: </strong>{studentToView.username}
+              <strong>Username: </strong>
+              {studentToView.username}
             </p>
             <p>
-              <strong>Email: </strong>{studentToView.email}
+              <strong>Email: </strong>
+              {studentToView.email}
             </p>
           </div>
         )}
@@ -547,7 +590,10 @@ const DetailClass: React.FC = () => {
           renderItem={(student: any) => (
             <List.Item
               actions={[
-                <Button type="primary" onClick={() => handleAddStudentItem(student._id)}>
+                <Button
+                  type="primary"
+                  onClick={() => handleAddStudentItem(student._id)}
+                >
                   Thêm
                 </Button>,
                 <Button onClick={() => openStudentContent(student)}>

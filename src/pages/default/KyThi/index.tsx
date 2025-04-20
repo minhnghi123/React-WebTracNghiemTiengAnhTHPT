@@ -65,7 +65,9 @@ export const KyThi = () => {
   };
 
   const filteredData = data.filter((exam) => {
-    const matchesSearch = (exam.title && " ").toLowerCase().includes(searchText.toLowerCase());
+    const matchesSearch = (exam.title && " ")
+      .toLowerCase()
+      .includes(searchText.toLowerCase());
     const matchesClass = selectedClass ? exam.class === selectedClass : true;
     return matchesSearch && matchesClass;
   });
@@ -145,7 +147,7 @@ export const KyThi = () => {
         direction="horizontal"
         size="large"
         style={{
-          justifyContent: "center", 
+          justifyContent: "center",
           width: "100%",
           minWidth: "700px",
           marginBottom: 16,
@@ -172,8 +174,7 @@ export const KyThi = () => {
         </Select>
       </Space>
       <center>
-
-        <Title level={2}>📋 Danh sách kỳ thi</Title>
+        <Title level={2}>📋 Danh sách Đề Thi</Title>
       </center>
 
       {ongoing.length > 0 && (
@@ -196,7 +197,7 @@ export const KyThi = () => {
 
       {filteredData.length === 0 && (
         <center>
-          <Text type="secondary">Không có kỳ thi nào.</Text>
+          <Text type="secondary">Không có Đề Thi nào.</Text>
         </center>
       )}
     </div>

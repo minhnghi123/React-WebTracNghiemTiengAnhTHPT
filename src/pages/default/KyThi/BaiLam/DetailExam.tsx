@@ -67,14 +67,18 @@ export const DetailExam = () => {
                   <CalendarOutlined /> <strong>Thời gian bắt đầu:</strong>
                 </Text>
                 <br />
-                <Text type="secondary">{formatDate(exam.startTime as unknown as string)}</Text>
+                <Text type="secondary">
+                  {formatDate(exam.startTime as unknown as string)}
+                </Text>
               </Col>
               <Col span={12}>
                 <Text>
                   <CalendarOutlined /> <strong>Thời gian kết thúc:</strong>
                 </Text>
                 <br />
-                <Text type="secondary">{formatDate(exam.endTime as unknown as string)}</Text>
+                <Text type="secondary">
+                  {formatDate(exam.endTime as unknown as string)}
+                </Text>
               </Col>
 
               <Col span={12}>
@@ -104,14 +108,18 @@ export const DetailExam = () => {
                   <strong>Chủ đề:</strong>
                 </Text>
                 <br />
-                <Text type="secondary">{exam.topic?.join(", ") || "Không có"}</Text>
+                <Text type="secondary">
+                  {exam.topic?.join(", ") || "Không có"}
+                </Text>
               </Col>
               <Col span={24}>
                 <Text>
                   <strong>Kiến thức:</strong>
                 </Text>
                 <br />
-                <Text type="secondary">{exam.knowledge?.join(", ") || "Không có"}</Text>
+                <Text type="secondary">
+                  {exam.knowledge?.join(", ") || "Không có"}
+                </Text>
               </Col>
             </Row>
 
@@ -130,7 +138,7 @@ export const DetailExam = () => {
         </Card>
       ) : (
         <center>
-          <Text>Đang tải thông tin kỳ thi...</Text>
+          <Text>Đang tải thông tin Đề Thi...</Text>
         </center>
       )}
     </div>

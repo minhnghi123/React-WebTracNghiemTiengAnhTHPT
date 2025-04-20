@@ -108,9 +108,7 @@ export const CreateExamQuestion = () => {
 
     setOtherQuestions((prev) =>
       prev.filter(
-        (q) =>
-          !easyQuestions.includes(q) &&
-          !hardQuestions.includes(q)
+        (q) => !easyQuestions.includes(q) && !hardQuestions.includes(q)
       )
     );
 
@@ -319,7 +317,7 @@ export const CreateExamQuestion = () => {
             ) {
               setOpenModalCreate(true);
             } else {
-              alert("Chưa có câu hỏi hoặc kỳ thi nghe nào");
+              alert("Chưa có câu hỏi hoặc Đề Thi nghe nào");
             }
           }}
         >
@@ -389,7 +387,7 @@ export const CreateExamQuestion = () => {
               }}
             />
           </Form.Item>
- 
+
           <Form.Item
             label={`Số câu khó (còn lại: ${
               otherQuestions.filter((q) => q.level === "hard").length

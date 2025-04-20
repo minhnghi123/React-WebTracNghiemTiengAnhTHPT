@@ -18,7 +18,6 @@ const Home = () => {
       setIsLoggedIn(true);
     }
   }, []);
-  
 
   const slides = [
     {
@@ -89,18 +88,22 @@ const Home = () => {
         </button>
       </div>
 
-      {/* Gợi ý tham gia kỳ thi, ôn tập, tham gia lớp học */}
+      {/* Gợi ý tham gia Đề Thi, ôn tập, tham gia lớp học */}
       <div className="exam-prep-section grid grid-cols-1 md:grid-cols-3 gap-8 mt-8">
-
-        {/* Tham gia kỳ thi */}
+        {/* Tham gia Đề Thi */}
         <div className="exam-card">
-          <img src="/src/assets/img/thithu.jpg" alt="Tham gia kỳ thi" className="exam-image"/>
+          <img
+            src="/src/assets/img/thithu.jpg"
+            alt="Tham gia Đề Thi"
+            className="exam-image"
+          />
           <div className="exam-info">
-            <h3 className="text-xl font-bold">Tham gia kỳ thi</h3>
+            <h3 className="text-xl font-bold">Tham gia Đề Thi</h3>
             <p className="text-gray-600 mt-2">
-              Thử sức với các đề thi sát với đề thi THPT quốc gia, nâng cao kỹ năng làm bài.
+              Thử sức với các đề thi sát với đề thi THPT quốc gia, nâng cao kỹ
+              năng làm bài.
             </p>
-            <Button 
+            <Button
               className="mt-4 px-6 py-2 bg-blue-500 text-black font-semibold rounded-lg shadow-md hover:bg-blue-600 transition"
               onClick={() => handleNavigation("/KyThi")}
             >
@@ -110,15 +113,19 @@ const Home = () => {
         </div>
 
         {/* Ôn tập */}
-        
+
         <div className="exam-card">
-          <img src="/src/assets/img/ontap.jpg" alt="Ôn tập hiệu quả" className="exam-image"/>
+          <img
+            src="/src/assets/img/ontap.jpg"
+            alt="Ôn tập hiệu quả"
+            className="exam-image"
+          />
           <div className="exam-info">
             <h3 className="text-xl font-bold">Ôn tập hiệu quả</h3>
             <p className="text-gray-600 mt-2">
               Hệ thống ôn tập thông minh giúp bạn cải thiện điểm số nhanh chóng.
             </p>
-            <Button 
+            <Button
               className="mt-4 px-6 py-2 bg-green-500 text-black font-semibold rounded-lg shadow-md hover:bg-green-600 transition"
               onClick={() => handleNavigation("/OnTap")}
             >
@@ -129,13 +136,18 @@ const Home = () => {
 
         {/* Tham gia vào lớp học */}
         <div className="exam-card">
-          <img src="/src/assets/img/lophoc.jpg" alt="Tham gia lớp học" className="exam-image"/>
+          <img
+            src="/src/assets/img/lophoc.jpg"
+            alt="Tham gia lớp học"
+            className="exam-image"
+          />
           <div className="exam-info">
             <h3 className="text-xl font-bold">Tham gia vào lớp học</h3>
             <p className="text-gray-600 mt-2">
-              Học tập cùng bạn bè, trao đổi kiến thức và nhận hỗ trợ từ giáo viên.
+              Học tập cùng bạn bè, trao đổi kiến thức và nhận hỗ trợ từ giáo
+              viên.
             </p>
-            <Button 
+            <Button
               className="mt-4 px-6 py-2 bg-purple-500 text-black font-semibold rounded-lg shadow-md hover:bg-purple-600 transition"
               onClick={() => handleNavigation("/PhongThi")}
             >
@@ -143,7 +155,6 @@ const Home = () => {
             </Button>
           </div>
         </div>
-
       </div>
     </div>
   );

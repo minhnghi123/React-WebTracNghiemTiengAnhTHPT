@@ -76,7 +76,7 @@ export const Navbar: React.FC<navbarProps> = ({ rule = true }) => {
               {user && (
                 <>
                   <li>
-                    <a href="/KyThi">Danh sách kỳ thi</a>
+                    <a href="/KyThi">Danh sách Đề Thi</a>
                   </li>
                   <li>
                     <a href="/Ontap">Thẻ Ghi Nhớ</a>

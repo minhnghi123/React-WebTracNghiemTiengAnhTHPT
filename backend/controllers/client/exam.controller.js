@@ -84,7 +84,7 @@ export const detailExam = async (req, res) => {
 
 export const joinedExam = async (req, res) => {
   try {
-    // Kiểm tra xem người dùng có đang tham gia kỳ thi khác không
+    // Kiểm tra xem người dùng có đang tham gia Đề Thi khác không
     // const ongoingExam = await Result.findOne({
     //   userId: req.user._id,
     //   isCompleted: false,
@@ -93,7 +93,7 @@ export const joinedExam = async (req, res) => {
     // if (ongoingExam) {
     //   return res.status(400).json({
     //     code: 400,
-    //     message: "Bạn đang tham gia kỳ thi khác.",
+    //     message: "Bạn đang tham gia Đề Thi khác.",
     //   });
     // }
 
@@ -288,7 +288,9 @@ export const joinListeningExam = async (req, res) => {
       resultId: result._id,
     });
   } catch (error) {
-    res.status(500).json({ code: 500, message: "Error joining listening exam." });
+    res
+      .status(500)
+      .json({ code: 500, message: "Error joining listening exam." });
   }
 };
 
@@ -313,7 +315,11 @@ export const calculateListeningExamScore = async (req, res) => {
       const userAnswer = userAnswers[question._id];
       const correctOption = question.options.find((opt) => opt.isCorrect);
 
-      if (userAnswer && correctOption && userAnswer === correctOption._id.toString()) {
+      if (
+        userAnswer &&
+        correctOption &&
+        userAnswer === correctOption._id.toString()
+      ) {
         score += 1;
         correctAnswer += 1;
       } else {
