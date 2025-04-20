@@ -90,7 +90,7 @@ export const CreateExamModalAuTo: React.FC<CreateExamModalProps> = ({
 
   return (
     <Modal
-      title="Tạo kỳ thi"
+      title="Tạo Đề Thi"
       visible={visible}
       onCancel={handleClose}
       onOk={handleSaveClick}

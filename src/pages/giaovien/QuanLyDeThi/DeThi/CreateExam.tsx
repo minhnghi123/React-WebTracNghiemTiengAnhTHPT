@@ -40,7 +40,9 @@ const CreateExamModal: React.FC<CreateExamModalProps> = ({
     }));
   }, [dataQuestion, listeningExams]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setExam((prev) => ({ ...prev, [name]: value }));
   };
@@ -65,7 +67,7 @@ const CreateExamModal: React.FC<CreateExamModalProps> = ({
 
   return (
     <Modal
-      title="Tạo kỳ thi"
+      title="Tạo Đề Thi"
       visible={visible}
       onCancel={handleClose}
       onOk={handleSaveClick}
@@ -78,10 +80,19 @@ const CreateExamModal: React.FC<CreateExamModalProps> = ({
           <Input name="title" value={exam.title} onChange={handleChange} />
         </Form.Item>
         <Form.Item label="Mô tả">
-          <Input.TextArea name="description" value={exam.description} onChange={handleChange} />
+          <Input.TextArea
+            name="description"
+            value={exam.description}
+            onChange={handleChange}
+          />
         </Form.Item>
         <Form.Item label="Thời gian (phút)">
-          <Input name="duration" type="number" value={exam.duration} onChange={handleChange} />
+          <Input
+            name="duration"
+            type="number"
+            value={exam.duration}
+            onChange={handleChange}
+          />
         </Form.Item>
         <Form.Item label="Thời gian bắt đầu">
           <DatePicker
@@ -96,7 +107,10 @@ const CreateExamModal: React.FC<CreateExamModalProps> = ({
           />
         </Form.Item>
         <Form.Item label="Công khai">
-          <Select value={exam.isPublic} onChange={(value) => handleSelectChange("isPublic", value)}>
+          <Select
+            value={exam.isPublic}
+            onChange={(value) => handleSelectChange("isPublic", value)}
+          >
             <Option value={true}>Công khai</Option>
             <Option value={false}>Riêng tư</Option>
           </Select>

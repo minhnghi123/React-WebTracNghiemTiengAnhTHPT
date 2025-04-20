@@ -65,7 +65,7 @@ export const UpdateExamQuestion = () => {
     Record<string, Question[]>
   >({});
   console.log("selectedQuestionsGroup", selectedQuestionsGroup);
-  // --- State cho kỳ thi nghe ---
+  // --- State cho Đề Thi nghe ---
   const [allListeningExams, setAllListeningExams] = useState<ExamDataRecieve[]>(
     []
   );
@@ -138,7 +138,7 @@ export const UpdateExamQuestion = () => {
     }
   };
 
-  // --- API: Lấy danh sách kỳ thi nghe ---
+  // --- API: Lấy danh sách Đề Thi nghe ---
   const getAllListeningExams = async () => {
     try {
       const response = await ExamListeningQuestionAPI.getAllListeningExams();
@@ -182,7 +182,7 @@ export const UpdateExamQuestion = () => {
     );
   }, [selectedQuestions, data]);
 
-  // --- Lấy dữ liệu câu hỏi và kỳ thi nghe đã có của đề thi ---
+  // --- Lấy dữ liệu câu hỏi và Đề Thi nghe đã có của đề thi ---
   const addSeletedQuestion = async () => {
     if (!_id) {
       console.error("Không tìm thấy id");
@@ -275,7 +275,7 @@ export const UpdateExamQuestion = () => {
     }
   };
 
-  // --- Xử lý chuyển kỳ thi nghe ---
+  // --- Xử lý chuyển Đề Thi nghe ---
   // Khi ấn "Thêm" sẽ đưa exam đó vào danh sách đã chọn
   const handleAddListeningExam = (exam: ExamDataRecieve) => {
     setSelectedListeningExams((prev) => [...prev, exam]);
@@ -286,7 +286,7 @@ export const UpdateExamQuestion = () => {
     setSelectedListeningExams((prev) => prev.filter((e) => e._id !== exam._id));
   };
 
-  // --- Tính danh sách ngân hàng kỳ thi nghe (loại trừ các đã chọn) ---
+  // --- Tính danh sách ngân hàng Đề Thi nghe (loại trừ các đã chọn) ---
   const bankListeningExams = allListeningExams.filter(
     (exam) => !selectedListeningExams.some((e) => e._id === exam._id)
   );
@@ -340,7 +340,7 @@ export const UpdateExamQuestion = () => {
             ) {
               setOpenModalCreate(true);
             } else {
-              alert("Chưa có câu hỏi hoặc kỳ thi nghe nào");
+              alert("Chưa có câu hỏi hoặc Đề Thi nghe nào");
             }
           }}
           style={{ marginRight: 8 }}
@@ -357,7 +357,7 @@ export const UpdateExamQuestion = () => {
             ) {
               copyExam();
             } else {
-              alert("Chưa có câu hỏi hoặc kỳ thi nghe nào");
+              alert("Chưa có câu hỏi hoặc Đề Thi nghe nào");
             }
           }}
         >
@@ -958,7 +958,7 @@ export const UpdateExamQuestion = () => {
           </div>
         </Tabs.TabPane>
 
-        {/* Tab: Danh sách kỳ thi nghe */}
+        {/* Tab: Danh sách Đề Thi nghe */}
         <Tabs.TabPane tab="Danh sách các phần thi nghe" key="3">
           <h3>Danh sách các phần nghe trong đề thi</h3>
           <Table
@@ -1016,7 +1016,7 @@ export const UpdateExamQuestion = () => {
           />
         </Tabs.TabPane>
 
-        {/* Tab: Ngân hàng kỳ thi nghe */}
+        {/* Tab: Ngân hàng Đề Thi nghe */}
         <Tabs.TabPane tab="Ngân hàng phần thi nghe" key="4">
           <h3>Ngân hàng phần thi nghe</h3>
           <Table

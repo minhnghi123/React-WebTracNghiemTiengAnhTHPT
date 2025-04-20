@@ -21,12 +21,12 @@ const ViewExamDetail: React.FC<ViewExamDetailProps> = ({ _id }) => {
           const response = await ExamAPI.getDetailExam(_id);
           setExam(response.data);
         } catch (err) {
-          setError("Lỗi khi lấy thông tin kỳ thi");
+          setError("Lỗi khi lấy thông tin Đề Thi");
         } finally {
           setLoading(false);
         }
       } else {
-        setError("Không tìm thấy id kỳ thi");
+        setError("Không tìm thấy id Đề Thi");
         setLoading(false);
       }
     };
@@ -34,7 +34,7 @@ const ViewExamDetail: React.FC<ViewExamDetailProps> = ({ _id }) => {
   }, [_id]);
 
   if (loading) {
-    return <Spin tip="Đang tải thông tin kỳ thi..." />;
+    return <Spin tip="Đang tải thông tin Đề Thi..." />;
   }
 
   if (error) {
@@ -42,13 +42,13 @@ const ViewExamDetail: React.FC<ViewExamDetailProps> = ({ _id }) => {
   }
 
   if (!exam) {
-    return <Alert message="Không tìm thấy thông tin kỳ thi" type="warning" />;
+    return <Alert message="Không tìm thấy thông tin Đề Thi" type="warning" />;
   }
 
   return (
     <Card title={exam.title} style={{ margin: "16px" }}>
       <Paragraph>
-        {exam.description || "Không có mô tả cho kỳ thi này"}
+        {exam.description || "Không có mô tả cho Đề Thi này"}
       </Paragraph>
       <Paragraph>
         <strong>Thời giản:</strong> {exam.duration} phút
@@ -57,7 +57,8 @@ const ViewExamDetail: React.FC<ViewExamDetailProps> = ({ _id }) => {
         <strong>Bắt đầu:</strong> {new Date(exam.startTime).toLocaleString()}
       </Paragraph>
       <Paragraph>
-        <strong>Kết thúc:</strong> {exam.endTime ? new Date(exam.endTime).toLocaleString() : "Chưa có"}
+        <strong>Kết thúc:</strong>{" "}
+        {exam.endTime ? new Date(exam.endTime).toLocaleString() : "Chưa có"}
       </Paragraph>
       <Paragraph>
         <strong>Hiển thị:</strong> {exam.isPublic ? "Công khai" : "Riêng tư"}
@@ -65,7 +66,8 @@ const ViewExamDetail: React.FC<ViewExamDetailProps> = ({ _id }) => {
 
       {exam.updatedAt && (
         <Paragraph>
-          <strong>Ngày cập nhật:</strong> {new Date(exam.updatedAt).toLocaleString()}
+          <strong>Ngày cập nhật:</strong>{" "}
+          {new Date(exam.updatedAt).toLocaleString()}
         </Paragraph>
       )}
       <Title level={4}>Danh sách câu hỏi:</Title>
@@ -97,7 +99,9 @@ const ViewExamDetail: React.FC<ViewExamDetailProps> = ({ _id }) => {
                   >
                     {question.level}
                   </Tag>
-                  {question.subject && <Tag color="blue">{question.subject}</Tag>}
+                  {question.subject && (
+                    <Tag color="blue">{question.subject}</Tag>
+                  )}
                   {question.knowledge && (
                     <Tag color="cyan">{question.knowledge}</Tag>
                   )}
