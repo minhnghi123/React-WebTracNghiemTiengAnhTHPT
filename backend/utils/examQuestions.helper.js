@@ -16,7 +16,7 @@ import { renderHtmlToTextRun } from "./renderHtmlToTextRun.js";
  * @returns {string} - Nội dung đã làm sạch.
  */
 const sanitizeAnswerText = (text) => {
-  return text.replace(/^[A-D]\.\s*/, "");
+  return (text || "").replace(/^[A-D]\.\s*/, "");
 };
 
 /**
@@ -25,8 +25,6 @@ const sanitizeAnswerText = (text) => {
  * @param {number} index - Vị trí đáp án (A, B, C, D)
  * @returns {TableCell} - Ô đáp án trong bảng
  */
-
-
 const getAnswerCell = (answerText, index) => {
   const sanitizedAnswer = sanitizeAnswerText(answerText || "");
   const isHtml = sanitizedAnswer.includes("<");
@@ -78,7 +76,6 @@ const getAnswerCell = (answerText, index) => {
   });
 };
 
-
 /**
  * Hàm tạo đoạn câu hỏi, hỗ trợ HTML
  * @param {number} index - Số thứ tự của câu hỏi
@@ -86,8 +83,8 @@ const getAnswerCell = (answerText, index) => {
  * @returns {Paragraph} - Đoạn văn câu hỏi
  */
 const buildQuestionParagraph = (index, content) => {
-  const fullContent = `${index + 1}. ${content}`;
-  return content.includes("<")
+  const fullContent = `${index}. ${content || ""}`;
+  return (content || "").includes("<")
     ? renderHtmlToTextRun(fullContent)
     : new Paragraph({
         children: [
@@ -103,57 +100,50 @@ const buildQuestionParagraph = (index, content) => {
 };
 
 /**
- * Hàm render toàn bộ phần câu hỏi trắc nghiệm
- * @param {Array} questionsMultichoice - Danh sách câu hỏi trắc nghiệm
- * @returns {Array<Paragraph | Table>} - Mảng các phần câu hỏi và bảng đáp án
+ * Render all multiple-choice questions without a title and with sequential numbering.
+ * @param {Array} questionsMultichoice - List of multiple-choice questions.
+ * @param {number} startIndex - Starting index for numbering.
+ * @returns {Array<Paragraph | Table>} - Array of formatted questions and answer tables.
  */
-export const formatExamQuestions = (questionsMultichoice) => {
+export const formatExamQuestions = (questionsMultichoice, startIndex = 1) => {
   const formattedQuestions = [];
 
-  // Tiêu đề phần trắc nghiệm
-  formattedQuestions.push(
-    new Paragraph({
-      children: [
-        new TextRun({
-          text: "CÂU HỎI TRẮC NGHIỆM:",
-          bold: true,
-          font: "Times New Roman",
-          size: 26,
-        }),
-      ],
-      alignment: AlignmentType.CENTER,
-      spacing: { before: 200, after: 200 },
-    })
-  );
-
-  // Render từng câu hỏi và bảng đáp án
   questionsMultichoice.forEach((question, index) => {
-    // ✅ Câu hỏi
-    formattedQuestions.push(buildQuestionParagraph(index, question.content));
+    const questionNumber = startIndex + index;
 
-    // ✅ Bảng đáp án 2x2
-    formattedQuestions.push(
-      new Table({
-        width: { size: 100, type: WidthType.PERCENTAGE },
-        rows: [
-          new TableRow({
-            children: [
-              getAnswerCell(question.answers[0]?.text, 0),
-              getAnswerCell(question.answers[1]?.text, 1),
-            ],
-          }),
-          new TableRow({
-            children: [
-              getAnswerCell(question.answers[2]?.text, 2),
-              getAnswerCell(question.answers[3]?.text, 3),
-            ],
-          }),
-        ],
-        spacing: { before: 100, after: 200 },
-      })
+    // ✅ Question
+    formattedQuestions.push(buildQuestionParagraph(questionNumber, question.content));
+
+    // Check if all answers are empty or contain only whitespace
+    const allAnswersEmptyOrWhitespace = (question.answers || []).every(
+      (answer) => !answer?.text?.trim()
     );
 
-    // ✅ Khoảng cách sau mỗi câu
+    if (!allAnswersEmptyOrWhitespace) {
+      // ✅ Answer table (2x2)
+      formattedQuestions.push(
+        new Table({
+          width: { size: 100, type: WidthType.PERCENTAGE },
+          rows: [
+            new TableRow({
+              children: [
+                getAnswerCell(question.answers?.[0]?.text, 0),
+                getAnswerCell(question.answers?.[1]?.text, 1),
+              ],
+            }),
+            new TableRow({
+              children: [
+                getAnswerCell(question.answers?.[2]?.text, 2),
+                getAnswerCell(question.answers?.[3]?.text, 3),
+              ],
+            }),
+          ],
+          spacing: { before: 100, after: 200 },
+        })
+      );
+    }
+
+    // ✅ Spacing after each question
     formattedQuestions.push(
       new Paragraph({
         children: [],
@@ -165,9 +155,6 @@ export const formatExamQuestions = (questionsMultichoice) => {
   return formattedQuestions;
 };
 
-
-
-
 /**
  * Hàm tạo đoạn câu hỏi điền khuyết, hỗ trợ HTML
  * @param {number} index - Số thứ tự của câu hỏi
@@ -175,9 +162,9 @@ export const formatExamQuestions = (questionsMultichoice) => {
  * @returns {Paragraph} - Đoạn văn câu hỏi điền khuyết
  */
 const buildFillInBlankQuestionParagraph = (index, content) => {
-  const fullContent = `${index + 1}. ${content}`;
-  return content.includes("<")
-    ? renderHtmlToTextRun(fullContent)  // Nếu có HTML, render HTML
+  const fullContent = `${index}. ${content || ""}`;
+  return (content || "").includes("<")
+    ? renderHtmlToTextRun(fullContent) // Nếu có HTML, render HTML
     : new Paragraph({
         children: [
           new TextRun({
@@ -191,48 +178,32 @@ const buildFillInBlankQuestionParagraph = (index, content) => {
 };
 
 /**
- * Tạo phần câu hỏi điền khuyết
- * @param {Array} questionsFillInBlank - Danh sách câu hỏi điền khuyết
- * @returns {Array<Paragraph>} - Mảng các câu hỏi điền khuyết dưới dạng Paragraph
+ * Render all fill-in-the-blank questions without a title and with sequential numbering.
+ * @param {Array} questionsFillInBlank - List of fill-in-the-blank questions.
+ * @param {number} startIndex - Starting index for numbering.
+ * @returns {Array<Paragraph>} - Array of formatted fill-in-the-blank questions.
  */
-export const formatFillInBlankQuestions = (questionsFillInBlank) => {
+export const formatFillInBlankQuestions = (questionsFillInBlank, startIndex = 1) => {
   const formattedQuestions = [];
 
-  // Tiêu đề phần câu hỏi điền khuyết
-  formattedQuestions.push(
-    new Paragraph({
-      children: [
-        new TextRun({
-          text: "CÂU HỎI ĐIỀN KHUYẾT:",
-          bold: true,
-          font: "Times New Roman",
-          size: 26,
-        }),
-      ],
-      alignment: AlignmentType.CENTER,
-      spacing: { before: 200, after: 200 },
-    })
-  );
-
-  // Render từng câu hỏi điền khuyết
   questionsFillInBlank.forEach((question, index) => {
-    formattedQuestions.push(buildFillInBlankQuestionParagraph(index, question.content));
+    const questionNumber = startIndex + index;
+    formattedQuestions.push(buildFillInBlankQuestionParagraph(questionNumber, question.content));
   });
 
   return formattedQuestions;
 };
-
 
 /**
  * Tạo hàm hiển thị Transcript
  * @param {string} transcript - Nội dung Transcript
  * @returns {Paragraph}
  */
-const buildTranscriptParagraph = (transcript) => 
+const buildTranscriptParagraph = (transcript) =>
   new Paragraph({
     children: [
       new TextRun({
-        text: `Transcript: ${transcript || '.....................'}`,
+        text: `Transcript: ${transcript || "....................."}`,
         italics: true,
         font: "Times New Roman",
         size: 22,
@@ -246,8 +217,8 @@ const buildTranscriptParagraph = (transcript) =>
  * @param {string} audio - Đường dẫn đến file audio
  * @returns {Paragraph}
  */
-const buildAudioLinkParagraph = (audio) => 
-  audio 
+const buildAudioLinkParagraph = (audio) =>
+  audio
     ? new Paragraph({
         children: [
           new TextRun({
@@ -281,20 +252,20 @@ const buildListeningQuestion = (question, qIndex) => [
   new Paragraph({
     children: [
       new TextRun({
-        text: `${qIndex + 1}. `,
+        text: `${qIndex}. `,
         bold: true,
         font: "Times New Roman",
         size: 24,
       }),
     ],
   }),
-  ...(question.content.includes("<")
-    ? [renderHtmlToTextRun(question.content)]
+  ...((question.content || "").includes("<")
+    ? [renderHtmlToTextRun(question.content || "")]
     : [
         new Paragraph({
           children: [
             new TextRun({
-              text: question.content,
+              text: question.content || "",
               bold: true,
               font: "Times New Roman",
               size: 24,
@@ -311,12 +282,12 @@ const buildListeningQuestion = (question, qIndex) => [
         children: [
           new TableCell({
             children: [
-              question.answers[0]?.text.includes("<")
-                ? renderHtmlToTextRun(question.answers[0]?.text)
+              (question.answers?.[0]?.text || "").includes("<")
+                ? renderHtmlToTextRun(question.answers?.[0]?.text || "")
                 : new Paragraph({
                     children: [
                       new TextRun({
-                        text: question.answers[0]?.text || "",
+                        text: question.answers?.[0]?.text || "",
                         font: "Times New Roman",
                         size: 22,
                       }),
@@ -326,12 +297,12 @@ const buildListeningQuestion = (question, qIndex) => [
           }),
           new TableCell({
             children: [
-              question.answers[1]?.text.includes("<")
-                ? renderHtmlToTextRun(question.answers[1]?.text)
+              (question.answers?.[1]?.text || "").includes("<")
+                ? renderHtmlToTextRun(question.answers?.[1]?.text || "")
                 : new Paragraph({
                     children: [
                       new TextRun({
-                        text: question.answers[1]?.text || "",
+                        text: question.answers?.[1]?.text || "",
                         font: "Times New Roman",
                         size: 22,
                       }),
@@ -345,12 +316,12 @@ const buildListeningQuestion = (question, qIndex) => [
         children: [
           new TableCell({
             children: [
-              question.answers[2]?.text.includes("<")
-                ? renderHtmlToTextRun(question.answers[2]?.text)
+              (question.answers?.[2]?.text || "").includes("<")
+                ? renderHtmlToTextRun(question.answers?.[2]?.text || "")
                 : new Paragraph({
                     children: [
                       new TextRun({
-                        text: question.answers[2]?.text || "",
+                        text: question.answers?.[2]?.text || "",
                         font: "Times New Roman",
                         size: 22,
                       }),
@@ -360,12 +331,12 @@ const buildListeningQuestion = (question, qIndex) => [
           }),
           new TableCell({
             children: [
-              question.answers[3]?.text.includes("<")
-                ? renderHtmlToTextRun(question.answers[3]?.text)
+              (question.answers?.[3]?.text || "").includes("<")
+                ? renderHtmlToTextRun(question.answers?.[3]?.text || "")
                 : new Paragraph({
                     children: [
                       new TextRun({
-                        text: question.answers[3]?.text || "",
+                        text: question.answers?.[3]?.text || "",
                         font: "Times New Roman",
                         size: 22,
                       }),
@@ -382,54 +353,66 @@ const buildListeningQuestion = (question, qIndex) => [
   new Paragraph({ children: [], spacing: { after: 200 } }),
 ];
 
-
 /**
- * Tạo phần câu hỏi bài nghe
- * @param {Array} questionsListening - Danh sách câu hỏi bài nghe
- * @returns {Array}
+ * Render all listening questions with the title retained and sequential numbering.
+ * @param {Array} questionsListening - List of listening questions.
+ * @param {number} startIndex - Starting index for numbering.
+ * @returns {Array} - Array of formatted listening questions.
  */
-export const formatListeningQuestions = (questionsListening) => [
-  // 📚 Tiêu Đề Phần Câu Hỏi Bài Nghe
-  new Paragraph({
-    children: [
-      new TextRun({
-        text: "CÂU HỎI BÀI NGHE:",
-        bold: true,
-        font: "Times New Roman",
-        size: 26,
-      }),
-    ],
-    alignment: AlignmentType.CENTER,
-    spacing: { before: 200, after: 200 },
-  }),
-
-  // 📝 Hiển Thị Các Câu Hỏi Bài Nghe
-  ...questionsListening.flatMap((listening, index) => [
-    // Hiển thị Transcript
-    buildTranscriptParagraph(listening.transcript),
-
-    // Hiển thị Audio link
-    buildAudioLinkParagraph(listening.audio),
-
-    // Hiển thị các câu hỏi bài nghe
-    ...listening.questions.flatMap((question, qIndex) =>
-      buildListeningQuestion(question, qIndex)
-    ),
-  ]),
-];
-
-
-
-
-export const formatReadingQuestions = (questionsReading) => {
-  const formattedReading = [];
-
-  // Tiêu đề phần Đọc hiểu
-  formattedReading.push(
+export const formatListeningQuestions = (questionsListening, startIndex = 1) => {
+  const formattedListening = [
+    // 📚 Title for the listening section
     new Paragraph({
       children: [
         new TextRun({
-          text: "CÂU HỎI ĐỌC HIỂU:",
+          text: "CÂU HỎI BÀI NGHE:",
+          bold: true,
+          font: "Times New Roman",
+          size: 26,
+        }),
+      ],
+      alignment: AlignmentType.CENTER,
+      spacing: { before: 200, after: 200 },
+    }),
+  ];
+
+  // 📝 Render each listening exam
+  questionsListening.forEach((listening, index) => {
+    // Add title for each listening exam
+    formattedListening.push(
+      new Paragraph({
+        children: [
+          new TextRun({
+            text: `Phần nghe số ${index + 1}:`,
+            bold: true,
+            font: "Times New Roman",
+            size: 24,
+          }),
+        ],
+        spacing: { after: 150 },
+      })
+    );
+
+    // Display transcript
+    formattedListening.push(buildTranscriptParagraph(listening.transcript));
+
+    // Display audio link
+    formattedListening.push(buildAudioLinkParagraph(listening.audio));
+
+    // Display questions
+    formattedListening.push(
+      ...listening.questions.flatMap((question, qIndex) =>
+        buildListeningQuestion(question, startIndex + qIndex)
+      )
+    );
+  });
+
+  // Add title for the reading section after all listening questions
+  formattedListening.push(
+    new Paragraph({
+      children: [
+        new TextRun({
+          text: "CÂU HỎI PHẦN ĐỌC:",
           bold: true,
           font: "Times New Roman",
           size: 26,
@@ -440,8 +423,21 @@ export const formatReadingQuestions = (questionsReading) => {
     })
   );
 
+  return formattedListening;
+};
+
+/**
+ * Render all reading questions grouped by passage with sequential numbering.
+ * @param {Array} questionsReading - List of reading questions grouped by passage.
+ * @param {number} startIndex - Starting index for numbering.
+ * @returns {Array<Paragraph | Table>} - Array of formatted reading questions.
+ */
+export const formatReadingQuestions = (questionsReading, startIndex = 1) => {
+  const formattedReading = [];
+  let questionCounter = startIndex;
+
   questionsReading.forEach((readingItem, readingIndex) => {
-    // In đoạn bài đọc
+    // Display passage
     formattedReading.push(
       new Paragraph({
         children: [
@@ -454,29 +450,28 @@ export const formatReadingQuestions = (questionsReading) => {
         ],
         spacing: { after: 100 },
       }),
-      renderHtmlToTextRun(readingItem.passage)
+      renderHtmlToTextRun(readingItem.passage || "")
     );
 
-    // In từng câu hỏi liên quan đến đoạn đó
-    readingItem.questions.forEach((question, qIndex) => {
-      const questionContent = `${readingIndex + 1}.${qIndex + 1}. ${question.content}`;
-      formattedReading.push(renderHtmlToTextRun(questionContent));
+    // Display questions related to the passage
+    readingItem.questions.forEach((question) => {
+      formattedReading.push(buildQuestionParagraph(questionCounter, question.content));
 
-      // Bảng đáp án
+      // Answer table
       formattedReading.push(
         new Table({
           width: { size: 100, type: WidthType.PERCENTAGE },
           rows: [
             new TableRow({
               children: [
-                getAnswerCell(question.answers[0]?.text, 0),
-                getAnswerCell(question.answers[1]?.text, 1),
+                getAnswerCell(question.answers?.[0]?.text, 0),
+                getAnswerCell(question.answers?.[1]?.text, 1),
               ],
             }),
             new TableRow({
               children: [
-                getAnswerCell(question.answers[2]?.text, 2),
-                getAnswerCell(question.answers[3]?.text, 3),
+                getAnswerCell(question.answers?.[2]?.text, 2),
+                getAnswerCell(question.answers?.[3]?.text, 3),
               ],
             }),
           ],
@@ -484,13 +479,15 @@ export const formatReadingQuestions = (questionsReading) => {
         })
       );
 
-      // Khoảng cách giữa các câu
+      // Spacing between questions
       formattedReading.push(
         new Paragraph({
           children: [],
           spacing: { after: 200 },
         })
       );
+
+      questionCounter++;
     });
   });
 

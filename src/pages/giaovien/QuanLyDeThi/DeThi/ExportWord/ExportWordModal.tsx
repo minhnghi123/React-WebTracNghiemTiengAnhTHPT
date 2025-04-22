@@ -35,14 +35,15 @@ const ExportWordModal: React.FC<ExportWordModalProps> = ({
       fetchExamData();
     }
   }, [examId]);
-
   const handleExport = async () => {
     try {
       if (!examData) {
         throw new Error("Không tìm thấy dữ liệu đề thi");
       }
       // Chuyển đổi câu hỏi thành cấu trúc ExamDataExport
+ 
       const exportData: ExamDataExport = {
+        slug: examData.slug,
         title,
         description,
         school,
@@ -53,62 +54,8 @@ const ExportWordModal: React.FC<ExportWordModalProps> = ({
         duration,
         comments,
 
-        // Câu hỏi dạng nhiều lựa chọn (Multichoice)
-        questionsMultichoice: examData.questions
-          .filter(
-            (q): q is Question =>
-              typeof q !== "string" &&
-              q.questionType === "6742fb1cd56a2e75dbd817ea" &&
-              !q.audio
-          )
-          .map((q) => ({
-            content: q.content,
-            answers: q.answers
-              .filter((answer) => answer.text !== undefined)
-              .map((answer) => ({
-                text: answer.text || "",
-                isCorrect: answer.isCorrect,
-              })),
-          })),
-
-        // Câu hỏi điền khuyết (Fill in the Blank)
-        questionsFillInBlank: examData.questions
-          .filter(
-            (q): q is Question =>
-              typeof q !== "string" &&
-              q.questionType === "6742fb3bd56a2e75dbd817ec"
-          )
-          .map((q) => ({
-            content: q.content,
-          })),
-
-        // Câu hỏi nghe (Listening)
-        questionsListening: examData.questions
-          .filter(
-            (q): q is Question =>
-              typeof q !== "string" &&
-              q.questionType === "6742fb1cd56a2e75dbd817ea" &&
-              !!q.audio
-          )
-          .map((q) => ({
-            transcript: q.audioInfo?.transcription || "",
-            audio:
-              typeof q.audioInfo?.filePath === "string"
-                ? q.audioInfo.filePath
-                : "",
-            questions: q.answers
-              .filter((answer) => answer.text !== undefined)
-              .map((answer) => ({
-                content: answer.text || "", // Ensure content is always a string
-                isCorrect: answer.isCorrect,
-                answers: q.answers.map((ans) => ({
-                  text: ans.text || "", // Ensure text is always a string
-                  isCorrect: ans.isCorrect,
-                })),
-              })),
-          })),
       };
-
+      console.log(exportData,"exportData");
       await ExportAPI.exportWord(exportData);
       alert("Xuất file Word thành công!");
       handleClose();
