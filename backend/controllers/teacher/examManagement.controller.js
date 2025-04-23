@@ -597,7 +597,6 @@ export const exportExamIntoWord = async (req, res) => {
           // Multiple Choice
           sectionChildren.push(...formatExamQuestions([question]));
         } else if (question.questionType === "6742fb3bd56a2e75dbd817ec") {
-          // Fill in the Blank
           sectionChildren.push(...formatFillInBlankQuestions([question]));
         } else if (question.questionType === "6742fb5dd56a2e75dbd817ee") {
           // True/False/Not Given (convert to multiple-choice format)
@@ -607,7 +606,7 @@ export const exportExamIntoWord = async (req, res) => {
               { text: "True", isCorrect: question.correctAnswerForTrueFalseNGV === "true" },
               { text: "False", isCorrect: question.correctAnswerForTrueFalseNGV === "false" },
               { text: "Not Given", isCorrect: question.correctAnswerForTrueFalseNGV === "not given" },
-              { text: "None", isCorrect: false },
+              { text: "No Answer", isCorrect: false },
             ],
           };
           sectionChildren.push(...formatExamQuestions([convertedQuestion]));

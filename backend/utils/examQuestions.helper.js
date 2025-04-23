@@ -455,38 +455,27 @@ export const formatReadingQuestions = (questionsReading, startIndex = 1) => {
 
     // Display questions related to the passage
     readingItem.questions.forEach((question) => {
-      formattedReading.push(buildQuestionParagraph(questionCounter, question.content));
-
-      // Answer table
-      formattedReading.push(
-        new Table({
-          width: { size: 100, type: WidthType.PERCENTAGE },
-          rows: [
-            new TableRow({
-              children: [
-                getAnswerCell(question.answers?.[0]?.text, 0),
-                getAnswerCell(question.answers?.[1]?.text, 1),
-              ],
-            }),
-            new TableRow({
-              children: [
-                getAnswerCell(question.answers?.[2]?.text, 2),
-                getAnswerCell(question.answers?.[3]?.text, 3),
-              ],
-            }),
+      if (question.questionType === "6742fb1cd56a2e75dbd817ea") {
+        // Multiple Choice
+        formattedReading.push(...formatExamQuestions([question], questionCounter));
+      } else if (question.questionType === "6742fb3bd56a2e75dbd817ec") {
+        // Fill in the Blank
+        formattedReading.push(...formatFillInBlankQuestions([question], questionCounter));
+      } else if (question.questionType === "6742fb5dd56a2e75dbd817ee") {
+        // True/False/Not Given (convert to multiple-choice format)
+        const convertedQuestion = {
+          ...question,
+          answers: [
+            { text: "True", isCorrect: question.correctAnswerForTrueFalseNGV === "true" },
+            { text: "False", isCorrect: question.correctAnswerForTrueFalseNGV === "false" },
+            { text: "Not Given", isCorrect: question.correctAnswerForTrueFalseNGV === "not given" },
+            { text: "No Answer", isCorrect: false },
           ],
-          spacing: { before: 100, after: 200 },
-        })
-      );
+        };
+        formattedReading.push(...formatExamQuestions([convertedQuestion], questionCounter));
+      }
 
-      // Spacing between questions
-      formattedReading.push(
-        new Paragraph({
-          children: [],
-          spacing: { after: 200 },
-        })
-      );
-
+      // Increment question counter
       questionCounter++;
     });
   });
