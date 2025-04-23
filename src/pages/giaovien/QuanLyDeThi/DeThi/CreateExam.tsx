@@ -58,6 +58,7 @@ const CreateExamModal: React.FC<CreateExamModalProps> = ({
   const handleSaveClick = async () => {
     const response = await ExamAPI.createExam(exam);
     if (response?.success) {
+      alert("Tạo đề thi thành công");
       onCreateSuccess();
       handleClose();
     } else {
