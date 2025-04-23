@@ -568,10 +568,17 @@ export const exportExamIntoWord = async (req, res) => {
       const variant = variants[i];
 
       // Prepare sections for the Word document
+      let startIndex = 1; // Initialize question numbering
       const sectionChildren = [
         ...formatExamHeader(variant, variant.code),
-        ...formatListeningQuestions(variant.listeningExams || []),
+        ...formatListeningQuestions(variant.listeningExams || [], startIndex),
       ];
+
+      // Update startIndex after listening questions
+      startIndex += (variant.listeningExams || []).reduce(
+        (count, listening) => count + listening.questions.length,
+        0
+      );
 
       // Group questions by passage
       const groupedQuestions = variant.questions.reduce((acc, question) => {
@@ -588,16 +595,19 @@ export const exportExamIntoWord = async (req, res) => {
           questions,
         })
       );
-      sectionChildren.push(...formatReadingQuestions(readingQuestions));
+      sectionChildren.push(...formatReadingQuestions(readingQuestions, startIndex));
+
+      // Update startIndex after reading questions
+      startIndex += variant.questions.length;
 
       // Add standalone questions (not associated with passages)
       const standaloneQuestions = groupedQuestions["noPassage"] || [];
       standaloneQuestions.forEach((question) => {
         if (question.questionType === "6742fb1cd56a2e75dbd817ea") {
           // Multiple Choice
-          sectionChildren.push(...formatExamQuestions([question]));
+          sectionChildren.push(...formatExamQuestions([question], startIndex++));
         } else if (question.questionType === "6742fb3bd56a2e75dbd817ec") {
-          sectionChildren.push(...formatFillInBlankQuestions([question]));
+          sectionChildren.push(...formatFillInBlankQuestions([question], startIndex++));
         } else if (question.questionType === "6742fb5dd56a2e75dbd817ee") {
           // True/False/Not Given (convert to multiple-choice format)
           const convertedQuestion = {
@@ -609,7 +619,7 @@ export const exportExamIntoWord = async (req, res) => {
               { text: "No Answer", isCorrect: false },
             ],
           };
-          sectionChildren.push(...formatExamQuestions([convertedQuestion]));
+          sectionChildren.push(...formatExamQuestions([convertedQuestion], startIndex++));
         }
       });
 
