@@ -700,7 +700,17 @@ export const importExamFromExcel = async (req, res) => {
       questionTypes.map((q) => [q.name.toLowerCase().trim(), q._id])
     );
 
-    const normalize = (str) => str?.toLowerCase()?.trim();
+    const normalize = (str, type = "default") => {
+      if (!str) return type === "level" ? "easy" : ""; // Default to "easy" for level, empty string otherwise
+      const normalized = str.toLowerCase().trim();
+      // Handle common typos or variations
+      const typoCorrections = {
+        "mutiple choices": "multiple choices",
+        "fill in blank": "fill in the blank",
+        "true/false/ng": "true/false/not given",
+      };
+      return typoCorrections[normalized] || normalized;
+    };
 
     const getFormattedHtml = (sheet, row, colName) => {
       const cellAddress = `${colName}${row}`;
@@ -767,7 +777,7 @@ export const importExamFromExcel = async (req, res) => {
 
         const normalizedType = normalize(question.QuestionType);
         const questionTypeId = questionTypeMap[normalizedType];
-        console.log(normalizedType, questionTypeId);
+
         if (!questionTypeId) {
           return res.status(400).json({
             success: false,
@@ -780,12 +790,20 @@ export const importExamFromExcel = async (req, res) => {
           instruction: question?.Instruction,
           topic: question?.Topic,
           questionType: questionTypeId,
-          level: normalize(question.Level),
+          level: normalize(question.Level, "level"), // Ensure level is normalized with a default value
           author: req.user._id,
           knowledge: question?.Knowledge,
           translation: question?.Translation,
           explanation: question?.Explaination,
         };
+
+        // Validate the level field
+        if (!["easy", "medium", "hard"].includes(baseData.level)) {
+          return res.status(400).json({
+            success: false,
+            message: `Invalid level: ${baseData.level}. Allowed values are "easy", "medium", "hard".`,
+          });
+        }
 
         if (question.PassageId) {
           if (!groupedQuestions.has(question.PassageId)) {
@@ -962,12 +980,20 @@ export const importExamFromExcel = async (req, res) => {
           topic: question?.Topic,
           instruction: question?.Instruction,
           questionType: questionTypeId,
-          level: normalize(question.Level),
+          level: normalize(question.Level, "level"), // Ensure level is normalized with a default value
           author: req.user._id,
           knowledge: question?.Knowledge,
           translation: question?.Translation,
           explanation: question?.Explaination,
         };
+
+        // Validate the level field
+        if (!["easy", "medium", "hard"].includes(baseData.level)) {
+          return res.status(400).json({
+            success: false,
+            message: `Invalid level: ${baseData.level}. Allowed values are "easy", "medium", "hard".`,
+          });
+        }
 
         if (normalizedType === "true/false/not given") {
           singleQuestions.push({
