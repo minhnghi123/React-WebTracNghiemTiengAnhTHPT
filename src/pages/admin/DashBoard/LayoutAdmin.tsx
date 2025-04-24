@@ -3,7 +3,13 @@ import { Navbar } from "@/components/Navbar";
 import { Outlet } from "react-router-dom";
 
 import "bootstrap/dist/css/bootstrap.min.css";
+import { useAuthContext } from "@/contexts/AuthProvider";
+import NotFound from "@/pages/NotFound";
 const LayoutAdmin = () => {
+  const {user} = useAuthContext();
+  if (!user || user.role !== "admin") {
+    return <NotFound />;
+  }
   return (
     <div id="main">
        <Navbar rule={false} />

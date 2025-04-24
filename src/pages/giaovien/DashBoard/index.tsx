@@ -5,12 +5,16 @@ import { useNavigate } from "react-router-dom";
 import { useAuthContext } from "@/contexts/AuthProvider";
 import { io } from "socket.io-client";
 import { ErrorReport } from "../QuanLyBaoLoi";
+import NotFound from "@/pages/NotFound";
 
 const socket = io("http://localhost:5000");
 
 export const DashBoardGiaoVien = () => {
   const [pendingReportsCount, setPendingReportsCount] = useState(0);
   const { user } = useAuthContext();
+  if (!user || user.role !== "admin") {
+    return <NotFound />;
+  }
   const navigate = useNavigate();
 
   useEffect(() => {

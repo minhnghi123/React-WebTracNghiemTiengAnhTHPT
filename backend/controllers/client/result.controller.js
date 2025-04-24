@@ -512,56 +512,29 @@ export const getDontCompletedExam = async (req, res) => {
           path: "questions",
           populate: { path: "questionType", select: "name" },
         },
-        { path: "listeningExams", populate: { path: "questions audio" } },
+        { path: "listeningExams", populate: { path: "questions", populate: { path: "questionType", select: "name" } } },
       ],
     });
 
     if (expiredResults && expiredResults.length > 0) {
       for (const result of expiredResults) {
-        const exam = result.examId;
-        let score = 0;
-        let correctAnswer = 0;
-        let wrongAnswer = 0;
-        const questionDetails = [];
-        const listeningQuestionDetails = [];
-        let wrongAnswerByKnowledge = {};
-
-        // Process regular questions
-        for (const question of exam.questions) {
-          const userAnswer = result.questions.find(
-            (q) => String(q.questionId) === String(question._id)
-          );
-          const isCorrect = userAnswer?.isCorrect || false;
-
-          if (isCorrect) {
-            score++;
-            correctAnswer++;
-          } else {
-            wrongAnswer++;
-            const knowledge = question.knowledge;
-            if (!wrongAnswerByKnowledge[knowledge]) {
-              wrongAnswerByKnowledge[knowledge] = 0;
-            }
-            wrongAnswerByKnowledge[knowledge]++;
+        try {
+          const exam = result.examId;
+          if (!exam) {
+            result.isDeleted = true;
+            result.isCompleted = true;
+            await result.save();
+            continue;
           }
 
-          questionDetails.push({
-            questionId: question._id,
-            content: question.content || " ",
-            answers: question.answers,
-            userAnswers: userAnswer?.userAnswers || [],
-            correctAnswerForBlank: question.answers.map(
-              (ans) => ans.correctAnswerForBlank
-            ),
-            audio: question.audio || null,
-            isCorrect,
-          });
-        }
+          let score = 0, correctAnswer = 0, wrongAnswer = 0;
+          const questionDetails = [];
+          const listeningQuestionDetails = [];
+          const wrongAnswerByKnowledge = {};
 
-        // Process listening questions
-        for (const listeningExam of exam.listeningExams) {
-          for (const question of listeningExam.questions) {
-            const userAnswer = result.listeningQuestions.find(
+          // Process regular questions
+          for (const question of exam.questions || []) {
+            const userAnswer = result.questions.find(
               (q) => String(q.questionId) === String(question._id)
             );
             const isCorrect = userAnswer?.isCorrect || false;
@@ -572,45 +545,72 @@ export const getDontCompletedExam = async (req, res) => {
             } else {
               wrongAnswer++;
               const knowledge = question.knowledge;
-              if (!wrongAnswerByKnowledge[knowledge]) {
-                wrongAnswerByKnowledge[knowledge] = 0;
-              }
-              wrongAnswerByKnowledge[knowledge]++;
+              wrongAnswerByKnowledge[knowledge] = (wrongAnswerByKnowledge[knowledge] || 0) + 1;
             }
 
-            listeningQuestionDetails.push({
+            questionDetails.push({
               questionId: question._id,
-              content: question.questionText || " ",
-              answers: question.options || [],
+              content: question.content || " ",
+              answers: question.answers,
               userAnswers: userAnswer?.userAnswers || [],
-              correctAnswerForBlank: question.blankAnswer
-                ? question.blankAnswer.split(",").map((ans) => ans.trim())
-                : [],
+              correctAnswerForBlank: question.answers?.map((ans) => ans.correctAnswerForBlank) || [],
               audio: question.audio || null,
               isCorrect,
             });
           }
+
+          // Process listening questions
+          for (const listeningExam of exam.listeningExams || []) {
+            for (const question of listeningExam.questions || []) {
+              const userAnswer = result.listeningQuestions.find(
+                (q) => String(q.questionId) === String(question._id)
+              );
+              const isCorrect = userAnswer?.isCorrect || false;
+
+              if (isCorrect) {
+                score++;
+                correctAnswer++;
+              } else {
+                wrongAnswer++;
+                const knowledge = question.knowledge;
+                wrongAnswerByKnowledge[knowledge] = (wrongAnswerByKnowledge[knowledge] || 0) + 1;
+              }
+
+              listeningQuestionDetails.push({
+                questionId: question._id,
+                content: question.questionText || " ",
+                answers: question.options || [],
+                userAnswers: userAnswer?.userAnswers || [],
+                correctAnswerForBlank: question.blankAnswer
+                  ? question.blankAnswer.split(",").map((ans) => ans.trim())
+                  : [],
+                audio: question.audio || null,
+                isCorrect,
+              });
+            }
+          }
+
+          const totalQuestions =
+            (exam.questions?.length || 0) +
+            exam.listeningExams.reduce((acc, le) => acc + (le.questions?.length || 0), 0);
+          const finalScore = Math.round((correctAnswer / totalQuestions * 10) * 100) / 100;
+
+          Object.assign(result, {
+            score: finalScore,
+            correctAnswer,
+            wrongAnswer,
+            questions: questionDetails,
+            listeningQuestions: listeningQuestionDetails,
+            wrongAnswerByKnowledge,
+            isCompleted: true,
+            endTime: now,
+          });
+
+          await result.save();
+        } catch (error) {
+          console.error(`Error processing result ${result._id}:`, error.message);
+          continue;
         }
-
-        const totalQuestions =
-          (exam.questions?.length || 0) +
-          exam.listeningExams.reduce(
-            (acc, le) => acc + (le.questions?.length || 0),
-            0
-          );
-        const finalScore = (correctAnswer / totalQuestions) * 10;
-        const roundedScore = Math.round(finalScore * 100) / 100;
-
-        result.score = roundedScore;
-        result.correctAnswer = correctAnswer;
-        result.wrongAnswer = wrongAnswer;
-        result.questions = questionDetails;
-        result.listeningQuestions = listeningQuestionDetails;
-        result.wrongAnswerByKnowledge = wrongAnswerByKnowledge;
-        result.isCompleted = true;
-        result.endTime = now;
-
-        await result.save();
       }
     }
 

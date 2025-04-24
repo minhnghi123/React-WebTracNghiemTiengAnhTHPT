@@ -7,12 +7,16 @@ import { useAuthContext } from "@/contexts/AuthProvider";
 
 import "bootstrap/dist/css/bootstrap.min.css";
 import { ErrorReport } from "./QuanLyBaoLoi";
+import NotFound from "../NotFound";
 
 const socket = io("http://localhost:5000");
 
 const LayoutGiaoVien = () => {
-  const [pendingReportsCount, setPendingReportsCount] = useState(0);
   const { user } = useAuthContext();
+  if (!user || user.role !== "teacher") {
+    return <NotFound />;
+  }
+  const [pendingReportsCount, setPendingReportsCount] = useState(0);
 
   useEffect(() => {
     socket.emit("GET_ERROR_REPORTS");
@@ -30,7 +34,7 @@ const LayoutGiaoVien = () => {
       socket.off("ERROR_REPORTS");
     };
   }, [user?._id]);
-
+ 
   return (
     <div id="main">
       <Navbar rule={false} />
