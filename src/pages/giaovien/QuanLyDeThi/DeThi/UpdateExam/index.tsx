@@ -64,7 +64,6 @@ export const UpdateExamQuestion = () => {
   const [selectedQuestionsGroup, setSelectedQuestionsGroup] = useState<
     Record<string, Question[]>
   >({});
-  console.log("selectedQuestionsGroup", selectedQuestionsGroup);
   // --- State cho Đề Thi nghe ---
   const [allListeningExams, setAllListeningExams] = useState<ExamDataRecieve[]>(
     []

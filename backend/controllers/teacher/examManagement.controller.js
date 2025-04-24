@@ -568,10 +568,17 @@ export const exportExamIntoWord = async (req, res) => {
       const variant = variants[i];
 
       // Prepare sections for the Word document
+      let startIndex = 1; // Initialize question numbering
       const sectionChildren = [
         ...formatExamHeader(variant, variant.code),
-        ...formatListeningQuestions(variant.listeningExams || []),
+        ...formatListeningQuestions(variant.listeningExams || [], startIndex),
       ];
+
+      // Update startIndex after listening questions
+      startIndex += (variant.listeningExams || []).reduce(
+        (count, listening) => count + listening.questions.length,
+        0
+      );
 
       // Group questions by passage
       const groupedQuestions = variant.questions.reduce((acc, question) => {
@@ -589,17 +596,25 @@ export const exportExamIntoWord = async (req, res) => {
           questions,
         })
       );
-      sectionChildren.push(...formatReadingQuestions(readingQuestions));
+      sectionChildren.push(
+        ...formatReadingQuestions(readingQuestions, startIndex)
+      );
+
+      // Update startIndex after reading questions
+      startIndex += variant.questions.length;
 
       // Add standalone questions (not associated with passages)
       const standaloneQuestions = groupedQuestions["noPassage"] || [];
       standaloneQuestions.forEach((question) => {
         if (question.questionType === "6742fb1cd56a2e75dbd817ea") {
           // Multiple Choice
-          sectionChildren.push(...formatExamQuestions([question]));
+          sectionChildren.push(
+            ...formatExamQuestions([question], startIndex++)
+          );
         } else if (question.questionType === "6742fb3bd56a2e75dbd817ec") {
-          // Fill in the Blank
-          sectionChildren.push(...formatFillInBlankQuestions([question]));
+          sectionChildren.push(
+            ...formatFillInBlankQuestions([question], startIndex++)
+          );
         } else if (question.questionType === "6742fb5dd56a2e75dbd817ee") {
           // True/False/Not Given (convert to multiple-choice format)
           const convertedQuestion = {
@@ -618,10 +633,12 @@ export const exportExamIntoWord = async (req, res) => {
                 isCorrect:
                   question.correctAnswerForTrueFalseNGV === "not given",
               },
-              { text: "None", isCorrect: false },
+              { text: "No Answer", isCorrect: false },
             ],
           };
-          sectionChildren.push(...formatExamQuestions([convertedQuestion]));
+          sectionChildren.push(
+            ...formatExamQuestions([convertedQuestion], startIndex++)
+          );
         }
       });
 
@@ -715,7 +732,17 @@ export const importExamFromExcel = async (req, res) => {
       questionTypes.map((q) => [q.name.toLowerCase().trim(), q._id])
     );
 
-    const normalize = (str) => str?.toLowerCase()?.trim();
+    const normalize = (str, type = "default") => {
+      if (!str) return type === "level" ? "easy" : ""; // Default to "easy" for level, empty string otherwise
+      const normalized = str.toLowerCase().trim();
+      // Handle common typos or variations
+      const typoCorrections = {
+        "mutiple choices": "multiple choices",
+        "fill in blank": "fill in the blank",
+        "true/false/ng": "true/false/not given",
+      };
+      return typoCorrections[normalized] || normalized;
+    };
 
     const getFormattedHtml = (sheet, row, colName) => {
       const cellAddress = `${colName}${row}`;
@@ -799,12 +826,20 @@ export const importExamFromExcel = async (req, res) => {
           instruction: question?.Instruction,
           topic: question?.Topic,
           questionType: questionTypeId,
-          level: normalize(question.Level),
+          level: normalize(question.Level, "level"), // Ensure level is normalized with a default value
           author: req.user._id,
           knowledge: question?.Knowledge,
           translation: question?.Translation,
           explanation: question?.Explaination,
         };
+
+        // Validate the level field
+        if (!["easy", "medium", "hard"].includes(baseData.level)) {
+          return res.status(400).json({
+            success: false,
+            message: `Invalid level: ${baseData.level}. Allowed values are "easy", "medium", "hard".`,
+          });
+        }
 
         if (question.PassageId) {
           if (!groupedQuestions.has(question.PassageId)) {
@@ -981,12 +1016,20 @@ export const importExamFromExcel = async (req, res) => {
           topic: question?.Topic,
           instruction: question?.Instruction,
           questionType: questionTypeId,
-          level: normalize(question.Level),
+          level: normalize(question.Level, "level"), // Ensure level is normalized with a default value
           author: req.user._id,
           knowledge: question?.Knowledge,
           translation: question?.Translation,
           explanation: question?.Explaination,
         };
+
+        // Validate the level field
+        if (!["easy", "medium", "hard"].includes(baseData.level)) {
+          return res.status(400).json({
+            success: false,
+            message: `Invalid level: ${baseData.level}. Allowed values are "easy", "medium", "hard".`,
+          });
+        }
 
         if (normalizedType === "true/false/not given") {
           singleQuestions.push({

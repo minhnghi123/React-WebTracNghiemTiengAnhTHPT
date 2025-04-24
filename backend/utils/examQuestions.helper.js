@@ -377,13 +377,13 @@ export const formatListeningQuestions = (questionsListening, startIndex = 1) => 
   ];
 
   // 📝 Render each listening exam
-  questionsListening.forEach((listening, index) => {
+  questionsListening.forEach((listening) => {
     // Add title for each listening exam
     formattedListening.push(
       new Paragraph({
         children: [
           new TextRun({
-            text: `Phần nghe số ${index + 1}:`,
+            text: `Phần nghe số ${startIndex}: ${listening.title}`,
             bold: true,
             font: "Times New Roman",
             size: 24,
@@ -394,34 +394,43 @@ export const formatListeningQuestions = (questionsListening, startIndex = 1) => 
     );
 
     // Display transcript
-    formattedListening.push(buildTranscriptParagraph(listening.transcript));
+    formattedListening.push(buildTranscriptParagraph(listening.description));
 
     // Display audio link
     formattedListening.push(buildAudioLinkParagraph(listening.audio));
 
-    // Display questions
-    formattedListening.push(
-      ...listening.questions.flatMap((question, qIndex) =>
-        buildListeningQuestion(question, startIndex + qIndex)
-      )
-    );
-  });
+    // Convert and display questions
+    listening.questions.forEach((question) => {
+      const questionNumber = startIndex++;
+      const convertedQuestion = {
+        content: question.questionText,
+        questionType: question.questionType,
+        level: question.difficulty,
+        answers: question.options.map((option) => ({
+          text: option.optionText,
+          isCorrect: option.isCorrect,
+        })),
+        correctAnswerForTrueFalseNGV: question.correctAnswerForTrueFalseNGV,
+      };
 
-  // Add title for the reading section after all listening questions
-  formattedListening.push(
-    new Paragraph({
-      children: [
-        new TextRun({
-          text: "CÂU HỎI PHẦN ĐỌC:",
-          bold: true,
-          font: "Times New Roman",
-          size: 26,
-        }),
-      ],
-      alignment: AlignmentType.CENTER,
-      spacing: { before: 200, after: 200 },
-    })
-  );
+      if (convertedQuestion.questionType === "6742fb1cd56a2e75dbd817ea") {
+        formattedListening.push(...formatExamQuestions([convertedQuestion], questionNumber));
+      } else if (convertedQuestion.questionType === "6742fb3bd56a2e75dbd817ec") {
+        formattedListening.push(...formatFillInBlankQuestions([convertedQuestion], questionNumber));
+      } else if (convertedQuestion.questionType === "6742fb5dd56a2e75dbd817ee") {
+        const tfngConvertedQuestion = {
+          ...convertedQuestion,
+          answers: [
+            { text: "True", isCorrect: convertedQuestion.correctAnswerForTrueFalseNGV === "true" },
+            { text: "False", isCorrect: convertedQuestion.correctAnswerForTrueFalseNGV === "false" },
+            { text: "Not Given", isCorrect: convertedQuestion.correctAnswerForTrueFalseNGV === "notgiven" },
+            { text: "No Answer", isCorrect: false },
+          ],
+        };
+        formattedListening.push(...formatExamQuestions([tfngConvertedQuestion], questionNumber));
+      }
+    });
+  });
 
   return formattedListening;
 };
@@ -434,15 +443,13 @@ export const formatListeningQuestions = (questionsListening, startIndex = 1) => 
  */
 export const formatReadingQuestions = (questionsReading, startIndex = 1) => {
   const formattedReading = [];
-  let questionCounter = startIndex;
 
-  questionsReading.forEach((readingItem, readingIndex) => {
-    // Display passage
+  questionsReading.forEach((readingItem) => {
     formattedReading.push(
       new Paragraph({
         children: [
           new TextRun({
-            text: `Đoạn ${readingIndex + 1}:`,
+            text: `Đoạn ${startIndex}:`,
             bold: true,
             font: "Times New Roman",
             size: 24,
@@ -453,41 +460,24 @@ export const formatReadingQuestions = (questionsReading, startIndex = 1) => {
       renderHtmlToTextRun(readingItem.passage || "")
     );
 
-    // Display questions related to the passage
     readingItem.questions.forEach((question) => {
-      formattedReading.push(buildQuestionParagraph(questionCounter, question.content));
-
-      // Answer table
-      formattedReading.push(
-        new Table({
-          width: { size: 100, type: WidthType.PERCENTAGE },
-          rows: [
-            new TableRow({
-              children: [
-                getAnswerCell(question.answers?.[0]?.text, 0),
-                getAnswerCell(question.answers?.[1]?.text, 1),
-              ],
-            }),
-            new TableRow({
-              children: [
-                getAnswerCell(question.answers?.[2]?.text, 2),
-                getAnswerCell(question.answers?.[3]?.text, 3),
-              ],
-            }),
+      const questionNumber = startIndex++;
+      if (question.questionType === "6742fb1cd56a2e75dbd817ea") {
+        formattedReading.push(...formatExamQuestions([question], questionNumber));
+      } else if (question.questionType === "6742fb3bd56a2e75dbd817ec") {
+        formattedReading.push(...formatFillInBlankQuestions([question], questionNumber));
+      } else if (question.questionType === "6742fb5dd56a2e75dbd817ee") {
+        const convertedQuestion = {
+          ...question,
+          answers: [
+            { text: "True", isCorrect: question.correctAnswerForTrueFalseNGV === "true" },
+            { text: "False", isCorrect: question.correctAnswerForTrueFalseNGV === "false" },
+            { text: "Not Given", isCorrect: question.correctAnswerForTrueFalseNGV === "not given" },
+            { text: "No Answer", isCorrect: false },
           ],
-          spacing: { before: 100, after: 200 },
-        })
-      );
-
-      // Spacing between questions
-      formattedReading.push(
-        new Paragraph({
-          children: [],
-          spacing: { after: 200 },
-        })
-      );
-
-      questionCounter++;
+        };
+        formattedReading.push(...formatExamQuestions([convertedQuestion], questionNumber));
+      }
     });
   });
 

@@ -360,7 +360,7 @@ const UpdateQuestionModal: React.FC<UpdateQuestionModalProps> = ({
           </div>
         </Form.Item>
 
-        <Form.Item label="Audio">
+        {/* <Form.Item label="Audio">
           <Upload
             beforeUpload={() => false}
             onChange={handleAudioChange}
@@ -380,7 +380,7 @@ const UpdateQuestionModal: React.FC<UpdateQuestionModalProps> = ({
               </Option>
             ))}
           </Select>
-        </Form.Item>
+        </Form.Item> */}
       </Form>
     </Modal>
   );

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Modal, Button, Input, Form, Select, Upload } from "antd";
 import { Question, QuestionAPI, AudioAPI, Audio } from "@/services/teacher/Teacher"; // Adjust the import path as needed
-import { UploadOutlined } from "@ant-design/icons";
+import {  QuestionOutlined } from "@ant-design/icons";
+import { explainInVietnamese, translateEnglishToVietnamese } from "@/services/GropApi";
 
 interface UpdateBlankQuestionModalProps {
   visible: boolean;
@@ -69,6 +70,43 @@ const UpdateBlankQuestionModal: React.FC<UpdateBlankQuestionModalProps> = ({
   const handleAudioChange = (info: any) => {
     if (info.file.status === "done") {
       setAudioFile(info.file.originFileObj);
+    }
+  };
+
+  const handleTranslate = async (text: string) => {
+    const confirm = window.confirm(
+      "Bạn có muốn dịch câu hỏi không? Sẽ xóa dữ liệu dịch cũ"
+    );
+    if (!confirm) return;
+    try {
+      const rq = await translateEnglishToVietnamese(text);
+      if (rq) {
+        setQuestion((prev) => ({ ...prev, translation: rq }));
+      }
+    } catch (error: any) {
+      if (error.response) {
+        console.log(error.response.data.message);
+      }
+    }
+  };
+
+  const handleExplain = async () => {
+    const text = `${question.content}\n${question.answers
+      .map((answer, _index) => `$ ${answer.text}`)
+      .join("\n")}`;
+    const confirm = window.confirm(
+      "Bạn có muốn giải thích câu hỏi không? Sẽ xóa dữ liệu giải thích cũ"
+    );
+    if (!confirm) return;
+    try {
+      const rq = await explainInVietnamese(text);
+      if (rq) {
+        setQuestion((prev) => ({ ...prev, explanation: rq }));
+      }
+    } catch (error: any) {
+      if (error.response) {
+        console.log(error.response.data.message);
+      }
     }
   };
 
@@ -180,23 +218,49 @@ const UpdateBlankQuestionModal: React.FC<UpdateBlankQuestionModalProps> = ({
         </Form.Item>
 
         <Form.Item label="Dịch">
-          <Input
-            name="translation"
-            value={question.translation}
-            onChange={handleChange}
-            style={{ width: "95% " }}
-          />
-        </Form.Item>
-        <Form.Item label="Giải thích">
-          <Input
-            name="explanation"
-            value={question.explanation}
-            onChange={handleChange}
-            style={{ width: "95% " }}
-          />
+          <div className="d-flex">
+            <Input.TextArea
+              name="translation"
+              value={question.translation}
+              onChange={handleChange}
+              style={{ width: "95% " }}
+            />
+            <div className="align-items-center d-flex flex-column justify-content-center">
+              <Button
+                type="link"
+                icon={
+                  <img
+                    src="/src/Content/img/Google_Translate_Icon.png"
+                    height="16px"
+                  />
+                }
+                onClick={() => handleTranslate(question.content)}
+                style={{ color: "#FF0000" }}
+              />
+            </div>
+          </div>
         </Form.Item>
 
-        <Form.Item label="Audio">
+        <Form.Item label="Giải thích">
+          <div className="d-flex">
+            <Input.TextArea
+              name="explanation"
+              value={question.explanation}
+              onChange={handleChange}
+              style={{ width: "95% " }}
+            />
+            <div className="align-items-center d-flex flex-column justify-content-center">
+              <Button
+                type="link"
+                icon={<QuestionOutlined />}
+                onClick={() => handleExplain()}
+                style={{ color: "#FF0000" }}
+              />
+            </div>
+          </div>
+        </Form.Item>
+
+        {/* <Form.Item label="Audio">
           <Upload
             beforeUpload={() => false}
             onChange={handleAudioChange}
@@ -216,7 +280,7 @@ const UpdateBlankQuestionModal: React.FC<UpdateBlankQuestionModalProps> = ({
               </Select.Option>
             ))}
           </Select>
-        </Form.Item>
+        </Form.Item> */}
       </Form>
     </Modal>
   );
