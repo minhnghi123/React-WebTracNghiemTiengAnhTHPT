@@ -584,7 +584,8 @@ export const exportExamIntoWord = async (req, res) => {
       // Add reading questions grouped by passage
       const readingQuestions = Object.entries(groupedQuestions).map(
         ([passageId, questions]) => ({
-          passage: passageId === "noPassage" ? null : questions[0].passageId.content,
+          passage:
+            passageId === "noPassage" ? null : questions[0].passageId.content,
           questions,
         })
       );
@@ -604,9 +605,19 @@ export const exportExamIntoWord = async (req, res) => {
           const convertedQuestion = {
             ...question,
             answers: [
-              { text: "True", isCorrect: question.correctAnswerForTrueFalseNGV === "true" },
-              { text: "False", isCorrect: question.correctAnswerForTrueFalseNGV === "false" },
-              { text: "Not Given", isCorrect: question.correctAnswerForTrueFalseNGV === "not given" },
+              {
+                text: "True",
+                isCorrect: question.correctAnswerForTrueFalseNGV === "true",
+              },
+              {
+                text: "False",
+                isCorrect: question.correctAnswerForTrueFalseNGV === "false",
+              },
+              {
+                text: "Not Given",
+                isCorrect:
+                  question.correctAnswerForTrueFalseNGV === "not given",
+              },
               { text: "None", isCorrect: false },
             ],
           };
@@ -626,7 +637,11 @@ export const exportExamIntoWord = async (req, res) => {
       const buffer = await Packer.toBuffer(doc);
 
       const fileName = `${exam.title} - ${variant.code}.docx`;
-      const downloadPath = path.join(process.env.USERPROFILE, "Downloads", fileName);
+      const downloadPath = path.join(
+        process.env.USERPROFILE,
+        "Downloads",
+        fileName
+      );
 
       fs.writeFileSync(downloadPath, buffer);
       exportPaths.push(downloadPath);
@@ -767,11 +782,15 @@ export const importExamFromExcel = async (req, res) => {
 
         const normalizedType = normalize(question.QuestionType);
         const questionTypeId = questionTypeMap[normalizedType];
-        console.log(normalizedType, questionTypeId);
+
         if (!questionTypeId) {
+          console.log(normalizedType, questionTypeId);
           return res.status(400).json({
             success: false,
             message: `Invalid QuestionType: ${question.QuestionType}`,
+            normalizedType,
+            questionTypeId,
+            question,
           });
         }
 

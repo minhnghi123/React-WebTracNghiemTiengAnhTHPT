@@ -259,6 +259,7 @@ const BaiLam: React.FC = () => {
     };
 
     try {
+      console.log("Submitting answers:", submitAnswer);
       const response = await ResultAPI.submitAnswer(submitAnswer);
       if (response.code === 200) {
         showAlertModal("Nộp bài thành công");
