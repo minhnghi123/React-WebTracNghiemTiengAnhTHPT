@@ -109,6 +109,7 @@ export interface ExamResult {
   videos: Record<string, Video[]>;
   arrResponse: string;
   totalQuestion: number;
+  listeningQuestions: any[];
 }
 
 export interface QuestionDetail {

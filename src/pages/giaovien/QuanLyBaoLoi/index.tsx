@@ -68,16 +68,18 @@ const QuanLyBaoLoi: React.FC = () => {
 
   const handleSubmitResponse = () => {
     if (!selectedReport) return;
-    socket.emit("UPDATE_ERROR_STATUS", {
+
+    // Gửi phản hồi của giáo viên
+    socket.emit("RESPOND_ERROR", {
       reportId: selectedReport._id,
-      status: "resolved",
+      additionalInfo: response,
     });
 
-    socket.on("UPDATE_SUCCESS", (res) => {
+    socket.on("RESPOND_SUCCESS", (res) => {
       message.success(res.message);
       setResponse("");
       setSelectedReport(null);
-      socket.off("UPDATE_SUCCESS");
+      socket.off("RESPOND_SUCCESS");
     });
 
     socket.on("error", (error) => {
