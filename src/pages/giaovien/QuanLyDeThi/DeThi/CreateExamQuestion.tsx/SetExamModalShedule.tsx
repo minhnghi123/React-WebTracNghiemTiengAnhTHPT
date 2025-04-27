@@ -37,6 +37,7 @@ const CreateExamModalShedule: React.FC<CreateExamModalProps> = ({
 
     try {
       const response = await ExamAPI.setScheduleExam(_id, startTime, endTime);
+      
       if (response?.success === true) {
         message.success("Sửa lịch thi thành công");
         handleClose();
@@ -52,7 +53,7 @@ const CreateExamModalShedule: React.FC<CreateExamModalProps> = ({
 
   return (
     <Modal
-      title="Tạo kỳ thi"
+      title="Tạo Đề Thi"
       visible={visible}
       onCancel={handleClose}
       onOk={handleSaveClick}

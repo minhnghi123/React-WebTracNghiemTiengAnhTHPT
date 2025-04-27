@@ -1,8 +1,27 @@
-import React, { useEffect, useState } from 'react';
-import { Row, Col, Button, Table, Space, Card, Spin, Collapse } from 'antd';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
-import { Exam } from '@/services/teacher/Teacher';
-import { ClassroomAPI } from '@/services/teacher/ClassroomAPI';
+import React, { useEffect, useState } from "react";
+import {
+  Row,
+  Col,
+  Button,
+  Table,
+  Space,
+  Card,
+  Spin,
+  Collapse,
+  Modal,
+} from "antd";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+} from "recharts";
+import { Exam } from "@/services/teacher/Teacher";
+import { ClassroomAPI, Student } from "@/services/teacher/ClassroomAPI";
+import ChiTietKetQua from "@/pages/default/KyThi/KetQua/ChiTietKetQua";
 
 const { Panel } = Collapse;
 
@@ -44,25 +63,53 @@ const ExamsTab: React.FC<ExamsTabProps> = ({
 }) => {
   const [examFrequencies, setExamFrequencies] = useState<ExamFrequency[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [isResultModalOpen, setIsResultModalOpen] = useState(false);
+  const [loadingResults, setLoadingResults] = useState(false);
+  const [examResults, setExamResults] = useState<any[]>([]);
+  const [selectedExam, setSelectedExam] = useState<Exam | null>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [detailedResult, setDetailedResult] = useState<any | null>(null);
+  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
 
+  const fetchDetailedResult = async (examId: string) => {
+    setLoadingResults(true);
+    try {
+      const response = await ClassroomAPI.getSpecificExamResult(examId);
+      if (response.success) {
+        setDetailedResult(response.data.result);
+        setIsDetailModalOpen(true);
+      }
+    } catch (error) {
+      console.error("Failed to fetch detailed results:", error);
+    } finally {
+      setLoadingResults(false);
+    }
+  };
   useEffect(() => {
-    const fetchExamFrequencyForExam = async (exam: any): Promise<ExamFrequency | null> => {
+    const fetchExamFrequencyForExam = async (
+      exam: any
+    ): Promise<ExamFrequency | null> => {
       try {
-        // Giả sử ClassroomAPI.getStudentResultsByExam nhận vào exam._id và trả về đối tượng API với dữ liệu:
-        // { success: true, message: string, data: ResultItem[] }
-        const res = await ClassroomAPI.getAllStudentResultsbyExam(classroom._id,exam._id);
+        const res = await ClassroomAPI.getAllStudentResultsbyExam(
+          classroom._id,
+          exam._id
+        );
         if (res.success) {
           const results: ResultItem[] = res.data;
-          // Tính điểm cao nhất của mỗi học sinh cho kỳ thi này
           const studentMaxScores: { [studentId: string]: number } = {};
           results.forEach((result) => {
-            const studentId = result.userId && result.userId._id ? result.userId._id : "unknown";
+            const studentId =
+              result.userId && result.userId._id
+                ? result.userId._id
+                : "unknown";
             const score = result.score;
-            if (!studentMaxScores[studentId] || score > studentMaxScores[studentId]) {
+            if (
+              !studentMaxScores[studentId] ||
+              score > studentMaxScores[studentId]
+            ) {
               studentMaxScores[studentId] = score;
             }
           });
-          // Tạo bảng tần số cho điểm từ 0 đến 10
           const frequency: { [key: number]: number } = {};
           for (let i = 0; i <= 10; i++) {
             frequency[i] = 0;
@@ -92,12 +139,13 @@ const ExamsTab: React.FC<ExamsTabProps> = ({
     const fetchAllExamFrequencies = async () => {
       setLoading(true);
       try {
-        // Gọi API riêng cho mỗi kỳ thi
         const promises = classroom.exams.map((exam: any) =>
           fetchExamFrequencyForExam(exam)
         );
         const results = await Promise.all(promises);
-        const frequencies = results.filter((item) => item !== null) as ExamFrequency[];
+        const frequencies = results.filter(
+          (item) => item !== null
+        ) as ExamFrequency[];
         setExamFrequencies(frequencies);
       } catch (error) {
         console.error("Error fetching exam frequencies", error);
@@ -110,6 +158,26 @@ const ExamsTab: React.FC<ExamsTabProps> = ({
       fetchAllExamFrequencies();
     }
   }, [classroom._id, classroom.exams]);
+
+  const fetchSpecificExamResult = async (examId: string) => {
+    setIsResultModalOpen(true);
+    setLoadingResults(true);
+    try {
+      const response = await ClassroomAPI.getAllResultsForExamInClassroom(
+        classroom._id,
+        examId
+      );
+      if (response.success) {
+        setExamResults([response.data]);
+      } else {
+        setExamResults([]);
+      }
+    } catch (error) {
+      setExamResults([]);
+    } finally {
+      setLoadingResults(false);
+    }
+  };
 
   return (
     <Row gutter={[16, 16]}>
@@ -132,19 +200,38 @@ const ExamsTab: React.FC<ExamsTabProps> = ({
                 key: "action",
                 render: (_, record: Exam) => (
                   <Space size="small">
-                    <Button type="link" onClick={() => openExamContent({
-                      _id: record._id,
-                      title: record.title,
-                      questions: record.questions,
-                      duration: record.duration,
-                      startTime: record.startTime,
-                      isPublic: record.isPublic,
-                      slug: '',
-                      createdAt: new Date()
-                    })}>
+                    <Button
+                      type="link"
+                      onClick={() =>
+                        openExamContent({
+                          _id: record._id,
+                          title: record.title,
+                          questions: record.questions,
+                          duration: record.duration,
+                          startTime: record.startTime,
+                          isPublic: record.isPublic,
+                          slug: "",
+                          createdAt: new Date(),
+                          listeningExams: [],
+                        })
+                      }
+                    >
                       Xem chi tiết
                     </Button>
-                    <Button type="link" danger onClick={() => handleRemoveExam(record._id || "")}>
+                    <Button
+                      type="link"
+                      onClick={() => {
+                        setSelectedExam(record);
+                        fetchSpecificExamResult(record._id || "");
+                      }}
+                    >
+                      Xem kết quả
+                    </Button>
+                    <Button
+                      type="link"
+                      danger
+                      onClick={() => handleRemoveExam(record._id || "")}
+                    >
                       Xóa
                     </Button>
                   </Space>
@@ -155,7 +242,9 @@ const ExamsTab: React.FC<ExamsTabProps> = ({
         )}
       </Col>
       <Col span={24}>
-        <h3 className="detail-subtitle">Biểu đồ tần số điểm cho từng bài kiểm tra</h3>
+        <h3 className="detail-subtitle">
+          Biểu đồ tần số điểm cho từng bài kiểm tra
+        </h3>
         {loading ? (
           <Spin />
         ) : examFrequencies.length > 0 ? (
@@ -169,7 +258,11 @@ const ExamsTab: React.FC<ExamsTabProps> = ({
                     <YAxis allowDecimals={false} />
                     <Tooltip formatter={(value: any) => `${value} học sinh`} />
                     <Legend />
-                    <Bar dataKey="count" fill="#82ca9d" name="Số lượng học sinh" />
+                    <Bar
+                      dataKey="count"
+                      fill="#82ca9d"
+                      name="Số lượng học sinh"
+                    />
                   </BarChart>
                 </Card>
               </Panel>
@@ -179,6 +272,89 @@ const ExamsTab: React.FC<ExamsTabProps> = ({
           <p>Không có dữ liệu kết quả cho bài kiểm tra.</p>
         )}
       </Col>
+
+      {/* Modal hiển thị kết quả học sinh */}
+      <Modal
+        title={`Kết quả của bài kiểm tra: ${selectedExam?.title || ""}`}
+        visible={isResultModalOpen}
+        onCancel={() => setIsResultModalOpen(false)}
+        footer={null}
+        width={800}
+      >
+        {loadingResults ? (
+          <Spin tip="Đang tải kết quả..." />
+        ) : examResults.length > 0 ? (
+          <Table
+            dataSource={examResults[0]}
+            rowKey="_id"
+            columns={[
+              {
+                title: "Học sinh",
+                dataIndex: ["userId", "email"],
+                key: "email",
+              },
+              {
+                title: "Điểm",
+                dataIndex: "score",
+                key: "score",
+              },
+              {
+                title: "Số câu đúng",
+                dataIndex: "correctAnswer",
+                key: "correctAnswer",
+              },
+              {
+                title: "Số câu sai",
+                dataIndex: "wrongAnswer",
+                key: "wrongAnswer",
+              },
+              {
+                title: "Ngày làm bài",
+                dataIndex: "createdAt",
+                key: "createdAt",
+                render: (text: string) => new Date(text).toLocaleString(),
+              },
+              {
+                title: "Xem chi tiết kết quả",
+                key: "viewDetails",
+                render: (_: any, record: any) => (
+                  <button
+                    className="btn btn-primary"
+                    onClick={() => {
+                      setSelectedStudent(examResults.userId);
+                      fetchDetailedResult(record._id);
+                    }}
+                  >
+                    Xem
+                  </button>
+                ),
+              },
+            ]}
+            pagination={false}
+          />
+        ) : (
+          <p>Không có kết quả nào.</p>
+        )}
+      </Modal>
+
+      {/* Modal hiển thị chi tiết kết quả */}
+      <Modal
+        title={`Chi tiết kết quả của học sinh: ${
+          selectedStudent?.username || ""
+        }`}
+        visible={isDetailModalOpen}
+        onCancel={() => setIsDetailModalOpen(false)}
+        footer={null}
+        width={800}
+      >
+        {loadingResults ? (
+          <Spin tip="Đang tải chi tiết kết quả..." />
+        ) : detailedResult ? (
+          <ChiTietKetQua result={detailedResult} />
+        ) : (
+          <p>Không có dữ liệu chi tiết kết quả.</p>
+        )}
+      </Modal>
     </Row>
   );
 };

@@ -17,11 +17,11 @@ export const VeChungToi = () => {
                   P2N là một trong những phần mềm tự học tiếng Anh trực tuyến
                   hiệu quả. Chúng tôi cung cấp giao diện thân thiện, dễ sử dụng,
                   và các bài kiểm tra được thiết kế với bố cục, thời lượng tương
-                  tự như các kỳ thi tiếng Anh thực tế.
+                  tự như các Đề Thi tiếng Anh thực tế.
                 </p>
                 <p>
                   Với nguồn đề thi phong phú được thu thập từ các nguồn uy tín,
-                  người dùng có thể tự luyện thi các kỳ thi quan trọng như
+                  người dùng có thể tự luyện thi các Đề Thi quan trọng như
                   <strong> IELTS</strong>, <strong>TOEIC</strong>,... và cải
                   thiện các kỹ năng ngôn ngữ một cách toàn diện.
                 </p>
@@ -48,8 +48,8 @@ export const VeChungToi = () => {
               <div className="col-md-4">
                 <h2 className="info-title">Sứ Mệnh</h2>
                 <p>
-                  Cung cấp công cụ học tập hiệu quả, giúp người học tiếng Anh đạt
-                  được mục tiêu cá nhân nhanh chóng và dễ dàng.
+                  Cung cấp công cụ học tập hiệu quả, giúp người học tiếng Anh
+                  đạt được mục tiêu cá nhân nhanh chóng và dễ dàng.
                 </p>
               </div>
               <div className="col-md-4">

@@ -17,8 +17,6 @@ router.post("/create-multi", createMultipleListeningQuestions );
 
 router.patch("/update/:id", listeningQuestionMiddleware, updateListeningQuestion );
 
-router.patch("/delete/:id",listeningQuestionMiddleware, deleteListeningQuestion );
-
-
+router.delete("/delete/:id", listeningQuestionMiddleware, deleteListeningQuestion );
 
 export default router;

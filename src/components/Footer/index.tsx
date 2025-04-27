@@ -31,12 +31,12 @@ export const Footer = () => {
               <ul>
                 <li>
                   <a className="nav-link" href="/Ontap">
-                    Ôn tập
+                    FlashCard Ôn Tập
                   </a>
                 </li>
                 <li>
                   <a className="nav-link" href="/KyThi">
-                    Tham Gia Kỳ Thi
+                    Tham Gia Đề Thi
                   </a>
                 </li>
               </ul>

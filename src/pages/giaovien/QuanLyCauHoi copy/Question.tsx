@@ -1,4 +1,4 @@
-import { QuestionAPI, Question } from "@/services/teacher/Teacher";
+import { Question } from "@/services/teacher/Teacher";
 import { cleanString } from "@/utils/cn";
 import { Divider, Flex, Modal, Tag } from "antd";
 import clsx from "clsx";
@@ -7,6 +7,7 @@ import { useState } from "react";
 import UpdateQuestionModal from "./CreateQuestion/UpdateQuestion";
 import UpdateBlankQuestionModal from "./CreateQuestion/UpdateQuestionBlank";
 import { UpdateAudioModal } from "../QuanLyFileAudio/FileAudio/UpdateDangCauHoiModal";
+import { listenQuestionAPI } from "@/services/teacher/ListeningQuestion";
 type QuestionComponentProps = {
   question: Question;
   onUpdateSuccess: () => void;
@@ -35,7 +36,7 @@ const QuestionComponent: React.FC<QuestionComponentProps> = ({
   };
   const handleDeleteQuestion = async (id: string) => {
     try {
-      const rq = await QuestionAPI.deleteQuestion(id);
+      const rq = await listenQuestionAPI.deleteListeningQuestion(id);
       if (rq?.code === 200) {
         alert("Xóa câu hỏi thành công");
         onUpdateSuccess();
@@ -70,7 +71,11 @@ const QuestionComponent: React.FC<QuestionComponentProps> = ({
                 }`}
                 style={{ whiteSpace: "pre-wrap" }}
               >
-                {cleanString(answer.text || "")}
+                <span
+                  dangerouslySetInnerHTML={{
+                    __html: cleanString(answer.text || ""),
+                  }}
+                />
               </div>
             ) : (
               <div
@@ -78,7 +83,11 @@ const QuestionComponent: React.FC<QuestionComponentProps> = ({
                 className="ml-2 rounded mb-2 bg-green-100"
                 style={{ whiteSpace: "pre-wrap" }}
               >
-                {cleanString(answer.correctAnswerForBlank || "")}
+                <span
+                  dangerouslySetInnerHTML={{
+                    __html: cleanString(answer.correctAnswerForBlank || ""),
+                  }}
+                />
               </div>
             )}
           </div>
@@ -91,7 +100,7 @@ const QuestionComponent: React.FC<QuestionComponentProps> = ({
         <Tag
           color={clsx(
             question.level === "easy" && "green",
-            question.level === "medium" && "yellow",
+            // question.level === "medium" && "yellow",
             question.level === "hard" && "red"
           )}
           className="type-question"
@@ -108,9 +117,10 @@ const QuestionComponent: React.FC<QuestionComponentProps> = ({
       >
         <span style={{ fontWeight: "bold" }}>Giải thích: </span>
         <span
-          dangerouslySetInnerHTML={{ __html: cleanString(question.explanation) }}
+          dangerouslySetInnerHTML={{
+            __html: cleanString(question.explanation),
+          }}
         />
-        
       </p>
       <p
         className="text-sm text-gray-600 mb-2"
@@ -125,7 +135,14 @@ const QuestionComponent: React.FC<QuestionComponentProps> = ({
             Phần nghe
           </Divider>
           <audio controls>
-            <source src={typeof question.audioInfo.filePath === 'string' ? question.audioInfo.filePath : ''} type="audio/mpeg" />
+            <source
+              src={
+                typeof question.audioInfo.filePath === "string"
+                  ? question.audioInfo.filePath
+                  : ""
+              }
+              type="audio/mpeg"
+            />
           </audio>
 
           <p
@@ -144,65 +161,71 @@ const QuestionComponent: React.FC<QuestionComponentProps> = ({
           </p>
         </div>
       )}
-      {
-        editable && (
-          <>
-            <hr />
-      <button className="btn btn-primary my-3 mx-3" onClick={() => setOpenModal(true)}>
-        Sửa câu hỏi
-      </button>
-      {
-        deletetalbe && (
-          <button className="btn btn-danger my-3 mx-3" onClick={() => setOpen(true)}>
-            Xóa câu hỏi
+      {editable && (
+        <>
+          <hr />
+          <button
+            className="btn btn-primary my-3 mx-3"
+            onClick={() => setOpenModal(true)}
+          >
+            Sửa câu hỏi
           </button>
-        )
-      }
-    
-      {question.audioInfo && <button className=" btn   my-3 mx-3" onClick={() => setOpenAudioUpdate(true)}>
-        Sửa file nghe
-      </button> } 
-      {questionType === "6742fb1cd56a2e75dbd817ea" ? (
-        <UpdateQuestionModal
-          visible={openModal}
-          onUpdateSuccess={() => onUpdateSuccess()}
-          handleClose={() => {
-            setOpenModal(false);
-          }}
-          question2={question}
-        />
-      ) : (
-        <UpdateBlankQuestionModal
-          visible={openModal}
-          handleClose={() => {
-            setOpenModal(false), onUpdateSuccess();
-          }}
-          question2={question}
-        />
+          {deletetalbe && (
+            <button
+              className="btn btn-danger my-3 mx-3"
+              onClick={() => setOpen(true)}
+            >
+              Xóa câu hỏi
+            </button>
+          )}
+
+          {question.audioInfo && (
+            <button
+              className=" btn   my-3 mx-3"
+              onClick={() => setOpenAudioUpdate(true)}
+            >
+              Sửa file nghe
+            </button>
+          )}
+          {questionType === "6742fb1cd56a2e75dbd817ea" ? (
+            <UpdateQuestionModal
+              visible={openModal}
+              onUpdateSuccess={() => onUpdateSuccess()}
+              handleClose={() => {
+                setOpenModal(false);
+              }}
+              question2={question}
+            />
+          ) : (
+            <UpdateBlankQuestionModal
+              visible={openModal}
+              handleClose={() => {
+                setOpenModal(false), onUpdateSuccess();
+              }}
+              question2={question}
+            />
+          )}
+          <Modal
+            open={open}
+            title="Xóa câu hỏi"
+            onOk={handleOk}
+            onCancel={handleCancel}
+            footer={(_, { OkBtn, CancelBtn }) => (
+              <>
+                <CancelBtn />
+                <OkBtn />
+              </>
+            )}
+          >
+            <p>Bạn có chắc chắn muốn xóa câu hỏi này</p>
+          </Modal>
+        </>
       )}
-      <Modal
-        open={open}
-        title="Xóa câu hỏi"
-        onOk={handleOk}
-        onCancel={handleCancel}
-        footer={(_, { OkBtn, CancelBtn }) => (
-          <>
-            <CancelBtn />
-            <OkBtn />
-          </>
-        )}
-      >
-        <p>Bạn có chắc chắn muốn xóa câu hỏi này</p>
-      </Modal>
-          </>
-        )
-      }
       {question.audioInfo && (
         <UpdateAudioModal
           audioData={question.audioInfo}
           visible={openAudioUpdate}
           handleClose={handleAudioUpdateSuccess}
-
         />
       )}
     </div>

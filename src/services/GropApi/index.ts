@@ -9,7 +9,6 @@ const configValue2: string =
   import.meta.env.VITE_MYMEMORY_API_KEY || "default_api_key";
 
 export async function translateEnglishToVietnamese(text: string): Promise<string> {
-  console.log("MyMemory API Key:", configValue2);
   
   let url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(
     text
@@ -31,7 +30,6 @@ export async function translateEnglishToVietnamese(text: string): Promise<string
 }
 
 // export async function translateEnglishToVietnamese(text: string) {
-//   console.log(configValue);
 //   const translationCompletion = await groq.chat.completions.create({
 //     messages: [
 //       {

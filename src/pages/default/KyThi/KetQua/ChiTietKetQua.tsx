@@ -40,19 +40,24 @@ const mergeListeningQuestion = (
 };
 
 const ChiTietKetQua: React.FC<ChiTietKetQuaProps> = ({ result }) => {
+  // console.log("Chi tiết kết quả:", result);
   // Tính tổng số câu: kết hợp câu hỏi thường và câu hỏi nghe từ listeningExams
-  const totalListeningQuestions = typeof result.examId === "object" && result.examId.listeningExams
-    ? result.examId.listeningExams.reduce(
-        (total: number, exam: any) => total + (exam.questions ? exam.questions.length : 0),
-        0
-      )
-    : result.listeningQuestions.length;
+  const totalListeningQuestions =
+    typeof result.examId === "object" && result.examId.listeningExams
+      ? result.examId.listeningExams.reduce(
+          (total: number, exam: any) =>
+            total + (exam.questions ? exam.questions.length : 0),
+          0
+        )
+      : result.listeningQuestions.length;
   return (
     <div className="container mx-auto p-4">
       <center>
         <h1 className="text-3xl font-bold">
           Chi tiết kết quả{" "}
-          {typeof result.examId === "object" ? result.examId.title : result.examId}
+          {typeof result.examId === "object"
+            ? result.examId.title
+            : result.examId}
         </h1>
       </center>
       <div>
@@ -61,38 +66,42 @@ const ChiTietKetQua: React.FC<ChiTietKetQuaProps> = ({ result }) => {
 
       {/* Hiển thị các câu hỏi trắc nghiệm, đọc, điền khuyết (với API gốc) */}
       {result.questions &&
-        (result.questions as QuestionAnswerResult[]).map((item: QuestionAnswerResult) => (
-          <QuestionAnswerComponent question={item} key={item._id} />
-        ))}
+        (result.questions as QuestionAnswerResult[]).map(
+          (item: QuestionAnswerResult) => (
+            <QuestionAnswerComponent question={item} key={item._id} />
+          )
+        )}
 
       {/* Hiển thị câu hỏi nghe */}
-      { typeof result.examId === "object" && result.examId.listeningExams && result.examId.listeningExams.length > 0 ? (
-        result.examId.listeningExams.map((exam: any) => (
-          <div key={exam._id} className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">{exam.title}</h2>
-            {exam.questions &&
-              exam.questions.map((listeningExamQuestion: any) => {
-                // Ghép kết quả của câu hỏi nghe dựa trên questionId
-                const mergedQuestion = mergeListeningQuestion(
-                  listeningExamQuestion,
-                  result.listeningQuestions || []
-                );
-                return (
-                  <QuestionAnswerComponent
-                    question={mergedQuestion}
-                    key={mergedQuestion._id}
-                  />
-                );
-              })}
-          </div>
-        ))
-      ) : (
-        // Nếu không có listeningExams, fallback hiển thị mảng listeningQuestions theo cấu trúc ban đầu
-        result.listeningQuestions &&
-        (result.listeningQuestions as QuestionAnswerResult[]).map((item: QuestionAnswerResult) => (
-          <QuestionAnswerComponent question={item} key={item._id} />
-        ))
-      )}
+      {typeof result.examId === "object" &&
+      result.examId.listeningExams &&
+      result.examId.listeningExams.length > 0
+        ? result.examId.listeningExams.map((exam: any) => (
+            <div key={exam._id} className="mb-8">
+              <h2 className="text-2xl font-semibold mb-4">{exam.title}</h2>
+              {exam.questions &&
+                exam.questions.map((listeningExamQuestion: any) => {
+                  // Ghép kết quả của câu hỏi nghe dựa trên questionId
+                  const mergedQuestion = mergeListeningQuestion(
+                    listeningExamQuestion,
+                    result.listeningQuestions || []
+                  );
+                  return (
+                    <QuestionAnswerComponent
+                      question={mergedQuestion}
+                      key={mergedQuestion._id}
+                    />
+                  );
+                })}
+            </div>
+          ))
+        : // Nếu không có listeningExams, fallback hiển thị mảng listeningQuestions theo cấu trúc ban đầu
+          result.listeningQuestions &&
+          (result.listeningQuestions as QuestionAnswerResult[]).map(
+            (item: QuestionAnswerResult) => (
+              <QuestionAnswerComponent question={item} key={item._id} />
+            )
+          )}
     </div>
   );
 };

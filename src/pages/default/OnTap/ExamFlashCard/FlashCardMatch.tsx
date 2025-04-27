@@ -124,7 +124,7 @@ export const FlashCardMatch: React.FC<FlashCardMatchProps> = ({
     let mouse: Node | null = null;
     let isDragging = false;
 
-    const onMouseDown = (e: MouseEvent) => {
+    const onMouseDown = () => {
       if (!mouse) return;
       const closestNode = findClosestNode(nodes, mouse);
       activeNode = closestNode || null;
@@ -136,7 +136,7 @@ export const FlashCardMatch: React.FC<FlashCardMatchProps> = ({
       mouse = { x: e.clientX - rect.left, y: e.clientY - rect.top };
     };
 
-    const onMouseUp = (e: MouseEvent) => {
+    const onMouseUp = () => {
       isDragging = false;
       if (!mouse || !activeNode) return;
       const intentRadius = nodeRadius * 1.5;
@@ -227,7 +227,6 @@ export const FlashCardMatch: React.FC<FlashCardMatchProps> = ({
 
   const handleReset = () => {
     setIsSubmitted(false);
-    setScore(null);
     setCorrectCount(0);
   };
 
@@ -257,7 +256,4 @@ export const FlashCardMatch: React.FC<FlashCardMatchProps> = ({
     </div>
   );
 };
-function setScore(arg0: null) {
-  throw new Error("Function not implemented.");
-}
 

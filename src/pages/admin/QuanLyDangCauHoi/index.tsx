@@ -18,9 +18,9 @@ export const QuanLyDangCauHoi = () => {
   const getAllQT = async (page: number) => {
     try {
       const rq = await QuestionTypeAPI.getAllQuestionType(page);
-
-      if (rq?.code === 200) {
-        setData(rq?.questionTypes);
+      console.log("rq", rq);  
+      if (rq?.success) {
+        setData(rq?.data);
         setTotal(rq?.totalPage);
         setPage(rq?.currentPage);
   
@@ -60,6 +60,7 @@ export const QuanLyDangCauHoi = () => {
   const handleCancel = () => {
     setOpen(false);
   };
+  console.log("data", data);
   return (
     <div className="container mx-auto p-4">
       <center>

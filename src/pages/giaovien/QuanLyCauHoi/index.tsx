@@ -2,6 +2,7 @@ import { Tabs } from "antd";
 import ListYesNo from "./listYesNo";
 import { ListBlank } from "./listBlank";
 import { ListListening } from "./listListening";
+import ListTFnotgiven from "./listTFnotgiven";
 
 export const QuanLyCauHoi = () => {
   const items = [
@@ -14,6 +15,11 @@ export const QuanLyCauHoi = () => {
       key: "blank",
       label: "Câu hỏi điền khuyết",
       children: <ListBlank />,
+    },
+    {
+      key: "TFnotgiven",
+      label: "Câu hỏi True/ False/ not given",
+      children: <ListTFnotgiven />,
     },
     {
       key: "listening",

@@ -27,7 +27,7 @@ const CreateQuestionModal: React.FC<CreateQuestionModalProps> = ({
     explanation: "",
     audio: "",
   });
-  const [audioFile, setAudioFile] = useState<File | null>(null);
+  const [audioFile] = useState<File | null>(null);
   const [existingAudios, setExistingAudios] = useState<Audio[]>([]);
   const [isCreateAudioModalVisible, setIsCreateAudioModalVisible] = useState(false); // State to manage CreateAudioModal visibility
   const handleAudioCreated = (audioId: string) => {
@@ -66,6 +66,13 @@ const CreateQuestionModal: React.FC<CreateQuestionModalProps> = ({
         ...prev,
         questionType: "6742fb3bd56a2e75dbd817ec",
         answers: [{ text: "", correctAnswerForBlank: "", isCorrect: true }],
+      }));
+    } else if (value === "truefalsengv") {
+      setQuestion((prev) => ({
+        ...prev,
+        questionType: "6742fb5dd56a2e75dbd817ee",
+        correctAnswerForTrueFalseNGV: "true",
+        answers: [],
       }));
     } else {
       setQuestion((prev) => ({
@@ -132,12 +139,6 @@ const CreateQuestionModal: React.FC<CreateQuestionModalProps> = ({
     setQuestion((prev) => ({ ...prev, answers: newAnswers }));
   };
 
-  // const handleAudioChange = (info: any) => {
-  //   if (info.file.status === "done") {
-  //     setAudioFile(info.file.originFileObj);
-  //   }
-  // };
-
   const handleSaveClick = async () => {
     if (!question.content.trim()) {
       return Modal.error({
@@ -154,6 +155,13 @@ const CreateQuestionModal: React.FC<CreateQuestionModalProps> = ({
         return Modal.error({
           title: "Lỗi",
           content: "Tất cả các từ khóa điền khuyết phải được nhập",
+        });
+      }
+    } else if (question.questionType === "6742fb5dd56a2e75dbd817ee") {
+      if (!question.correctAnswerForTrueFalseNGV) {
+        return Modal.error({
+          title: "Lỗi",
+          content: "Cần phải chọn đáp án đúng cho câu hỏi True/False/Not Given",
         });
       }
     } else {
@@ -269,12 +277,15 @@ const CreateQuestionModal: React.FC<CreateQuestionModalProps> = ({
               value={
                 question.questionType === "6742fb1cd56a2e75dbd817ea"
                   ? "yesno"
-                  : "fillblank"
+                  : question.questionType === "6742fb3bd56a2e75dbd817ec"
+                  ? "fillblank"
+                  : "truefalsengv"
               }
               onChange={handleQuestionTypeChange}
             >
               <Option value="yesno">Yes/No</Option>
               <Option value="fillblank">Điền khuyết</Option>
+              <Option value="truefalsengv">True/False/Not Given</Option>
             </Select>
           </Form.Item>
 
@@ -282,43 +293,51 @@ const CreateQuestionModal: React.FC<CreateQuestionModalProps> = ({
             <Form.Item label="Đáp án">
               {question.answers.map((answer, index) => (
                 <div
-                  key={index}
-                  className={clsx(
-                    "answer-container",
-                    answer.isCorrect
-                      ? "answer-correct"
-                      : "answer-incorrect"
-                  )}
-                >
-                  <div className="answer-input">
-                    <Input
-                      name="text"
-                      value={answer.text}
-                      onChange={(e) => handleAnswerChange(index, e)}
-                      placeholder={`Đáp án ${index + 1}`}
-                    />
-                  </div>
-                  <div className="answer-actions">
-                    <Input
-                      type="checkbox"
-                      name="isCorrect"
-                      checked={answer.isCorrect}
-                      onChange={(e) => handleCheckboxChange(index, e)}
-                    />
-                    <Button
-                      type="link"
-                      icon={<CloseCircleOutlined />}
-                      onClick={() => handleRemoveAnswer(index)}
-                      danger
-                    />
-                  </div>
+                key={index}
+                className={clsx(
+                  "answer-container",
+                  answer.isCorrect ? "answer-correct" : "answer-incorrect"
+                )}
+                style={{ display: "flex", alignItems: "flex-start", gap: "16px" }}
+              >
+                <div className="answer-input" style={{ flex: 1 }}>
+                  <Input
+                    name="text"
+                    value={answer.text}
+                    onChange={(e) => handleAnswerChange(index, e)}
+                    placeholder={`Đáp án ${index + 1}`}
+                  />
                 </div>
+                <div
+                  className="answer-actions"
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    gap: "8px",
+                  }}
+                >
+                  <Input
+                    type="checkbox"
+                    name="isCorrect"
+                    checked={answer.isCorrect}
+                    onChange={(e) => handleCheckboxChange(index, e)}
+                  />
+                  <Button
+                    type="link"
+                    icon={<CloseCircleOutlined />}
+                    onClick={() => handleRemoveAnswer(index)}
+                    danger
+                  />
+                </div>
+              </div>
+              
               ))}
               <Button type="dashed" onClick={handleAddAnswer}>
                 Thêm đáp án
               </Button>
             </Form.Item>
-          ) : (
+          ) : question.questionType === "6742fb3bd56a2e75dbd817ec" ? (
             <Form.Item label="Từ khóa cần điền">
               {question.answers.map((answer, index) => (
                 <div key={index} className="blank-container">
@@ -335,6 +354,22 @@ const CreateQuestionModal: React.FC<CreateQuestionModalProps> = ({
               <Button type="dashed" onClick={handleAddBlank}>
                 Thêm từ khóa
               </Button>
+            </Form.Item>
+          ) : (
+            <Form.Item label="Đáp án đúng">
+              <Select
+                value={question.correctAnswerForTrueFalseNGV}
+                onChange={(value) =>
+                  setQuestion((prev) => ({
+                    ...prev,
+                    correctAnswerForTrueFalseNGV: value,
+                  }))
+                }
+              >
+                <Option value="true">True</Option>
+                <Option value="false">False</Option>
+                <Option value="notgiven">Not Given</Option>
+              </Select>
             </Form.Item>
           )}
 

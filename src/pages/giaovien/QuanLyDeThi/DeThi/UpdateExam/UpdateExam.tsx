@@ -35,14 +35,20 @@ const UpdateExamModal: React.FC<UpdateExamModalProps> = ({
     isPublic: false,
     slug: "",
     createdAt: new Date(),
+    class: "10", // Default value for class
+    topic: [], // Default value for topic
+    knowledge: [], // Default value for knowledge
   });
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setExam((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSelectChange = (value: boolean) => {
-    setExam((prev) => ({ ...prev, isPublic: value }));
+  const handleSelectChange = (name: string, value: any) => {
+    setExam((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleDateChange = (name: string, date: any) => {
@@ -58,7 +64,9 @@ const UpdateExamModal: React.FC<UpdateExamModalProps> = ({
           setExam((prev) => ({
             ...prev,
             startTime: new Date(response.data.startTime),
-            endTime: response.data.endTime ? new Date(response.data.endTime) : undefined,
+            endTime: response.data.endTime
+              ? new Date(response.data.endTime)
+              : undefined,
             questions: dataQuestion || [],
             listeningExams: listeningExams || [],
           }));
@@ -81,9 +89,7 @@ const UpdateExamModal: React.FC<UpdateExamModalProps> = ({
       alert("Thời gian kết thúc phải lớn hơn thời gian bắt đầu.");
       return;
     }
-    console.log("gửi",exam);
     const response = await ExamAPI.UpdateExam(exam as Exam, slug);
-    console.log(response);
     if (response?.success === true) {
       alert("Sửa đề thi thành công");
       navigate("/giaovien/QuanLyDeThi/");
@@ -98,7 +104,7 @@ const UpdateExamModal: React.FC<UpdateExamModalProps> = ({
 
   return (
     <Modal
-      title="Sửa kỳ thi"
+      title="Sửa Đề Thi"
       visible={visible}
       onCancel={handleClose}
       onOk={handleSaveClick}
@@ -111,10 +117,19 @@ const UpdateExamModal: React.FC<UpdateExamModalProps> = ({
           <Input name="title" value={exam.title} onChange={handleChange} />
         </Form.Item>
         <Form.Item label="Mô tả">
-          <Input.TextArea name="description" value={exam.description} onChange={handleChange} />
+          <Input.TextArea
+            name="description"
+            value={exam.description}
+            onChange={handleChange}
+          />
         </Form.Item>
         <Form.Item label="Thời gian (phút)">
-          <Input name="duration" type="number" value={exam.duration} onChange={handleChange} />
+          <Input
+            name="duration"
+            type="number"
+            value={exam.duration}
+            onChange={handleChange}
+          />
         </Form.Item>
         <Form.Item label="Thời gian bắt đầu">
           <DatePicker
@@ -131,10 +146,37 @@ const UpdateExamModal: React.FC<UpdateExamModalProps> = ({
           />
         </Form.Item>
         <Form.Item label="Công khai">
-          <Select value={exam.isPublic} onChange={handleSelectChange}>
+          <Select
+            value={exam.isPublic}
+            onChange={(value) => handleSelectChange("isPublic", value)}
+          >
             <Option value={true}>Công khai</Option>
             <Option value={false}>Riêng tư</Option>
           </Select>
+        </Form.Item>
+        <Form.Item label="Lớp">
+          <Select
+            value={exam.class}
+            onChange={(value) => handleSelectChange("class", value)}
+          >
+            <Option value="10">Lớp 10</Option>
+            <Option value="11">Lớp 11</Option>
+            <Option value="12">Lớp 12</Option>
+          </Select>
+        </Form.Item>
+        <Form.Item label="Chủ đề">
+          <Select
+            mode="tags"
+            value={exam.topic}
+            onChange={(value) => handleSelectChange("topic", value)}
+          />
+        </Form.Item>
+        <Form.Item label="Kiến thức">
+          <Select
+            mode="tags"
+            value={exam.knowledge}
+            onChange={(value) => handleSelectChange("knowledge", value)}
+          />
         </Form.Item>
       </Form>
     </Modal>

@@ -7,26 +7,52 @@ import {
   Modal,
   Button,
   Tag,
-  Collapse,
   Pagination,
   Select,
   Tabs,
+  Table,
 } from "antd";
-import { PlusOutlined, MinusOutlined } from "@ant-design/icons";
-import QuestionComponent from "@/pages/giaovien/QuanLyCauHoi/Question";
+import { PlusOutlined, MinusOutlined, EditOutlined } from "@ant-design/icons";
 import clsx from "clsx";
 import { useParams } from "react-router-dom";
 import UpdateExamModal from "./UpdateExam";
+import UpdateQuestionModal from "@/pages/giaovien/QuanLyCauHoi/CreateQuestion/UpdateQuestion";
+import UpdateBlankQuestionModal from "@/pages/giaovien/QuanLyCauHoi/CreateQuestion/UpdateQuestionBlank";
 import "./index.css";
 import {
   ExamListeningQuestionAPI,
   ExamDataRecieve,
 } from "@/services/teacher/ListeningQuestion";
-import { EditOutlined, CopyOutlined } from "@ant-design/icons";
 import { Card } from "antd";
 const { Search } = Input;
-const { Panel } = Collapse;
 const { Option } = Select;
+
+export const TruncatedText = ({
+  text,
+  maxLength,
+}: {
+  text: string;
+  maxLength: number;
+}) => {
+  const [expanded, setExpanded] = useState(false);
+
+  if (text.length <= maxLength) {
+    return <span>{text}</span>;
+  }
+
+  return (
+    <span>
+      {expanded ? text : `${text.slice(0, maxLength)}...`}
+      <Button
+        type="link"
+        onClick={() => setExpanded(!expanded)}
+        style={{ padding: 0 }}
+      >
+        {expanded ? "Thu gọn" : "Xem thêm"}
+      </Button>
+    </span>
+  );
+};
 
 export const UpdateExamQuestion = () => {
   const { _id } = useParams<{ _id: string }>();
@@ -35,7 +61,10 @@ export const UpdateExamQuestion = () => {
   const [data, setData] = useState<Question[]>([]);
   const [otherQuestions, setOtherQuestions] = useState<Question[]>([]);
   const [selectedQuestions, setSelectedQuestions] = useState<Question[]>([]);
-  // --- State cho kỳ thi nghe ---
+  const [selectedQuestionsGroup, setSelectedQuestionsGroup] = useState<
+    Record<string, Question[]>
+  >({});
+  // --- State cho Đề Thi nghe ---
   const [allListeningExams, setAllListeningExams] = useState<ExamDataRecieve[]>(
     []
   );
@@ -46,19 +75,30 @@ export const UpdateExamQuestion = () => {
   const [total, setTotal] = useState<number>(1);
   const [total2, setTotal2] = useState<number>(1);
   const [easyLimit, setEasyLimit] = useState<number>(0);
-  const [mediumLimit, setMediumLimit] = useState<number>(0);
   const [hardLimit, setHardLimit] = useState<number>(0);
   const [openModal, setOpenModal] = useState<boolean>(false);
   const [openModalCreate, setOpenModalCreate] = useState<boolean>(false);
-  const [examID, setExamID] = useState<string>("");
+  const [, setExamID] = useState<string>("");
 
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [filterType, setFilterType] = useState<string>("");
   const [filterLevel, setFilterLevel] = useState<string>("");
 
-  const [selectedPage, setSelectedPage] = useState<number>(1);
   const [bankPage, setBankPage] = useState<number>(1);
   const [pageSize] = useState<number>(10);
+
+  const [openEditModal, setOpenEditModal] = useState<boolean>(false);
+  const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
+
+  const handleEditQuestion = (question: Question) => {
+    setEditingQuestion(question);
+    setOpenEditModal(true);
+  };
+
+  const handleEditSuccess = () => {
+    setOpenEditModal(false);
+    addSeletedQuestion(); // Refresh selected questions
+  };
 
   // --- API: Lấy danh sách câu hỏi ---
   const getAllQuestions = async (page: number) => {
@@ -97,10 +137,11 @@ export const UpdateExamQuestion = () => {
     }
   };
 
-  // --- API: Lấy danh sách kỳ thi nghe ---
+  // --- API: Lấy danh sách Đề Thi nghe ---
   const getAllListeningExams = async () => {
     try {
       const response = await ExamListeningQuestionAPI.getAllListeningExams();
+      // console.log("response", response);
       if (response?.data) {
         setAllListeningExams(response.data);
       }
@@ -140,7 +181,7 @@ export const UpdateExamQuestion = () => {
     );
   }, [selectedQuestions, data]);
 
-  // --- Lấy dữ liệu câu hỏi và kỳ thi nghe đã có của đề thi ---
+  // --- Lấy dữ liệu câu hỏi và Đề Thi nghe đã có của đề thi ---
   const addSeletedQuestion = async () => {
     if (!_id) {
       console.error("Không tìm thấy id");
@@ -148,11 +189,28 @@ export const UpdateExamQuestion = () => {
     }
     const rq = await ExamAPI.getDetailExam(_id);
     if (rq?.success) {
-      setSelectedQuestions(rq.data.questions || []);
+      setSelectedQuestions(rq.data.questions);
       setSelectedListeningExams(rq.data.listeningExams || []);
       setExamID(rq.data._id);
     }
   };
+
+  // --- Group selectedQuestions by passageId whenever it changes ---
+  useEffect(() => {
+    const grouped = selectedQuestions.reduce((acc, question) => {
+      const passageId =
+        question.passageId?._id?.toString() ||
+        question.passageId?.toString() ||
+        "no-passage";
+      if (!acc[passageId]) {
+        acc[passageId] = [];
+      }
+      acc[passageId].push(question);
+      return acc;
+    }, {} as Record<string, Question[]>);
+
+    setSelectedQuestionsGroup(grouped);
+  }, [selectedQuestions]);
 
   // --- Utility: Trộn mảng câu hỏi ---
   const shuffleArray = (array: Question[]) => {
@@ -168,9 +226,6 @@ export const UpdateExamQuestion = () => {
     const easyQuestions = shuffleArray(
       otherQuestions.filter((q) => q.level === "easy")
     ).slice(0, easyLimit);
-    const mediumQuestions = shuffleArray(
-      otherQuestions.filter((q) => q.level === "medium")
-    ).slice(0, mediumLimit);
     const hardQuestions = shuffleArray(
       otherQuestions.filter((q) => q.level === "hard")
     ).slice(0, hardLimit);
@@ -178,7 +233,6 @@ export const UpdateExamQuestion = () => {
     setSelectedQuestions((prev) => [
       ...prev,
       ...easyQuestions,
-      ...mediumQuestions,
       ...hardQuestions,
     ]);
 
@@ -186,7 +240,6 @@ export const UpdateExamQuestion = () => {
       prev.filter(
         (q) =>
           !easyQuestions.some((eq) => eq._id === q._id) &&
-          !mediumQuestions.some((mq) => mq._id === q._id) &&
           !hardQuestions.some((hq) => hq._id === q._id)
       )
     );
@@ -221,7 +274,7 @@ export const UpdateExamQuestion = () => {
     }
   };
 
-  // --- Xử lý chuyển kỳ thi nghe ---
+  // --- Xử lý chuyển Đề Thi nghe ---
   // Khi ấn "Thêm" sẽ đưa exam đó vào danh sách đã chọn
   const handleAddListeningExam = (exam: ExamDataRecieve) => {
     setSelectedListeningExams((prev) => [...prev, exam]);
@@ -232,7 +285,7 @@ export const UpdateExamQuestion = () => {
     setSelectedListeningExams((prev) => prev.filter((e) => e._id !== exam._id));
   };
 
-  // --- Tính danh sách ngân hàng kỳ thi nghe (loại trừ các đã chọn) ---
+  // --- Tính danh sách ngân hàng Đề Thi nghe (loại trừ các đã chọn) ---
   const bankListeningExams = allListeningExams.filter(
     (exam) => !selectedListeningExams.some((e) => e._id === exam._id)
   );
@@ -253,10 +306,6 @@ export const UpdateExamQuestion = () => {
   });
 
   // --- Phân trang cho danh sách câu hỏi ---
-  const paginatedSelectedQuestions = selectedQuestions.slice(
-    (selectedPage - 1) * pageSize,
-    selectedPage * pageSize
-  );
   const paginatedBankQuestions = filteredOtherQuestions.slice(
     (bankPage - 1) * pageSize,
     bankPage * pageSize
@@ -290,14 +339,14 @@ export const UpdateExamQuestion = () => {
             ) {
               setOpenModalCreate(true);
             } else {
-              alert("Chưa có câu hỏi hoặc kỳ thi nghe nào");
+              alert("Chưa có câu hỏi hoặc Đề Thi nghe nào");
             }
           }}
           style={{ marginRight: 8 }}
         >
           Sửa đề thi
         </Button>
-        <Button
+        {/* <Button
           type="default"
           icon={<CopyOutlined />}
           onClick={() => {
@@ -307,237 +356,721 @@ export const UpdateExamQuestion = () => {
             ) {
               copyExam();
             } else {
-              alert("Chưa có câu hỏi hoặc kỳ thi nghe nào");
+              alert("Chưa có câu hỏi hoặc Đề Thi nghe nào");
             }
           }}
         >
           Sao chép đề thi
-        </Button>
+        </Button> */}
       </Card>
 
       {/* Tabs để phân chia nội dung */}
       <Tabs defaultActiveKey="1" type="card">
         {/* Tab: Danh sách câu hỏi */}
         <Tabs.TabPane tab="Danh sách câu hỏi" key="1">
-          <h3>Danh sách câu hỏi trong đề thi</h3>
-          {selectedQuestions && selectedQuestions.length > 0 ? (
-            <>
-              <Collapse accordion>
-                {paginatedSelectedQuestions.map((question, index) => (
-                  <Panel
-                    header={
+          <div style={{ display: "flex", gap: "16px" }}>
+            {/* Left Panel: Danh sách câu hỏi trong đề thi */}
+            <div style={{ flex: 1 }}>
+              <h3>Danh sách câu hỏi trong đề thi</h3>
+              <div
+                style={{
+                  overflowY: "auto", // Enable vertical scrolling
+                  maxHeight: "500px", // Set a maximum height for the scrollable area
+                  border: "1px solid #ddd",
+                  borderRadius: "8px",
+                  padding: "16px",
+                }}
+              >
+                {Object.keys(selectedQuestionsGroup).length > 0 ? (
+                  <>
+                    {Object.entries(selectedQuestionsGroup).map(
+                      ([passageId, questions], groupIndex) => (
+                        <div key={groupIndex} style={{ marginBottom: "16px" }}>
+                          {passageId !== "no-passage" &&
+                          questions[0]?.passageId?.content ? (
+                            <div
+                              style={{
+                                marginBottom: "8px",
+                                fontWeight: "bold",
+                                color: "#333",
+                              }}
+                              dangerouslySetInnerHTML={{
+                                __html: questions[0].passageId.content,
+                              }}
+                            />
+                          ) : null}
+
+                          {/* Display questions in the group */}
+                          {questions.map((question, index) => (
+                            <div
+                              key={question._id || index}
+                              style={{
+                                marginBottom: "12px",
+                                padding: "8px",
+                                border: "1px solid #ddd",
+                                borderRadius: "8px",
+                                backgroundColor: "#f9f9f9",
+                              }}
+                            >
+                              <div style={{ marginBottom: "8px" }}>
+                                <strong
+                                  dangerouslySetInnerHTML={{
+                                    __html: `${index + 1}. ${
+                                      question.content ||
+                                      "Nội dung không khả dụng"
+                                    }`,
+                                  }}
+                                />
+                              </div>
+                              <div style={{ marginBottom: "8px" }}>
+                                <Tag
+                                  color={clsx(
+                                    question.level === "easy" && "green",
+                                    question.level === "hard" && "red"
+                                  )}
+                                >
+                                  {question.level}
+                                </Tag>
+                                <Tag color="blue">{question.subject}</Tag>
+                                <Tag color="cyan">{question.knowledge}</Tag>
+                              </div>
+                              {/* Determine question type and render accordingly */}
+                              <div style={{ marginBottom: "8px" }}>
+                                {question.questionType ===
+                                  "6742fb1cd56a2e75dbd817ea" &&
+                                  // Render for multiple-choice questions
+                                  question.answers?.map(
+                                    (answer, answerIndex) => (
+                                      <div
+                                        key={answer._id || answerIndex}
+                                        style={{
+                                          padding: "4px 8px",
+                                          border: "1px solid #ddd",
+                                          borderRadius: "4px",
+                                          marginBottom: "4px",
+                                          backgroundColor: answer.isCorrect
+                                            ? "#f6ffed"
+                                            : "#fff",
+                                        }}
+                                      >
+                                        <span>
+                                          <strong>
+                                            {String.fromCharCode(
+                                              65 + answerIndex
+                                            )}
+                                            .
+                                          </strong>{" "}
+                                          <span
+                                            dangerouslySetInnerHTML={{
+                                              __html: answer.text || "",
+                                            }}
+                                          />
+                                        </span>
+                                        {answer.isCorrect && (
+                                          <Tag
+                                            color="green"
+                                            style={{ marginLeft: "8px" }}
+                                          >
+                                            Đúng
+                                          </Tag>
+                                        )}
+                                      </div>
+                                    )
+                                  )}
+
+                                {question.questionType ===
+                                  "6742fb3bd56a2e75dbd817ec" &&
+                                  // Render for fill-in-the-blank questions
+                                  question.answers?.map(
+                                    (answer, answerIndex) => (
+                                      <div
+                                        key={answer._id || answerIndex}
+                                        style={{
+                                          padding: "4px 8px",
+                                          border: "1px solid #ddd",
+                                          borderRadius: "4px",
+                                          marginBottom: "4px",
+                                        }}
+                                      >
+                                        <span>
+                                          <strong>
+                                            Điền khuyết {answerIndex + 1}:
+                                          </strong>{" "}
+                                          {answer.correctAnswerForBlank}
+                                        </span>
+                                      </div>
+                                    )
+                                  )}
+
+                                {question.questionType ===
+                                  "6742fb5dd56a2e75dbd817ee" &&
+                                  // Render for True/False/Not Given questions
+                                  ["true", "false", "not given"].map(
+                                    (choice) => (
+                                      <div
+                                        key={choice}
+                                        style={{
+                                          padding: "4px 8px",
+                                          border: "1px solid #ddd",
+                                          borderRadius: "4px",
+                                          marginBottom: "4px",
+                                          backgroundColor:
+                                            question.correctAnswerForTrueFalseNGV ===
+                                            choice
+                                              ? "#f6ffed"
+                                              : "#fff",
+                                        }}
+                                      >
+                                        <span>
+                                          <strong>
+                                            {choice.toUpperCase()}
+                                          </strong>
+                                        </span>
+                                        {question.correctAnswerForTrueFalseNGV ===
+                                          choice && (
+                                          <Tag
+                                            color="green"
+                                            style={{ marginLeft: "8px" }}
+                                          >
+                                            Đúng
+                                          </Tag>
+                                        )}
+                                      </div>
+                                    )
+                                  )}
+                              </div>
+                              <Button
+                                size="small"
+                                onClick={() => moveQuestion(question)}
+                                icon={
+                                  <MinusOutlined style={{ color: "red" }} />
+                                }
+                              >
+                                Gỡ
+                              </Button>
+                              <Button
+                                size="small"
+                                onClick={() => handleEditQuestion(question)}
+                                icon={
+                                  <EditOutlined style={{ color: "blue" }} />
+                                }
+                                style={{ marginLeft: "8px" }}
+                              >
+                                Sửa
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      )
+                    )}
+
+                    {/* Display questions without a passage */}
+                    {selectedQuestionsGroup["no-passage"] && (
                       <div>
-                        <strong>
-                          {index + 1 + (selectedPage - 1) * pageSize}.{" "}
-                          {question.content.length > 200
-                            ? question.content.slice(0, 200) + " ..."
-                            : question.content}
-                        </strong>
-                      </div>
-                    }
-                    key={question._id || index}
-                  >
-                    <div style={{ marginBottom: 8 }}>
-                      <Tag
-                        color={clsx(
-                          question.level === "easy" && "green",
-                          question.level === "medium" && "yellow",
-                          question.level === "hard" && "red"
+                        <h4
+                          style={{
+                            marginTop: "16px",
+                            fontWeight: "bold",
+                            color: "#333",
+                          }}
+                        >
+                          Câu hỏi không có bài đọc
+                        </h4>
+                        {selectedQuestionsGroup["no-passage"].map(
+                          (question, index) => (
+                            <div
+                              key={question._id || index}
+                              style={{
+                                marginBottom: "12px",
+                                padding: "8px",
+                                border: "1px solid #ddd",
+                                borderRadius: "8px",
+                                backgroundColor: "#f9f9f9",
+                              }}
+                            >
+                              <div style={{ marginBottom: "8px" }}>
+                                <strong>
+                                  {index + 1}.{" "}
+                                  <span
+                                    dangerouslySetInnerHTML={{
+                                      __html: question.content || "",
+                                    }}
+                                  />
+                                </strong>
+                              </div>
+                              <div style={{ marginBottom: "8px" }}>
+                                <Tag
+                                  color={clsx(
+                                    question.level === "easy" && "green",
+                                    question.level === "hard" && "red"
+                                  )}
+                                >
+                                  {question.level}
+                                </Tag>
+                                <Tag color="blue">{question.subject}</Tag>
+                                <Tag color="cyan">{question.knowledge}</Tag>
+                              </div>
+                              {/* Determine question type and render accordingly */}
+                              <div style={{ marginBottom: "8px" }}>
+                                {question.questionType ===
+                                  "6742fb1cd56a2e75dbd817ea" &&
+                                  // Render for multiple-choice questions
+                                  question.answers?.map(
+                                    (answer, answerIndex) => (
+                                      <div
+                                        key={answer._id || answerIndex}
+                                        style={{
+                                          padding: "4px 8px",
+                                          border: "1px solid #ddd",
+                                          borderRadius: "4px",
+                                          marginBottom: "4px",
+                                          backgroundColor: answer.isCorrect
+                                            ? "#f6ffed"
+                                            : "#fff",
+                                        }}
+                                      >
+                                        <span>
+                                          <strong>
+                                            {String.fromCharCode(
+                                              65 + answerIndex
+                                            )}
+                                            .
+                                          </strong>{" "}
+                                          <span
+                                            dangerouslySetInnerHTML={{
+                                              __html: answer.text || "",
+                                            }}
+                                          />
+                                        </span>
+                                        {answer.isCorrect && (
+                                          <Tag
+                                            color="green"
+                                            style={{ marginLeft: "8px" }}
+                                          >
+                                            Đúng
+                                          </Tag>
+                                        )}
+                                      </div>
+                                    )
+                                  )}
+
+                                {question.questionType ===
+                                  "6742fb3bd56a2e75dbd817ec" &&
+                                  // Render for fill-in-the-blank questions
+                                  question.answers?.map(
+                                    (answer, answerIndex) => (
+                                      <div
+                                        key={answer._id || answerIndex}
+                                        style={{
+                                          padding: "4px 8px",
+                                          border: "1px solid #ddd",
+                                          borderRadius: "4px",
+                                          marginBottom: "4px",
+                                        }}
+                                      >
+                                        <span>
+                                          <strong>
+                                            Điền khuyết {answerIndex + 1}:
+                                          </strong>{" "}
+                                          <span
+                                            dangerouslySetInnerHTML={{
+                                              __html:
+                                                answer.correctAnswerForBlank ||
+                                                "",
+                                            }}
+                                          />
+                                        </span>
+                                      </div>
+                                    )
+                                  )}
+
+                                {question.questionType ===
+                                  "6742fb5dd56a2e75dbd817ee" &&
+                                  // Render for True/False/Not Given questions
+                                  ["true", "false", "not given"].map(
+                                    (choice) => (
+                                      <div
+                                        key={choice}
+                                        style={{
+                                          padding: "4px 8px",
+                                          border: "1px solid #ddd",
+                                          borderRadius: "4px",
+                                          marginBottom: "4px",
+                                          backgroundColor:
+                                            question.correctAnswerForTrueFalseNGV ===
+                                            choice
+                                              ? "#f6ffed"
+                                              : "#fff",
+                                        }}
+                                      >
+                                        <span>
+                                          <strong>
+                                            {choice.toUpperCase()}
+                                          </strong>
+                                        </span>
+                                        {question.correctAnswerForTrueFalseNGV ===
+                                          choice && (
+                                          <Tag
+                                            color="green"
+                                            style={{ marginLeft: "8px" }}
+                                          >
+                                            Đúng
+                                          </Tag>
+                                        )}
+                                      </div>
+                                    )
+                                  )}
+                              </div>
+                              <Button
+                                size="small"
+                                onClick={() => moveQuestion(question)}
+                                icon={
+                                  <MinusOutlined style={{ color: "red" }} />
+                                }
+                              >
+                                Gỡ
+                              </Button>
+                              <Button
+                                size="small"
+                                onClick={() => handleEditQuestion(question)}
+                                icon={
+                                  <EditOutlined style={{ color: "blue" }} />
+                                }
+                                style={{ marginLeft: "8px" }}
+                              >
+                                Sửa
+                              </Button>
+                            </div>
+                          )
                         )}
-                      >
-                        {question.level}
-                      </Tag>
-                      <Tag color="blue">{question.subject}</Tag>
-                      <Tag color="cyan">{question.knowledge}</Tag>
-                    </div>
-                    <Button
-                      size="large"
-                      onClick={() => moveQuestion(question)}
-                      icon={<MinusOutlined style={{ color: "red" }} />}
-                    >
-                      Gỡ
-                    </Button>
-                    <QuestionComponent
-                      deletetalbe={false}
-                      question={question}
-                      onUpdateSuccess={() => {}}
-                      questionType={question.questionType || ""}
-                    />
-                  </Panel>
-                ))}
-              </Collapse>
-              <div style={{ marginTop: 16, textAlign: "center" }}>
-                <Pagination
-                  current={selectedPage}
-                  pageSize={pageSize}
-                  total={selectedQuestions.length}
-                  onChange={(page) => setSelectedPage(page)}
-                />
-              </div>
-            </>
-          ) : (
-            <p>Chưa có câu hỏi nào được chọn.</p>
-          )}
-        </Tabs.TabPane>
-
-        {/* Tab: Ngân hàng câu hỏi */}
-        <Tabs.TabPane tab="Ngân hàng câu hỏi" key="2">
-          <h3>Ngân hàng câu hỏi</h3>
-          <div
-            style={{
-              marginBottom: 16,
-              display: "flex",
-              gap: 8,
-              flexWrap: "wrap",
-            }}
-          >
-            <Search
-              placeholder="Tìm theo nội dung, kiến thức, chủ đề"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              enterButton
-              className="search-input"
-            />
-            <Select
-              placeholder="Loại câu hỏi"
-              allowClear
-              className="select-item"
-              value={filterType || undefined}
-              onChange={(value) => setFilterType(value)}
-            >
-              <Option value="6742fb1cd56a2e75dbd817ea">Yes/No</Option>
-              <Option value="6742fb3bd56a2e75dbd817ec">Điền khuyết</Option>
-            </Select>
-            <Select
-              placeholder="Mức độ"
-              allowClear
-              className="select-item"
-              value={filterLevel || undefined}
-              onChange={(value) => setFilterLevel(value)}
-            >
-              <Option value="easy">Easy</Option>
-              <Option value="medium">Medium</Option>
-              <Option value="hard">Hard</Option>
-            </Select>
-          </div>
-          {filteredOtherQuestions && filteredOtherQuestions.length > 0 ? (
-            <>
-              <Collapse accordion>
-                {paginatedBankQuestions.map((question, index) => (
-                  <Panel
-                    header={
-                      <div>
-                        <strong>
-                          {index + 1 + (bankPage - 1) * pageSize}.{" "}
-                          {question.content.length > 200
-                            ? question.content.slice(0, 200) + " ..."
-                            : question.content}
-                        </strong>
                       </div>
-                    }
-                    key={question._id || index}
-                  >
-                    <Button
-                      className="btn"
-                      onClick={() => moveQuestion(question)}
-                    >
-                      <PlusOutlined style={{ color: "green" }} /> Thêm
-                    </Button>
-                    <QuestionComponent
-                      deletetalbe={false}
-                      question={question}
-                      onUpdateSuccess={() => {}}
-                      questionType={question.questionType || ""}
-                    />
-                  </Panel>
-                ))}
-              </Collapse>
-              <div style={{ marginTop: 16, textAlign: "center" }}>
-                <Pagination
-                  current={bankPage}
-                  pageSize={pageSize}
-                  total={filteredOtherQuestions.length}
-                  onChange={(page) => setBankPage(page)}
-                />
+                    )}
+                  </>
+                ) : (
+                  <p>Chưa có câu hỏi nào được chọn.</p>
+                )}
               </div>
-            </>
-          ) : (
-            <p>Không có câu hỏi phù hợp.</p>
-          )}
+            </div>
+
+            {/* Right Panel: Ngân hàng câu hỏi */}
+            <div style={{ flex: 1 }}>
+              <h3>Ngân hàng câu hỏi</h3>
+              <div
+                style={{
+                  marginBottom: 16,
+                  display: "flex",
+                  gap: 8,
+                  flexWrap: "wrap",
+                }}
+              >
+                <Search
+                  placeholder="Tìm theo nội dung, kiến thức, chủ đề"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  enterButton
+                  className="search-input"
+                />
+                <Select
+                  placeholder="Loại câu hỏi"
+                  allowClear
+                  className="select-item"
+                  value={filterType || undefined}
+                  onChange={(value) => setFilterType(value)}
+                >
+                  <Option value="6742fb1cd56a2e75dbd817ea">
+                    Multiple Choices
+                  </Option>
+                  <Option value="6742fb3bd56a2e75dbd817ec">Điền khuyết</Option>
+                </Select>
+                <Select
+                  placeholder="Mức độ"
+                  allowClear
+                  className="select-item"
+                  value={filterLevel || undefined}
+                  onChange={(value) => setFilterLevel(value)}
+                >
+                  <Option value="easy">Easy</Option>
+                  <Option value="medium">Medium</Option>
+                  <Option value="hard">Hard</Option>
+                </Select>
+              </div>
+              <div
+                style={{
+                  overflowY: "auto", // Enable vertical scrolling
+                  maxHeight: "500px", // Set a maximum height for the scrollable area
+                  border: "1px solid #ddd",
+                  borderRadius: "8px",
+                  padding: "16px",
+                }}
+              >
+                {filteredOtherQuestions && filteredOtherQuestions.length > 0 ? (
+                  <>
+                    {paginatedBankQuestions.map((question, index) => (
+                      <div
+                        key={question._id || index}
+                        style={{
+                          marginBottom: "12px",
+                          padding: "8px",
+                          border: "1px solid #ddd",
+                          borderRadius: "8px",
+                          backgroundColor: "#f9f9f9",
+                        }}
+                      >
+                        <div style={{ marginBottom: "8px" }}>
+                          <strong>
+                            {index + 1 + (bankPage - 1) * pageSize}.{" "}
+                            <span
+                              dangerouslySetInnerHTML={{
+                                __html: question.content || "",
+                              }}
+                            />
+                          </strong>
+                        </div>
+                        <div style={{ marginBottom: "8px" }}>
+                          <Tag
+                            color={clsx(
+                              question.level === "easy" && "green",
+                              question.level === "hard" && "red"
+                            )}
+                          >
+                            {question.level}
+                          </Tag>
+                          <Tag color="blue">{question.subject}</Tag>
+                          <Tag color="cyan">{question.knowledge}</Tag>
+                        </div>
+                        <div style={{ marginBottom: "8px" }}>
+                          {question.questionType ===
+                            "6742fb1cd56a2e75dbd817ea" &&
+                            question.answers?.map((answer, answerIndex) => (
+                              <div
+                                key={answer._id || answerIndex}
+                                style={{
+                                  padding: "4px 8px",
+                                  border: "1px solid #ddd",
+                                  borderRadius: "4px",
+                                  marginBottom: "4px",
+                                  backgroundColor: answer.isCorrect
+                                    ? "#f6ffed"
+                                    : "#fff",
+                                }}
+                              >
+                                <span>
+                                  <strong>
+                                    {String.fromCharCode(65 + answerIndex)}.
+                                  </strong>{" "}
+                                  <span
+                                    dangerouslySetInnerHTML={{
+                                      __html: answer.text || "",
+                                    }}
+                                  />
+                                </span>
+                                {answer.isCorrect && (
+                                  <Tag
+                                    color="green"
+                                    style={{ marginLeft: "8px" }}
+                                  >
+                                    Đúng
+                                  </Tag>
+                                )}
+                              </div>
+                            ))}
+                          {question.questionType ===
+                            "6742fb3bd56a2e75dbd817ec" &&
+                            question.answers?.map((answer, answerIndex) => (
+                              <div
+                                key={answer._id || answerIndex}
+                                style={{
+                                  padding: "4px 8px",
+                                  border: "1px solid #ddd",
+                                  borderRadius: "4px",
+                                  marginBottom: "4px",
+                                }}
+                              >
+                                <span>
+                                  <strong>
+                                    Điền khuyết {answerIndex + 1}:
+                                  </strong>{" "}
+                                  <span
+                                    dangerouslySetInnerHTML={{
+                                      __html:
+                                        answer.correctAnswerForBlank || "",
+                                    }}
+                                  />
+                                </span>
+                              </div>
+                            ))}
+                          {question.questionType ===
+                            "6742fb5dd56a2e75dbd817ee" &&
+                            ["true", "false", "not given"].map((choice) => (
+                              <div
+                                key={choice}
+                                style={{
+                                  padding: "4px 8px",
+                                  border: "1px solid #ddd",
+                                  borderRadius: "4px",
+                                  marginBottom: "4px",
+                                  backgroundColor:
+                                    question.correctAnswerForTrueFalseNGV ===
+                                    choice
+                                      ? "#f6ffed"
+                                      : "#fff",
+                                }}
+                              >
+                                <span>
+                                  <strong>{choice.toUpperCase()}</strong>
+                                </span>
+                                {question.correctAnswerForTrueFalseNGV ===
+                                  choice && (
+                                  <Tag
+                                    color="green"
+                                    style={{ marginLeft: "8px" }}
+                                  >
+                                    Đúng
+                                  </Tag>
+                                )}
+                              </div>
+                            ))}
+                        </div>
+                        <Button
+                          size="small"
+                          onClick={() => moveQuestion(question)}
+                          icon={<PlusOutlined style={{ color: "green" }} />}
+                        >
+                          Thêm
+                        </Button>
+                      </div>
+                    ))}
+                    <div style={{ marginTop: 16, textAlign: "center" }}>
+                      <Pagination
+                        current={bankPage}
+                        pageSize={pageSize}
+                        total={filteredOtherQuestions.length}
+                        onChange={(page) => setBankPage(page)}
+                      />
+                    </div>
+                  </>
+                ) : (
+                  <p>Không có câu hỏi phù hợp.</p>
+                )}
+              </div>
+            </div>
+          </div>
         </Tabs.TabPane>
 
-        {/* Tab: Danh sách kỳ thi nghe */}
-        <Tabs.TabPane tab="Danh sách kỳ thi nghe" key="3">
-          <h3>Danh sách kỳ thi nghe trong đề thi</h3>
-          {selectedListeningExams && selectedListeningExams.length > 0 ? (
-            <Collapse accordion>
-              {selectedListeningExams.map((exam, index) => (
-                <Panel
-                  header={
-                    <div>
-                      <strong>
-                        {index + 1}. {exam.title}
-                      </strong>
-                    </div>
-                  }
-                  key={exam._id || index}
-                >
-                  <p>{exam.description}</p>
-                  <p>
-                    Thời gian: {exam.duration} phút - Điểm qua:{" "}
-                    {exam.passingScore} -{" "}
-                    {exam.isPublished ? "Đã phát hành" : "Chưa phát hành"}
-                  </p>
+        {/* Tab: Danh sách Đề Thi nghe */}
+        <Tabs.TabPane tab="Danh sách các phần thi nghe" key="3">
+          <h3>Danh sách các phần nghe trong đề thi</h3>
+          <Table
+            dataSource={selectedListeningExams.map((exam, index) => ({
+              key: exam._id || index,
+              index: index + 1,
+              title: exam.title,
+              description: exam.description,
+              duration: `${exam.duration} phút`,
+              isPublished: exam.isPublished ? "Đã phát hành" : "Chưa phát hành",
+              actions: exam,
+            }))}
+            columns={[
+              {
+                title: "STT",
+                dataIndex: "index",
+                key: "index",
+                width: 50,
+              },
+              {
+                title: "Tiêu đề",
+                dataIndex: "title",
+                key: "title",
+              },
+              {
+                title: "Mô tả",
+                dataIndex: "description",
+                key: "description",
+              },
+              {
+                title: "Thời gian",
+                dataIndex: "duration",
+                key: "duration",
+              },
+              {
+                title: "Trạng thái",
+                dataIndex: "isPublished",
+                key: "isPublished",
+              },
+              {
+                title: "Hành động",
+                key: "actions",
+                render: (_, record) => (
                   <Button
                     size="small"
-                    onClick={() => handleRemoveListeningExam(exam)}
+                    onClick={() => handleRemoveListeningExam(record.actions)}
                     icon={<MinusOutlined style={{ color: "red" }} />}
                   >
                     Gỡ
                   </Button>
-                </Panel>
-              ))}
-            </Collapse>
-          ) : (
-            <p>Chưa có kỳ thi nghe nào được chọn.</p>
-          )}
+                ),
+              },
+            ]}
+            pagination={false}
+          />
         </Tabs.TabPane>
 
-        {/* Tab: Ngân hàng kỳ thi nghe */}
-        <Tabs.TabPane tab="Ngân hàng kỳ thi nghe" key="4">
-          <h3>Ngân hàng kỳ thi nghe</h3>
-          {bankListeningExams && bankListeningExams.length > 0 ? (
-            <Collapse accordion>
-              {bankListeningExams.map((exam, index) => (
-                <Panel
-                  header={
-                    <div>
-                      <strong>
-                        {index + 1}. {exam.title}
-                      </strong>
-                    </div>
-                  }
-                  key={exam._id || ""}
-                >
-                  <p>{exam.description}</p>
-                  <p>
-                    Thời gian: {exam.duration} phút - Điểm qua:{" "}
-                    {exam.passingScore} -{" "}
-                    {exam.isPublished ? "Đã phát hành" : "Chưa phát hành"}
-                  </p>
+        {/* Tab: Ngân hàng Đề Thi nghe */}
+        <Tabs.TabPane tab="Ngân hàng phần thi nghe" key="4">
+          <h3>Ngân hàng phần thi nghe</h3>
+          <Table
+            dataSource={bankListeningExams.map((exam, index) => ({
+              key: exam._id || index,
+              index: index + 1,
+              title: exam.title,
+              description: exam.description,
+              duration: `${exam.duration} phút`,
+              isPublished: exam.isPublished ? "Đã phát hành" : "Chưa phát hành",
+              actions: exam,
+            }))}
+            columns={[
+              {
+                title: "STT",
+                dataIndex: "index",
+                key: "index",
+                width: 50,
+              },
+              {
+                title: "Tiêu đề",
+                dataIndex: "title",
+                key: "title",
+              },
+              {
+                title: "Mô tả",
+                dataIndex: "description",
+                key: "description",
+              },
+              {
+                title: "Thời gian",
+                dataIndex: "duration",
+                key: "duration",
+              },
+              {
+                title: "Trạng thái",
+                dataIndex: "isPublished",
+                key: "isPublished",
+              },
+              {
+                title: "Hành động",
+                key: "actions",
+                render: (_, record) => (
                   <Button
                     size="small"
-                    onClick={() => handleAddListeningExam(exam)}
+                    onClick={() => handleAddListeningExam(record.actions)}
                     icon={<PlusOutlined style={{ color: "green" }} />}
                   >
                     Thêm
                   </Button>
-                </Panel>
-              ))}
-            </Collapse>
-          ) : (
-            <p>Không có kỳ thi nghe phù hợp.</p>
-          )}
+                ),
+              },
+            ]}
+            pagination={false}
+          />
         </Tabs.TabPane>
       </Tabs>
 
@@ -565,20 +1098,7 @@ export const UpdateExamQuestion = () => {
               }}
             />
           </Form.Item>
-          <Form.Item
-            label={`Số câu trung bình (còn lại: ${
-              otherQuestions.filter((q) => q.level === "medium").length
-            })`}
-          >
-            <InputNumber
-              min={0}
-              max={otherQuestions.filter((q) => q.level === "medium").length}
-              value={mediumLimit}
-              onChange={(value) => {
-                if (value !== null) setMediumLimit(value);
-              }}
-            />
-          </Form.Item>
+
           <Form.Item
             label={`Số câu khó (còn lại: ${
               otherQuestions.filter((q) => q.level === "hard").length
@@ -603,10 +1123,24 @@ export const UpdateExamQuestion = () => {
         dataQuestion={selectedQuestions}
         listeningExams={selectedListeningExams}
       />
+      {editingQuestion && (
+        <>
+          {editingQuestion.questionType === "6742fb1cd56a2e75dbd817ea" ? (
+            <UpdateQuestionModal
+              visible={openEditModal}
+              onUpdateSuccess={handleEditSuccess}
+              handleClose={() => setOpenEditModal(false)}
+              question2={editingQuestion}
+            />
+          ) : (
+            <UpdateBlankQuestionModal
+              visible={openEditModal}
+              handleClose={() => setOpenEditModal(false)}
+              question2={editingQuestion}
+            />
+          )}
+        </>
+      )}
     </div>
   );
 };
-
-function copyExam() {
-  alert("Sao chép đề thi thành công");
-}

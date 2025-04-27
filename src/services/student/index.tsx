@@ -8,6 +8,7 @@ export interface Result {
   score: number;
   correctAnswer: number;
   wrongAnswer: number;
+  totalQuestion: number;
   questions: QuestionAnswerResult[];
   listeningQuestions: QuestionAnswerResult[];
   suggestionQuestion: Question[];
@@ -33,6 +34,7 @@ export interface QuestionAnswerResult {
   selectedAnswerId?: string;
   userAnswers: UserAnswer[];
   isCorrect: boolean;
+  correctAnswerForTrueFalseNGV?: string;
 }
 
 interface UserAnswer {
@@ -45,6 +47,7 @@ interface UserAnswer {
 export interface SubmitAnswer {
   resultId: string;
   answers: SubmitAnswerDetail[];
+  unansweredQuestions: SubmitAnswerDetail[];
   listeningAnswers: SubmitAnswerDetail[];
 }
 
@@ -78,7 +81,17 @@ export const ResultAPI = {
   saveAnswer: async (data: SubmitAnswer) => {
     const response = await request.post(`/result/save`, data);
     return response.data;
-  }
+  },
+  saveSingleAnswer: async (p0: { resultId: any; questionId: string; selectedAnswerId: string | null; }, data: {
+  resultId: string;
+  questionId: string;
+  selectedAnswerId?: string;
+  userAnswer?: string | string[];
+  isListening: boolean;
+}) => {
+    const response = await request.post(`/result/save-single-answer`, data);
+    return response.data;
+  },
 };
 
 export const ExamAPIStudent = {
@@ -96,6 +109,13 @@ export const ExamAPIStudent = {
   },
   joinExam: async (id: string) => {
     const response = await request.get(`/exam/exam-practice/${id}`);
+    return response.data;
+  },
+};
+
+export const QuestionAPIStudent = {
+  getQuestionForStudent: async (questionId: string) => {
+    const response = await request.get(`/question/student/${questionId}`);
     return response.data;
   },
 };

@@ -33,9 +33,10 @@ export const CreateExamModalAuTo: React.FC<CreateExamModalProps> = ({
 
   const getAllQT = async (page: number) => {
     try {
-      const rq = await QuestionTypeAPI.getAllQuestionType(page);
-      if (rq?.code === 200) {
-        setQuestionTypesData(rq?.questionTypes);
+      const rq = await QuestionTypeAPI.getAllQuestionTypeTeacher(page);
+
+      if (rq?.success) {
+        setQuestionTypesData(rq?.data);
       }
     } catch (error: any) {
       if (error.response) {
@@ -77,21 +78,20 @@ export const CreateExamModalAuTo: React.FC<CreateExamModalProps> = ({
         questionTypeIds
       );
       if (response?.code === 200) {
-        message.success("Tạo đề thi thành công");
+        message.success(response?.message);
         handleClose();
       } else {
-        message.error("Failed to create exam.");
-        console.log(response);
+        message.error(response?.message || "Failed to create exam.");
       }
     } catch (error) {
-      message.error("An error occurred while creating the exam.");
+      message.error(error?.response?.data?.message || "An error occurred.");
       console.error(error);
     }
   };
 
   return (
     <Modal
-      title="Tạo kỳ thi"
+      title="Tạo Đề Thi"
       visible={visible}
       onCancel={handleClose}
       onOk={handleSaveClick}

@@ -8,22 +8,22 @@ import listeningExamManagementRoute from "./listeningExamManagement.route.js";
 import {
   protectedRoute,
   isTeacher,
+  isAdmin,
 } from "../../middlewares/protectedRoute.middleware.js";
 
 
 const indexTeacher = (app) => {
-  app.use(protectedRoute);
+  app.use(protectedRoute); // Đảm bảo người dùng đã đăng nhập
   app.use("/teacher/listening-exam", isTeacher, listeningExamManagementRoute);
+  app.use("/teacher/listening-question", isTeacher, listeningQuestionManagementRoute); // Đảm bảo chỉ giáo viên có quyền truy cập
   app.use("/teacher", isTeacher, questionManagementRoute);
 
   app.use("/teacher/exam", isTeacher, examManagementRoute);
 
-  app.use("/teacher/question-types", isTeacher, questionTypeManagementRoute);
-
   app.use("/teacher/audio", isTeacher, audioManagementRoute);
 
-  app.use("/teacher/listening-question", isTeacher, listeningQuestionManagementRoute);
-
   app.use("/teacher/classroom", isTeacher, classroomManagementRoute);
+
+  app.use("/teacher/question-types", questionTypeManagementRoute);
 };
 export default indexTeacher;

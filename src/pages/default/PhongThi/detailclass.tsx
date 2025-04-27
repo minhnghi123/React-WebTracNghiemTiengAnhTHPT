@@ -1,4 +1,4 @@
-import  { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   Card,
@@ -12,9 +12,7 @@ import {
   Col,
   message,
 } from "antd";
-import {
-  studentClassroomAPI,
-} from "@/services/student/ClassroomAPI";
+import { studentClassroomAPI } from "@/services/student/ClassroomAPI";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { ColumnsType } from "antd/es/table";
 import { Exam, Question } from "@/services/teacher/Teacher";
@@ -178,7 +176,7 @@ export const ClassroomDetail = () => {
       {joined && (
         <Card bordered style={{ marginTop: 16 }}>
           <Tabs defaultActiveKey="1">
-            <TabPane tab="Kỳ thi" key="1">
+            <TabPane tab="Đề Thi" key="1">
               <Table
                 dataSource={classroom.exams || []}
                 showSorterTooltip={false}
@@ -220,7 +218,7 @@ export const ClassroomDetail = () => {
               </Row>
             </TabPane>
 
-            <TabPane tab="Học sinh" key="3">
+            <TabPane tab="Thành viên" key="3">
               <List
                 itemLayout="horizontal"
                 dataSource={classroom.students || []}

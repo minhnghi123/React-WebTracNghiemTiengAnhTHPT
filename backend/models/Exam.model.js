@@ -7,6 +7,19 @@ mongoose.plugin(slug);
 const ExamSchema = new mongoose.Schema({
   title: { type: String, required: true },
   description: { type: String },
+  class: {
+    type: String,
+    enum: ["10", "11", "12"],
+    default: "10",
+  },
+  topic: {
+    type: Array,
+    default: [],
+  },
+  knowledge: {
+    type: Array,
+    default: [],
+  },
   questions: [{ type: mongoose.Schema.Types.ObjectId, ref: "Question" }],
   duration: { type: Number, default: 90 },
   startTime: { type: Date, required: true },
@@ -23,7 +36,9 @@ const ExamSchema = new mongoose.Schema({
     unique: true,
   },
   createdAt: { type: Date, default: Date.now },
-  listeningExams: [{ type: mongoose.Schema.Types.ObjectId, ref: "ListeningExam" }], // Add this line
+  listeningExams: [
+    { type: mongoose.Schema.Types.ObjectId, ref: "ListeningExam" },
+  ], // Add this line
 });
 
 const Exam = mongoose.model("Exam", ExamSchema);

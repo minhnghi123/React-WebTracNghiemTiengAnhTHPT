@@ -84,7 +84,7 @@ export const QuanLyAudio = () => {
               key: "filePath",
               width: "20%",
               render: (record: Audio) => (
-                <audio controls src={record.filePath} />
+                <audio controls src={typeof record.filePath === "string" ? record.filePath : undefined} />
               ),
             },
             {

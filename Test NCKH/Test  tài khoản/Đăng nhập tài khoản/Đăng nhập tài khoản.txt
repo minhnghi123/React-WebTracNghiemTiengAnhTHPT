@@ -1,0 +1,24 @@
+Tài khoản giáo viên :
+	tk :minhhnghiii@gmail.com
+	mk :minhnghi
+
+	tk: giaovien@gmail.com
+	mk: 123456
+
+Tài khoản học sinh :
+	tk: hophuoc98765432@gmail.com
+	mk:123456
+
+	tk:hophuoc4so9@gmail.com
+	mk:123456
+
+	tk : 123@gmail.com
+	mk:123456
+
+	tk: 1234@gmail.com
+	mk:123456
+
+Tài khoản ADMIN :
+	tk:hophuoc4so99@gmail.com
+	mk:123456
+	

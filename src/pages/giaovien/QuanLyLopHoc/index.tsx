@@ -85,7 +85,10 @@ export const QuanLyLopHoc = () => {
     <div className="container mt-4">
       <h1 className="text-center mb-4">Quản Lý Lớp Học</h1>
      
-        <button className="btn my-3" onClick={() => setIsAddModalOpen(true)}>
+        <button 
+        style={{backgroundColor: "#4CAF50", color: "white", border: "none", padding: "10px 20px", textAlign: "center", textDecoration: "none", display: "inline-block", fontSize: "16px", margin: "4px 2px", cursor: "pointer"}}  
+        className="btn my-3" 
+        onClick={() => setIsAddModalOpen(true)}>
        Thêm Lớp Học  
         </button>
      
@@ -104,10 +107,10 @@ export const QuanLyLopHoc = () => {
                   <strong>Trạng thái:</strong> {classroom.status}
                 </p>
                 <p>
-                  <strong>Số lượng học sinh:</strong> {classroom.students.length}
+                  <strong>Số lượng học sinh:</strong> {classroom.students?.length ?? 0}
                 </p>
                 <p>
-                  <strong>Số lượng bài kiểm tra:</strong> {classroom.exams.length}
+                  <strong>Số lượng bài kiểm tra:</strong> {classroom.exams?.length ?? 0}
                 </p>
                 <div className="d-flex justify-content-between mt-3">
                   <Link to={`/giaovien/QuanLyLopHoc/${classroom._id}`}>

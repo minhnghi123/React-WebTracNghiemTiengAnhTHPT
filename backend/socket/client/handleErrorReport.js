@@ -97,6 +97,52 @@ const handleErrorReport = () => {
       }
     });
 
+    // Xử lý sự kiện giáo viên phản hồi báo lỗi
+    socket.on("RESPOND_ERROR", async ({ reportId, additionalInfo }) => {
+      if (!reportId || !additionalInfo) {
+        socket.emit("error", {
+          message: "Mã báo lỗi và phản hồi là bắt buộc!",
+        });
+        return;
+      }
+
+      try {
+        const updatedReport = await ErrorReport.findByIdAndUpdate(
+          reportId,
+          { additionalInfo },
+          { new: true }
+        );
+
+        if (!updatedReport) {
+          socket.emit("error", {
+            message: "Không tìm thấy báo lỗi!",
+          });
+          return;
+        }
+
+        socket.emit("RESPOND_SUCCESS", {
+          message: "Phản hồi báo lỗi thành công!",
+          report: updatedReport,
+        });
+
+        // Gửi cập nhật đến tất cả các client
+        _io.emit("ERROR_REPORT_UPDATED", updatedReport);
+
+        // Gửi thông báo phản hồi thành công đến học sinh
+        const studentUserId = updatedReport.userId; // Ensure userId maps to the student's ID
+        _io.emit("TEACHER_RESPONSE_SUCCESS", {
+          message: "Giáo viên đã phản hồi báo lỗi của bạn.",
+          report: updatedReport,
+          userId: studentUserId, // Include userId in the emitted event
+        });
+      } catch (error) {
+        console.error("Lỗi khi phản hồi báo lỗi:", error);
+        socket.emit("error", {
+          message: "Không thể phản hồi báo lỗi.",
+        });
+      }
+    });
+
     socket.on("disconnect", () => {
       console.log(`🔌 Client ${socket.id} disconnected (error-report)`);
     });

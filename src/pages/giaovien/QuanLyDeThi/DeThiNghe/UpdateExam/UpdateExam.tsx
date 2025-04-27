@@ -22,10 +22,10 @@ const UpdateExamModal: React.FC<UpdateExamModalProps> = ({
   examData,
   dataQuestion,
 }) => {
+  
   const [exam, setExam] = useState<Partial<ListeningExamData>>(examData || {});
   const [existingAudios, setExistingAudios] = useState<Audio[]>([]);
   const {user} = useAuthContext() 
-
   const fetchAudios = async () => {
     try {
       const response = await AudioAPI.getAllAudio();
@@ -68,16 +68,14 @@ const UpdateExamModal: React.FC<UpdateExamModalProps> = ({
       title: exam.title || "",
       description: exam.description || "",
       audio: exam.audio || "",
-      questions: exam.questions || dataQuestion.map((q) => q.id) as string[],
+      questions: exam.questions || dataQuestion.map((q) => q._id) as string[],
       duration: Number(exam.duration) || 90,
       startTime: exam.startTime || new Date(),
       endTime: exam.endTime || new Date(new Date(exam.startTime!).getTime() + 90 * 60 * 1000),
       isPublic: exam.isPublic || false,
     };
-    console.log(formattedExam)
     try {
-      const response = await ExamListeningQuestionAPI.updateListeningExam(exam.id!,user?._id, formattedExam);
-      console.log(response)
+      const response = await ExamListeningQuestionAPI.updateListeningExam(exam._id!,user?._id, formattedExam);
       if (response?.data) {
         message.success("Bài kiểm tra đã được cập nhật thành công!");
         handleClose();
@@ -111,8 +109,8 @@ const UpdateExamModal: React.FC<UpdateExamModalProps> = ({
         <Form.Item label="Audio">
           <Select
             placeholder="Chọn audio"
-            value={exam.audio}
-            onChange={(value) => setExam((prev) => ({ ...prev, audio: value }))}
+            value={exam.audio ? exam.audio._id : undefined}
+            onChange={(value) => setExam((prev) => ({ ...prev, audio: { ...prev.audio, _id: value } }))}
             style={{ width: "100%" }}
           >
             {existingAudios.map((audio) => (

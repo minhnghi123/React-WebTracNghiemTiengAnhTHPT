@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Button, Space, message, Tabs, Input } from 'antd';
+import { Table, Button, Space, message, Tabs, Input, Tag } from 'antd';
 import type { TabsProps } from 'antd';
 import { AdminAPI, VerificationRequest } from '@/services/admin/Admin';
 
@@ -13,11 +13,13 @@ const VerificationTeacher: React.FC = () => {
 
   const fetchTeachers = async () => {
     setLoading(true);
+    setError(null); // Reset error state before fetching
     try {
       const response = await AdminAPI.getVerificationRequests();
       setTeachers(response);
     } catch (err) {
-      setError('Failed to fetch teachers');
+      console.error("Error fetching teachers:", err);
+      setError("Không thể tải danh sách giáo viên. Vui lòng thử lại sau.");
     } finally {
       setLoading(false);
     }
@@ -30,26 +32,28 @@ const VerificationTeacher: React.FC = () => {
   const handleApprove = async (teacherId: string) => {
     try {
       await AdminAPI.approveTeacher(teacherId);
-      message.success('Teacher approved successfully');
-      fetchTeachers(); 
+      message.success("Phê duyệt giáo viên thành công");
+      setTimeout(fetchTeachers, 500); // Add delay to ensure backend updates are reflected
     } catch (err) {
-      message.error('Failed to approve teacher');
+      console.error("Error approving teacher:", err);
+      message.error("Không thể phê duyệt giáo viên. Vui lòng thử lại sau.");
     }
   };
 
   const handleReject = async (teacherId: string) => {
     try {
       await AdminAPI.rejectTeacher(teacherId);
-      message.success('Teacher rejected successfully');
-      fetchTeachers(); 
+      message.success("Từ chối giáo viên thành công");
+      setTimeout(fetchTeachers, 500); // Add delay to ensure backend updates are reflected
     } catch (err) {
-      message.error('Failed to reject teacher');
+      console.error("Error rejecting teacher:", err);
+      message.error("Không thể từ chối giáo viên. Vui lòng thử lại sau.");
     }
   };
 
   const getColumns = () => [
     {
-      title: 'Username',
+      title: 'Tên đăng nhập',
       dataIndex: 'username',
       key: 'username',
     },
@@ -59,34 +63,60 @@ const VerificationTeacher: React.FC = () => {
       key: 'email',
     },
     {
-      title: 'Role',
+      title: 'Vai trò',
       dataIndex: 'role',
       key: 'role',
     },
     {
-      title: 'Status',
+      title: 'Trạng thái',
       dataIndex: 'status',
       key: 'status',
       render: (status: string) => (
-        <span className={`badge ${status === 'pending' ? 'bg-yellow-500' : status === 'approved' ? 'bg-green-500' : 'bg-red-500'} text-white p-1 rounded`}>
+        <Tag color={status === 'pending' ? 'gold' : status === 'approved' ? 'green' : 'red'}>
           {status}
-        </span>
+        </Tag>
       ),
     },
     {
-      title: 'Created At',
+      title: 'Ngày tạo',
       dataIndex: 'createdAt',
       key: 'createdAt',
-      render: (text: string) => new Date(text).toLocaleString(),
+      render: (text: string) =>
+        text
+          ? new Intl.DateTimeFormat("vi-VN", {
+              day: "2-digit",
+              month: "2-digit",
+              year: "numeric",
+            }).format(new Date(text)) +
+            ` (${new Date(text).toLocaleTimeString("vi-VN", {
+              hour: "2-digit",
+              minute: "2-digit",
+              second: "2-digit",
+              hour12: false, // Use 24-hour format
+            })})`
+          : "N/A",
     },
     {
-      title: 'Updated At',
+      title: 'Ngày cập nhật',
       dataIndex: 'updatedAt',
       key: 'updatedAt',
-      render: (text: string) => new Date(text).toLocaleString(),
+      render: (text: string) =>
+        text
+          ? new Intl.DateTimeFormat("vi-VN", {
+              day: "2-digit",
+              month: "2-digit",
+              year: "numeric",
+            }).format(new Date(text)) +
+            ` (${new Date(text).toLocaleTimeString("vi-VN", {
+              hour: "2-digit",
+              minute: "2-digit",
+              second: "2-digit",
+              hour12: false, // Use 24-hour format
+            })})`
+          : "N/A",
     },
     {
-      title: 'Action',
+      title: 'Hành động',
       key: 'action',
       render: (_: any, record: VerificationRequest) => (
         <Space>
@@ -158,11 +188,11 @@ const VerificationTeacher: React.FC = () => {
   ];
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <div>Đang tải dữ liệu...</div>;
   }
 
   if (error) {
-    return <div>{error}</div>;
+    return <div className="text-red-500">{error}</div>; // Display error in red for better visibility
   }
 
   return (

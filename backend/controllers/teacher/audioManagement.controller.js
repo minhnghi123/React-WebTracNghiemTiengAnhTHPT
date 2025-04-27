@@ -19,7 +19,7 @@ export const createAudio  = async (req, res) => {
       // Trả về thông tin về file đã upload thành công
       return res.status(200).json({
         success: true,
-        message: "File uploaded successfully",
+        message: "Tải tệp lên thành công",
         data: {
           _id: newAudio._id, // ID của audio
           filePath: req.body.filePath, // Đường dẫn file
@@ -29,11 +29,11 @@ export const createAudio  = async (req, res) => {
       });
     } else {
       // Trả về lỗi nếu không có filePath
-      return res.status(400).json({ success: false, message: "No file uploaded" });
+      return res.status(400).json({ success: false, message: "Không có tệp nào được tải lên" });
     }
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ success: false, message: "Error uploading file" });
+    return res.status(500).json({ success: false, message: "Lỗi khi tải tệp lên" });
   }
 };
 
@@ -46,7 +46,7 @@ export const getAllAudios = async (req, res) => {
     const audios = await Audio.find(filter);
     res.status(200).json(audios);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching audios", error });
+    res.status(500).json({ message: "Lỗi khi lấy danh sách audio", error });
   }
 };
 
@@ -67,18 +67,18 @@ export const updateAudio = async (req, res) => {
     const updatedAudio = await Audio.findByIdAndUpdate(id, updateData, { new: true });
 
     if (!updatedAudio) {
-      return res.status(404).json({ success: false, message: "Audio not found" });
+      return res.status(404).json({ success: false, message: "Không tìm thấy audio" });
     }
 
     // Trả về thông tin audio đã được cập nhật
     return res.status(200).json({
       success: true,
-      message: "Audio updated successfully",
+      message: "Cập nhật audio thành công",
       data: updatedAudio,
     });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ success: false, message: "Error updating audio" });
+    return res.status(500).json({ success: false, message: "Lỗi khi cập nhật audio" });
   }
 };
 
@@ -94,17 +94,17 @@ export const softDeleteAudio = async (req, res) => {
     }, { new: true });
 
     if (!deletedAudio) {
-      return res.status(404).json({ success: false, message: "Audio not found" });
+      return res.status(404).json({ success: false, message: "Không tìm thấy audio" });
     }
 
     // Trả về thông tin audio sau khi đã xóa mềm
     return res.status(200).json({
       success: true,
-      message: "Audio soft deleted successfully",
+      message: "Xóa mềm audio thành công",
       data: deletedAudio,
     });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ success: false, message: "Error deleting audio" });
+    return res.status(500).json({ success: false, message: "Lỗi khi xóa audio" });
   }
 };

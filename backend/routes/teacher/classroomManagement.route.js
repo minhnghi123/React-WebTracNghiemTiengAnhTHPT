@@ -5,7 +5,10 @@ import {
     getAllStudents,
     downloadStudentResultsExcel,
     getAllStudentResultsByExams,
-    getStudentResultsByExam
+    getStudentResultsByExam,
+    getAllResultsForExamInClassroom,
+    getStudentResultsForAllExamsInClassroom,
+    getSpecificExamResult
   } from "../../controllers/teacher/classroomManagement.controller.js";
 
 import { validateClassroom } from "../../validate/teacher/classroom.validate.js"
@@ -42,7 +45,6 @@ router.patch('/add_exam/:classroomId/:examId', addExamToClassroom);
 
 router.delete('/remove_exam/:classroomId/:examId', removeExamFromClassroom);
 
-
 // Route để lấy tất cả kết quả làm bài của học sinh trong lớp theo từng bài kiểm tra
 router.get("/:classroomId/results", getAllStudentResultsByExams);
 
@@ -51,5 +53,14 @@ router.get("/:classroomId/exam/:examId/results", getStudentResultsByExam);
 
 // Route để tải xuống file Excel kết quả học sinh theo lớp
 router.get("/:classroomId/results/excel", downloadStudentResultsExcel);
+
+// Route để lấy tất cả kết quả của 1 bài kiểm tra của tất cả học sinh trong 1 lớp
+router.get("/:classroomId/exam/:examId/all-results", getAllResultsForExamInClassroom);
+
+// Route để lấy kết quả của 1 học sinh của tất cả kiểm tra có trong lớp
+router.get("/:classroomId/student/:studentId/all-results", getStudentResultsForAllExamsInClassroom);
+
+// Route để lấy thông tin kết quả của 1 bài kiểm tra cụ thể
+router.get("/exam/:id/", getSpecificExamResult);
 
 export default router;

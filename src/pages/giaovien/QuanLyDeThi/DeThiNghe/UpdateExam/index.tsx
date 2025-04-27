@@ -59,7 +59,9 @@ export const UpdateExamQuestion = () => {
         setData((prev) => {
           const combined = [...prev, ...rq.questions];
           // Loại bỏ các câu hỏi trùng lặp theo _id
-          const unique = Array.from(new Map(combined.map((q) => [q._id, q])).values());
+          const unique = Array.from(
+            new Map(combined.map((q) => [q._id, q])).values()
+          );
           return unique;
         });
       }
@@ -77,7 +79,9 @@ export const UpdateExamQuestion = () => {
       if (rq?.code === 200) {
         setData((prev) => {
           const combined = [...prev, ...rq.questions];
-          const unique = Array.from(new Map(combined.map((q) => [q._id, q])).values());
+          const unique = Array.from(
+            new Map(combined.map((q) => [q._id, q])).values()
+          );
           return unique;
         });
         setTotal2(rq.totalPage);
@@ -347,36 +351,35 @@ export const UpdateExamQuestion = () => {
         }}
       >
         <div className="search-filter-container">
-  <Search
-    placeholder="Tìm theo nội dung, kiến thức, chủ đề"
-    value={searchTerm}
-    onChange={(e) => setSearchTerm(e.target.value)}
-    enterButton
-    className="search-input"
-  />
-  <Select
-    placeholder="Loại câu hỏi"
-    allowClear
-    className="select-item"
-    value={filterType || undefined}
-    onChange={(value) => setFilterType(value)}
-  >
-    <Option value="6742fb1cd56a2e75dbd817ea">Yes/No</Option>
-    <Option value="6742fb3bd56a2e75dbd817ec">Điền khuyết</Option>
-  </Select>
-  <Select
-    placeholder="Mức độ"
-    allowClear
-    className="select-item"
-    value={filterLevel || undefined}
-    onChange={(value) => setFilterLevel(value)}
-  >
-    <Option value="easy">Easy</Option>
-    <Option value="medium">Medium</Option>
-    <Option value="hard">Hard</Option>
-  </Select>
-</div>
-
+          <Search
+            placeholder="Tìm theo nội dung, kiến thức, chủ đề"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            enterButton
+            className="search-input"
+          />
+          <Select
+            placeholder="Loại câu hỏi"
+            allowClear
+            className="select-item"
+            value={filterType || undefined}
+            onChange={(value) => setFilterType(value)}
+          >
+            <Option value="6742fb1cd56a2e75dbd817ea">Yes/No</Option>
+            <Option value="6742fb3bd56a2e75dbd817ec">Điền khuyết</Option>
+          </Select>
+          <Select
+            placeholder="Mức độ"
+            allowClear
+            className="select-item"
+            value={filterLevel || undefined}
+            onChange={(value) => setFilterLevel(value)}
+          >
+            <Option value="easy">Easy</Option>
+            <Option value="medium">Medium</Option>
+            <Option value="hard">Hard</Option>
+          </Select>
+        </div>
       </div>
       {filteredOtherQuestions && filteredOtherQuestions.length > 0 ? (
         <>
@@ -435,9 +438,9 @@ export const UpdateExamQuestion = () => {
       >
         <Form layout="vertical">
           <Form.Item
-            label={`Số câu dễ (còn lại: ${otherQuestions.filter(
-              (q) => q.level === "easy"
-            ).length})`}
+            label={`Số câu dễ (còn lại: ${
+              otherQuestions.filter((q) => q.level === "easy").length
+            })`}
           >
             <InputNumber
               min={0}
@@ -449,9 +452,9 @@ export const UpdateExamQuestion = () => {
             />
           </Form.Item>
           <Form.Item
-            label={`Số câu trung bình (còn lại: ${otherQuestions.filter(
-              (q) => q.level === "medium"
-            ).length})`}
+            label={`Số câu trung bình (còn lại: ${
+              otherQuestions.filter((q) => q.level === "medium").length
+            })`}
           >
             <InputNumber
               min={0}
@@ -463,9 +466,9 @@ export const UpdateExamQuestion = () => {
             />
           </Form.Item>
           <Form.Item
-            label={`Số câu khó (còn lại: ${otherQuestions.filter(
-              (q) => q.level === "hard"
-            ).length})`}
+            label={`Số câu khó (còn lại: ${
+              otherQuestions.filter((q) => q.level === "hard").length
+            })`}
           >
             <InputNumber
               min={0}

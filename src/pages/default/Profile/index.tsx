@@ -66,54 +66,23 @@ export const Profile = () => {
     getAllClassrooms();
   }, []);
 
-
   return (
     <div className="p-4 max-w-lg mx-auto">
       <h1 className="text-3xl font-bold text-center">Thông tin cá nhân</h1>
       {user ? (
-        <div className="profile-container">
-          <div>
-            <img
-              src={user.avatar || "https://via.placeholder.com/150"}
-              alt="Avatar"
-              className="profile-avatar"
-            />
-          </div>
-          <div className="profile-info">
-            {!isEditing ? (
-              <>
-                <p><strong>Tên người dùng:</strong> {user.username}</p>
-                <p><strong>Email:</strong> {user.email}</p>
-                <p><strong>Vai trò:</strong> {user.role}</p>
-                <button onClick={handleEditClick} className="mt-2 px-4 py-2 bg-blue-500 text-white rounded">Chỉnh sửa</button>
-              </>
-            ) : (
-              <div>
-                <p>
-                  <strong>Tên người dùng:</strong>
-                  <input
-                    type="text"
-                    name="username"
-                    value={editedUser.username || ''}
-                    onChange={handleChange}
-                    className="ml-2 border rounded px-2 py-1"
-                  />
-                </p>
-                <p>
-                  <strong>Email:</strong>
-                  <input
-                    type="email"
-                    name="email"
-                    value={editedUser.email || ''}
-                    onChange={handleChange}
-                    className="ml-2 border rounded px-2 py-1"
-                  />
-                </p>
-                <p><strong>Vai trò:</strong> {user.role} (Không cho phép chỉnh sửa)</p> {/* Tùy chọn không cho phép sửa vai trò */}
-                <button onClick={handleSaveClick} className="mt-2 mr-2 px-4 py-2 bg-green-500 text-white rounded">Lưu</button>
-                <button onClick={handleCancelClick} className="mt-2 px-4 py-2 bg-gray-300 text-gray-700 rounded">Hủy</button>
-              </div>
-            )}
+        <div>
+          <div className="mt-4">
+            <center>
+              <p>
+                <strong>Tên người dùng:</strong> {user.username}
+              </p>
+              <p>
+                <strong>Email:</strong> {user.email}
+              </p>
+              <p>
+                <strong>Vai trò:</strong> {user.role}
+              </p>
+            </center>
           </div>
         </div>
         ) : (
@@ -132,7 +101,10 @@ export const Profile = () => {
               dataSource={classrooms}
               renderItem={(item) => (
                 <List.Item>
-                  <Card hoverable onClick={() => navigate(`/PhongThi/Detail/${item._id}`)}>
+                  <Card
+                    hoverable
+                    onClick={() => navigate(`/PhongThi/Detail/${item._id}`)}
+                  >
                     {item.title}
                   </Card>
                 </List.Item>

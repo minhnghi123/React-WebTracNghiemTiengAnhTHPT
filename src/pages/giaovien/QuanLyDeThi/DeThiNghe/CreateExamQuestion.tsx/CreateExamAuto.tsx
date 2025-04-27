@@ -33,7 +33,7 @@ export const CreateExamModalAuTo: React.FC<CreateExamModalProps> = ({
 
   const getAllQT = async (page: number) => {
     try {
-      const rq = await QuestionTypeAPI.getAllQuestionType(page);
+      const rq = await QuestionTypeAPI.getAllQuestionTypeTeacher(page);
       if (rq?.code === 200) {
         setQuestionTypesData(rq?.questionTypes);
       }
@@ -43,7 +43,6 @@ export const CreateExamModalAuTo: React.FC<CreateExamModalProps> = ({
       }
     }
   };
-
   useEffect(() => {
     getAllQT(1);
   }, []);
@@ -91,7 +90,7 @@ export const CreateExamModalAuTo: React.FC<CreateExamModalProps> = ({
 
   return (
     <Modal
-      title="Tạo kỳ thi"
+      title="Tạo Đề Thi"
       visible={visible}
       onCancel={handleClose}
       onOk={handleSaveClick}

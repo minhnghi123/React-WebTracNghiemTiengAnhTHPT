@@ -81,5 +81,17 @@ export const ClassroomAPI = {
   downloadStudentResultsExcel: async (classroomId: string) => {
     const response = await request.get(`/teacher/classroom/${classroomId}/results/excel`, { responseType: 'blob' });
     return response.data;
+  },
+  getAllResultsForExamInClassroom: async (classroomId: string, examId: string) => {
+    const response = await request.get(`/teacher/classroom/${classroomId}/exam/${examId}/all-results`);
+    return response.data;
+  },
+  getStudentResultsForAllExamsInClassroom: async (classroomId: string, studentId: string) => {
+    const response = await request.get(`/teacher/classroom/${classroomId}/student/${studentId}/all-results`);
+    return response.data;
+  },
+  getSpecificExamResult: async (_id: string) => {
+    const response = await request.get(`/teacher/classroom/exam/${_id}`);
+    return response.data;
   }
 };

@@ -1,12 +1,12 @@
 import { QuestionAPI, Question } from "@/services/teacher/Teacher";
 import { cleanString } from "@/utils/cn";
-import { Divider, Flex, Modal, Tag } from "antd";
-import clsx from "clsx";
+import { Divider, Modal, Tag } from "antd";
 import "./cauhoi.css";
 import { useState } from "react";
 import UpdateQuestionModal from "./CreateQuestion/UpdateQuestion";
 import UpdateBlankQuestionModal from "./CreateQuestion/UpdateQuestionBlank";
 import { UpdateAudioModal } from "../QuanLyFileAudio/FileAudio/UpdateDangCauHoiModal";
+import UpdateQuestionTFModal from "./CreateQuestion/UpdateQuestionTF";
 import { Card, Typography, Button } from "antd";
 import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
 
@@ -29,28 +29,7 @@ const QuestionComponent: React.FC<QuestionComponentProps> = ({
 }) => {
   const [open, setOpen] = useState(false);
   const [openAudioUpdate, setOpenAudioUpdate] = useState(false);
-  const handleOk = () => {
-    handleDeleteQuestion(question._id || "");
 
-    setOpen(false);
-  };
-
-  const handleCancel = () => {
-    setOpen(false);
-  };
-  const handleDeleteQuestion = async (id: string) => {
-    try {
-      const rq = await QuestionAPI.deleteQuestion(id);
-      if (rq?.code === 200) {
-        alert("Xóa câu hỏi thành công");
-        onUpdateSuccess();
-      }
-    } catch (error: any) {
-      if (error.response) {
-        console.log(error.response.data.message);
-      }
-    }
-  };
   const handleAudioUpdateSuccess = () => {
     setOpenAudioUpdate(false);
     window.location.reload();
@@ -73,7 +52,6 @@ const QuestionComponent: React.FC<QuestionComponentProps> = ({
     }
     setOpen(false);
   };
-
   return (
     <Card
       bordered={false}
@@ -95,22 +73,39 @@ const QuestionComponent: React.FC<QuestionComponentProps> = ({
         Đáp án
       </Divider>
       <div style={{ marginBottom: 16 }}>
-        {question.answers.map((answer) => (
+        {question.questionType === "6742fb5dd56a2e75dbd817ee" ? (
           <div
-            key={answer._id}
-            className={`p-2 rounded mb-2 ${
-              answer.isCorrect ? "bg-green-100" : "bg-gray-100"
-            }`}
+            className={`p-2 rounded mb-2 bg-gray-100`}
             style={{
-              border: answer.isCorrect
-                ? "1px solid #52c41a"
-                : "1px solid #d9d9d9",
-              color: answer.isCorrect ? "#52c41a" : "#595959",
+              border: "1px solid #d9d9d9",
+              color: "#595959",
             }}
-          >
-            {cleanString(answer.text || answer.correctAnswerForBlank || "")}
-          </div>
-        ))}
+            dangerouslySetInnerHTML={{
+              __html:
+                question.correctAnswerForTrueFalseNGV?.toUpperCase() || "",
+            }}
+          />
+        ) : (
+          question.answers.map((answer) => (
+            <div
+              key={answer._id}
+              className={`p-2 rounded mb-2 ${
+                answer.isCorrect ? "bg-green-100" : "bg-gray-100"
+              }`}
+              style={{
+                border: answer.isCorrect
+                  ? "1px solid #52c41a"
+                  : "1px solid #d9d9d9",
+                color: answer.isCorrect ? "#52c41a" : "#595959",
+              }}
+              dangerouslySetInnerHTML={{
+                __html: cleanString(
+                  answer.text || answer.correctAnswerForBlank || ""
+                ),
+              }}
+            />
+          ))
+        )}
       </div>
 
       {/* Thông tin chi tiết */}
@@ -119,15 +114,7 @@ const QuestionComponent: React.FC<QuestionComponentProps> = ({
       </Divider>
       <div style={{ marginBottom: 16 }}>
         <Text strong>Mức độ: </Text>
-        <Tag
-          color={
-            question.level === "easy"
-              ? "green"
-              : question.level === "medium"
-              ? "yellow"
-              : "red"
-          }
-        >
+        <Tag color={question.level === "easy" ? "green" : "red"}>
           {question.level}
         </Tag>
       </div>
@@ -194,19 +181,28 @@ const QuestionComponent: React.FC<QuestionComponentProps> = ({
       </Modal>
 
       {/* Modal sửa câu hỏi */}
-      {questionType === "6742fb1cd56a2e75dbd817ea" ? (
+      {questionType === "6742fb5dd56a2e75dbd817ee" ? (
+        <UpdateQuestionTFModal
+          visible={openModal}
+          handleClose={() => setOpenModal(false)}
+          question2={question}
+          onUpdateSuccess={onUpdateSuccess}
+        />
+      ) : questionType === "6742fb1cd56a2e75dbd817ea" ? (
         <UpdateQuestionModal
           visible={openModal}
           onUpdateSuccess={onUpdateSuccess}
           handleClose={() => setOpenModal(false)}
           question2={question}
         />
-      ) : (
+      ) : questionType === "6742fb3bd56a2e75dbd817ec" ? (
         <UpdateBlankQuestionModal
           visible={openModal}
           handleClose={() => setOpenModal(false)}
           question2={question}
         />
+      ) : (
+        <div>{/* Placeholder for future modals */}</div>
       )}
       {question.audioInfo && (
         <div>

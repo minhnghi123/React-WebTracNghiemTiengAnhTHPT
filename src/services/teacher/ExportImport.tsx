@@ -25,6 +25,7 @@ export interface QuestionListening {
   questions: ListeningQuestion[];
 }
 export interface ExamDataExport {
+  slug?: string;
   title: string;
   description: string;
   school: string;
@@ -34,12 +35,11 @@ export interface ExamDataExport {
   code: string;
   duration: number;
   comments: string;
-  questionsMultichoice: QuestionMultichoice[];
-  questionsFillInBlank: QuestionFillInBlank[];
-  questionsListening: QuestionListening[];
+
 }
 export const ExportAPI = {
   exportWord: async (examDataExport: ExamDataExport) => {
+    console.log("Exporting exam data:", examDataExport);
     const response = await request.post(
       `/teacher/exam/export-exam`,
       examDataExport

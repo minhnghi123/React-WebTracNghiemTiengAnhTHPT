@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 const { Schema } = mongoose;
 
-const listeningQuestionSchema  = new Schema(
+const listeningQuestionSchema = new Schema(
   {
     teacherId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -10,7 +10,6 @@ const listeningQuestionSchema  = new Schema(
     },
     questionText: {
       type: String,
-      required: true,
       trim: true,
     },
     questionType: {
@@ -26,7 +25,12 @@ const listeningQuestionSchema  = new Schema(
         },
         optionText: {
           type: String,
+          default: "",
+        },
+        isCorrect: {
+          type: Boolean,
           required: true,
+          default: false, // Set default to false
         },
       },
     ],
@@ -40,16 +44,27 @@ const listeningQuestionSchema  = new Schema(
           type: String,
           required: true,
         },
+        isCorrect: {
+          type: Boolean,
+          required: true,
+          default: false, // Set default to false
+        },
       },
     ],
+    correctAnswerForTrueFalseNGV: {
+      type: String,
+      enum: ["true", "false", "notgiven", ""],
+      default: "",
+    },
     difficulty: {
       type: String,
       enum: ["easy", "medium", "hard"],
-      required: true,
+      default: "easy",
     },
     isDeleted: { type: Boolean, default: false },
     blankAnswer: {
-      type: String
+      type: String,
+      default: "",
     },
   },
   {
@@ -58,5 +73,9 @@ const listeningQuestionSchema  = new Schema(
 );
 
 // Tạo model từ schema
-const ListeningQuestion = mongoose.model("ListeningQuestion", listeningQuestionSchema, "listening-questions");
+const ListeningQuestion = mongoose.model(
+  "ListeningQuestion",
+  listeningQuestionSchema,
+  "listening-questions"
+);
 export default ListeningQuestion;

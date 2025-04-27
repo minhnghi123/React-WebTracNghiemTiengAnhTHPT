@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Divider, Input, Radio, Card, Typography, Space } from "antd";
+import { Input, Radio, Card, Typography } from "antd";
 import { Question } from "@/types/interface";
 import { cleanString } from "@/utils/cn";
 
@@ -9,6 +9,7 @@ export type UserAnswer = {
   questionId: string;
   selectedAnswerId?: string;
   userAnswer?: string[];
+  qu
 };
 
 type QuestionComponentProps = {
@@ -17,6 +18,8 @@ type QuestionComponentProps = {
   onAnswerChange: (newAnswer: UserAnswer) => void;
   currentAnswer?: UserAnswer;
   index: number;
+  viewOnly?: boolean; // Add viewOnly prop
+  questionIndex: number; // Add questionIndex prop
 };
 
 const QuestionSubmit: React.FC<QuestionComponentProps> = ({
@@ -25,6 +28,8 @@ const QuestionSubmit: React.FC<QuestionComponentProps> = ({
   onAnswerChange,
   currentAnswer,
   index,
+  viewOnly = false, // Add viewOnly prop with default value
+  questionIndex, // Add questionIndex
 }) => {
   const [localAnswer, setLocalAnswer] = useState<UserAnswer>(
     currentAnswer || { questionId: question._id || "", userAnswer: [] }
@@ -40,9 +45,10 @@ const QuestionSubmit: React.FC<QuestionComponentProps> = ({
     questionId: string,
     selectedAnswerId: string
   ) => {
+    if (viewOnly) return; // Disable interaction if viewOnly
     const newAnswer: UserAnswer = { questionId, selectedAnswerId };
     setLocalAnswer(newAnswer);
-    onAnswerChange(newAnswer);
+    onAnswerChange({ ...newAnswer, questionType }); // Include questionType
   };
 
   const handleFillBlankInputChange = (
@@ -50,6 +56,7 @@ const QuestionSubmit: React.FC<QuestionComponentProps> = ({
     index: number,
     value: string
   ) => {
+    if (viewOnly) return; // Disable interaction if viewOnly
     let currentUserAnswers: string[] = localAnswer.userAnswer
       ? [...localAnswer.userAnswer]
       : new Array(question.answers ? question.answers.length : 0).fill("");
@@ -59,12 +66,22 @@ const QuestionSubmit: React.FC<QuestionComponentProps> = ({
       userAnswer: currentUserAnswers,
     };
     setLocalAnswer(newAnswer);
-    onAnswerChange(newAnswer);
+    onAnswerChange({ ...newAnswer, questionType }); // Include questionType
+  };
+
+  const handleTrueFalseChange = (questionId: string, value: string) => {
+    if (viewOnly) return; // Disable interaction if viewOnly
+    const newAnswer: UserAnswer = { questionId, userAnswer: [value] };
+    setLocalAnswer(newAnswer);
+    onAnswerChange({ ...newAnswer, questionType }); // Include questionType
   };
 
   const renderFillInBlankContent = () => {
     const placeholderRegex = /_+\d+_+/g;
-    const matchedPlaceholders = question.content.match(placeholderRegex);
+    // console.log(question);
+    const matchedPlaceholders = typeof question.content === "string" 
+      ? question.content.match(placeholderRegex) 
+      : null;
 
     if (
       matchedPlaceholders &&
@@ -89,7 +106,8 @@ const QuestionSubmit: React.FC<QuestionComponentProps> = ({
                       e.target.value
                     )
                   }
-                  placeholder={`Blank ${idx + 1}`}
+                  placeholder={`Điền khuyết ${idx + 1}`}
+                  disabled={viewOnly} // Disable Input if viewOnly
                 />
               )}
             </React.Fragment>
@@ -99,8 +117,10 @@ const QuestionSubmit: React.FC<QuestionComponentProps> = ({
     }
 
     return (
-      <Paragraph
-        dangerouslySetInnerHTML={{ __html: cleanString(question.content) }}
+      <span
+        dangerouslySetInnerHTML={{
+          __html: cleanString(question.content),
+        }}
       />
     );
   };
@@ -111,12 +131,13 @@ const QuestionSubmit: React.FC<QuestionComponentProps> = ({
         level={5}
         style={{
           whiteSpace: "normal",
-          wordBreak: "break-word", // đảm bảo nội dung không tràn
+          wordBreak: "break-word",
           fontSize: "16px",
           lineHeight: "1.5",
           marginBottom: 16,
         }}
       >
+        {questionIndex}. {/* Use questionIndex for numbering */}
         {questionType === "6742fb3bd56a2e75dbd817ec" ? (
           renderFillInBlankContent()
         ) : (
@@ -136,6 +157,7 @@ const QuestionSubmit: React.FC<QuestionComponentProps> = ({
             }
             value={localAnswer.selectedAnswerId}
             style={{ display: "flex", flexDirection: "column", gap: "12px" }}
+            disabled={viewOnly} // Disable Radio.Group if viewOnly
           >
             {question.answers?.map((answer) => (
               <Radio key={answer._id} value={answer._id}>
@@ -147,10 +169,25 @@ const QuestionSubmit: React.FC<QuestionComponentProps> = ({
               </Radio>
             ))}
           </Radio.Group>
+        ) : questionType === "6742fb5dd56a2e75dbd817ee" ? (
+          <Radio.Group
+            onChange={(e) =>
+              handleTrueFalseChange(question._id || "", e.target.value)
+            }
+            value={localAnswer.userAnswer?.[0]}
+            style={{ display: "flex", flexDirection: "column", gap: "12px" }}
+            disabled={viewOnly} // Disable Radio.Group if viewOnly
+          >
+            <Radio value="true">True</Radio>
+            <Radio value="false">False</Radio>
+            <Radio value="not_given">Not Given</Radio>
+          </Radio.Group>
         ) : (
           (() => {
             const placeholderRegex = /_+\d+_+/g;
-            const matched = question.content.match(placeholderRegex);
+            const matched = typeof question.content === "string" 
+              ? question.content.match(placeholderRegex) 
+              : null;
             if (matched && matched.length === (question.answers?.length || 0))
               return null;
 
@@ -167,7 +204,8 @@ const QuestionSubmit: React.FC<QuestionComponentProps> = ({
                           e.target.value
                         )
                       }
-                      placeholder={`Blank ${idx + 1}`}
+                      placeholder={`Điền ${idx + 1}`}
+                      disabled={viewOnly} // Disable Input if viewOnly
                     />
                   </div>
                 ))}

@@ -1,25 +1,30 @@
 import { useState, useEffect } from "react";
-import { Button } from "antd";
+import { Button, Pagination } from "antd"; // Import Pagination
 import { ListeningQuestion, listenQuestionAPI } from "@/services/teacher/ListeningQuestion";
 import { ListeningQuestionComponent } from "./ListeningQuestion";
 import CreateListeningQuestionModal from "./CreateQuestion/CreateListeningQuestion";
 
 export const ListListening = () => {
   const [data, setData] = useState<ListeningQuestion[]>([]);
+  const [paginatedData, setPaginatedData] = useState<ListeningQuestion[]>([]); // Data for the current page
   const [showModal, setShowModal] = useState<boolean>(false);
+  const [currentPage, setCurrentPage] = useState<number>(1); // Current page
+  const [pageSize, setPageSize] = useState<number>(10); // Page size
 
   const getAllQuestions = async () => {
     try {
       const rq = await listenQuestionAPI.getAllListeningQuestions();
       console.log("listening", rq);
-      // Giả sử API trả về { message: string, data: ListeningQuestion[] }
       if (rq.data) {
-        // Chuyển _id thành id cho phù hợp với interface ListeningQuestion
-        const questions = rq.data.map((q: any) => ({ ...q, id: q._id ? q._id : "" }));
+        const questions = rq.data.map((q: any) => ({
+          ...q,
+          _id: q._id ? String(q._id) : crypto.randomUUID(), // Ensure _id is always a string
+        }));
         setData(questions);
-        // Nếu có thông tin phân trang từ API thì setTotal, setPage tương ứng
+        setPaginatedData(questions.slice(0, pageSize)); // Initialize paginated data
       } else {
         setData([]);
+        setPaginatedData([]);
       }
     } catch (error: any) {
       if (error.response) {
@@ -32,9 +37,20 @@ export const ListListening = () => {
     getAllQuestions();
   }, []);
 
+  useEffect(() => {
+    // Update paginated data whenever currentPage or pageSize changes
+    const startIndex = (currentPage - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    setPaginatedData(data.slice(startIndex, endIndex));
+  }, [currentPage, pageSize, data]);
+
   const handleUpdateSuccess = () => {
-    // Refresh danh sách sau khi cập nhật hoặc xóa câu hỏi
     getAllQuestions();
+  };
+
+  const handlePageChange = (page: number, size?: number) => {
+    setCurrentPage(page);
+    if (size) setPageSize(size);
   };
 
   return (
@@ -44,22 +60,31 @@ export const ListListening = () => {
           Thêm câu hỏi
         </Button>
       </div>
-      {data && data.map((item) => (
+      {paginatedData && paginatedData.map((item) => (
         <ListeningQuestionComponent
-          key={item.id}
+          key={item._id}
           question={item}
           onUpdateSuccess={handleUpdateSuccess}
         />
       ))}
-      {/* Bạn có thể triển khai CreateQuestionModal cho chức năng thêm câu hỏi */}
+     <center><Pagination
+        className="mt-4"
+        current={currentPage}
+        pageSize={pageSize}
+        total={data.length} // Total items from the full dataset
+        onChange={handlePageChange}
+        showSizeChanger
+        onShowSizeChange={handlePageChange}
+      />
+      </center> 
       <CreateListeningQuestionModal
         visible={showModal}
         handleClose={() => {
           setShowModal(false);
           getAllQuestions();
-          }}
-          onCreateSuccess={getAllQuestions}
-        />
+        }}
+        onCreateSuccess={getAllQuestions}
+      />
     </div>
   );
 };

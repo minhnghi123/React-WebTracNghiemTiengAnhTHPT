@@ -5,7 +5,12 @@ const QuestionSchema = new mongoose.Schema({
     ref: "Passage",
     default: null,
   }, // Liên kết bài đọc (nếu có)
+  instruction: { type: String, default: "" },
   content: { type: String, default: "" },
+  topic: {
+    type: String,
+    default: "",
+  },
   questionType: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "QuestionType",
@@ -13,7 +18,7 @@ const QuestionSchema = new mongoose.Schema({
   },
   level: {
     type: String,
-    enum: ["easy", "hard"],
+    enum: ["easy", "medium", "hard"],
     default: "easy",
   },
 
@@ -26,7 +31,7 @@ const QuestionSchema = new mongoose.Schema({
   ],
   correctAnswerForTrueFalseNGV: {
     type: String,
-
+    enum: ["true", "false", "notgiven", ""],
     default: "",
   },
   subject: { type: String, default: "English" },

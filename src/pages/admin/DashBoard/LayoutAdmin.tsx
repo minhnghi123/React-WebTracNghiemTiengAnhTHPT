@@ -3,7 +3,10 @@ import { Navbar } from "@/components/Navbar";
 import { Outlet } from "react-router-dom";
 
 import "bootstrap/dist/css/bootstrap.min.css";
+import { useAuthContext } from "@/contexts/AuthProvider";
+import NotFound from "@/pages/NotFound";
 const LayoutAdmin = () => {
+  
   return (
     <div id="main">
        <Navbar rule={false} />

@@ -238,7 +238,6 @@ export const deleteListeningQuestion = async (req, res) => {
         .status(404)
         .json({ message: `Không tìm thấy câu hỏi với ID ${id}` });
     }
-
     return res.status(200).json({
       code: 200,
       message: "Câu hỏi đã được xóa thành công!",

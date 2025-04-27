@@ -41,6 +41,7 @@ interface Question {
   questionType: string;
   options: Option[];
   correctAnswer: CorrectAnswer[];
+  correctAnswerForTrueFalseNGV?: string;
   difficulty: string;
   isDeleted: boolean;
   createdAt: string;
@@ -57,7 +58,6 @@ interface Exam {
   questions: Question[];
   duration: number;
   difficulty: string;
-  passingScore: number;
   isPublished: boolean;
   isDeleted: boolean;
   createdAt: string;

@@ -1,3 +1,5 @@
+import { Passage } from "@/services/teacher/Teacher";
+
 export interface Answer {
   _id: string;
   correctAnswerForBlank: string;
@@ -6,11 +8,13 @@ export interface Answer {
 }
 
 export interface Question {
-  passageId: string | null;
+  detailsFetched?: Question | undefined;
+  passageId?: Passage;
   _id: string;
   content: string;
   level: string;
   answers: Answer[];
+  correctAnswerForTrueFalseNGV?: string;
   subject: string;
   knowledge: string;
   translation: string;
@@ -68,7 +72,6 @@ export interface ListeningExam {
   questions: ListeningQuestion[];
   duration: number;
   difficulty: string;
-  passingScore: number;
   isPublished: boolean;
   isDeleted: boolean;
   createdAt: string;
@@ -87,6 +90,9 @@ export interface Exam {
   isPublic: boolean;
   createdBy: string;
   listeningExams: ListeningExam[];
+  class: "10" | "11" | "12"; // Class level
+  topic: string[]; // Topics covered in the exam
+  knowledge: string[]; // Knowledge areas covered in the exam
   createdAt: string;
   slug: string;
   __v: number;

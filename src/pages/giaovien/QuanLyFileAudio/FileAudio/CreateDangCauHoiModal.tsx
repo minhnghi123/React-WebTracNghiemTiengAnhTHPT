@@ -112,7 +112,7 @@ export const CreateAudioModal: React.FC<CreateAudioProps> = ({
       <Form layout="vertical">
         <Form.Item label="Upload Audio File">
           <input type="file" accept="audio/*" onChange={handleFileChange} />
-          {question.filePath && <p>Tệp đã chọn: {question.filePath.name}</p>}
+          {question.filePath instanceof File && <p>Tệp đã chọn: {question.filePath.name}</p>}
         </Form.Item>
         <Form.Item label="Tên file nghe">
           <Input.TextArea

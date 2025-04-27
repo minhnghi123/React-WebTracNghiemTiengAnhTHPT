@@ -1,14 +1,12 @@
 import { request } from "@/config/request";
-import { Audio } from "./Teacher";
 import { Answer } from "@/types/interface";
-import { useAuthContext } from "@/contexts/AuthProvider";
 
 export interface ListeningQuestion {
-  id?: string;
+  _id?: string;
   teacherId: string;
   questionText: string;
   questionType: string;
-  options?: { option_id: string; optionText: string }[] ;
+  options?: { option_id: string; optionText: string }[];
   answers?: Answer[];
   correctAnswer?: { answer_id: string; answer: string }[];
   difficulty: "easy" | "medium" | "hard";
@@ -16,7 +14,7 @@ export interface ListeningQuestion {
   blankAnswer?: string;
 }
 export interface ListeningQuestionData {
-  id?: string;
+  _id?: string;
   teacherId: string;
   questionText: string;
   questionType: string;
@@ -28,22 +26,19 @@ export interface ListeningQuestionData {
   blankAnswer?: string;
 }
 
-
 export interface ListeningExamData {
-  id?: string;
+  _id?: string;
   teacherId: string; // ID của giáo viên
   title: string; // Tiêu đề bài kiểm tra
   description: string; // Mô tả bài kiểm tra
   audio: string; // ID của audio
-  questions: string[]; // Mảng các ID câu hỏi
+  questions: string[] | Question ; // Mảng các ID câu hỏi
   duration?: number; // Thời lượng bài kiểm tra (mặc định: 90 phút)
   startTime?: Date; // Thời gian bắt đầu
   endTime?: Date; // Thời gian kết thúc
   isPublic?: boolean; // Trạng thái công khai (mặc định: false)
   isDeleted?: boolean; // Trạng thái xóa mềm
 }
-
-
 
 export interface Teacher {
   _id: string;
@@ -85,19 +80,63 @@ export interface Question {
 
 export interface ExamDataRecieve {
   _id: string;
-  teacherId: Teacher;
+  teacherId: {
+    _id: string;
+    username: string;
+    email: string;
+    password: string;
+    avatar: string;
+    role: string;
+    __v: number;
+    deleted: boolean;
+    status: string;
+  };
   title: string;
   description: string;
-  audio: Audio;
-  questions: Question[];
+  audio: {
+    _id: string;
+    filePath: string;
+    description: string;
+    transcription: string;
+    deletedAt: string | null;
+    isDeleted: boolean;
+    createdAt: string;
+    __v: number;
+  };
+  questions: {
+    correctAnswerForTrueFalseNGV: string;
+    _id: string;
+    teacherId: string;
+    questionText: string;
+    questionType: string;
+    difficulty: string;
+    isDeleted: boolean;
+    blankAnswer?: string;
+    options: {
+      option_id: string;
+      optionText: string;
+      _id: string;
+    }[];
+    correctAnswer: {
+      answer_id: string;
+      answer: string;
+      _id: string;
+    }[];
+    createdAt: string;
+    updatedAt: string;
+    __v: number;
+  }[];
   duration: number;
   difficulty: string;
-  passingScore: number;
   isPublished: boolean;
   isDeleted: boolean;
   createdAt: string;
   updatedAt: string;
   __v: number;
+  endTime: string;
+  isPublic: boolean;
+  startTime: string;
+  slug: string;
 }
 
 export const listenQuestionAPI = {
@@ -109,20 +148,36 @@ export const listenQuestionAPI = {
     const response = await request.get(`/teacher/listening-question/${id}`);
     return response.data;
   },
-  createListeningQuestion: async (data: ListeningQuestionData)=> {
-    const response = await request.post("/teacher/listening-question/create", data);
+  createListeningQuestion: async (data: ListeningQuestionData) => {
+    const response = await request.post(
+      "/teacher/listening-question/create",
+      data
+    );
     return response.data;
   },
   createMultiListeningQuestion: async (data: ListeningQuestionData) => {
-    const response = await request.post("/teacher/listening-question/create-multi", data);
+    const response = await request.post(
+      "/teacher/listening-question/create-multi",
+      data
+    );
     return response.data;
   },
-  updateListeningQuestion: async (id: string, data: Partial<ListeningQuestionData>) => {
-    const response = await request.patch(`/teacher/listening-question/update/${id}`, data);
+  updateListeningQuestion: async (
+    id: string,
+    data: Partial<ListeningQuestionData>
+  ) => {
+    const response = await request.patch(
+      `/teacher/listening-question/update/${id}`,
+      data
+    );
     return response.data;
   },
   deleteListeningQuestion: async (id: string) => {
-    const response = await request.patch(`/teacher/listening-question/delete/${id}`);
+    const response = await request.delete(`/teacher/listening-question/delete/${id}`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`, // Gửi token trong header
+      },
+    });
     return response.data;
   },
 };
@@ -150,10 +205,17 @@ export const ExamListeningQuestionAPI = {
       isPublic: data.isPublic || false,
     };
 
-    const response = await request.post("/teacher/listening-exam/create", payload);
+    const response = await request.post(
+      "/teacher/listening-exam/create",
+      payload
+    );
     return response.data;
   },
-  updateListeningExam: async (id: string,teacherId, data: Partial<ListeningExamData>) => {
+  updateListeningExam: async (
+    id: string,
+    teacherId: any,
+    data: Partial<ListeningExamData>
+  ) => {
     // Chỉ gửi các trường cần thiết theo cấu trúc mới
     const payload = {
       title: data.title,
@@ -167,12 +229,16 @@ export const ExamListeningQuestionAPI = {
       teacherId: teacherId,
     };
 
-    const response = await request.patch(`/teacher/listening-exam/update/${id}`, payload);
+    const response = await request.patch(
+      `/teacher/listening-exam/update/${id}`,
+      payload
+    );
     return response.data;
   },
-  deleteListeningExam: async (id: string,teacherId: string) => {
-    const response = await request.patch(`/teacher/listening-exam/delete/${id}`,teacherId);
-    ;
+  deleteListeningExam: async (id: string, teacherId: string) => {
+    const response = await request.delete(
+      `/teacher/listening-exam/delete/${id}`
+    );
     return response.data;
   },
 };

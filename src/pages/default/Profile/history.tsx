@@ -1,7 +1,15 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { Tabs, Select, Table, Card } from "antd";
 import { ColumnsType } from "antd/es/table";
-import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
+import {
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+} from "recharts";
 import moment from "moment";
 import { Result, ResultAPI } from "@/services/student";
 
@@ -33,9 +41,7 @@ const columns: ColumnsType<Result> = [
       return aScore - bScore;
     },
     render: (_, record) => {
-      if (!record.questions || record.questions.length === 0) return "0.00";
-      const computedScore = (record.score / record.questions.length) * 10;
-      return computedScore.toFixed(2);
+      return record.score;
     },
   },
   {
@@ -52,16 +58,27 @@ const columns: ColumnsType<Result> = [
   },
 ];
 
-
 // -------------------- PHẦN HEATMAP --------------------
 
 // Các hằng số cho heatmap
-const cellSize = 14;   // Kích thước mỗi ô vuông
-const cellGap = 3;     // Khoảng cách giữa các ô
-const topMargin = 20;  // Khoảng trống phía trên để hiển thị label tháng
+const cellSize = 14; // Kích thước mỗi ô vuông
+const cellGap = 3; // Khoảng cách giữa các ô
+const topMargin = 20; // Khoảng trống phía trên để hiển thị label tháng
 const leftMargin = 30; // Khoảng trống bên trái để hiển thị label ngày trong tuần
-const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", 
-                     "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const MONTH_NAMES = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
 // Bắt đầu từ Thứ Hai
 const WEEKDAY_NAMES = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
@@ -97,17 +114,13 @@ const HistoryHeatmap: React.FC<HistoryHeatmapProps> = ({ testHistory }) => {
   // Lấy mảng các ngày có làm bài từ testHistory có trong năm được chọn
   const testDates = useMemo(() => {
     return testHistory
-      .map(item => new Date(item.createdAt))
-      .filter(d => d.getFullYear() === year);
+      .map((item) => new Date(item.createdAt))
+      .filter((d) => d.getFullYear() === year);
   }, [testHistory, year]);
 
   const daysInYear = generateDaysInYear(year);
 
-  const testSet = new Set(
-    testDates.map((d) =>
-      d.toISOString().slice(0, 10)
-    )
-  );
+  const testSet = new Set(testDates.map((d) => d.toISOString().slice(0, 10)));
 
   const dayDataList: DayData[] = daysInYear.map((day) => {
     const iso = day.toISOString().slice(0, 10);
@@ -152,9 +165,15 @@ const HistoryHeatmap: React.FC<HistoryHeatmapProps> = ({ testHistory }) => {
 
   return (
     <div style={{ margin: "20px" }}>
-      <h3 style={{ textAlign: "center", marginBottom: "10px" }}>Activity Calendar</h3>
-      <div style={{ textAlign: "center", marginBottom: "10px" }}>
-        <select value={year} onChange={(e) => setYear(parseInt(e.target.value))}>
+      <h3 style={{ textAlign: "center", marginBottom: "10px" }}>
+        Activity Calendar
+      </h3>
+      <center>
+      <div style={{ textAlign: "center", marginBottom: "10px", justifyContent: "center" }}>
+        <select
+          value={year}
+          onChange={(e) => setYear(parseInt(e.target.value))}
+        >
           {Array.from({ length: 5 }, (_, i) => currentYear - 2 + i).map((y) => (
             <option key={y} value={y}>
               {y}
@@ -162,8 +181,12 @@ const HistoryHeatmap: React.FC<HistoryHeatmapProps> = ({ testHistory }) => {
           ))}
         </select>
       </div>
-
-      <svg width={svgWidth} height={svgHeight} style={{ border: "1px solid #ccc" }}>
+    
+      <svg
+        width={svgWidth}
+        height={svgHeight}
+        style={{ border: "1px solid #ccc" }}
+      >
         {/* Label tháng */}
         {monthLabels.map((m, i) => (
           <text key={i} x={m.x} y={12} fontSize={10} fill="#666">
@@ -211,6 +234,7 @@ const HistoryHeatmap: React.FC<HistoryHeatmapProps> = ({ testHistory }) => {
           );
         })}
       </svg>
+      </center>
     </div>
   );
 };
@@ -219,7 +243,7 @@ const HistoryHeatmap: React.FC<HistoryHeatmapProps> = ({ testHistory }) => {
 
 export const HistoryPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
-  const [timeFilter, setTimeFilter] = useState<string>("7"); 
+  const [timeFilter, setTimeFilter] = useState<string>("7");
   // timeFilter: "3", "7", "30", "90" (3 tháng ~ 90 ngày), "365" (1 năm)
   const [testHistory, setTestHistory] = useState<Result[]>([]);
 
@@ -249,7 +273,9 @@ export const HistoryPage: React.FC = () => {
     if (!testHistory) return [];
     const now = moment();
     const cutoff = now.clone().subtract(parseInt(timeFilter), "days");
-    return testHistory.filter((item) => moment(item.createdAt).isSameOrAfter(cutoff));
+    return testHistory.filter((item) =>
+      moment(item.createdAt).isSameOrAfter(cutoff)
+    );
   }, [testHistory, timeFilter]);
 
   // Chuẩn bị dữ liệu cho biểu đồ toàn thời gian (không lọc)
@@ -258,11 +284,9 @@ export const HistoryPage: React.FC = () => {
       (a, b) => moment(a.createdAt).unix() - moment(b.createdAt).unix()
     );
     return sorted.map((item) => {
-      const totalQ = item.questions?.length || 0;
-      const computedScore = totalQ > 0 ? (item.score / totalQ) * 10 : 0;
       return {
         date: moment(item.createdAt).format("DD/MM"),
-        score: parseFloat(computedScore.toFixed(2)),
+        score: item.score,
       };
     });
   }, [testHistory]);
@@ -281,7 +305,12 @@ export const HistoryPage: React.FC = () => {
                   <XAxis dataKey="date" />
                   <YAxis domain={[0, 10]} />
                   <Tooltip />
-                  <Line type="monotone" dataKey="score" stroke="#8884d8" strokeWidth={2} />
+                  <Line
+                    type="monotone"
+                    dataKey="score"
+                    stroke="#8884d8"
+                    strokeWidth={2}
+                  />
                 </LineChart>
               </ResponsiveContainer>
             ) : (
@@ -313,11 +342,8 @@ export const HistoryPage: React.FC = () => {
             loading={loading}
           />
         </TabPane>
-
-       
       </Tabs>
       <HistoryHeatmap testHistory={testHistory} />
-
     </div>
   );
 };

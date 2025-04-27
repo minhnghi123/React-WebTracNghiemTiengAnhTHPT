@@ -1,24 +1,26 @@
 import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
 import { Outlet } from "react-router-dom";
-import React, { useEffect, useState } from "react";
+import  { useEffect, useState } from "react";
 import { io } from "socket.io-client";
 import { useAuthContext } from "@/contexts/AuthProvider";
 
 import "bootstrap/dist/css/bootstrap.min.css";
+import { ErrorReport } from "./QuanLyBaoLoi";
 
 const socket = io("http://localhost:5000");
 
 const LayoutGiaoVien = () => {
-  const [pendingReportsCount, setPendingReportsCount] = useState(0);
   const { user } = useAuthContext();
+
+  const [pendingReportsCount, setPendingReportsCount] = useState(0);
 
   useEffect(() => {
     socket.emit("GET_ERROR_REPORTS");
 
     socket.on("ERROR_REPORTS", (reports) => {
       const filteredReports = reports.filter(
-        (report) =>
+        (report: ErrorReport) =>
           report.status === "pending" &&
           report.examId?.createdBy === user?._id
       );
@@ -29,7 +31,7 @@ const LayoutGiaoVien = () => {
       socket.off("ERROR_REPORTS");
     };
   }, [user?._id]);
-
+ 
   return (
     <div id="main">
       <Navbar rule={false} />

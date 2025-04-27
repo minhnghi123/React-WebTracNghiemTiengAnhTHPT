@@ -386,9 +386,8 @@ export const UpdateExamQuestion = () => {
         handleClose={() => setOpenModalCreate(false)}
         onCreateSuccess={() => {
           setOpenModalCreate(false);
-        }}
-        dataQuestion={selectedQuestions}
-      />
+        } }
+        dataQuestion={selectedQuestions} listeningExams={[]}      />
       <ExportWordModal
         visible={openExportModal}
         handleClose={() => setOpenExportModal(false)}

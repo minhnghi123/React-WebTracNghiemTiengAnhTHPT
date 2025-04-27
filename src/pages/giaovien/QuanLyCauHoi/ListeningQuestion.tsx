@@ -1,17 +1,20 @@
-import { QuestionAPI } from "@/services/teacher/Teacher";
 import { cleanString } from "@/utils/cn";
 import { Divider, Flex, Modal, Tag, Button } from "antd";
 import clsx from "clsx";
 import "./cauhoi.css";
 import { useEffect, useState } from "react";
 import UpdateListeningQuestionModal from "./CreateQuestion/UpdateListeningQuestion";
-import { ListeningQuestionData } from "@/services/teacher/ListeningQuestion";
+import {
+  ListeningQuestionData,
+  listenQuestionAPI,
+} from "@/services/teacher/ListeningQuestion";
+import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
 
 export interface ListeningQuestion {
-  id: string;
-  teacherId: any; // Bạn có thể định nghĩa chi tiết hơn nếu cần
+  _id: string;
+  teacherId: { _id: string; name?: string }; // Updated to reflect the expected structure
   questionText: string;
-  questionType: any; // API trả về object, nếu cần chuyển đổi bạn có thể xử lý lại ở đây
+  questionType: { _id: string; name?: string }; // Updated to reflect the expected structure
   options?: { option_id: string; optionText: string }[];
   correctAnswer?: { answer_id: string; answer: string }[];
   difficulty: "easy" | "medium" | "hard";
@@ -41,7 +44,7 @@ export const ListeningQuestionComponent: React.FC<
   });
   useEffect(() => {
     setQuestionData({
-      id: question.id,
+      _id: question._id,
       teacherId: question.teacherId?._id || "",
       questionText: question.questionText,
       difficulty: question.difficulty,
@@ -50,11 +53,12 @@ export const ListeningQuestionComponent: React.FC<
       blankAnswer: question.blankAnswer || "",
     });
   }, [question]);
+
   const [open, setOpen] = useState(false);
   const [openModal, setOpenModal] = useState<boolean>(false);
 
   const handleOk = () => {
-    handleDeleteQuestion(question.id);
+    handleDeleteQuestion(question._id);
     setOpen(false);
   };
 
@@ -64,7 +68,7 @@ export const ListeningQuestionComponent: React.FC<
 
   const handleDeleteQuestion = async (id: string) => {
     try {
-      const rq = await QuestionAPI.deleteQuestion(id);
+      const rq = await listenQuestionAPI.deleteListeningQuestion(id);
       if (rq?.code === 200) {
         alert("Xóa câu hỏi thành công");
         onUpdateSuccess();
@@ -86,31 +90,38 @@ export const ListeningQuestionComponent: React.FC<
         />
       </h3>
       <div className="mt-1">
-        {question.options?.map((option) => {
-          const isCorrect = question.correctAnswer?.some(
-            (ans) => ans.answer_id === option.option_id
-          );
-          return (
+        {question.questionType._id != "6742fb3bd56a2e75dbd817ec" &&
+          question.options?.map((option) => {
+            const isCorrect = question.correctAnswer?.some(
+              (ans) => ans.answer?.trim() === option.optionText?.trim()
+            );
+
+            return (
+              <div
+                key={option.option_id}
+                className={clsx("ml-2 rounded mb-2 p-2", {
+                  "bg-green-100": isCorrect,
+                })}
+                style={{
+                  whiteSpace: "pre-wrap",
+                  border: isCorrect ? "1px solid #52c41a" : "1px solid #d9d9d9",
+                  color: isCorrect ? "#52c41a" : "#595959",
+                }}
+              >
+               
+                {cleanString(option.optionText)}
+              </div>
+            );
+          })}
+        {question.questionType._id == "6742fb3bd56a2e75dbd817ec" &&
+          question.blankAnswer && (
             <div
-              key={option.option_id}
-              className={clsx("ml-2 rounded mb-2 p-2", {
-                "bg-green-100": isCorrect,
-                "bg-red-100": !isCorrect,
-              })}
+              className="ml-2 rounded mb-2 bg-green-100 p-2"
               style={{ whiteSpace: "pre-wrap" }}
             >
-              {cleanString(option.optionText)}
+              {cleanString(question.blankAnswer)}
             </div>
-          );
-        })}
-        {question.blankAnswer && (
-          <div
-            className="ml-2 rounded mb-2 bg-green-100 p-2"
-            style={{ whiteSpace: "pre-wrap" }}
-          >
-            {cleanString(question.blankAnswer)}
-          </div>
-        )}
+          )}
       </div>
       <Divider orientation="left" style={{ borderColor: "#7cb305" }}>
         Độ khó
@@ -130,18 +141,26 @@ export const ListeningQuestionComponent: React.FC<
       {editable && (
         <>
           <hr />
-          <Button
-            type="primary"
-            className="my-3 mx-3"
-            onClick={() => setOpenModal(true)}
-          >
-            Sửa câu hỏi
-          </Button>
-          {deletetalbe && (
-            <Button danger className="my-3 mx-3" onClick={() => setOpen(true)}>
-              Xóa câu hỏi
+          <div style={{ display: "flex", gap: "10px", justifyContent: "flex-start" }}>
+            <Button
+              type="primary"
+              icon={<EditOutlined />}
+
+              className="my-3"
+              onClick={() => setOpenModal(true)}
+            >
+              Sửa câu hỏi
             </Button>
-          )}
+            {deletetalbe && (
+              <Button danger className="my-3" 
+              icon={<DeleteOutlined />}
+
+              onClick={() => setOpen(true)}>
+                Xóa câu hỏi
+              </Button>
+            )}
+            
+          </div>
           <Modal
             open={open}
             title="Xóa câu hỏi"
@@ -160,7 +179,13 @@ export const ListeningQuestionComponent: React.FC<
             visible={openModal}
             onUpdateSuccess={onUpdateSuccess}
             handleClose={() => setOpenModal(false)}
-            questionData={questionData || []}
+            questionData={{
+              ...questionData,
+              teacherId: questionData.teacherId || "",
+              questionText: questionData.questionText || "",
+              questionType: questionData.questionType || "",
+              difficulty: questionData.difficulty || "easy",
+            }}
           />
         </>
       )}

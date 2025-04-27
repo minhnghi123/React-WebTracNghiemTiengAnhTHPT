@@ -14,7 +14,7 @@ const ResultSchema = new mongoose.Schema({
         ref: "Question",
         required: true,
       },
-      content: { type: String, required: true },
+      content: { type: String, required: true, default: " " },
       answers: [
         {
           _id: { type: mongoose.Schema.Types.ObjectId, required: true },
@@ -41,7 +41,7 @@ const ResultSchema = new mongoose.Schema({
         ref: "ListeningQuestion",
         required: true,
       },
-      content: { type: String, required: true },
+      content: { type: String, required: true, default: " " },
       answers: [
         {
           _id: { type: mongoose.Schema.Types.ObjectId, required: true },
