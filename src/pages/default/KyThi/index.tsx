@@ -47,8 +47,10 @@ export const KyThi = () => {
     }
   }, [total]);
 
-  const formatDate = (dateStr?: string) => {
-    return dateStr ? new Date(dateStr).toLocaleString() : "Không có";
+  const formatDate = (date?: string | Date) => {
+      if (!date) return "Không có";
+      const dateObj = typeof date === "string" ? new Date(date) : date;
+      return dateObj.toLocaleString();
   };
 
   const now = new Date().getTime();

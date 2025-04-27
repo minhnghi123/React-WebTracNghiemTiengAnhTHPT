@@ -100,7 +100,7 @@ const Home = () => {
               Thử sức với các đề thi sát với đề thi THPT quốc gia, nâng cao kỹ năng làm bài.
             </p>
             <button 
-              className="mt-4 px-6 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600 transition"
+              className="mt-4 px-6 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600 transition btn-tc"
               onClick={() => handleNavigation("/KyThi")}
             >
               Tham gia ngay
@@ -118,7 +118,7 @@ const Home = () => {
               Hệ thống ôn tập thông minh giúp bạn cải thiện điểm số nhanh chóng.
             </p>
             <button 
-              className="mt-4 px-6 py-2 bg-green-500 text-white font-semibold rounded-lg shadow-md hover:bg-green-600 transition"
+              className="mt-4 px-6 py-2 bg-green-500 text-white font-semibold rounded-lg shadow-md hover:bg-green-600 transition btn-tc"
               onClick={() => handleNavigation("/OnTap")}
             >
               Ôn tập ngay
@@ -135,7 +135,7 @@ const Home = () => {
               Học tập cùng bạn bè, trao đổi kiến thức và nhận hỗ trợ từ giáo viên.
             </p>
             <button 
-              className="mt-4 px-6 py-2 bg-purple-500 text-white font-semibold rounded-lg shadow-md hover:bg-purple-600 transition"
+              className="mt-4 px-6 py-2 bg-purple-500 text-white font-semibold rounded-lg shadow-md hover:bg-purple-600 transition btn-tc"
               onClick={() => handleNavigation("/PhongThi")}
             >
               Tham gia ngay

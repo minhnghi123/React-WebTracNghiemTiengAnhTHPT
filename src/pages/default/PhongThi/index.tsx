@@ -6,12 +6,17 @@ import {
 import { useNavigate } from "react-router-dom";
 import { Card, Button, Input, Row, Col, Typography } from "antd";
 import "bootstrap/dist/css/bootstrap.min.css";
-
+import "./phongthi.css"; // Import your CSS file here
 const { Title, Text } = Typography;
 
 export const PhongThi = () => {
   const [classrooms, setClassrooms] = useState<ClassroomReponse[]>([]);
   const [joinClassroomId, setJoinClassroomId] = useState("");
+  const [searchText, setSearchText] = useState('');
+  const filteredClassrooms = classrooms ? classrooms.filter((classroom) =>
+    classroom.title.toLowerCase().includes(searchText.toLowerCase()) ||
+    classroom.teacherId.username.toLowerCase().includes(searchText.toLowerCase())
+  ) : [];
   const navigate = useNavigate();
 
   const getAllClassrooms = async () => {
@@ -36,6 +41,13 @@ export const PhongThi = () => {
       <Title level={2} className="text-center mb-4">
         Danh sách lớp
       </Title>
+      <Input
+        className="search-input"
+        placeholder="Tìm kiếm lớp học hoặc giáo viên"
+        value={searchText}
+        onChange={(e) => setSearchText(e.target.value)}
+        style={{ marginBottom: 16 }}
+      />
       <Row gutter={[16, 16]}>
         {/* Card tham gia lớp mới */}
         <Col xs={24} sm={12} md={8}>
@@ -50,14 +62,15 @@ export const PhongThi = () => {
               type="primary"
               block
               onClick={() => navigate(`/PhongThi/Detail/${joinClassroomId}`)}
+              disabled={!joinClassroomId.trim()}
             >
               Tham gia
             </Button>
           </Card>
         </Col>
         {/* Danh sách lớp học */}
-        {classrooms && classrooms.length > 0 ? (
-          classrooms.map((classroom) => (
+        {filteredClassrooms.length > 0 ? (
+          filteredClassrooms.map((classroom) => (
             <Col xs={24} sm={12} md={8} key={classroom._id}>
               <Card
                 title={classroom.title}
@@ -77,7 +90,9 @@ export const PhongThi = () => {
           ))
         ) : (
           <Col span={24}>
-            <div className="text-center">Chưa có lớp học nào.</div>
+            <div className="text-center">
+              {searchText ? "Không tìm thấy lớp học nào." : "Chưa có lớp học nào."}
+            </div>
           </Col>
         )}
       </Row>
