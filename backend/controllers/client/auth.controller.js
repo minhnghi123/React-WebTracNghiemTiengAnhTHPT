@@ -205,7 +205,7 @@ export async function resetPassword(req, res) {
     console.log(user);
     await TaiKhoan.updateOne(
       {
-        _id: user._id,
+        _id: user._id,  
       },
       {
         password: hashedPassword,
