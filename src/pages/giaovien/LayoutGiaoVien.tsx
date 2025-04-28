@@ -11,8 +11,9 @@ import { ErrorReport } from "./QuanLyBaoLoi";
 const socket = io("http://localhost:5000");
 
 const LayoutGiaoVien = () => {
-  const [pendingReportsCount, setPendingReportsCount] = useState(0);
   const { user } = useAuthContext();
+
+  const [pendingReportsCount, setPendingReportsCount] = useState(0);
 
   useEffect(() => {
     socket.emit("GET_ERROR_REPORTS");
@@ -30,7 +31,7 @@ const LayoutGiaoVien = () => {
       socket.off("ERROR_REPORTS");
     };
   }, [user?._id]);
-
+ 
   return (
     <div id="main">
       <Navbar rule={false} />

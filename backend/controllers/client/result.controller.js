@@ -512,56 +512,29 @@ export const getDontCompletedExam = async (req, res) => {
           path: "questions",
           populate: { path: "questionType", select: "name" },
         },
-        { path: "listeningExams", populate: { path: "questions audio" } },
+        { path: "listeningExams", populate: { path: "questions", populate: { path: "questionType", select: "name" } } },
       ],
     });
 
     if (expiredResults && expiredResults.length > 0) {
       for (const result of expiredResults) {
-        const exam = result.examId;
-        let score = 0;
-        let correctAnswer = 0;
-        let wrongAnswer = 0;
-        const questionDetails = [];
-        const listeningQuestionDetails = [];
-        let wrongAnswerByKnowledge = {};
-
-        // Process regular questions
-        for (const question of exam.questions) {
-          const userAnswer = result.questions.find(
-            (q) => String(q.questionId) === String(question._id)
-          );
-          const isCorrect = userAnswer?.isCorrect || false;
-
-          if (isCorrect) {
-            score++;
-            correctAnswer++;
-          } else {
-            wrongAnswer++;
-            const knowledge = question.knowledge;
-            if (!wrongAnswerByKnowledge[knowledge]) {
-              wrongAnswerByKnowledge[knowledge] = 0;
-            }
-            wrongAnswerByKnowledge[knowledge]++;
+        try {
+          const exam = result.examId;
+          if (!exam) {
+            result.isDeleted = true;
+            result.isCompleted = true;
+            await result.save();
+            continue;
           }
 
-          questionDetails.push({
-            questionId: question._id,
-            content: question.content || " ",
-            answers: question.answers,
-            userAnswers: userAnswer?.userAnswers || [],
-            correctAnswerForBlank: question.answers.map(
-              (ans) => ans.correctAnswerForBlank
-            ),
-            audio: question.audio || null,
-            isCorrect,
-          });
-        }
+          let score = 0, correctAnswer = 0, wrongAnswer = 0;
+          const questionDetails = [];
+          const listeningQuestionDetails = [];
+          const wrongAnswerByKnowledge = {};
 
-        // Process listening questions
-        for (const listeningExam of exam.listeningExams) {
-          for (const question of listeningExam.questions) {
-            const userAnswer = result.listeningQuestions.find(
+          // Process regular questions
+          for (const question of exam.questions || []) {
+            const userAnswer = result.questions.find(
               (q) => String(q.questionId) === String(question._id)
             );
             const isCorrect = userAnswer?.isCorrect || false;
@@ -572,45 +545,72 @@ export const getDontCompletedExam = async (req, res) => {
             } else {
               wrongAnswer++;
               const knowledge = question.knowledge;
-              if (!wrongAnswerByKnowledge[knowledge]) {
-                wrongAnswerByKnowledge[knowledge] = 0;
-              }
-              wrongAnswerByKnowledge[knowledge]++;
+              wrongAnswerByKnowledge[knowledge] = (wrongAnswerByKnowledge[knowledge] || 0) + 1;
             }
 
-            listeningQuestionDetails.push({
+            questionDetails.push({
               questionId: question._id,
-              content: question.questionText || " ",
-              answers: question.options || [],
+              content: question.content || " ",
+              answers: question.answers,
               userAnswers: userAnswer?.userAnswers || [],
-              correctAnswerForBlank: question.blankAnswer
-                ? question.blankAnswer.split(",").map((ans) => ans.trim())
-                : [],
+              correctAnswerForBlank: question.answers?.map((ans) => ans.correctAnswerForBlank) || [],
               audio: question.audio || null,
               isCorrect,
             });
           }
+
+          // Process listening questions
+          for (const listeningExam of exam.listeningExams || []) {
+            for (const question of listeningExam.questions || []) {
+              const userAnswer = result.listeningQuestions.find(
+                (q) => String(q.questionId) === String(question._id)
+              );
+              const isCorrect = userAnswer?.isCorrect || false;
+
+              if (isCorrect) {
+                score++;
+                correctAnswer++;
+              } else {
+                wrongAnswer++;
+                const knowledge = question.knowledge;
+                wrongAnswerByKnowledge[knowledge] = (wrongAnswerByKnowledge[knowledge] || 0) + 1;
+              }
+
+              listeningQuestionDetails.push({
+                questionId: question._id,
+                content: question.questionText || " ",
+                answers: question.options || [],
+                userAnswers: userAnswer?.userAnswers || [],
+                correctAnswerForBlank: question.blankAnswer
+                  ? question.blankAnswer.split(",").map((ans) => ans.trim())
+                  : [],
+                audio: question.audio || null,
+                isCorrect,
+              });
+            }
+          }
+
+          const totalQuestions =
+            (exam.questions?.length || 0) +
+            exam.listeningExams.reduce((acc, le) => acc + (le.questions?.length || 0), 0);
+          const finalScore = Math.round((correctAnswer / totalQuestions * 10) * 100) / 100;
+
+          Object.assign(result, {
+            score: finalScore,
+            correctAnswer,
+            wrongAnswer,
+            questions: questionDetails,
+            listeningQuestions: listeningQuestionDetails,
+            wrongAnswerByKnowledge,
+            isCompleted: true,
+            endTime: now,
+          });
+
+          await result.save();
+        } catch (error) {
+          console.error(`Error processing result ${result._id}:`, error.message);
+          continue;
         }
-
-        const totalQuestions =
-          (exam.questions?.length || 0) +
-          exam.listeningExams.reduce(
-            (acc, le) => acc + (le.questions?.length || 0),
-            0
-          );
-        const finalScore = (correctAnswer / totalQuestions) * 10;
-        const roundedScore = Math.round(finalScore * 100) / 100;
-
-        result.score = roundedScore;
-        result.correctAnswer = correctAnswer;
-        result.wrongAnswer = wrongAnswer;
-        result.questions = questionDetails;
-        result.listeningQuestions = listeningQuestionDetails;
-        result.wrongAnswerByKnowledge = wrongAnswerByKnowledge;
-        result.isCompleted = true;
-        result.endTime = now;
-
-        await result.save();
       }
     }
 
@@ -630,11 +630,11 @@ export const getDontCompletedExam = async (req, res) => {
         { path: "listeningExams", populate: { path: "questions audio" } },
       ],
     });
-
+    // Return only existing ongoing exams without creating new ones
     res.status(200).json({
       code: 200,
       message: "Final scores computed and incomplete exams updated successfully",
-      results: ongoingExam,
+      results: ongoingExam || null,
     });
   } catch (error) {
     console.error("Error checking incomplete exams:", error);
@@ -703,14 +703,12 @@ export const savedExam = async (req, res) => {
 // Lưu câu trả lời đơn lẻ
 export const saveSingleAnswer = async (req, res) => {
   try {
-    const { resultId, questionId, answer, isListening } = req.body;
+    const { resultId, questionId, selectedAnswerId, userAnswer, isListening } = req.body;
 
-    // Validate input
-    if (!resultId || !questionId || !answer) {
+    if (!resultId || !questionId) {
       return res.status(400).json({ message: "Invalid input data." });
     }
 
-    // Find the ongoing result
     const existingResult = await Result.findOne({
       _id: resultId,
       isCompleted: false,
@@ -735,7 +733,6 @@ export const saveSingleAnswer = async (req, res) => {
       });
     }
 
-    // Check if the exam time has expired
     if (new Date() > existingResult.endTime) {
       existingResult.isCompleted = true;
       await existingResult.save();
@@ -750,15 +747,13 @@ export const saveSingleAnswer = async (req, res) => {
       return res.status(400).json({ code: 400, message: "Exam not found." });
     }
 
-    let question, isCorrect = false;
+    let question, isCorrect = false, detail = {};
 
     if (isListening) {
-      // Find the listening question
       question = exam.listeningExams
-        .flatMap((le) => le.questions)
+        .flatMap((le) => le.questions || []) // Ensure questions array exists
         .find((q) => String(q._id) === String(questionId));
     } else {
-      // Find the regular question
       question = exam.questions.find((q) => String(q._id) === String(questionId));
     }
 
@@ -769,55 +764,67 @@ export const saveSingleAnswer = async (req, res) => {
       });
     }
 
-    // Determine correctness based on question type
-    switch (
-      questionTypeMapping[question.questionType.name] || question.questionType.name
-    ) {
-      case "Fill in the Blanks":
-        if (Array.isArray(answer)) {
-          const correctAnswers = question.answers.map(
-            (ans) => ans.correctAnswerForBlank.trim().toLowerCase()
-          );
-          const correctCount = answer.filter(
-            (ans, index) =>
-              ans.trim().toLowerCase() === (correctAnswers[index] || "")
-          ).length;
-          isCorrect = correctCount === correctAnswers.length;
+    const typeName = questionTypeMapping[question.questionType.name] || question.questionType.name;
+
+    switch (typeName) {
+      case "Fill in the Blanks": {
+        const blanks = question.answers.map(a => a.correctAnswerForBlank.trim().toLowerCase());
+        const userDetails = (userAnswer || []).map((ua, i) => ({
+          userAnswer: ua,
+          answerId: question.answers[i]?._id,
+          isCorrect: ua.trim().toLowerCase() === (blanks[i] || ""),
+        }));
+        isCorrect = userDetails.length === blanks.length && userDetails.every(d => d.isCorrect);
+        detail = {
+          questionId: question._id,
+          userAnswers: userDetails,
+          isCorrect,
+        };
+        break;
+      }
+      case "Multiple Choices": {
+        const correctObj = question.answers.find(a => a.isCorrect);
+        if (!correctObj) {
+          return res.status(500).json({ message: `Question ${questionId} has no correct answer.` });
         }
+        isCorrect = String(correctObj._id) === String(selectedAnswerId);
+        detail = {
+          questionId: question._id,
+          selectedAnswerId,
+          userAnswers: [{ userAnswer: selectedAnswerId }],
+          isCorrect,
+        };
         break;
-
-      case "Multiple Choices":
-        const correctAnswerObj = question.answers.find((ans) => ans.isCorrect);
-        isCorrect =
-          correctAnswerObj && String(correctAnswerObj._id) === String(answer);
+      }
+      case "True/False/Not Given": {
+        const correctTF = question.correctAnswerForTrueFalseNGV || [];
+        const userTF = (userAnswer || []).map(ua => ({
+          userAnswer: ua,
+          isCorrect: correctTF.includes(ua.trim().toLowerCase()),
+        }));
+        isCorrect = userTF.length === correctTF.length && userTF.every(d => d.isCorrect);
+        detail = {
+          questionId: question._id,
+          userAnswers: userTF,
+          isCorrect,
+        };
         break;
-
-      case "True/False/Not Given":
-        const correctAnswers = question.correctAnswerForTrueFalseNGV || [];
-        isCorrect = correctAnswers.includes(answer.trim().toLowerCase());
-        break;
-
+      }
       default:
         return res.status(400).json({
           message: `Unsupported question type: ${question.questionType.name}`,
         });
     }
 
-    // Update the specific question's answer
     if (isListening) {
       const questionIndex = existingResult.listeningQuestions.findIndex(
         (q) => String(q.questionId) === String(questionId)
       );
 
       if (questionIndex !== -1) {
-        existingResult.listeningQuestions[questionIndex].userAnswers = answer;
-        existingResult.listeningQuestions[questionIndex].isCorrect = isCorrect;
+        existingResult.listeningQuestions[questionIndex] = detail;
       } else {
-        existingResult.listeningQuestions.push({
-          questionId,
-          userAnswers: answer,
-          isCorrect,
-        });
+        existingResult.listeningQuestions.push(detail);
       }
     } else {
       const questionIndex = existingResult.questions.findIndex(
@@ -825,14 +832,9 @@ export const saveSingleAnswer = async (req, res) => {
       );
 
       if (questionIndex !== -1) {
-        existingResult.questions[questionIndex].userAnswers = answer;
-        existingResult.questions[questionIndex].isCorrect = isCorrect;
+        existingResult.questions[questionIndex] = detail;
       } else {
-        existingResult.questions.push({
-          questionId,
-          userAnswers: answer,
-          isCorrect,
-        });
+        existingResult.questions.push(detail);
       }
     }
 

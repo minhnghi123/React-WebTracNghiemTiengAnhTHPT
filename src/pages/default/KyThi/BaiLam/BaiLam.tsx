@@ -25,7 +25,7 @@ import errorrIcon from "@/Content/img/errorr.png"; // Import your error icon
 import SuggestedQuestionAnswer from "@/components/SuggestedQuestionAnswer";
 
 const { Panel } = Collapse;
-const { Title, Paragraph } = Typography;
+const { Title } = Typography;
 const { Sider, Content } = Layout;
 
 const BaiLam: React.FC = () => {
@@ -49,7 +49,7 @@ const BaiLam: React.FC = () => {
   const [groupedQuestions, setGroupedQuestions] = useState<
     Record<string, any[]>
   >({});
-  const questionRefs = useRef<any[]>([]);
+  const questionRefs = useRef<Record<string, any>>({});
   const resultSectionRef = useRef<HTMLDivElement>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const endTimeRef = useRef<Date | null>(null);
@@ -157,18 +157,32 @@ const BaiLam: React.FC = () => {
 
   const handleSaveSingleAnswer = async (
     questionId: string,
-    answer: string | string[],
+    selectedAnswerId: string | null,
+    userAnswer: string | string[] | null,
     isListening: boolean
   ) => {
     if (!examDetails) return;
 
     try {
-      await ResultAPI.saveSingleAnswer({
-        resultId: examDetails._id,
-        questionId,
-        answer,
-        isListening,
-      });
+      // Delay the request until the question loses focus
+      const saveAnswer = () =>
+        ResultAPI.saveSingleAnswer(
+          examDetails._id,
+          questionId,
+          selectedAnswerId,
+          userAnswer,
+          isListening,
+          {} // Provide the missing argument (adjust as per the expected type)
+        );
+
+      // Use a debounce mechanism to reduce requests
+      if (questionRefs.current[questionId as string]) {
+        clearTimeout(questionRefs.current[questionId].debounceTimer);
+      }
+
+      questionRefs.current[questionId] = {
+        debounceTimer: setTimeout(saveAnswer, 500), // Delay of 500ms
+      };
     } catch (error) {
       console.error("Error saving single answer:", error);
     }
@@ -183,8 +197,13 @@ const BaiLam: React.FC = () => {
       if (index !== -1) updated[index] = newAnswer;
       else updated.push(newAnswer);
 
-      // Save single answer
-      handleSaveSingleAnswer(newAnswer.questionId, newAnswer.userAnswer, false);
+      // Save single answer only when the question loses focus
+      handleSaveSingleAnswer(
+        newAnswer.questionId,
+        newAnswer.selectedAnswerId,
+        newAnswer.userAnswer,
+        false
+      );
 
       return updated;
     });
@@ -199,8 +218,13 @@ const BaiLam: React.FC = () => {
       if (index !== -1) updated[index] = newAnswer;
       else updated.push(newAnswer);
 
-      // Save single listening answer
-      handleSaveSingleAnswer(newAnswer.questionId, newAnswer.userAnswer, true);
+      // Save single listening answer only when the question loses focus
+      handleSaveSingleAnswer(
+        newAnswer.questionId,
+        newAnswer.selectedAnswerId,
+        newAnswer.userAnswer,
+        true
+      );
 
       return updated;
     });
@@ -255,7 +279,7 @@ const BaiLam: React.FC = () => {
       answers: enrichedAnswers,
       listeningAnswers: enrichedListeningAnswers,
       unansweredQuestions,
-      questionTypes, // Include questionTypes as a separate field
+      questionTypes, // Removed as it is not part of SubmitAnswer type
     };
 
     try {
@@ -380,7 +404,7 @@ const BaiLam: React.FC = () => {
     const otherQuestions =
       groupedQuestions["no-passage"]?.filter(
         (q) =>
-          !listeningSections.some((le) =>
+          !listeningSections.some((le:any) =>
             le.questions.some((lq: any) => lq._id === q._id)
           )
       ) || [];
@@ -397,7 +421,7 @@ const BaiLam: React.FC = () => {
         const correctAnswer =
           Examresult.details?.find((ans) => ans.questionId === questionId) ||
           Examresult.listeningQuestions?.find(
-            (ans) => ans.questionId === questionId
+            (ans: any) => ans.questionId === questionId
           );
 
         if (!correctAnswer) {
@@ -458,7 +482,7 @@ const BaiLam: React.FC = () => {
               Phần đọc {idx + 1}
             </Title>
             <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
-              {groupedQuestions[passageId].map((q, qIdx) => {
+              {groupedQuestions[passageId].map((q) => {
                 const questionIndex = questionNumber++;
                 const buttonColor = getButtonColor(q._id);
                 return (
@@ -490,7 +514,7 @@ const BaiLam: React.FC = () => {
             Câu hỏi khác
           </Title>
           <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
-            {otherQuestions.map((q, idx) => {
+            {otherQuestions.map((q) => {
               const questionIndex = questionNumber++;
               const buttonColor = getButtonColor(q._id);
               return (
@@ -778,21 +802,25 @@ const BaiLam: React.FC = () => {
               </Button>
 
               {showDetails && (
-                <Collapse>
+                <Collapse
+                  onChange={(activeKeys) => {
+                    if (Array.isArray(activeKeys)) {
+                      activeKeys.forEach((key) => handleExpandSuggestedQuestion(key));
+                    } else {
+                      handleExpandSuggestedQuestion(activeKeys);
+                    }
+                  }}
+                >
                   {/* Lời khuyên */}
                   <Panel header="Lời khuyên" key="advice">
                     {loading ? (
                       <Spin />
                     ) : (
-                      <div style={{ whiteSpace: "pre-line" }}>
-                        {advice.split("\n").map((line, index) => (
-                          <p key={index} style={{ marginBottom: "8px" }}>
-                            {line
-                              .replace(/^\*\*|\*\*$/g, "")
-                              .replace(/^\*|\*$/g, "")}
-                          </p>
-                        ))}
-                      </div>
+                      <div
+                        dangerouslySetInnerHTML={{
+                          __html: advice.replace(/\*/g, "").replace(/\n/g, "<br />"),
+                        }}
+                      />
                     )}
                   </Panel>
 
@@ -823,7 +851,7 @@ const BaiLam: React.FC = () => {
                         </div>
                       ))}
                   </Panel>
-
+                          {/* key={q._id ?? id} */}
                   {/* Câu hỏi đề nghị */}
                   <Panel header="Câu hỏi đề nghị" key="suggested">
                     <Collapse>
@@ -862,9 +890,6 @@ const BaiLam: React.FC = () => {
           display: "flex",
           flexDirection: "column",
           padding: "1rem",
-          position: "sticky",
-          top: 0,
-          height: "100vh",
           overflowY: "auto", // Ensure scrolling works for long content
         }}
       >

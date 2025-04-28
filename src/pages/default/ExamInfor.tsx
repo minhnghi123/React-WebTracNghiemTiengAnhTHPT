@@ -46,7 +46,7 @@ const ExamInfoBox: React.FC<ExamInfoBoxProps> = ({ examDetails }) => {
   return (
     <div className="exam-info-box">
       <Link to={`/KyThi/BaiLam/`} className="exam-link">
-        <h2 className="exam-title">{examDetails?.examId?.title && ""}</h2>
+        <h2 className="exam-title">{examDetails?.examId?.title }</h2>
         <p className="time-left"><center>{timeLeft}</center></p>
       </Link>
     </div>

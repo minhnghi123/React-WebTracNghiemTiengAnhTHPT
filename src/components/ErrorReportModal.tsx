@@ -1,5 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { io } from "socket.io-client";
+import { Modal } from "antd";
+import { useAuthContext } from "@/contexts/AuthProvider";
 
 const socket = io("http://localhost:5000"); // Kết nối đến server WebSocket
 
@@ -20,8 +22,15 @@ const ErrorReportModal: React.FC<ErrorReportModalProps> = ({
   userId,
   onClose,
 }) => {
+  const {user}= useAuthContext()
   const [description, setDescription] = useState("");
   const [additionalInfo, setAdditionalInfo] = useState("");
+
+  useEffect(() => {
+    return () => {
+      socket.off("TEACHER_RESPONSE_SUCCESS");
+    };
+  }, [userId]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,14 +71,14 @@ const ErrorReportModal: React.FC<ErrorReportModalProps> = ({
               style={styles.textarea}
             />
           </div>
-          <div style={styles.formGroup}>
+          {/* <div style={styles.formGroup}>
             <label>Thông tin bổ sung:</label>
             <textarea
               value={additionalInfo}
               onChange={(e) => setAdditionalInfo(e.target.value)}
               style={styles.textarea}
             />
-          </div>
+          </div> */}
           <button type="submit" style={styles.button}>
             Gửi báo lỗi
           </button>

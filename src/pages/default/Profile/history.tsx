@@ -168,7 +168,8 @@ const HistoryHeatmap: React.FC<HistoryHeatmapProps> = ({ testHistory }) => {
       <h3 style={{ textAlign: "center", marginBottom: "10px" }}>
         Activity Calendar
       </h3>
-      <div style={{ textAlign: "center", marginBottom: "10px" }}>
+      <center>
+      <div style={{ textAlign: "center", marginBottom: "10px", justifyContent: "center" }}>
         <select
           value={year}
           onChange={(e) => setYear(parseInt(e.target.value))}
@@ -180,7 +181,7 @@ const HistoryHeatmap: React.FC<HistoryHeatmapProps> = ({ testHistory }) => {
           ))}
         </select>
       </div>
-
+    
       <svg
         width={svgWidth}
         height={svgHeight}
@@ -233,6 +234,7 @@ const HistoryHeatmap: React.FC<HistoryHeatmapProps> = ({ testHistory }) => {
           );
         })}
       </svg>
+      </center>
     </div>
   );
 };

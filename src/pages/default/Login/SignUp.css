@@ -92,6 +92,12 @@ h2 {
   box-sizing: border-box;
 }
 
+.btn-submit{
+  border-radius: 7px;
+  border: 1px solid #2575fc;
+  color: white;
+}
+
 .btn-link{
   text-decoration: none;
   color: #333;
@@ -103,5 +109,14 @@ h2 {
 .btn-link:hover{
   background: linear-gradient(135deg, #2575fc 0%, #6a11cb 100%);
   color: white;
+}
+
+.btn-warning{
+  background: linear-gradient(135deg, #2575fc 0%, #6a11cb 100%);
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
 }
 
