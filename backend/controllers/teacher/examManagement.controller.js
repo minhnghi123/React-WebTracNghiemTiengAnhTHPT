@@ -591,11 +591,14 @@ export const exportExamIntoWord = async (req, res) => {
       // Add reading questions grouped by passage
       const readingQuestions = Object.entries(groupedQuestions).map(
         ([passageId, questions]) => ({
-          passage: passageId === "noPassage" ? null : questions[0].passageId.content,
+          passage:
+            passageId === "noPassage" ? null : questions[0].passageId.content,
           questions,
         })
       );
-      sectionChildren.push(...formatReadingQuestions(readingQuestions, startIndex));
+      sectionChildren.push(
+        ...formatReadingQuestions(readingQuestions, startIndex)
+      );
 
       // Update startIndex after reading questions
       startIndex += variant.questions.length;
@@ -605,21 +608,37 @@ export const exportExamIntoWord = async (req, res) => {
       standaloneQuestions.forEach((question) => {
         if (question.questionType === "6742fb1cd56a2e75dbd817ea") {
           // Multiple Choice
-          sectionChildren.push(...formatExamQuestions([question], startIndex++));
+          sectionChildren.push(
+            ...formatExamQuestions([question], startIndex++)
+          );
         } else if (question.questionType === "6742fb3bd56a2e75dbd817ec") {
-          sectionChildren.push(...formatFillInBlankQuestions([question], startIndex++));
+          sectionChildren.push(
+            ...formatFillInBlankQuestions([question], startIndex++)
+          );
         } else if (question.questionType === "6742fb5dd56a2e75dbd817ee") {
           // True/False/Not Given (convert to multiple-choice format)
           const convertedQuestion = {
             ...question,
             answers: [
-              { text: "True", isCorrect: question.correctAnswerForTrueFalseNGV === "true" },
-              { text: "False", isCorrect: question.correctAnswerForTrueFalseNGV === "false" },
-              { text: "Not Given", isCorrect: question.correctAnswerForTrueFalseNGV === "not given" },
+              {
+                text: "True",
+                isCorrect: question.correctAnswerForTrueFalseNGV === "true",
+              },
+              {
+                text: "False",
+                isCorrect: question.correctAnswerForTrueFalseNGV === "false",
+              },
+              {
+                text: "Not Given",
+                isCorrect:
+                  question.correctAnswerForTrueFalseNGV === "not given",
+              },
               { text: "No Answer", isCorrect: false },
             ],
           };
-          sectionChildren.push(...formatExamQuestions([convertedQuestion], startIndex++));
+          sectionChildren.push(
+            ...formatExamQuestions([convertedQuestion], startIndex++)
+          );
         }
       });
 
@@ -635,7 +654,11 @@ export const exportExamIntoWord = async (req, res) => {
       const buffer = await Packer.toBuffer(doc);
 
       const fileName = `${exam.title} - ${variant.code}.docx`;
-      const downloadPath = path.join(process.env.USERPROFILE, "Downloads", fileName);
+      const downloadPath = path.join(
+        process.env.USERPROFILE,
+        "Downloads",
+        fileName
+      );
 
       fs.writeFileSync(downloadPath, buffer);
       exportPaths.push(downloadPath);
@@ -788,9 +811,13 @@ export const importExamFromExcel = async (req, res) => {
         const questionTypeId = questionTypeMap[normalizedType];
 
         if (!questionTypeId) {
+          console.log(normalizedType, questionTypeId);
           return res.status(400).json({
             success: false,
             message: `Invalid QuestionType: ${question.QuestionType}`,
+            normalizedType,
+            questionTypeId,
+            question,
           });
         }
 

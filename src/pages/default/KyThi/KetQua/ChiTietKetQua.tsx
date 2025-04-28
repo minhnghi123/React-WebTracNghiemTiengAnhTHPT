@@ -15,6 +15,7 @@ const mergeListeningQuestion = (
   const resultQuestion = listeningQuestions.find(
     (lq) => lq.questionId === listeningExamQuestion._id
   );
+
   // Ghép dữ liệu: ưu tiên thông tin từ listeningExamQuestion (ví dụ questionText, blankAnswer, options,...)
   return {
     _id: listeningExamQuestion._id,

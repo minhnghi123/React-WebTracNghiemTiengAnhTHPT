@@ -23,7 +23,7 @@ import { Question } from "@/types/interface";
 import ErrorReportModal from "@/components/ErrorReportModal"; // Import ErrorReportModal
 import errorrIcon from "@/Content/img/errorr.png"; // Import your error icon
 import SuggestedQuestionAnswer from "@/components/SuggestedQuestionAnswer";
-
+import usePreventDevTools from "@/security/devtools.security";
 const { Panel } = Collapse;
 const { Title } = Typography;
 const { Sider, Content } = Layout;
@@ -146,7 +146,10 @@ const BaiLam: React.FC = () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
   }, [Examresult]);
-
+  // ------------------------------------
+  //SECURITY
+  usePreventDevTools();
+  // ------------------------------------
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -283,6 +286,7 @@ const BaiLam: React.FC = () => {
     };
 
     try {
+      console.log("Submitting answers:", submitAnswer);
       const response = await ResultAPI.submitAnswer(submitAnswer);
       if (response.code === 200) {
         showAlertModal("Nộp bài thành công");
@@ -403,7 +407,7 @@ const BaiLam: React.FC = () => {
     const otherQuestions =
       groupedQuestions["no-passage"]?.filter(
         (q) =>
-          !listeningSections.some((le:any) =>
+          !listeningSections.some((le: any) =>
             le.questions.some((lq: any) => lq._id === q._id)
           )
       ) || [];
@@ -804,7 +808,9 @@ const BaiLam: React.FC = () => {
                 <Collapse
                   onChange={(activeKeys) => {
                     if (Array.isArray(activeKeys)) {
-                      activeKeys.forEach((key) => handleExpandSuggestedQuestion(key));
+                      activeKeys.forEach((key) =>
+                        handleExpandSuggestedQuestion(key)
+                      );
                     } else {
                       handleExpandSuggestedQuestion(activeKeys);
                     }
@@ -817,7 +823,9 @@ const BaiLam: React.FC = () => {
                     ) : (
                       <div
                         dangerouslySetInnerHTML={{
-                          __html: advice.replace(/\*/g, "").replace(/\n/g, "<br />"),
+                          __html: advice
+                            .replace(/\*/g, "")
+                            .replace(/\n/g, "<br />"),
                         }}
                       />
                     )}
@@ -850,7 +858,7 @@ const BaiLam: React.FC = () => {
                         </div>
                       ))}
                   </Panel>
-                          {/* key={q._id ?? id} */}
+                  {/* key={q._id ?? id} */}
                   {/* Câu hỏi đề nghị */}
                   <Panel header="Câu hỏi đề nghị" key="suggested">
                     <Collapse>
@@ -880,9 +888,8 @@ const BaiLam: React.FC = () => {
         width={260}
         theme="light"
         style={{
-          position: "fixed", // Cố định Sider
+          position: "sticky", // Prevent overlapping by using sticky positioning
           top: 0,
-          right: 0,
           height: "100vh", // Chiều cao toàn màn hình
           background: "#f7f8fa",
           borderLeft: "1px solid #f0f0f0",
