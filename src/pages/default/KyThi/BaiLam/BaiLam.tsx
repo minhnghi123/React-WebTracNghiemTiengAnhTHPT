@@ -149,17 +149,50 @@ const BaiLam: React.FC = () => {
     };
   }, [Examresult]);
   // ------------------------------------
-  //auto submit exam with the violation.
+
+  //SECURITY
+
   const [alertCount, setAlertCount] = useState<number>(() => {
-    // Lấy giá trị từ localStorage khi khởi tạo
+    // Lấy số lần vi phạm từ localStorage khi khởi tạo
     const savedCount = localStorage.getItem("alertCount");
     return savedCount ? parseInt(savedCount, 10) : 0;
   });
+  useEffect(() => {
+    // Lưu số lần vi phạm vào localStorage mỗi khi alertCount thay đổi
+    localStorage.setItem("alertCount", alertCount.toString());
 
-  //SECURITY
-  usePreventDevTools();
+    // Nếu vượt quá 5 lần, tự động nộp bài
+    if (alertCount > 5) {
+      alert("Bạn đã vi phạm quá nhiều lần. Hệ thống sẽ tự động nộp bài.");
+      handleSubmit();
+    }
+  }, [alertCount]);
 
-  usePreventCopyPaste();
+  // Hàm tăng số lần vi phạm
+  const incrementAlertCount = () => {
+    setAlertCount((prev) => {
+      const newCount = prev + 1;
+
+      // Hiển thị cảnh báo nếu chưa đạt giới hạn
+      if (newCount < 5) {
+        const remaining = 5 - newCount;
+        if (remaining > 0) {
+          showAlertModal(
+            `Bạn còn ${remaining} lần vi phạm nữa trước khi hệ thống tự động nộp bài.`
+          );
+        }
+      } else {
+        showAlertModal(
+          "Bạn đã vi phạm quá nhiều lần. Hệ thống sẽ tự động nộp bài."
+        );
+        handleSubmit();
+      }
+
+      return newCount;
+    });
+  };
+  usePreventDevTools(incrementAlertCount);
+  usePreventCopyPaste(incrementAlertCount);
 
   // ------------------------------------
   const formatTime = (seconds: number) => {
@@ -254,9 +287,11 @@ const BaiLam: React.FC = () => {
 
     if (intervalRef.current) clearInterval(intervalRef.current);
 
+    // Reset số lần vi phạm sau khi nộp bài
+    localStorage.removeItem("alertCount");
+    setAlertCount(0);
     // Xác định các câu hỏi chưa trả lời
     const unansweredQuestions = getUnansweredQuestions();
-    console.log("Unanswered Questions:", unansweredQuestions);
 
     // Map answers and listeningAnswers to the required format
     const enrichedAnswers = answers.map((ans) => {
