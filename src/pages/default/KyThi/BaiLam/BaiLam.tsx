@@ -24,6 +24,8 @@ import ErrorReportModal from "@/components/ErrorReportModal"; // Import ErrorRep
 import errorrIcon from "@/Content/img/errorr.png"; // Import your error icon
 import SuggestedQuestionAnswer from "@/components/SuggestedQuestionAnswer";
 import usePreventDevTools from "@/security/devtools.security";
+import usePreventCopyPaste from "@/security/copyPaste.security";
+
 const { Panel } = Collapse;
 const { Title } = Typography;
 const { Sider, Content } = Layout;
@@ -147,8 +149,18 @@ const BaiLam: React.FC = () => {
     };
   }, [Examresult]);
   // ------------------------------------
+  //auto submit exam with the violation.
+  const [alertCount, setAlertCount] = useState<number>(() => {
+    // Lấy giá trị từ localStorage khi khởi tạo
+    const savedCount = localStorage.getItem("alertCount");
+    return savedCount ? parseInt(savedCount, 10) : 0;
+  });
+
   //SECURITY
   usePreventDevTools();
+
+  usePreventCopyPaste();
+
   // ------------------------------------
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
