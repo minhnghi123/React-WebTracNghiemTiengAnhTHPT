@@ -24,6 +24,7 @@ import ErrorReportModal from "@/components/ErrorReportModal"; // Import ErrorRep
 import errorrIcon from "@/Content/img/errorr.png"; // Import your error icon
 import SuggestedQuestionAnswer from "@/components/SuggestedQuestionAnswer";
 import usePreventDevTools from "@/security/devtools.security";
+import usePreventCopyPaste from "@/security/copyPaste.security";
 const { Panel } = Collapse;
 const { Title } = Typography;
 const { Sider, Content } = Layout;
@@ -149,6 +150,7 @@ const BaiLam: React.FC = () => {
   // ------------------------------------
   //SECURITY
   usePreventDevTools();
+  usePreventCopyPaste();
   // ------------------------------------
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
