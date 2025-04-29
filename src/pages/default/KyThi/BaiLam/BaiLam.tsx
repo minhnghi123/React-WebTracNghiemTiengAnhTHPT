@@ -193,6 +193,49 @@ const BaiLam: React.FC = () => {
   };
   usePreventDevTools(incrementAlertCount);
   usePreventCopyPaste(incrementAlertCount);
+  
+  // fullscreen 
+  useEffect(() => {
+    if (!Examresult && examDetails) {
+      // tù động full màn hình
+      const enterFullscreen = () => {
+        if (document.documentElement.requestFullscreen) {
+          document.documentElement.requestFullscreen();
+        } else if ((document as any).webkitRequestFullscreen) {
+          (document as any).webkitRequestFullscreen();
+        }
+      };
+
+      enterFullscreen();
+
+      // Track fullscreen exit
+      const handleFullscreenChange = () => {
+        if (!document.fullscreenElement) {
+          // tăng số lần vi phạm
+          incrementAlertCount();
+          showAlertModal("Bạn đã thoát chế độ toàn màn hình. Hãy quay lại ngay!");
+        }
+      };
+
+      // thông báo người dùng
+      const handleVisibilityChange = () => {
+        if (document.visibilityState === "hidden") {
+           // tăng số lần vi phạm
+
+          incrementAlertCount();
+          showAlertModal("Bạn đã chuyển tab. Hãy quay lại ngay!");
+        }
+      };
+
+      document.addEventListener("fullscreenchange", handleFullscreenChange);
+      document.addEventListener("visibilitychange", handleVisibilityChange);
+
+      return () => {
+        document.removeEventListener("fullscreenchange", handleFullscreenChange);
+        document.removeEventListener("visibilitychange", handleVisibilityChange);
+      };
+    }
+  }, [Examresult, examDetails]);
 
   // ------------------------------------
   const formatTime = (seconds: number) => {
@@ -1009,7 +1052,16 @@ const BaiLam: React.FC = () => {
       <Modal
         title="Thông báo"
         visible={isAlertModalVisible}
-        onOk={() => setIsAlertModalVisible(false)}
+        onOk={() => {
+          setIsAlertModalVisible(false);
+          if (!document.fullscreenElement) {
+            if (document.documentElement.requestFullscreen) {
+              document.documentElement.requestFullscreen();
+            } else if ((document as any).webkitRequestFullscreen) {
+              (document as any).webkitRequestFullscreen();
+            }
+          }
+        }}
         okText="Đóng"
       >
         <p>{alertMessage}</p>
