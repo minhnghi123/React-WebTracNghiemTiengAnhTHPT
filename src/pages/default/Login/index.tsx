@@ -16,6 +16,7 @@ export const Login = () => {
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [showPassword, setShowPassword] = useState(false);
+  const [loginAttempts, setLoginAttempts] = useState<number>(0);
   const { handleLogin } = useAuthContext();
   const navigate = useNavigate();
 
@@ -25,19 +26,47 @@ export const Login = () => {
 
   useEffect(() => {
     if (message) {
+      // Nếu đang lỗi và đã vượt quá 5 lần thì KHÔNG clear message
+      if (message.type === "error" && loginAttempts >= 5) {
+        setMessage({
+          text: "Bạn đã vượt quá số lần đăng nhập cho phép. Vui lòng đến trang Quên mật khẩu để lấy lại tài khoản.",
+          type: "error",
+        });
+      }
+      
+      // Ngược lại (bình thường) thì clear message sau 3s
       const timer = setTimeout(() => setMessage(null), 3000);
       return () => clearTimeout(timer);
     }
-  }, [message]);
+  }, [message, loginAttempts]);
 
+  useEffect(() => {
+    if (username) {
+      const storedAttempts = JSON.parse(localStorage.getItem("loginAttempts") || "{}");
+  
+      if (storedAttempts[username]) {
+        setLoginAttempts(storedAttempts[username]); 
+      }
+    }
+  }, [username]);
+  
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    // Bước 1: Kiểm tra đã nhập tài khoản/mật khẩu chưa
+    if (!username.trim() || !password.trim()) {
+      setMessage({
+        text: "Vui lòng nhập đầy đủ tài khoản và mật khẩu.",
+        type: "error",
+      });
+      return;
+    }
     getUser(username, password);
   };
 
   const getUser = async (email: string, pass: string) => {
     try {
-      const rq = await AuthApi.login({ email: email, password: pass });
+      const rq = await AuthApi.login({ email, password: pass });
       setMessage({ text: rq?.data.message, type: "success" });
       if (rq?.status === 201) {
         handleLogin(rq?.data.user);
@@ -50,19 +79,11 @@ export const Login = () => {
         }
       }
     } catch (error: any) {
-      if (error.response) {
-        setMessage({
-          text: `Login failed: ${error.response.data.message}`,
-          type: "error",
-        });
-      } else if (error.request) {
-        setMessage({
-          text: "Network error: Please check your connection.",
-          type: "error",
-        });
-      } else {
-        setMessage({ text: `Error: ${error.message}`, type: "error" });
-      }
+      setLoginAttempts((prev) => prev + 1); 
+      setMessage({
+        text: "Đăng nhập thất bại. Vui lòng kiểm tra lại tài khoản và mật khẩu.",
+        type: "error",
+      });
     }
   };
 
@@ -84,6 +105,7 @@ export const Login = () => {
               onChange={(e) => setUsername(e.target.value)}
             />
           </div>
+
           <div className="mb-3">
             <label htmlFor="password" className="form-label">
               Mật khẩu
@@ -98,27 +120,31 @@ export const Login = () => {
                 onChange={(e) => setPassword(e.target.value)}
               />
               <i
-                className={`bi ${
-                  showPassword ? "bi-eye-slash" : "bi-eye"
-                } eyeIcon`}
+                className={`bi ${showPassword ? "bi-eye-slash" : "bi-eye"} eyeIcon`}
                 onClick={togglePasswordVisibility}
               ></i>
             </div>
           </div>
 
-          <button type="submit" className="btn btn-primary">
+          <button
+            type="submit"
+            className="btn btn-primary"
+            disabled={loginAttempts >= 5}
+          >
             Đăng nhập
           </button>
 
           <div className="forget-password">
             <a href="/forgetPass">Quên mật khẩu?</a>
           </div>
+
           <div className="formFooter">
             <p>
               Chưa có tài khoản? <a href="/SignUp">Đăng ký ngay</a>
             </p>
           </div>
         </form>
+
         {message && (
           <div
             className={`alert alert-${
@@ -126,8 +152,26 @@ export const Login = () => {
             } mt-3`}
           >
             {message.text}
+            {message.type === "error" && loginAttempts > 0 && loginAttempts < 5 && (
+              <div className="mt-2">
+                Bạn còn <strong>{5 - loginAttempts}</strong> lần thử đăng nhập.
+              </div>
+            )}
           </div>
         )}
+
+        {/* Nếu vượt quá số lần --> hiện riêng nút này */}
+        {loginAttempts >= 5 && (
+          <div className="mt-3">
+            <button
+              onClick={() => navigate("/forgetPass")}
+              className="btn btn-warning"
+            >
+              ➡️ Đi đến trang Quên mật khẩu
+            </button>
+          </div>
+        )}
+
       </div>
     </div>
   );

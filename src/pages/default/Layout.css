@@ -25,7 +25,6 @@ body {
     }
 }
 
-
 .fw-bold{
   font-weight: bold;
   font-size: 3rem; /* Tăng kích thước tiêu đề */
@@ -341,3 +340,8 @@ body {
     color: #007bff; /* Màu xanh dương */
   }
   
+  .btn-tc{
+    border-radius: 10px;
+    background: linear-gradient(135deg, #2575fc 0%, #6a11cb 100%);
+    border: 1px solid #2575fc;
+  }
