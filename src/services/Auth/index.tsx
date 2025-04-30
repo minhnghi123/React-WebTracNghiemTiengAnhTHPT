@@ -3,6 +3,7 @@ import { request } from "@/config/request";
 export interface User {
   email: string;
   password: string;
+  captchaToken?: string;
 }
 export interface UserDK {
   username: string;
@@ -36,8 +37,11 @@ export const AuthApi = {
     const response = await request.post(`/auth/send-otp`, { email, otp });
     return response.data;
   },
-  resetPassword: async ( newPassword: string, rePassword: string,) => {
-    const response = await request.post(`/auth/reset-password`, {  newPassword ,rePassword});
+  resetPassword: async (newPassword: string, rePassword: string) => {
+    const response = await request.post(`/auth/reset-password`, {
+      newPassword,
+      rePassword,
+    });
     return response.data;
   },
 };

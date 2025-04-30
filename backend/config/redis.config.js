@@ -65,6 +65,42 @@ class RedisService {
       return false;
     }
   }
+  async incr(key) {
+    try {
+      const value = await this.client.incr(key);
+      return value;
+    } catch (error) {
+      console.error("[Redis] Increment Error:", error);
+      return null;
+    }
+  }
+  async decr(key) {
+    try {
+      const value = await this.client.decr(key);
+      return value;
+    } catch (error) {
+      console.error("[Redis] Decrement Error:", error);
+      return null;
+    }
+  }
+  async expire(key, seconds) {
+    try {
+      const result = await this.client.expire(key, seconds);
+      return result;
+    } catch (error) {
+      console.error("[Redis] Expire Error:", error);
+      return false;
+    }
+  }
+  async ttl(key) {
+    try {
+      const result = await this.client.ttl(key);
+      return result;
+    } catch (error) {
+      console.error("[Redis] TTL Error:", error);
+      return null;
+    }
+  }
   async quit() {
     try {
       await this.client.quit();

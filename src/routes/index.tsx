@@ -40,6 +40,7 @@ import { ClassroomDetail } from "@/pages/default/PhongThi/detailclass";
 import { CreateExamQuestion } from "@/pages/giaovien/QuanLyDeThi/DeThi/CreateExamQuestion.tsx";
 import BaiLam from "@/pages/default/KyThi/BaiLam/BaiLam";
 import QuanLyBaoLoi from "@/pages/giaovien/QuanLyBaoLoi/index.tsx";
+import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
 export enum ERolePath {
   ADMIN = 2,
   GIAOVIEN = 3,
@@ -52,13 +53,22 @@ export enum ERolePath {
 //   return true;
 // };
 
+// --------RECAPCHA--------
+const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
+// --------RECAPCHA--------
+
 export const createRoute = (
   path: TRoutePaths,
   element: ReactNode,
   roleAccess?: number
 ) => {
   if (roleAccess) {
-    const Wrapper = roleAccess === 2 ? ProtectedRouteAdmin : (roleAccess === 3? ProtectedRouteTeacher : ProtectedRouteUser ) ;
+    const Wrapper =
+      roleAccess === 2
+        ? ProtectedRouteAdmin
+        : roleAccess === 3
+        ? ProtectedRouteTeacher
+        : ProtectedRouteUser;
     element = <Wrapper>{element}</Wrapper>;
   }
 
@@ -98,7 +108,13 @@ export const router = [
     path: "/",
     element: <Layout />,
     children: [
-      createRoute("/Login", <Login />, ERolePath.USER),
+      createRoute(
+        "/Login",
+        <GoogleReCaptchaProvider reCaptchaKey={RECAPTCHA_SITE_KEY}>
+          <Login />
+        </GoogleReCaptchaProvider>,
+        ERolePath.USER
+      ),
       createRoute("/SignUp", <SignUp />, ERolePath.USER),
       createRoute("/forgetPass", <ForgetPass />, ERolePath.USER),
     ],
@@ -108,7 +124,11 @@ export const router = [
     element: <LayoutGiaoVien />,
     children: [
       createRoute("/GiaoVien", <DashBoardGiaoVien />, ERolePath.GIAOVIEN),
-      createRoute("/giaovien/NganHangCauHoi", <QuanLyCauHoi />, ERolePath.GIAOVIEN),
+      createRoute(
+        "/giaovien/NganHangCauHoi",
+        <QuanLyCauHoi />,
+        ERolePath.GIAOVIEN
+      ),
       createRoute(
         "/giaovien/QuanLyDeThi",
         <QuanLyDeThiIndex />,
@@ -129,9 +149,17 @@ export const router = [
         <DetailClass />,
         ERolePath.GIAOVIEN
       ),
-      createRoute("/giaovien/QuanLyLopHoc", <QuanLyLopHoc />, ERolePath.GIAOVIEN),
+      createRoute(
+        "/giaovien/QuanLyLopHoc",
+        <QuanLyLopHoc />,
+        ERolePath.GIAOVIEN
+      ),
       createRoute("/giaovien/QuanLyAudio", <QuanLyAudio />, ERolePath.GIAOVIEN),
-      createRoute("/GiaoVien/QuanLyBaoLoi", <QuanLyBaoLoi />, ERolePath.GIAOVIEN),
+      createRoute(
+        "/GiaoVien/QuanLyBaoLoi",
+        <QuanLyBaoLoi />,
+        ERolePath.GIAOVIEN
+      ),
     ],
   },
   {
