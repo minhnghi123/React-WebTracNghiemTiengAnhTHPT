@@ -11,6 +11,7 @@ import { LockOutlined } from "@ant-design/icons";
 const { Paragraph, Text } = Typography;
 // import ReCAPTCHA from "react-google-recaptcha";
 import HCaptcha from "@hcaptcha/react-hcaptcha";
+import { getDeviceId } from "@/utils/cn";
 interface Message {
   text: string;
   type: "success" | "error";
@@ -103,19 +104,53 @@ export const Login = () => {
     }
   };
 
+  const saveTrustedDevice = async () => {
+    try {
+      const deviceId = getDeviceId();
+      await AuthApi.saveTrustedDevice({ deviceId });
+      setMessage({ text: "Thiết bị đã được lưu thành công.", type: "success" });
+    } catch (error) {
+      setMessage({
+        text: "Lỗi khi lưu thiết bị. Vui lòng thử lại.",
+        type: "error",
+      });
+    }
+  };
+  const [userRole, setUserRole] = useState<string>(""); // Thêm state cho userRole
+  const handleModalOk = async () => {
+    await saveTrustedDevice();
+    redirectUser(userRole); // Chuyển trang sau khi lưu thiết bị
+  };
+
+  const handleModalCancel = () => {
+    redirectUser(userRole); // Chuyển trang sau khi đóng modal
+  };
+
+  const redirectUser = (role: string) => {
+    if (role === "admin") {
+      navigate("/admin");
+    } else if (role === "teacher") {
+      navigate("/giaovien");
+    } else {
+      navigate("/");
+    }
+  };
+
   const getUser = async (email: string, pass: string, captchaToken: string) => {
     try {
-      const rq = await AuthApi.login({ email, password: pass, captchaToken });
+      const deviceId = getDeviceId(); // Lấy deviceId từ localStorage
+      const rq = await AuthApi.login({ email, password: pass, captchaToken, deviceId });
       setMessage({ text: rq?.data.message, type: "success" });
       if (rq?.status === 201) {
-        handleLogin(rq?.data.user);
-        if (rq?.data.user.role === "admin") {
-          navigate("/admin");
-        } else if (rq?.data.user.role === "teacher") {
-          navigate("/giaovien");
+        console.log("Login successful, showing confirm dialog..."); // Debug log
+        const confirmSave = window.confirm("Bạn có muốn lưu thiết bị này làm thiết bị tin cậy không?");
+        if (confirmSave) {
+          await handleModalOk();
         } else {
-          navigate("/");
+          handleModalCancel();
         }
+        handleLogin(rq?.data.user);
+        setUserRole(rq?.data.user.role);
       }
     } catch (error: any) {
       setLoginAttempts((prev) => prev + 1);
@@ -179,46 +214,47 @@ export const Login = () => {
     );
   }
   return (
-    <div className={styles.container}>
-      <div className={styles.loginForm}>
-        <h2 className={styles.title}>Đăng nhập</h2>
-        <form onSubmit={handleSubmit}>
-          <div className="mb-3">
-            <label htmlFor="username" className="form-label">
-              Tài khoản
-            </label>
-            <input
-              type="text"
-              className="form-control"
-              id="username"
-              value={username}
-              placeholder="Nhập email"
-              onChange={(e) => setUsername(e.target.value)}
-            />
-          </div>
-
-          <div className="mb-3">
-            <label htmlFor="password" className="form-label">
-              Mật khẩu
-            </label>
-            <div className={styles.passwordWrapper}>
+    <>
+      <div className={styles.container}>
+        <div className={styles.loginForm}>
+          <h2 className={styles.title}>Đăng nhập</h2>
+          <form onSubmit={handleSubmit}>
+            <div className="mb-3">
+              <label htmlFor="username" className="form-label">
+                Tài khoản
+              </label>
               <input
-                type={showPassword ? "text" : "password"}
+                type="text"
                 className="form-control"
-                id="password"
-                value={password}
-                placeholder="Nhập mật khẩu"
-                onChange={(e) => setPassword(e.target.value)}
+                id="username"
+                value={username}
+                placeholder="Nhập email"
+                onChange={(e) => setUsername(e.target.value)}
               />
-              <i
-                className={`bi ${
-                  showPassword ? "bi-eye-slash" : "bi-eye"
-                } eyeIcon`}
-                onClick={togglePasswordVisibility}
-              ></i>
             </div>
-          </div>
-          {/* Add reCAPTCHA
+
+            <div className="mb-3">
+              <label htmlFor="password" className="form-label">
+                Mật khẩu
+              </label>
+              <div className={styles.passwordWrapper}>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  className="form-control"
+                  id="password"
+                  value={password}
+                  placeholder="Nhập mật khẩu"
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+                <i
+                  className={`bi ${
+                    showPassword ? "bi-eye-slash" : "bi-eye"
+                  } eyeIcon`}
+                  onClick={togglePasswordVisibility}
+                ></i>
+              </div>
+            </div>
+            {/* Add reCAPTCHA
           <div className="mb-3">
             <ReCAPTCHA
               sitekey={RECAPTCHA_SITE_KEY}
@@ -226,62 +262,63 @@ export const Login = () => {
               datatype="image"
             />
           </div> */}
-          {/* Add hCaptcha */}
-          <div className="mb-3">
-            <HCaptcha
-              sitekey={HCAPTCHA_SITE_KEY}
-              onVerify={handleCaptchaChange}
-            />
-          </div>
-          <button
-            type="submit"
-            className="btn btn-primary"
-            disabled={loginAttempts >= 5}
-          >
-            Đăng nhập
-          </button>
-
-          <div className="forget-password">
-            <a href="/forgetPass">Quên mật khẩu?</a>
-          </div>
-
-          <div className="formFooter">
-            <p>
-              Chưa có tài khoản? <a href="/SignUp">Đăng ký ngay</a>
-            </p>
-          </div>
-        </form>
-
-        {message && (
-          <div
-            className={`alert alert-${
-              message.type === "success" ? "success" : "danger"
-            } mt-3`}
-          >
-            {message.text}
-            {message.type === "error" &&
-              loginAttempts > 0 &&
-              loginAttempts < 5 && (
-                <div className="mt-2">
-                  Bạn còn <strong>{5 - loginAttempts}</strong> lần thử đăng
-                  nhập.
-                </div>
-              )}
-          </div>
-        )}
-
-        {/* Nếu vượt quá số lần --> hiện riêng nút này */}
-        {loginAttempts >= 5 && (
-          <div className="mt-3">
+            {/* Add hCaptcha */}
+            <div className="mb-3">
+              <HCaptcha
+                sitekey={HCAPTCHA_SITE_KEY}
+                onVerify={handleCaptchaChange}
+              />
+            </div>
             <button
-              onClick={() => navigate("/forgetPass")}
-              className="btn btn-warning"
+              type="submit"
+              className="btn btn-primary"
+              disabled={loginAttempts >= 5}
             >
-              ➡️ Đi đến trang Quên mật khẩu
+              Đăng nhập
             </button>
-          </div>
-        )}
+
+            <div className="forget-password">
+              <a href="/forgetPass">Quên mật khẩu?</a>
+            </div>
+
+            <div className="formFooter">
+              <p>
+                Chưa có tài khoản? <a href="/SignUp">Đăng ký ngay</a>
+              </p>
+            </div>
+          </form>
+
+          {message && (
+            <div
+              className={`alert alert-${
+                message.type === "success" ? "success" : "danger"
+              } mt-3`}
+            >
+              {message.text}
+              {message.type === "error" &&
+                loginAttempts > 0 &&
+                loginAttempts < 5 && (
+                  <div className="mt-2">
+                    Bạn còn <strong>{5 - loginAttempts}</strong> lần thử đăng
+                    nhập.
+                  </div>
+                )}
+            </div>
+          )}
+
+          {/* Nếu vượt quá số lần --> hiện riêng nút này */}
+          {loginAttempts >= 5 && (
+            <div className="mt-3">
+              <button
+                onClick={() => navigate("/forgetPass")}
+                className="btn btn-warning"
+              >
+                ➡️ Đi đến trang Quên mật khẩu
+              </button>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 };

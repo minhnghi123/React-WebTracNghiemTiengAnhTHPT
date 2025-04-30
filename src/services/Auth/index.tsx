@@ -4,6 +4,7 @@ export interface User {
   email: string;
   password: string;
   captchaToken?: string;
+  deviceId?: string;
 }
 export interface UserDK {
   username: string;
@@ -23,8 +24,11 @@ export const AuthApi = {
   getBlockInfo: async () => {
     const response = await request.get("/auth/blocked-info/");
     return response.data;
-  }
-  ,
+  },
+  saveTrustedDevice: async (deviceId: string) => {
+    const response = await request.post("/auth/save-trusted-device", { deviceId });
+    return response.data;
+  },
   logout: async () => {
     const response = await request.post("/auth/logout");
     return response;

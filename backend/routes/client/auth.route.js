@@ -8,7 +8,6 @@ import {
   sendOtpPost,
   resetPassword,
   getBlockedInfo,
-  verifyDevice,
   saveTrustedDevice,
 } from "../../controllers/client/auth.controller.js";
 import { protectedRoute } from "../../middlewares/protectedRoute.middleware.js";
@@ -25,6 +24,5 @@ router.post(
   resetPassword
 );
 router.get("/blocked-info/", getBlockedInfo);
-router.post("/verify-device", verifyDevice);
 router.post("/save-trusted-device", saveTrustedDevice);
 export default router;
