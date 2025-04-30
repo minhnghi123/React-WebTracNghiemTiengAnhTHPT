@@ -5,7 +5,8 @@ import { AuthApi } from "@/services/Auth";
 import { useAuthContext } from "@/contexts/AuthProvider";
 import { useNavigate } from "react-router-dom";
 import styles from "./login.module.css";
-
+// import ReCAPTCHA from "react-google-recaptcha";
+import HCaptcha from "@hcaptcha/react-hcaptcha";
 interface Message {
   text: string;
   type: "success" | "error";
@@ -19,7 +20,20 @@ export const Login = () => {
   const [loginAttempts, setLoginAttempts] = useState<number>(0);
   const { handleLogin } = useAuthContext();
   const navigate = useNavigate();
-
+  // ---------------- ReCAPTCHA ------------------
+  // const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  // const RECAPTCHA_SITE_KEY: string = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
+  // const handleCaptchaChange = (token: string | null) => {
+  //   setCaptchaToken(token);
+  // };
+  //---------------- ReCAPTCHA ------------------
+  // -----------------------HCAPTCHA-------------------------------
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const HCAPTCHA_SITE_KEY: string = import.meta.env.VITE_HCAPTCHA_SITE_KEY;
+  const handleCaptchaChange = (token: string | null) => {
+    setCaptchaToken(token);
+  };
+  // ----------------------- HCAPTCHA -----------------------------
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
@@ -33,7 +47,7 @@ export const Login = () => {
           type: "error",
         });
       }
-      
+
       // Ngược lại (bình thường) thì clear message sau 3s
       const timer = setTimeout(() => setMessage(null), 3000);
       return () => clearTimeout(timer);
@@ -42,15 +56,17 @@ export const Login = () => {
 
   useEffect(() => {
     if (username) {
-      const storedAttempts = JSON.parse(localStorage.getItem("loginAttempts") || "{}");
-  
+      const storedAttempts = JSON.parse(
+        localStorage.getItem("loginAttempts") || "{}"
+      );
+
       if (storedAttempts[username]) {
-        setLoginAttempts(storedAttempts[username]); 
+        setLoginAttempts(storedAttempts[username]);
       }
     }
   }, [username]);
-  
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     // Bước 1: Kiểm tra đã nhập tài khoản/mật khẩu chưa
@@ -61,12 +77,29 @@ export const Login = () => {
       });
       return;
     }
-    getUser(username, password);
+    // Check capcha
+    if (!captchaToken) {
+      setMessage({
+        text: "Vui lòng xác minh CAPTCHA trước khi đăng nhập.",
+        type: "error",
+      });
+      return;
+    }
+
+    try {
+      // Gửi token và thông tin đăng nhập đến server
+      getUser(username, password, captchaToken);
+    } catch (error) {
+      setMessage({
+        text: "Lỗi khi xác minh CAPTCHA. Vui lòng thử lại.",
+        type: "error",
+      });
+    }
   };
 
-  const getUser = async (email: string, pass: string) => {
+  const getUser = async (email: string, pass: string, captchaToken: string) => {
     try {
-      const rq = await AuthApi.login({ email, password: pass });
+      const rq = await AuthApi.login({ email, password: pass, captchaToken });
       setMessage({ text: rq?.data.message, type: "success" });
       if (rq?.status === 201) {
         handleLogin(rq?.data.user);
@@ -79,7 +112,8 @@ export const Login = () => {
         }
       }
     } catch (error: any) {
-      setLoginAttempts((prev) => prev + 1); 
+      console.log(error);
+      setLoginAttempts((prev) => prev + 1);
       setMessage({
         text: "Đăng nhập thất bại. Vui lòng kiểm tra lại tài khoản và mật khẩu.",
         type: "error",
@@ -120,12 +154,28 @@ export const Login = () => {
                 onChange={(e) => setPassword(e.target.value)}
               />
               <i
-                className={`bi ${showPassword ? "bi-eye-slash" : "bi-eye"} eyeIcon`}
+                className={`bi ${
+                  showPassword ? "bi-eye-slash" : "bi-eye"
+                } eyeIcon`}
                 onClick={togglePasswordVisibility}
               ></i>
             </div>
           </div>
-
+          {/* Add reCAPTCHA
+          <div className="mb-3">
+            <ReCAPTCHA
+              sitekey={RECAPTCHA_SITE_KEY}
+              onChange={handleCaptchaChange}
+              datatype="image"
+            />
+          </div> */}
+          {/* Add hCaptcha */}
+          <div className="mb-3">
+            <HCaptcha
+              sitekey={HCAPTCHA_SITE_KEY}
+              onVerify={handleCaptchaChange}
+            />
+          </div>
           <button
             type="submit"
             className="btn btn-primary"
@@ -152,11 +202,14 @@ export const Login = () => {
             } mt-3`}
           >
             {message.text}
-            {message.type === "error" && loginAttempts > 0 && loginAttempts < 5 && (
-              <div className="mt-2">
-                Bạn còn <strong>{5 - loginAttempts}</strong> lần thử đăng nhập.
-              </div>
-            )}
+            {message.type === "error" &&
+              loginAttempts > 0 &&
+              loginAttempts < 5 && (
+                <div className="mt-2">
+                  Bạn còn <strong>{5 - loginAttempts}</strong> lần thử đăng
+                  nhập.
+                </div>
+              )}
           </div>
         )}
 
@@ -171,7 +224,6 @@ export const Login = () => {
             </button>
           </div>
         )}
-
       </div>
     </div>
   );

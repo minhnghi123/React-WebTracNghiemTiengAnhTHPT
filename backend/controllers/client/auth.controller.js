@@ -7,6 +7,47 @@ import { generateRandomString } from "../../helpers/generateNumber.helper.js";
 import { sendMail } from "../../helpers/sendMail.helper.js";
 import jwt from "jsonwebtoken";
 import { ENV_VARS } from "../../config/envVars.config.js";
+import axios from "axios";
+//----RECAPTCHA---
+// export async function verifyRecaptcha(token) {
+//   const secretKey = ENV_VARS.RECAPTCHA_SECRET_KEY;
+//   const response = await axios.post(
+//     `https://www.google.com/recaptcha/api/siteverify`,
+//     null,
+//     {
+//       params: {
+//         secret: secretKey,
+//         response: token,
+//       },
+//     }
+//   );
+
+//   return response.data.success;
+// }
+// ----RECAPTCHA---
+
+// ------HCAPTCHA--------
+export async function verifyHCaptcha(token) {
+  const secretKey = ENV_VARS.HCAPTCHA_SECRET_KEY;
+
+  const form = new URLSearchParams();
+  form.append("secret", secretKey);
+  form.append("response", token);
+
+  const response = await axios.post(
+    "https://hcaptcha.com/siteverify",
+    form.toString(),
+    {
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+    }
+  );
+
+  // console.log(response.data);
+  return response.data.success;
+}
+// ------HCAPTCHA--------
 
 export async function signup(req, res) {
   try {
@@ -34,9 +75,10 @@ export async function signup(req, res) {
         .json({ code: 400, message: "Email đã tồn tại trong hệ thống" });
     }
     if (existingUserByUsername) {
-      return res
-        .status(400)
-        .json({ code: 400, message: "Tên người dùng đã tồn tại trong hệ thống" });
+      return res.status(400).json({
+        code: 400,
+        message: "Tên người dùng đã tồn tại trong hệ thống",
+      });
     }
     const salt = bcryptjs.genSaltSync(10);
     const hashedPassword = await bcryptjs.hash(password, salt);
@@ -59,7 +101,8 @@ export async function signup(req, res) {
 
       return res.status(201).json({
         code: 201,
-        message: "Yêu cầu đăng ký giáo viên đã được gửi. Vui lòng chờ quản trị viên phê duyệt.",
+        message:
+          "Yêu cầu đăng ký giáo viên đã được gửi. Vui lòng chờ quản trị viên phê duyệt.",
       });
     } else if (role === "student") {
       // Proceed with normal signup for students
@@ -75,30 +118,44 @@ export async function signup(req, res) {
         .status(201)
         .json({ code: 201, message: "Tạo tài khoản người dùng thành công" });
     } else {
-      return res.status(400).json({ code: 400, message: "Vai trò không hợp lệ" });
+      return res
+        .status(400)
+        .json({ code: 400, message: "Vai trò không hợp lệ" });
     }
   } catch (error) {
     console.error(error);
-    return res
-      .status(400)
-      .json({ code: 400, message: "Lỗi máy chủ" });
+    return res.status(400).json({ code: 400, message: "Lỗi máy chủ" });
   }
 }
 export async function login(req, res) {
+  const { email, password, captchaToken } = req.body;
   try {
-    const { email, password } = req.body;
     if (!email || !password) {
       return res
         .status(400)
         .json({ code: 400, message: "Email và mật khẩu là bắt buộc" });
     }
+    // xac minh captcha
+    const recaptchaResponse = await verifyHCaptcha(captchaToken);
+    // console.log(recaptchaResponse);
+    if (!recaptchaResponse) {
+      return res.status(400).json({
+        code: 400,
+        message: "Captcha không hợp lệ. Vui lòng thử lại.",
+      });
+    }
+
     const user = await TaiKhoan.findOne({ email: email });
     if (!user) {
-      return res.status(400).json({ code: 400, message: "Không tìm thấy người dùng" });
+      return res
+        .status(400)
+        .json({ code: 400, message: "Không tìm thấy người dùng" });
     }
     const isPasswordMatch = await bcryptjs.compare(password, user.password);
     if (!isPasswordMatch) {
-      return res.status(400).json({ code: 400, message: "Mật khẩu không hợp lệ" });
+      return res
+        .status(400)
+        .json({ code: 400, message: "Mật khẩu không hợp lệ" });
     }
     generateTokenAndSetToken(user._id, res); //jwt
     res.status(201).json({
@@ -109,7 +166,7 @@ export async function login(req, res) {
   } catch (error) {
     res.status(400).json({
       code: 400,
-      message: "Lỗi máy chủ",
+      message: error.message || "Lỗi máy chủ",
     });
   }
 }
@@ -129,7 +186,9 @@ export async function forgotPost(req, res) {
       status: "active",
     });
     if (!existedUser) {
-      return res.status(400).json({ code: 400, message: "Không tìm thấy người dùng" });
+      return res
+        .status(400)
+        .json({ code: 400, message: "Không tìm thấy người dùng" });
     }
     const existedEmailInForgotPassword = await ForgotPassword.findOne({
       email: req.body.email,
@@ -174,9 +233,10 @@ export async function sendOtpPost(req, res) {
       status: "active",
     });
     generateTokenAndSetToken(user._id, res); //jwt
-    res
-      .status(201)
-      .json({ code: 201, message: "Mã OTP hợp lệ! Vui lòng đặt lại mật khẩu!" });
+    res.status(201).json({
+      code: 201,
+      message: "Mã OTP hợp lệ! Vui lòng đặt lại mật khẩu!",
+    });
   } catch (error) {
     console.log(error);
     res.status(400).json({ code: 400, message: "Lỗi máy chủ" });
@@ -205,7 +265,7 @@ export async function resetPassword(req, res) {
     console.log(user);
     await TaiKhoan.updateOne(
       {
-        _id: user._id,  
+        _id: user._id,
       },
       {
         password: hashedPassword,
@@ -221,9 +281,7 @@ export async function getUserInfo(req, res) {
   try {
     const token = req.cookies["jwt-token"];
     if (!token) {
-      return res
-        .status(401)
-        .json({ code: 401, message: "Bạn chưa đăng nhập" });
+      return res.status(401).json({ code: 401, message: "Bạn chưa đăng nhập" });
     }
 
     const decoded = jwt.verify(token, ENV_VARS.JWT_SECRET);
