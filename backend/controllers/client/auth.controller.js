@@ -8,6 +8,7 @@ import { sendMail } from "../../helpers/sendMail.helper.js";
 import jwt from "jsonwebtoken";
 import { ENV_VARS } from "../../config/envVars.config.js";
 import axios from "axios";
+import { redisService } from "../../config/redis.config.js";
 //----RECAPTCHA---
 // export async function verifyRecaptcha(token) {
 //   const secretKey = ENV_VARS.RECAPTCHA_SECRET_KEY;
@@ -129,16 +130,31 @@ export async function signup(req, res) {
 }
 export async function login(req, res) {
   const { email, password, captchaToken } = req.body;
+  // lay ip cua nguoi dung
+  const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+  // console.log(ip); -> dia chi ip v6
   try {
     if (!email || !password) {
       return res
         .status(400)
         .json({ code: 400, message: "Email và mật khẩu là bắt buộc" });
     }
+    // Kiểm tra số lần thử đăng nhập từ IP
+    const attempts = (await redisService.get(ip)) || 0;
+    if (attempts >= 5) {
+      const ttl = await redisService.ttl(ip);
+      return res.status(400).json({
+        code: 400,
+        message: "Bạn đã vượt quá số lần thử đăng nhập.",
+        ttl,
+      });
+    }
     // xac minh captcha
     const recaptchaResponse = await verifyHCaptcha(captchaToken);
     // console.log(recaptchaResponse);
     if (!recaptchaResponse) {
+      await redisService.incr(ip); // Tăng số lần thử cho IP
+      await redisService.expire(ip, 900); // Đặt thời gian hết hạn là 15 phút
       return res.status(400).json({
         code: 400,
         message: "Captcha không hợp lệ. Vui lòng thử lại.",
@@ -147,16 +163,22 @@ export async function login(req, res) {
 
     const user = await TaiKhoan.findOne({ email: email });
     if (!user) {
+      await redisService.incr(ip); // Tăng số lần thử cho IP
+      await redisService.expire(ip, 900); // Đặt thời gian hết hạn là 15 phút
       return res
         .status(400)
         .json({ code: 400, message: "Không tìm thấy người dùng" });
     }
     const isPasswordMatch = await bcryptjs.compare(password, user.password);
     if (!isPasswordMatch) {
+      await redisService.incr(ip); // Tăng số lần thử cho IP
+      await redisService.expire(ip, 900); // Đặt thời gian hết hạn là 15 phút
       return res
         .status(400)
         .json({ code: 400, message: "Mật khẩu không hợp lệ" });
     }
+    // Đăng nhập thành công
+    await redisService.del(ip); // Xóa số lần thử nếu đăng nhập thành công
     generateTokenAndSetToken(user._id, res); //jwt
     res.status(201).json({
       code: 201,

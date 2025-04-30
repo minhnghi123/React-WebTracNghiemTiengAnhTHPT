@@ -5,6 +5,10 @@ import { AuthApi } from "@/services/Auth";
 import { useAuthContext } from "@/contexts/AuthProvider";
 import { useNavigate } from "react-router-dom";
 import styles from "./login.module.css";
+import { Result, Typography } from "antd";
+import { LockOutlined } from "@ant-design/icons";
+
+const { Paragraph, Text } = Typography;
 // import ReCAPTCHA from "react-google-recaptcha";
 import HCaptcha from "@hcaptcha/react-hcaptcha";
 interface Message {
@@ -19,6 +23,8 @@ export const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loginAttempts, setLoginAttempts] = useState<number>(0);
   const { handleLogin } = useAuthContext();
+  const [isIpBlocked, setIsIpBlocked] = useState<boolean>(false);
+  const [timeLeft, setTimeLeft] = useState<number>(0);
   const navigate = useNavigate();
   // ---------------- ReCAPTCHA ------------------
   // const [captchaToken, setCaptchaToken] = useState<string | null>(null);
@@ -112,15 +118,66 @@ export const Login = () => {
         }
       }
     } catch (error: any) {
-      console.log(error);
       setLoginAttempts((prev) => prev + 1);
-      setMessage({
-        text: "Đăng nhập thất bại. Vui lòng kiểm tra lại tài khoản và mật khẩu.",
-        type: "error",
-      });
+      if (
+        (error.response?.status === 400 &&
+          error.response?.data?.message.includes(
+            "Vui lòng thử lại sau 15 phút"
+          )) ||
+        error.response?.data.message.includes(
+          "Bạn đã vượt quá số lần thử đăng nhập."
+        )
+      ) {
+        setIsIpBlocked(true);
+        setTimeLeft(error.response?.data?.ttl || 0);
+      } else {
+        setMessage({
+          text: error.response?.data?.message || "Đăng nhập thất bại.",
+          type: "error",
+        });
+      }
     }
   };
 
+  // Cập nhật thời gian còn lại theo thời gian thực
+  useEffect(() => {
+    if (isIpBlocked && timeLeft > 0) {
+      const timer = setInterval(() => {
+        setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
+      }, 1000);
+
+      return () => clearInterval(timer); // Xóa timer khi component bị unmount
+    }
+  }, [isIpBlocked, timeLeft]);
+  if (isIpBlocked) {
+    // Giao diện khi IP bị khóa
+    return (
+      <div
+        style={{
+          height: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: "#f5f5f5",
+        }}
+      >
+        <Result
+          icon={<LockOutlined style={{ fontSize: 48, color: "#ff4d4f" }} />}
+          title={<Text type="danger">IP của bạn đã bị khóa</Text>}
+          subTitle={
+            <Paragraph>
+              Bạn đã vượt quá số lần thử đăng nhập. <br />
+              Vui lòng thử lại sau{" "}
+              <Text strong>
+                {Math.floor(timeLeft / 60)} phút {timeLeft % 60} giây
+              </Text>
+              .
+            </Paragraph>
+          }
+        />
+      </div>
+    );
+  }
   return (
     <div className={styles.container}>
       <div className={styles.loginForm}>
