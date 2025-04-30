@@ -19,6 +19,11 @@ export const AuthApi = {
     const response = await request.post("/auth/login", data);
     return response;
   },
+  getBlockInfo: async () => {
+    const response = await request.get("/auth/blocked-info/");
+    return response.data;
+  }
+  ,
   logout: async () => {
     const response = await request.post("/auth/logout");
     return response;

@@ -96,7 +96,18 @@ export const joinedExam = async (req, res) => {
     //     message: "Bạn đang tham gia Đề Thi khác.",
     //   });
     // }
+    // Kiểm tra xem người dùng có đang bị chặn không
+    const userAccount = await TaiKhoan.findById(req.user._id);
+    if (!userAccount) {
+      return res.status(404).json({ message: "Tài khoản không tồn tại." });
+    }
 
+    if (userAccount.blockedUntil && new Date() < userAccount.blockedUntil) {
+      return res.status(403).json({
+        code: 403,
+        message: `Tài khoản của bạn bị chặn đến ${userAccount.blockedUntil.toLocaleString()}.`,
+      });
+    }
     // Tìm đề thi và populate các câu hỏi của đề chính và phần nghe
     const exam = await Exam.findOne({ _id: req.params.examId })
       .populate({

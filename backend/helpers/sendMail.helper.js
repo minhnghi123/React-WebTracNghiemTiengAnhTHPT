@@ -27,3 +27,10 @@ export const sendMail = (email, subject, text) => {
     }
   });
 };
+
+export const sendDeviceVerificationMail = (email, deviceId) => {
+  const subject = "Xác thực thiết bị mới";
+  const text = `Thiết bị với mã định danh <b>${deviceId}</b> đang cố gắng đăng nhập vào tài khoản của bạn. Nếu đây là bạn, vui lòng xác thực thiết bị này.`;
+
+  sendMail(email, subject, text);
+};

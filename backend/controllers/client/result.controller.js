@@ -9,8 +9,7 @@ import jwt from "jsonwebtoken";
 import { ENV_VARS } from "../../config/envVars.config.js";
 import { Audio } from "../../models/Audio.model.js";
 import ListeningExam from "../../models/listeningExam.model.js";
-
-
+import { TaiKhoan } from "../../models/Taikhoan.model.js";
 
 // [GET]: /result/
 // Lấy tất cả kết quả (không bị xóa và đã hoàn thành) và populate các trường liên quan
@@ -851,5 +850,42 @@ export const saveSingleAnswer = async (req, res) => {
       message: "Error saving single answer.",
       error: error.message,
     });
+  }
+};
+
+export const reportViolation = async (req, res) => {
+  try {
+    const token = req.cookies["jwt-token"];
+    const decoded = jwt.verify(token, ENV_VARS.JWT_SECRET);
+    const userId = decoded.userId;
+     
+    if (!userId) {
+      return res.status(400).json({ message: "User ID is required." });
+    }
+
+    const user = await TaiKhoan.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    // Increment violation count
+    user.violationCount += 1;
+
+    // Check if violationCount is a multiple of 5
+    if (user.violationCount % 5 === 0) {
+      user.violationCount = 0; // Reset violation count
+      user.blockedUntil = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000); // Block for 3 days
+    }
+
+    await user.save();
+
+    res.status(200).json({
+      message: "Violation reported successfully.",
+      violationCount: user.violationCount,
+      blockedUntil: user.blockedUntil,
+    });
+  } catch (error) {
+    console.error("Error reporting violation:", error);
+    res.status(500).json({ message: "Error reporting violation.", error: error.message });
   }
 };

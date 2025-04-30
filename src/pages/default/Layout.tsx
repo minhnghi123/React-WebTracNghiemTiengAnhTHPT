@@ -8,6 +8,8 @@ import { useAuthContext } from "@/contexts/AuthProvider";
 import { useState, useEffect } from "react";
 import { Result } from "@/types/interface";
 import ExamInfoBox from "./ExamInfor";
+import { AuthApi } from "@/services/Auth";
+import BlockPage, { BlockInfo } from "../BlockPage";
 
 const Layout = () => {
   const { user } = useAuthContext();
@@ -24,10 +26,21 @@ const Layout = () => {
       console.error("Error fetching incomplete exam:", error);
     }
   };
+  const [blockInfo, setBlockInfo] = useState<BlockInfo | null>(null);
+  const getBlockInfo = async () => {
+    try {
+      const res = await AuthApi.getBlockInfo();
+      console.log("getBlockInfo", res);
+      setBlockInfo(res);
+    } catch (error) {
+      console.error("Error fetching block info:", error);
+    }
+  };
 
   useEffect(() => {
     if (user?._id) {
       getInCompletedExam();
+      getBlockInfo(); 
     }
   }, [user]);
 
@@ -36,7 +49,11 @@ const Layout = () => {
       <Navbar />
       <div style={{ flex: 1, paddingBottom: "80px" }}>
         {/* Ensure content takes up remaining space and leaves room for the footer */}
-        <Outlet />
+        {blockInfo?.isBlocked && new Date(blockInfo.blockedUntil) > new Date() ? (
+          <BlockPage info={blockInfo} />
+        ) : (
+          <Outlet />
+        )}
         {examDetails && <ExamInfoBox examDetails={examDetails} />}
       </div>
       <Footer />

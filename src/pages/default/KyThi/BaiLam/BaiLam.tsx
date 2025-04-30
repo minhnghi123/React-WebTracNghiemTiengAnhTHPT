@@ -157,19 +157,32 @@ const BaiLam: React.FC = () => {
     const savedCount = localStorage.getItem("alertCount");
     return savedCount ? parseInt(savedCount, 10) : 0;
   });
-  useEffect(() => {
-    // Lưu số lần vi phạm vào localStorage mỗi khi alertCount thay đổi
-    localStorage.setItem("alertCount", alertCount.toString());
+  // useEffect(() => {
+  //   // Lưu số lần vi phạm vào localStorage mỗi khi alertCount thay đổi
+  //   localStorage.setItem("alertCount", alertCount.toString());
 
-    // Nếu vượt quá 5 lần, tự động nộp bài
-    if (alertCount > 5) {
-      alert("Bạn đã vi phạm quá nhiều lần. Hệ thống sẽ tự động nộp bài.");
-      handleSubmit();
+  //   // Nếu vượt quá 5 lần, tự động nộp bài
+  //   if (alertCount > 5) {
+  //     alert("Bạn đã vi phạm quá nhiều lần. Hệ thống sẽ tự động nộp bài.");
+  //     handleSubmit();
+  //     handleReportViolation()
+      
+  //   }
+  // }, [alertCount]);
+  const handleReportViolation = async () => {
+    try {
+      const res= await ResultAPI.reportViolation();
+      if (res.code === 200) {
+      } else {
+        console.error("Failed to report violation:", res.message);
+      }
+    } catch (error) {
+      console.error("Error reporting violation:", error);
     }
-  }, [alertCount]);
-
+  };
   // Hàm tăng số lần vi phạm
   const incrementAlertCount = () => {
+    if (Examresult) return; // không tăng nữa khi đã nộp bài
     setAlertCount((prev) => {
       const newCount = prev + 1;
 
@@ -182,10 +195,12 @@ const BaiLam: React.FC = () => {
           );
         }
       } else {
-        showAlertModal(
-          "Bạn đã vi phạm quá nhiều lần. Hệ thống sẽ tự động nộp bài."
+        alert(
+          "Bạn đã vi phạm quá nhiều lần. Hệ thống sẽ tự động nộp bài.\nHành vi của bạn đã được báo cáo. Nếu bạn vi phạm thi quá 5 lần, hệ thống sẽ cấm thi bạn trong 3 ngày"
         );
-        handleSubmit();
+        handleSubmit(); // Tự động nộp bài khi vượt quá giới hạn
+        handleReportViolation()
+
       }
 
       return newCount;
@@ -197,7 +212,6 @@ const BaiLam: React.FC = () => {
   // fullscreen 
   useEffect(() => {
     if (!Examresult && examDetails) {
-      // tù động full màn hình
       const enterFullscreen = () => {
         if (document.documentElement.requestFullscreen) {
           document.documentElement.requestFullscreen();
@@ -208,22 +222,18 @@ const BaiLam: React.FC = () => {
 
       enterFullscreen();
 
-      // Track fullscreen exit
       const handleFullscreenChange = () => {
         if (!document.fullscreenElement) {
-          // tăng số lần vi phạm
           incrementAlertCount();
-          showAlertModal("Bạn đã thoát chế độ toàn màn hình. Hãy quay lại ngay!");
+          alert("Bạn đã thoát chế độ toàn màn hình. Hãy quay lại ngay!");
         }
       };
 
-      // thông báo người dùng
       const handleVisibilityChange = () => {
         if (document.visibilityState === "hidden") {
-           // tăng số lần vi phạm
-
           incrementAlertCount();
-          showAlertModal("Bạn đã chuyển tab. Hãy quay lại ngay!");
+          alert("Bạn đã chuyển tab. Hãy quay lại ngay!");
+          // showAlertModal("Bạn đã chuyển tab. Hãy quay lại ngay!");
         }
       };
 
@@ -383,6 +393,8 @@ const BaiLam: React.FC = () => {
         setExamresult(response);
         setSuggestedQuestions(response.suggestionQuestion);
         setRemainingTime(0);
+        localStorage.removeItem("alertCount"); // Reset alertCount
+        setAlertCount(0); // Reset state
         resultSectionRef.current?.scrollIntoView({ behavior: "smooth" });
       }
     } catch (error) {

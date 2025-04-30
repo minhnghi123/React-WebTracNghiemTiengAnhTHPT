@@ -86,11 +86,11 @@ export async function signup(req, res) {
 }
 export async function login(req, res) {
   try {
-    const { email, password } = req.body;
-    if (!email || !password) {
+    const { email, password, deviceId } = req.body;
+    if (!email || !password || !deviceId) {
       return res
         .status(400)
-        .json({ code: 400, message: "Email và mật khẩu là bắt buộc" });
+        .json({ code: 400, message: "Email, mật khẩu và deviceId là bắt buộc" });
     }
     const user = await TaiKhoan.findOne({ email: email });
     if (!user) {
@@ -100,6 +100,33 @@ export async function login(req, res) {
     if (!isPasswordMatch) {
       return res.status(400).json({ code: 400, message: "Mật khẩu không hợp lệ" });
     }
+
+    const isTrustedDevice = user.trustedDevices.some(
+      (device) => device.deviceId === deviceId
+    );
+
+    if (!isTrustedDevice) {
+      // Gửi OTP để xác thực thiết bị lạ
+      const otp = generateRandomString(6);
+      user.lastLoginInfo = { otp, deviceId, time: new Date() };
+      await user.save();
+
+      sendMail(user.email, "Xác thực thiết bị mới", `Mã OTP của bạn là: ${otp}`);
+      return res.status(403).json({
+        code: 403,
+        message: "Thiết bị chưa được xác thực. Vui lòng kiểm tra email để xác thực.",
+      });
+    }
+
+    // Cập nhật thông tin đăng nhập gần nhất
+    user.lastLoginInfo = {
+      ip: req.ip,
+      userAgent: req.headers["user-agent"],
+      deviceId: deviceId,
+      time: new Date(),
+    };
+    await user.save();
+
     generateTokenAndSetToken(user._id, res); //jwt
     res.status(201).json({
       code: 201,
@@ -113,6 +140,66 @@ export async function login(req, res) {
     });
   }
 }
+export async function verifyDevice(req, res) {
+  try {
+    const { email, otp, deviceId } = req.body;
+    if (!email || !otp || !deviceId) {
+      return res
+        .status(400)
+        .json({ code: 400, message: "Email, OTP và deviceId là bắt buộc" });
+    }
+
+    const user = await TaiKhoan.findOne({ email: email });
+    if (!user || user.lastLoginInfo.otp !== otp) {
+      return res.status(400).json({ code: 400, message: "OTP không hợp lệ" });
+    }
+
+    // Xác thực thiết bị và cho phép đăng nhập
+    user.trustedDevices.push({
+      deviceId: deviceId,
+      addedAt: new Date(),
+    });
+    user.lastLoginInfo = { ip: req.ip, userAgent: req.headers["user-agent"], deviceId, time: new Date() };
+    await user.save();
+
+    generateTokenAndSetToken(user._id, res); //jwt
+    res.status(200).json({
+      code: 200,
+      message: "Thiết bị đã được xác thực và đăng nhập thành công",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ code: 500, message: "Lỗi máy chủ" });
+  }
+}
+export async function saveTrustedDevice(req, res) {
+  try {
+    const { deviceId } = req.body;
+    const token = req.cookies["jwt-token"];
+    if (!token) {
+      return res.status(401).json({ code: 401, message: "Bạn chưa đăng nhập" });
+    }
+
+    const decoded = jwt.verify(token, ENV_VARS.JWT_SECRET);
+    const user = await TaiKhoan.findById(decoded.userId);
+
+    if (!user) {
+      return res.status(404).json({ code: 404, message: "Không tìm thấy người dùng" });
+    }
+
+    user.trustedDevices.push({
+      deviceId: deviceId,
+      addedAt: new Date(),
+    });
+    await user.save();
+
+    res.status(200).json({ code: 200, message: "Thiết bị đã được lưu thành công" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ code: 500, message: "Lỗi máy chủ" });
+  }
+}
+
 export async function logout(req, res) {
   try {
     res.clearCookie("jwt-token");
@@ -236,6 +323,35 @@ export async function getUserInfo(req, res) {
     }
 
     res.status(200).json({ code: 200, user });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ code: 500, message: "Lỗi máy chủ" });
+  }
+}
+
+export async function getBlockedInfo(req, res) {
+  try {
+    const token = req.cookies["jwt-token"];
+    if (!token) {
+      return res
+        .status(401)
+        .json({ code: 401, message: "Bạn chưa đăng nhập" });
+    }
+
+    const decoded = jwt.verify(token, ENV_VARS.JWT_SECRET);
+    const userId = decoded.userId;
+
+    const user = await TaiKhoan.findById(userId).select("blockedUntil");
+
+    if (!user) {
+      return res.status(404).json({ code: 404, message: "Không tìm thấy người dùng" });
+    }
+
+    res.status(200).json({
+      code: 200,
+      blockedUntil: user.blockedUntil,
+      isBlocked: user.blockedUntil && new Date(user.blockedUntil) > new Date(),
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ code: 500, message: "Lỗi máy chủ" });
