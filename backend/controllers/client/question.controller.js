@@ -2,6 +2,7 @@ import { Question } from "../../models/Question.model.js";
 import XLSX from "xlsx";
 import fs from "fs";
 import path from "path";
+import { userLog } from "../../utils/logUser.js";
 
 // Convert questions data to Excel format
 const convertToExcelData = async (questionsData) => {
@@ -87,9 +88,11 @@ export const questionPost = async (req, res) => {
     }
     XLSX.writeFile(wb, filePath);
     console.log(`File has been saved to ${filePath}`);
+    userLog(req, "Save Questions to Excel", `User saved questions to Excel with exam title: ${req.body.examTitle}`);
     //read the excel file ,then save data to db
     importQuestion(filePath);
   } catch (error) {
+    userLog(req, "Save Questions to Excel", `Error saving questions to Excel: ${error.message}`);
     console.error("Error saving questions to Excel:", error);
     res.status(500).json({
       message: "An error occurred while saving questions to Excel.",
@@ -106,8 +109,10 @@ export const getQuestionForStudent = async (req, res) => {
     if (!question) {
       return res.status(404).json({ code: 404, message: "Question not found" });
     }
+    userLog(req, "View Question", `User viewed question with ID: ${questionId}`);
     res.status(200).json({ code: 200, question });
   } catch (error) {
+    userLog(req, "View Question", `Error fetching question for student: ${error.message}`);
     console.error("Error fetching question for student:", error);
     res.status(500).json({ code: 500, message: "Internal server error" });
   }

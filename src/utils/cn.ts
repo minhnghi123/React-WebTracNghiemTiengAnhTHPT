@@ -11,3 +11,11 @@ export const cleanString = (str: string): string => {
   }
   return str.replace(/\n/g, '<br />').replace(/\s+/g, ' ').trim();
 };
+export function getDeviceId() {
+  let id = localStorage.getItem("deviceId");
+  if (!id) {
+    id = crypto.randomUUID();
+    localStorage.setItem("deviceId", id);
+  }
+  return id;
+}

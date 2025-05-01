@@ -23,6 +23,8 @@ import { Question } from "@/types/interface";
 import ErrorReportModal from "@/components/ErrorReportModal"; // Import ErrorReportModal
 import errorrIcon from "@/Content/img/errorr.png"; // Import your error icon
 import SuggestedQuestionAnswer from "@/components/SuggestedQuestionAnswer";
+import usePreventDevTools from "@/security/devtools.security";
+import usePreventCopyPaste from "@/security/copyPaste.security";
 
 const { Panel } = Collapse;
 const { Title } = Typography;
@@ -168,7 +170,106 @@ const BaiLam: React.FC = () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
   }, [Examresult]);
+  // ------------------------------------
 
+  //SECURITY
+
+  const [alertCount, setAlertCount] = useState<number>(() => {
+    // Lấy số lần vi phạm từ localStorage khi khởi tạo
+    const savedCount = localStorage.getItem("alertCount");
+    return savedCount ? parseInt(savedCount, 10) : 0;
+  });
+  // useEffect(() => {
+  //   // Lưu số lần vi phạm vào localStorage mỗi khi alertCount thay đổi
+  //   localStorage.setItem("alertCount", alertCount.toString());
+
+  //   // Nếu vượt quá 5 lần, tự động nộp bài
+  //   if (alertCount > 5) {
+  //     alert("Bạn đã vi phạm quá nhiều lần. Hệ thống sẽ tự động nộp bài.");
+  //     handleSubmit();
+  //     handleReportViolation()
+      
+  //   }
+  // }, [alertCount]);
+  const handleReportViolation = async () => {
+    try {
+      const res= await ResultAPI.reportViolation();
+      if (res.code === 200) {
+      } else {
+        console.error("Failed to report violation:", res.message);
+      }
+    } catch (error) {
+      console.error("Error reporting violation:", error);
+    }
+  };
+  // Hàm tăng số lần vi phạm
+  const incrementAlertCount = () => {
+    if (Examresult) return; // không tăng nữa khi đã nộp bài
+    setAlertCount((prev) => {
+      const newCount = prev + 1;
+
+      // Hiển thị cảnh báo nếu chưa đạt giới hạn
+      if (newCount < 5) {
+        const remaining = 5 - newCount;
+        if (remaining > 0) {
+          showAlertModal(
+            `Bạn còn ${remaining} lần vi phạm nữa trước khi hệ thống tự động nộp bài.`
+          );
+        }
+      } else {
+        alert(
+          "Bạn đã vi phạm quá nhiều lần. Hệ thống sẽ tự động nộp bài.\nHành vi của bạn đã được báo cáo. Nếu bạn vi phạm thi quá 5 lần, hệ thống sẽ cấm thi bạn trong 3 ngày"
+        );
+        handleSubmit(); // Tự động nộp bài khi vượt quá giới hạn
+        handleReportViolation()
+
+      }
+
+      return newCount;
+    });
+  };
+  usePreventDevTools(incrementAlertCount);
+  usePreventCopyPaste(incrementAlertCount);
+  
+  // fullscreen 
+  useEffect(() => {
+    if (!Examresult && examDetails) {
+      const enterFullscreen = () => {
+        if (document.documentElement.requestFullscreen) {
+          document.documentElement.requestFullscreen();
+        } else if ((document as any).webkitRequestFullscreen) {
+          (document as any).webkitRequestFullscreen();
+        }
+      };
+
+      enterFullscreen();
+
+      const handleFullscreenChange = () => {
+        if (!document.fullscreenElement) {
+          incrementAlertCount();
+          alert("Bạn đã thoát chế độ toàn màn hình. Hãy quay lại ngay!");
+        }
+      };
+
+      const handleVisibilityChange = () => {
+        if (document.visibilityState === "hidden") {
+          incrementAlertCount();
+          alert("Bạn đã chuyển tab. Hãy quay lại ngay!");
+          // showAlertModal("Bạn đã chuyển tab. Hãy quay lại ngay!");
+        }
+      };
+
+      document.addEventListener("fullscreenchange", handleFullscreenChange);
+      document.addEventListener("visibilitychange", handleVisibilityChange);
+
+      return () => {
+        document.removeEventListener("fullscreenchange", handleFullscreenChange);
+        document.removeEventListener("visibilitychange", handleVisibilityChange);
+      };
+    }
+  }, [Examresult, examDetails]);
+
+  // ------------------------------------
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -261,9 +362,11 @@ const BaiLam: React.FC = () => {
 
     if (intervalRef.current) clearInterval(intervalRef.current);
 
+    // Reset số lần vi phạm sau khi nộp bài
+    localStorage.removeItem("alertCount");
+    setAlertCount(0);
     // Xác định các câu hỏi chưa trả lời
     const unansweredQuestions = getUnansweredQuestions();
-    console.log("Unanswered Questions:", unansweredQuestions);
 
     // Map answers and listeningAnswers to the required format
     const enrichedAnswers = answers.map((ans) => {
@@ -305,12 +408,15 @@ const BaiLam: React.FC = () => {
     };
 
     try {
+      console.log("Submitting answers:", submitAnswer);
       const response = await ResultAPI.submitAnswer(submitAnswer);
       if (response.code === 200) {
         showAlertModal("Nộp bài thành công");
         setExamresult(response);
         setSuggestedQuestions(response.suggestionQuestion);
         setRemainingTime(0);
+        localStorage.removeItem("alertCount"); // Reset alertCount
+        setAlertCount(0); // Reset state
         resultSectionRef.current?.scrollIntoView({ behavior: "smooth" });
       }
     } catch (error) {
@@ -425,7 +531,7 @@ const BaiLam: React.FC = () => {
     const otherQuestions =
       groupedQuestions["no-passage"]?.filter(
         (q) =>
-          !listeningSections.some((le:any) =>
+          !listeningSections.some((le: any) =>
             le.questions.some((lq: any) => lq._id === q._id)
           )
       ) || [];
@@ -831,7 +937,9 @@ const BaiLam: React.FC = () => {
                 <Collapse
                   onChange={(activeKeys) => {
                     if (Array.isArray(activeKeys)) {
-                      activeKeys.forEach((key) => handleExpandSuggestedQuestion(key));
+                      activeKeys.forEach((key) =>
+                        handleExpandSuggestedQuestion(key)
+                      );
                     } else {
                       handleExpandSuggestedQuestion(activeKeys);
                     }
@@ -844,7 +952,9 @@ const BaiLam: React.FC = () => {
                     ) : (
                       <div
                         dangerouslySetInnerHTML={{
-                          __html: advice.replace(/\*/g, "").replace(/\n/g, "<br />"),
+                          __html: advice
+                            .replace(/\*/g, "")
+                            .replace(/\n/g, "<br />"),
                         }}
                       />
                     )}
@@ -877,7 +987,7 @@ const BaiLam: React.FC = () => {
                         </div>
                       ))}
                   </Panel>
-                          {/* key={q._id ?? id} */}
+                  {/* key={q._id ?? id} */}
                   {/* Câu hỏi đề nghị */}
                   <Panel header="Câu hỏi đề nghị" key="suggested">
                     <Collapse>
@@ -907,9 +1017,8 @@ const BaiLam: React.FC = () => {
         width={260}
         theme="light"
         style={{
-          position: "fixed", // Cố định Sider
+          position: "sticky", // Prevent overlapping by using sticky positioning
           top: 0,
-          right: 0,
           height: "100vh", // Chiều cao toàn màn hình
           background: "#f7f8fa",
           borderLeft: "1px solid #f0f0f0",
@@ -982,7 +1091,16 @@ const BaiLam: React.FC = () => {
       <Modal
         title="Thông báo"
         visible={isAlertModalVisible}
-        onOk={() => setIsAlertModalVisible(false)}
+        onOk={() => {
+          setIsAlertModalVisible(false);
+          if (!document.fullscreenElement) {
+            if (document.documentElement.requestFullscreen) {
+              document.documentElement.requestFullscreen();
+            } else if ((document as any).webkitRequestFullscreen) {
+              (document as any).webkitRequestFullscreen();
+            }
+          }
+        }}
         okText="Đóng"
       >
         <p>{alertMessage}</p>

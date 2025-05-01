@@ -82,6 +82,11 @@ export const ResultAPI = {
     const response = await request.post(`/result/save`, data);
     return response.data;
   },
+  reportViolation: async ()=>{
+    const response = await request.post(`/result/report-violation`);
+    return response.data;
+  }
+  ,
   saveSingleAnswer: async (p0: { resultId: any; questionId: string; selectedAnswerId: string | null; }, data: {
   resultId: string;
   questionId: string;
@@ -92,8 +97,9 @@ export const ResultAPI = {
     const response = await request.post(`/result/save-single-answer`, data);
     return response.data;
   },
+  
 };
-
+  
 export const ExamAPIStudent = {
   getAllExam: async (page: number) => {
     const response = await request.get(`/exam/?page=${page}`);

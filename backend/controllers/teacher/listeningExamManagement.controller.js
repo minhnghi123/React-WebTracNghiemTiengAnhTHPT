@@ -6,6 +6,7 @@ import { Audio } from "../../models/Audio.model.js";
 import XLSX from "xlsx";
 import mongoose from "mongoose";
 import ListeningQuestion from "../../models/ListeningQuestion.js";
+import { userLog } from "../../utils/logUser.js";
 
 export const createListeningExamController = async (req, res) => {
   try {
@@ -14,6 +15,8 @@ export const createListeningExamController = async (req, res) => {
     const newExam = new ListeningExam(data);
 
     await newExam.save();
+
+    userLog(req, "Create Listening Exam", "Created a new listening exam.");
 
     return res.status(201).json({
       message: "Bài kiểm tra đã được tạo thành công!",
@@ -44,6 +47,8 @@ export const getAllListeningExamsController = async (req, res) => {
       .populate("teacherId")
       .populate("audio");
 
+    userLog(req, "Fetch Listening Exams", "Fetched all listening exams.");
+
     return res.status(200).json({
       message: "Danh sách bài kiểm tra",
       data: exams,
@@ -68,6 +73,8 @@ export const getAllListeningExamsOfMyselfController = async (req, res) => {
       .populate("teacherId")
       .populate("audio");
 
+    userLog(req, "Fetch My Listening Exams", "Fetched all listening exams created by the user.");
+
     return res.status(200).json({
       message: "Danh sách bài kiểm tra của bạn",
       data: exams,
@@ -91,6 +98,8 @@ export const updateListeningExamController = async (req, res) => {
       updateData,
       { new: true, runValidators: true }
     );
+
+    userLog(req, "Update Listening Exam", `Updated listening exam with ID: ${req.params.examId}`);
 
     return res.status(200).json({
       message: "Cập nhật bài kiểm tra thành công!",
@@ -118,6 +127,8 @@ export const deleteExamController = async (req, res) => {
     if (!exam) {
       return res.status(404).json({ message: "Bài kiểm tra không tồn tại." });
     }
+
+    userLog(req, "Delete Listening Exam", `Soft deleted listening exam with ID: ${req.params.examId}`);
 
     return res.status(200).json({
       message: "Bài kiểm tra đã được xóa thành công (soft delete).",
@@ -258,6 +269,8 @@ export const importListeningExamController = async (req, res) => {
       endTime: new Date(Date.now() + 90 * 60 * 1000),
       isPublic: false,
     });
+
+    userLog(req, "Import Listening Exam", "Imported a listening exam from files.");
 
     res.status(200).json({
       success: true,

@@ -1,5 +1,6 @@
 import ListeningExam from "../../models/listeningExam.model.js";
 import { redisService } from "../../config/redis.config.js";
+import { userLog } from "../../utils/logUser.js";
 
 export const index = async (req, res) => {
   try {
@@ -54,6 +55,9 @@ export const index = async (req, res) => {
       hasNextPage: currentPage < totalPage,
     };
 
+    // Log user action
+    userLog(req, "View Listening Exams", `User accessed listening exams list on page ${currentPage} with limit ${limitItems}`);
+
     // Cache the result in Redis
     await redisService.set(
       `CACHE_EXAM_PAGE_${currentPage}_LIMIT_${limitItems}`,
@@ -63,6 +67,9 @@ export const index = async (req, res) => {
     // Return the response
     res.status(200).json(data);
   } catch (error) {
+    // Log error
+    userLog(req, "View Listening Exams", `Error viewing listening exams: ${error.message}`);
+    
     // Handle any errors
     res.status(400).json({ code: 400, message: error.message });
   }

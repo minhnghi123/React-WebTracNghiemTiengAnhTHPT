@@ -10,6 +10,8 @@ import { useEffect, useState } from "react";
 import { ExamAPIStudent } from "@/services/student";
 import { useNavigate } from "react-router-dom";
 import flex from "antd/es/flex";
+import { AuthApi } from "@/services/Auth";
+import BlockPage, { BlockInfo } from "@/pages/BlockPage";
 
 const { Title, Text } = Typography;
 const { Search } = Input;
@@ -67,7 +69,7 @@ export const KyThi = () => {
   };
 
   const filteredData = data.filter((exam) => {
-    const matchesSearch = (exam.title && " ")
+    const matchesSearch = ((exam.title ?? "") && " ")
       .toLowerCase()
       .includes(searchText.toLowerCase());
     const matchesClass = selectedClass ? exam.class === selectedClass : true;
@@ -142,7 +144,7 @@ export const KyThi = () => {
       ))}
     </Row>
   );
-
+  
   return (
     <div className="container mx-auto p-4">
       <Space

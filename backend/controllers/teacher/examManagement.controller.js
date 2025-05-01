@@ -15,6 +15,7 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { Packer, Document } from "docx";
+import { userLog } from "../../utils/logUser.js";
 
 import XLSX from "xlsx";
 const __filename = fileURLToPath(import.meta.url);
@@ -47,6 +48,7 @@ export const getAllExams = async (req, res) => {
     // Đếm tổng số đề thi thỏa mãn bộ lọc
     const total = await Exam.countDocuments(filter);
     // Phản hồi thành công
+    userLog(req, "Fetch Exams", "Fetched all exams with filters and pagination.");
     return res.status(200).json({
       success: true,
       message: "Lấy danh sách đề thi thành công!",
@@ -91,6 +93,7 @@ export const getExamDetail = async (req, res) => {
     }
 
     // Phản hồi thành công với thông tin đề thi
+    userLog(req, "Fetch Exam Detail", `Fetched details for exam with slug: ${req.params.slug}`);
     return res.status(200).json({
       success: true,
       message: "Lấy thông tin đề thi thành công!",
@@ -130,6 +133,7 @@ export const toggleExamVisibility = async (req, res) => {
     await exam.save();
 
     // Phản hồi thành công
+    userLog(req, "Toggle Exam Visibility", `Toggled visibility for exam with ID: ${req.params.id}`);
     return res.status(200).json({
       success: true,
       message: `Đề thi đã được ${
@@ -202,6 +206,7 @@ export const createExam = async (req, res) => {
     const savedExam = await newExam.save();
 
     // Phản hồi thành công
+    userLog(req, "Create Exam", "Created a new exam.");
     return res.status(200).json({
       success: true,
       message: "Đề thi đã được tạo thành công!",
@@ -271,6 +276,7 @@ export const updateExam = async (req, res) => {
     }
 
     // Phản hồi thành công
+    userLog(req, "Update Exam", `Updated exam with slug: ${req.params.slug}`);
     return res.status(200).json({
       success: true,
       message: "Đề thi đã được cập nhật thành công!",
@@ -303,6 +309,7 @@ export const deleteExam = async (req, res) => {
     }
 
     // Phản hồi thành công
+    userLog(req, "Delete Exam", `Deleted exam with ID: ${req.params.id}`);
     return res.status(200).json({
       success: true,
       message: "Đề thi đã được xóa thành công!",
@@ -361,6 +368,7 @@ export const setExamSchedule = async (req, res) => {
     }
 
     // Phản hồi thành công
+    userLog(req, "Set Exam Schedule", `Set schedule for exam with ID: ${req.params.id}`);
     return res.status(200).json({
       success: true,
       message: "Lịch thi đã được cập nhật thành công!",
@@ -521,6 +529,7 @@ export const autoGenerateExam = async (req, res) => {
 
     await newExam.save();
 
+    userLog(req, "Auto Generate Exam", "Automatically generated an exam.");
     res.status(200).json({
       code: 200,
       message: "Tạo đề thi thành công!",
@@ -591,11 +600,14 @@ export const exportExamIntoWord = async (req, res) => {
       // Add reading questions grouped by passage
       const readingQuestions = Object.entries(groupedQuestions).map(
         ([passageId, questions]) => ({
-          passage: passageId === "noPassage" ? null : questions[0].passageId.content,
+          passage:
+            passageId === "noPassage" ? null : questions[0].passageId.content,
           questions,
         })
       );
-      sectionChildren.push(...formatReadingQuestions(readingQuestions, startIndex));
+      sectionChildren.push(
+        ...formatReadingQuestions(readingQuestions, startIndex)
+      );
 
       // Update startIndex after reading questions
       startIndex += variant.questions.length;
@@ -605,21 +617,37 @@ export const exportExamIntoWord = async (req, res) => {
       standaloneQuestions.forEach((question) => {
         if (question.questionType === "6742fb1cd56a2e75dbd817ea") {
           // Multiple Choice
-          sectionChildren.push(...formatExamQuestions([question], startIndex++));
+          sectionChildren.push(
+            ...formatExamQuestions([question], startIndex++)
+          );
         } else if (question.questionType === "6742fb3bd56a2e75dbd817ec") {
-          sectionChildren.push(...formatFillInBlankQuestions([question], startIndex++));
+          sectionChildren.push(
+            ...formatFillInBlankQuestions([question], startIndex++)
+          );
         } else if (question.questionType === "6742fb5dd56a2e75dbd817ee") {
           // True/False/Not Given (convert to multiple-choice format)
           const convertedQuestion = {
             ...question,
             answers: [
-              { text: "True", isCorrect: question.correctAnswerForTrueFalseNGV === "true" },
-              { text: "False", isCorrect: question.correctAnswerForTrueFalseNGV === "false" },
-              { text: "Not Given", isCorrect: question.correctAnswerForTrueFalseNGV === "not given" },
+              {
+                text: "True",
+                isCorrect: question.correctAnswerForTrueFalseNGV === "true",
+              },
+              {
+                text: "False",
+                isCorrect: question.correctAnswerForTrueFalseNGV === "false",
+              },
+              {
+                text: "Not Given",
+                isCorrect:
+                  question.correctAnswerForTrueFalseNGV === "not given",
+              },
               { text: "No Answer", isCorrect: false },
             ],
           };
-          sectionChildren.push(...formatExamQuestions([convertedQuestion], startIndex++));
+          sectionChildren.push(
+            ...formatExamQuestions([convertedQuestion], startIndex++)
+          );
         }
       });
 
@@ -635,12 +663,17 @@ export const exportExamIntoWord = async (req, res) => {
       const buffer = await Packer.toBuffer(doc);
 
       const fileName = `${exam.title} - ${variant.code}.docx`;
-      const downloadPath = path.join(process.env.USERPROFILE, "Downloads", fileName);
+      const downloadPath = path.join(
+        process.env.USERPROFILE,
+        "Downloads",
+        fileName
+      );
 
       fs.writeFileSync(downloadPath, buffer);
       exportPaths.push(downloadPath);
     }
 
+    userLog(req, "Export Exam to Word", "Exported exam into Word document.");
     res.status(200).json({
       success: true,
       message: `${variantCount} mã đề đã được export thành công.`,
@@ -675,6 +708,7 @@ export const copyExamFromOthers = async (req, res) => {
       listeningExams: exam.listeningExams, // Add this line
     });
     await newExam.save();
+    userLog(req, "Copy Exam", `Copied exam with ID: ${req.body.examId}`);
     return res.status(200).json({
       success: true,
       message: "Sao chép đề thi thành công!",
@@ -788,9 +822,13 @@ export const importExamFromExcel = async (req, res) => {
         const questionTypeId = questionTypeMap[normalizedType];
 
         if (!questionTypeId) {
+          console.log(normalizedType, questionTypeId);
           return res.status(400).json({
             success: false,
             message: `Invalid QuestionType: ${question.QuestionType}`,
+            normalizedType,
+            questionTypeId,
+            question,
           });
         }
 
@@ -945,6 +983,7 @@ export const importExamFromExcel = async (req, res) => {
 
       await newExam.save();
 
+      userLog(req, "Import Exam from Excel", "Imported exam from an Excel file.");
       return res.status(200).json({
         success: true,
         message: "Import exam successfully!",
@@ -1080,6 +1119,7 @@ export const importExamFromExcel = async (req, res) => {
       });
       await newExam.save();
 
+      userLog(req, "Import Exam from Excel", "Imported exam from an Excel file.");
       return res.status(200).json({
         success: true,
         message: "Import exam successfully (only questions)!",

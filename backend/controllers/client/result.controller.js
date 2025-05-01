@@ -9,8 +9,8 @@ import jwt from "jsonwebtoken";
 import { ENV_VARS } from "../../config/envVars.config.js";
 import { Audio } from "../../models/Audio.model.js";
 import ListeningExam from "../../models/listeningExam.model.js";
-
-
+import { TaiKhoan } from "../../models/Taikhoan.model.js";
+import { userLog } from "../../utils/logUser.js";
 
 // [GET]: /result/
 // Lấy tất cả kết quả (không bị xóa và đã hoàn thành) và populate các trường liên quan
@@ -35,11 +35,13 @@ export const getAllResults = async (req, res) => {
         },
       ],
     });
+    userLog(req, "View All Results", "User fetched all completed results.");
     res.status(200).json({
       code: 200,
       data: results,
     });
   } catch (error) {
+    userLog(req, "View All Results", `Error fetching results: ${error.message}`);
     res.status(500).json({ message: "Failed to fetch results", error });
   }
 };
@@ -62,11 +64,13 @@ export const getAllListeningResults = async (req, res) => {
       },
     });
 
+    userLog(req, "View All Listening Results", "User fetched all completed listening results.");
     res.status(200).json({
       code: 200,
       data: results,
     });
   } catch (error) {
+    userLog(req, "View All Listening Results", `Error fetching listening results: ${error.message}`);
     res.status(500).json({ message: "Failed to fetch listening results", error });
   }
 };
@@ -284,6 +288,7 @@ export const submitExam = async (req, res) => {
     // Build AI prompt
     let prompt2 = incorrectAnswer.map(q => `Đây là câu hỏi tiếng anh (${q.questionContent}), đáp án: ${q.answerDetail}, kiến thức: ${q.knowledge}.`).join(" ");
     let prompt = "Hãy đưa ra lời khuyên, lộ trình học tiếng Anh biết học sinh đẫ làm các câu trả lời sai sau đây: " + prompt2;
+    userLog(req, "Submit Exam", `User submitted exam with result ID: ${req.body.resultId}`);
     return res.status(200).json({
       code: 200,
       message: "Exam submitted successfully!",
@@ -302,6 +307,7 @@ export const submitExam = async (req, res) => {
       arrResponse: prompt
     });
   } catch (error) {
+    userLog(req, "Submit Exam", `Error submitting exam: ${error.message}`);
     console.error("Error processing exam:", error);
     return res.status(500).json({ message: "Error submitting exam.", error: error.message });
   }
@@ -419,6 +425,7 @@ export const submitListeningExam = async (req, res) => {
 
     await existingResult.save();
 
+    userLog(req, "Submit Listening Exam", `User submitted listening exam with result ID: ${req.body.resultId}`);
     res.status(200).json({
       code: 200,
       message: "Listening exam submitted successfully!",
@@ -429,6 +436,7 @@ export const submitListeningExam = async (req, res) => {
       details: questionDetails,
     });
   } catch (error) {
+    userLog(req, "Submit Listening Exam", `Error submitting listening exam: ${error.message}`);
     res.status(500).json({
       message: "Error submitting listening exam.",
       error: error.message,
@@ -448,12 +456,14 @@ export const deleteResult = async (req, res) => {
     if (!result) {
       return res.status(404).json({ message: "Result not found" });
     }
+    userLog(req, "Delete Result", `User soft-deleted result with ID: ${id}`);
     res.status(200).json({
       code: 200,
       message: "Result soft-deleted successfully",
       result,
     });
   } catch (error) {
+    userLog(req, "Delete Result", `Error soft-deleting result: ${error.message}`);
     res.status(500).json({
       code: 500,
       message: "Failed to soft-delete result",
@@ -482,6 +492,7 @@ export const getWrongQuestions = async (req, res) => {
     const wrongListeningQuestions = result.listeningQuestions.filter(
       (q) => !q.isCorrect
     );
+    userLog(req, "View Wrong Questions", `User fetched wrong questions for result ID: ${resultId}`);
     res.status(200).json({
       code: 200,
       message: "Wrong questions fetched successfully.",
@@ -489,6 +500,7 @@ export const getWrongQuestions = async (req, res) => {
       wrongListeningQuestions,
     });
   } catch (error) {
+    userLog(req, "View Wrong Questions", `Error fetching wrong questions: ${error.message}`);
     res.status(500).json({
       code: 500,
       message: "Failed to fetch wrong questions",
@@ -631,12 +643,14 @@ export const getDontCompletedExam = async (req, res) => {
       ],
     });
     // Return only existing ongoing exams without creating new ones
+    userLog(req, "Check Incomplete Exams", "User checked incomplete exams and updated final scores.");
     res.status(200).json({
       code: 200,
       message: "Final scores computed and incomplete exams updated successfully",
       results: ongoingExam || null,
     });
   } catch (error) {
+    userLog(req, "Check Incomplete Exams", `Error checking incomplete exams: ${error.message}`);
     console.error("Error checking incomplete exams:", error);
     res.status(500).json({
       code: 500,
@@ -685,12 +699,14 @@ export const savedExam = async (req, res) => {
     existingResult.questions = answers;
     existingResult.listeningQuestions = listeningAnswers;
     await existingResult.save();
+    userLog(req, "Save Exam Progress", `User saved progress for exam ID: ${req.body.examId}`);
     res.status(200).json({
       code: 200,
       message: "Exam progress saved successfully!",
       result: existingResult,
     });
   } catch (error) {
+    userLog(req, "Save Exam Progress", `Error saving exam progress: ${error.message}`);
     console.error("Error saving exam progress:", error);
     res.status(500).json({
       message: "Error saving exam progress.",
@@ -840,16 +856,57 @@ export const saveSingleAnswer = async (req, res) => {
 
     await existingResult.save();
 
+    // userLog(req, "Save Single Answer", `User saved single answer for question ID: ${req.body.questionId}`);
     res.status(200).json({
       code: 200,
       message: "Answer saved successfully!",
       result: existingResult,
     });
   } catch (error) {
+    // userLog(req, "Save Single Answer", `Error saving single answer: ${error.message}`);
     console.error("Error saving single answer:", error);
     res.status(500).json({
       message: "Error saving single answer.",
       error: error.message,
     });
+  }
+};
+
+export const reportViolation = async (req, res) => {
+  try {
+    const token = req.cookies["jwt-token"];
+    const decoded = jwt.verify(token, ENV_VARS.JWT_SECRET);
+    const userId = decoded.userId;
+     
+    if (!userId) {
+      return res.status(400).json({ message: "User ID is required." });
+    }
+
+    const user = await TaiKhoan.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    // Increment violation count
+    user.violationCount += 1;
+
+    // Check if violationCount is a multiple of 5
+    if (user.violationCount % 5 === 0) {
+      user.violationCount = 0; // Reset violation count
+      user.blockedUntil = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000); // Block for 3 days
+    }
+
+    await user.save();
+
+    userLog(req, "Report Violation", `User reported a violation. User ID: ${decoded.userId}`);
+    res.status(200).json({
+      message: "Violation reported successfully.",
+      violationCount: user.violationCount,
+      blockedUntil: user.blockedUntil,
+    });
+  } catch (error) {
+    userLog(req, "Report Violation", `Error reporting violation: ${error.message}`);
+    console.error("Error reporting violation:", error);
+    res.status(500).json({ message: "Error reporting violation.", error: error.message });
   }
 };

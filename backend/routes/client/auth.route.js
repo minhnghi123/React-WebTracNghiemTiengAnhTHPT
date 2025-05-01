@@ -7,6 +7,8 @@ import {
   forgotPost,
   sendOtpPost,
   resetPassword,
+  getBlockedInfo,
+  saveTrustedDevice,
 } from "../../controllers/client/auth.controller.js";
 import { protectedRoute } from "../../middlewares/protectedRoute.middleware.js";
 import { resetPasswordMiddleware } from "../../middlewares/resetPassword.middleware.js";
@@ -21,4 +23,6 @@ router.post(
   resetPasswordMiddleware,
   resetPassword
 );
+router.get("/blocked-info/", getBlockedInfo);
+router.post("/save-trusted-device", saveTrustedDevice);
 export default router;

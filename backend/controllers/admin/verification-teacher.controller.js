@@ -2,6 +2,7 @@ import { VerificationRequest } from "../../models/VerificationRequest.model.js";
 import { TaiKhoan } from "../../models/Taikhoan.model.js";
 import { generateTokenAndSetToken } from "../../utils/generateToken.util.js";
 import { sendMail } from "../../helpers/sendMail.helper.js";
+import { userLog } from "../../utils/logUser.js";
 
 // Ensure the sendMail helper is configured with valid SMTP credentials
 // Example: Check the sendMail.helper.js file for proper configuration
@@ -10,6 +11,7 @@ export async function getVerificationRequests(req, res) {
   try {
     const verificationRequests = await VerificationRequest.find();
     res.status(200).json(verificationRequests);
+    userLog(req, "Fetch Verification Requests", "Fetched all verification requests.");
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Lỗi máy chủ nội bộ" });
@@ -25,6 +27,7 @@ export async function getDetailVerificationRequest(req, res) {
         .json({ message: "Không tìm thấy yêu cầu xác minh" });
     }
     res.status(200).json(verificationRequest);
+    userLog(req, "Fetch Verification Request Detail", `Fetched verification request with ID: ${req.params.requestId}`);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Lỗi máy chủ nội bộ" });
@@ -66,6 +69,7 @@ export async function approveTeacher(req, res) {
     await verificationRequest.save();
 
     res.status(200).json({ message: "Phê duyệt giáo viên thành công" });
+    userLog(req, "Approve Teacher", `Approved teacher account for request ID: ${req.params.requestId}`);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Lỗi máy chủ nội bộ" });
@@ -99,6 +103,7 @@ export async function rejectTeacher(req, res) {
     );
 
     res.status(200).json({ message: "Từ chối giáo viên thành công" });
+    userLog(req, "Reject Teacher", `Rejected teacher account for request ID: ${req.params.requestId}`);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Lỗi máy chủ nội bộ" });

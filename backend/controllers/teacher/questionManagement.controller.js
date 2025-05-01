@@ -4,6 +4,7 @@ import { Audio } from "../../models/Audio.model.js";
 import { Passage } from "../../models/Passage.model.js";
 import XLSX from "xlsx";
 import fs from "fs";
+import { userLog } from "../../utils/logUser.js";
 
 export const questionManagement = async (req, res) => {
   // //questionType
@@ -50,6 +51,8 @@ export const questionManagement = async (req, res) => {
     })
   );
 
+  userLog(req, "Fetch Questions", "Fetched questions with pagination and filters.");
+
   res.status(200).json({
     code: 200,
     message: "Lấy danh sách câu hỏi thành công!",
@@ -77,6 +80,8 @@ export const detail = async (req, res) => {
     passage = await Passage.findById(question.passageId); 
   }
 
+  userLog(req, "Fetch Question Detail", `Fetched details for question ID: ${req.params.id}`);
+
   res.status(200).json({
     code: 200,
     message: "Lấy chi tiết câu hỏi thành công",
@@ -94,6 +99,9 @@ export const update = async (req, res) => {
         message: "Không tìm thấy câu hỏi",
       });
     }
+
+    userLog(req, "Fetch Question for Update", `Fetched question for update with ID: ${req.params.id}`);
+
     res.status(200).json({
       code: 200,
       message: "Lấy chi tiết câu hỏi thành công",
@@ -116,6 +124,9 @@ export const createPost = async (req, res) => {
       newQuestion.audio = newAudio._id;
     }
     await newQuestion.save();
+
+    userLog(req, "Create Question", "Created a new question.");
+
     res.status(200).json({
       code: 200,
       message: "Tạo câu hỏi mới thành công",
@@ -139,6 +150,9 @@ export const deletePatch = async (req, res) => {
         deleted: true,
       }
     );
+
+    userLog(req, "Delete Question", `Soft deleted question with ID: ${req.params.id}`);
+
     res.status(200).json({
       code: 200,
       message: "Xóa câu hỏi thành công",
@@ -178,6 +192,8 @@ export const updatePatch = async (req, res) => {
       },
       updateData
     );
+
+    userLog(req, "Update Question", `Updated question with ID: ${req.params.id}`);
 
     res.status(200).json({
       code: 200,
@@ -268,6 +284,8 @@ export const importExcel = async (req, res) => {
       collectQuestions,
       { ordered: false } // If any error occurs, stop inserting and return the error
     );
+
+    userLog(req, "Import Questions from Excel", "Imported questions from an Excel file.");
 
     // Xóa tệp tạm thời
     fs.unlink(excel.tempFilePath, (err) => {

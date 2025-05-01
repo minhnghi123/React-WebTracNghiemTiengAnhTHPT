@@ -3,6 +3,8 @@ import { request } from "@/config/request";
 export interface User {
   email: string;
   password: string;
+  captchaToken?: string;
+  deviceId?: string;
 }
 export interface UserDK {
   username: string;
@@ -19,6 +21,14 @@ export const AuthApi = {
     const response = await request.post("/auth/login", data);
     return response;
   },
+  getBlockInfo: async () => {
+    const response = await request.get("/auth/blocked-info/");
+    return response.data;
+  },
+  saveTrustedDevice: async (deviceId: string) => {
+    const response = await request.post("/auth/save-trusted-device", { deviceId });
+    return response.data;
+  },
   logout: async () => {
     const response = await request.post("/auth/logout");
     return response;
@@ -31,8 +41,11 @@ export const AuthApi = {
     const response = await request.post(`/auth/send-otp`, { email, otp });
     return response.data;
   },
-  resetPassword: async ( newPassword: string, rePassword: string,) => {
-    const response = await request.post(`/auth/reset-password`, {  newPassword ,rePassword});
+  resetPassword: async (newPassword: string, rePassword: string) => {
+    const response = await request.post(`/auth/reset-password`, {
+      newPassword,
+      rePassword,
+    });
     return response.data;
   },
 };
