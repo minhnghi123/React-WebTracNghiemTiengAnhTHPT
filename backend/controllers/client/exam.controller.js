@@ -4,6 +4,7 @@ import Result from "../../models/Result.model.js";
 import { Passage } from "../../models/Passage.model.js";
 import ListeningExam from "../../models/listeningExam.model.js";
 import { userLog } from "../../utils/logUser.js";
+import { TaiKhoan } from "../../models/Taikhoan.model.js";
 
 function shuffleArray(array) {
   for (let i = array.length - 1; i > 0; i--) {

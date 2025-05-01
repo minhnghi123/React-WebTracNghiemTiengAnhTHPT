@@ -228,8 +228,9 @@ export async function saveTrustedDevice(req, res) {
       return res.status(404).json({ code: 404, message: "Không tìm thấy người dùng" });
     }
 
+    // Thêm thiết bị tin cậy
     user.trustedDevices.push({
-      deviceId: deviceId,
+      deviceId, // Chỉ lưu chuỗi deviceId
       addedAt: new Date(),
     });
     await user.save();

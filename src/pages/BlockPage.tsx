@@ -15,8 +15,16 @@ const BlockPage = ({ info }: { info: BlockInfo }) => {
           Vui lòng chờ đến thời gian kết thúc.
         </h1>
         <p className="lead">
-          Cấm đến ngày: {new Date(info.blockedUntil).toLocaleString()}
-        </p>
+  Cấm đến ngày:{" "}
+  {new Date(info.blockedUntil).toLocaleString("vi-VN", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  })}
+</p>
       </div>
     </div>
   );

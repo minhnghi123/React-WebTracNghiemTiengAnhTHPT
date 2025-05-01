@@ -1,20 +1,13 @@
 import fs from "fs";
 import path from "path";
-import { fileURLToPath } from "url"; // Added for ES module compatibility
+import { fileURLToPath } from "url"; 
 import { ENV_VARS } from "../config/envVars.config.js";
 import jwt from "jsonwebtoken";
-
-// Resolve __dirname for ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const logFilePath = path.join(__dirname, "../logs/userLog.log");
 
-/**
- * @param userId - Tên người dùng
- * @param action - Hành động
- * @param details - Chi tiết
- */
 export const userLog = (req, action, details) => {
   try {
     const token = req.cookies["jwt-token"];
@@ -42,4 +35,4 @@ export const userLog = (req, action, details) => {
   } catch (loi) {
     console.error("Lỗi khi ghi nhật ký người dùng:", loi);
   }
-}; // Added missing closing brace and semicolon
+}; 

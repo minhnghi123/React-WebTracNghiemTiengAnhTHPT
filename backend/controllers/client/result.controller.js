@@ -886,18 +886,12 @@ export const reportViolation = async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: "User not found." });
     }
-
-    // Increment violation count
     user.violationCount += 1;
-
-    // Check if violationCount is a multiple of 5
     if (user.violationCount % 5 === 0) {
-      user.violationCount = 0; // Reset violation count
-      user.blockedUntil = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000); // Block for 3 days
+      user.violationCount = 0; 
+      user.blockedUntil = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000); // chặn 3 ngày
     }
-
     await user.save();
-
     userLog(req, "Report Violation", `User reported a violation. User ID: ${decoded.userId}`);
     res.status(200).json({
       message: "Violation reported successfully.",

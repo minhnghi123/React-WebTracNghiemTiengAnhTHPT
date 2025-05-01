@@ -50,9 +50,9 @@ const taiKhoanSchema = new mongoose.Schema({
   },
   trustedDevices: [
     {
-      deviceId: String,              // Mã định danh thiết bị đã xác thực/trusted
-      addedAt: Date                  // Ngày thêm vào danh sách trusted
-    }
+      deviceId: { type: String, required: true },
+      addedAt: { type: Date, default: Date.now },
+    },
   ],
 });
 export const TaiKhoan = mongoose.model("TaiKhoan", taiKhoanSchema, "taikhoans");
