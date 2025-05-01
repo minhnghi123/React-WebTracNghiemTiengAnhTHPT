@@ -9,6 +9,10 @@ import {
   resetPassword,
   getBlockedInfo,
   saveTrustedDevice,
+  enable2FA,
+  verify2FA,
+  get2FAStatus,
+  check2FAStatus,
   verifyLoginOtp,
 } from "../../controllers/client/auth.controller.js";
 import { protectedRoute } from "../../middlewares/protectedRoute.middleware.js";
@@ -26,5 +30,9 @@ router.post(
   resetPassword
 );
 router.get("/blocked-info/", getBlockedInfo);
+router.get("/get-2fa-status", protectedRoute, get2FAStatus);
 router.post("/save-trusted-device", saveTrustedDevice);
+router.post("/enable-2fa", protectedRoute, enable2FA);
+router.post("/verify-2fa", protectedRoute, verify2FA);
+router.post("/check-2fa-status", check2FAStatus);
 export default router;

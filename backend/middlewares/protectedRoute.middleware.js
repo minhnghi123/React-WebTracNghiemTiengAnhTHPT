@@ -62,9 +62,7 @@ export const isStudent = (req, res, next) => {
   }
   next();
 };
-
 // Admin role middleware
-
 export const isAdmin = (req, res, next) => {
   if (req.role !== "admin") {
     return res.status(403).json({

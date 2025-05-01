@@ -4,9 +4,12 @@ import { Tabs, List, Card } from "antd";
 import { useAuthContext } from "@/contexts/AuthProvider";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { HistoryPage } from "./history";
-import { ClassroomReponse, studentClassroomAPI } from "@/services/student/ClassroomAPI";
+import {
+  ClassroomReponse,
+  studentClassroomAPI,
+} from "@/services/student/ClassroomAPI";
 import "./prolife.css";
-
+import { Enable2FA } from "@/pages/Enable2FA";
 const { TabPane } = Tabs;
 
 export const Profile = () => {
@@ -24,7 +27,7 @@ export const Profile = () => {
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setEditedUser(prev => ({
+    setEditedUser((prev) => ({
       ...prev,
       [name]: value,
     }));
@@ -38,7 +41,7 @@ export const Profile = () => {
   const handleSaveClick = () => {
     // Gọi API để cập nhật thông tin người dùng (ví dụ: sử dụng fetch hoặc axios)
     // Sau khi API thành công, gọi onUpdateUser(editedUser) để cập nhật state ở component cha (nếu cần)
-    console.log('Lưu thông tin:', editedUser);
+    console.log("Lưu thông tin:", editedUser);
     setIsEditing(false);
     // **Lưu ý:** Bạn cần triển khai logic gọi API thực tế ở đây
   };
@@ -46,8 +49,6 @@ export const Profile = () => {
   const handleCancelClick = () => {
     setIsEditing(false);
   };
-
-
 
   const getAllClassrooms = async () => {
     try {
@@ -85,9 +86,9 @@ export const Profile = () => {
             </center>
           </div>
         </div>
-        ) : (
-          <p className="error-message">Không tìm thấy thông tin người dùng.</p>
-        )}
+      ) : (
+        <p className="error-message">Không tìm thấy thông tin người dùng.</p>
+      )}
 
       {/* Phần hiển thị 2 tab kết quả ôn tập và lớp học */}
       <Tabs defaultActiveKey="1" className="mt-8">
@@ -113,6 +114,9 @@ export const Profile = () => {
           ) : (
             <p>Chưa có lớp học nào.</p>
           )}
+        </TabPane>
+        <TabPane tab="Xác thực hai yếu tố" key="3">
+          <Enable2FA />
         </TabPane>
       </Tabs>
       {/* <YearHeatmap /> */}

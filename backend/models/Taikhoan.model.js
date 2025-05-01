@@ -47,16 +47,19 @@ const taiKhoanSchema = new mongoose.Schema({
     expireAt: { type: Date },
   },
   lastLoginInfo: {
-    ip: { type: String },             // IP đăng nhập lần gần nhất
-    userAgent: { type: String },      // Trình duyệt + hệ điều hành (User-Agent)
-    deviceId: { type: String },       // Có thể là fingerprint hoặc mã định danh thiết bị
-    time: { type: Date },             // Thời điểm đăng nhập gần nhất
+    ip: { type: String }, // IP đăng nhập lần gần nhất
+    userAgent: { type: String }, // Trình duyệt + hệ điều hành (User-Agent)
+    deviceId: { type: String }, // Có thể là fingerprint hoặc mã định danh thiết bị
+    time: { type: Date }, // Thời điểm đăng nhập gần nhất
   },
   trustedDevices: [
     {
       deviceId: { type: String, required: true },
       addedAt: { type: Date, default: Date.now },
+      deviceId: String, // Mã định danh thiết bị đã xác thực/trusted
+      addedAt: Date, // Ngày thêm vào danh sách trusted
     },
   ],
+  twoFactorSecret: { type: String, default: null }, // Lưu secret key cho 2FA
 });
 export const TaiKhoan = mongoose.model("TaiKhoan", taiKhoanSchema, "taikhoans");
