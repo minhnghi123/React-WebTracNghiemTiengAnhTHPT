@@ -24,36 +24,42 @@ export const Login = () => {
     setShowPassword(!showPassword);
   };
 
+  // Load số lần đăng nhập từ localStorage khi người dùng nhập username
+  useEffect(() => {
+    if (username) {
+      try {
+        const storedAttempts = JSON.parse(localStorage.getItem("loginAttempts") || "{}");
+        if (typeof storedAttempts === "object" && storedAttempts !== null && !Array.isArray(storedAttempts)) {
+          setLoginAttempts(storedAttempts[username] || 0);
+        } else {
+          setLoginAttempts(0);
+        }
+      } catch {
+        setLoginAttempts(0);
+      }
+    } else {
+      setLoginAttempts(0);
+    }
+  }, [username]);
+
+  // Xử lý hiển thị message (tự động ẩn sau 3s nếu không vượt quá số lần)
   useEffect(() => {
     if (message) {
-      // Nếu đang lỗi và đã vượt quá 5 lần thì KHÔNG clear message
       if (message.type === "error" && loginAttempts >= 5) {
         setMessage({
           text: "Bạn đã vượt quá số lần đăng nhập cho phép. Vui lòng đến trang Quên mật khẩu để lấy lại tài khoản.",
           type: "error",
         });
+      } else {
+        const timer = setTimeout(() => setMessage(null), 3000);
+        return () => clearTimeout(timer);
       }
-      
-      // Ngược lại (bình thường) thì clear message sau 3s
-      const timer = setTimeout(() => setMessage(null), 3000);
-      return () => clearTimeout(timer);
     }
   }, [message, loginAttempts]);
 
-  useEffect(() => {
-    if (username) {
-      const storedAttempts = JSON.parse(localStorage.getItem("loginAttempts") || "{}");
-  
-      if (storedAttempts[username]) {
-        setLoginAttempts(storedAttempts[username]); 
-      }
-    }
-  }, [username]);
-  
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    // Bước 1: Kiểm tra đã nhập tài khoản/mật khẩu chưa
     if (!username.trim() || !password.trim()) {
       setMessage({
         text: "Vui lòng nhập đầy đủ tài khoản và mật khẩu.",
@@ -61,6 +67,7 @@ export const Login = () => {
       });
       return;
     }
+
     getUser(username, password);
   };
 
@@ -68,6 +75,13 @@ export const Login = () => {
     try {
       const rq = await AuthApi.login({ email, password: pass });
       setMessage({ text: rq?.data.message, type: "success" });
+
+      // Reset số lần đăng nhập nếu thành công
+      const stored = JSON.parse(localStorage.getItem("loginAttempts") || "{}");
+      stored[email] = 0;
+      localStorage.setItem("loginAttempts", JSON.stringify(stored));
+      setLoginAttempts(0);
+
       if (rq?.status === 201) {
         handleLogin(rq?.data.user);
         if (rq?.data.user.role === "admin") {
@@ -79,7 +93,24 @@ export const Login = () => {
         }
       }
     } catch (error: any) {
-      setLoginAttempts((prev) => prev + 1); 
+      // Tăng số lần và lưu lại vào localStorage
+      setLoginAttempts((prev) => {
+        const newAttempts = prev + 1;
+        let storedAttempts: Record<string, number> = {};
+        try {
+          const parsed = JSON.parse(localStorage.getItem("loginAttempts") || "{}");
+          if (typeof parsed === "object" && parsed !== null && !Array.isArray(parsed)) {
+            storedAttempts = parsed;
+          }
+        } catch {
+          storedAttempts = {};
+        }
+        storedAttempts[email] = newAttempts;
+        localStorage.setItem("loginAttempts", JSON.stringify(storedAttempts));
+        return newAttempts;
+      });
+
+      // Hiển thị thông báo lỗi
       setMessage({
         text: "Đăng nhập thất bại. Vui lòng kiểm tra lại tài khoản và mật khẩu.",
         type: "error",
@@ -93,9 +124,7 @@ export const Login = () => {
         <h2 className={styles.title}>Đăng nhập</h2>
         <form onSubmit={handleSubmit}>
           <div className="mb-3">
-            <label htmlFor="username" className="form-label">
-              Tài khoản
-            </label>
+            <label htmlFor="username" className="form-label">Tài khoản</label>
             <input
               type="text"
               className="form-control"
@@ -107,9 +136,7 @@ export const Login = () => {
           </div>
 
           <div className="mb-3">
-            <label htmlFor="password" className="form-label">
-              Mật khẩu
-            </label>
+            <label htmlFor="password" className="form-label">Mật khẩu</label>
             <div className={styles.passwordWrapper}>
               <input
                 type={showPassword ? "text" : "password"}
@@ -147,9 +174,7 @@ export const Login = () => {
 
         {message && (
           <div
-            className={`alert alert-${
-              message.type === "success" ? "success" : "danger"
-            } mt-3`}
+            className={`alert alert-${message.type === "success" ? "success" : "danger"} mt-3`}
           >
             {message.text}
             {message.type === "error" && loginAttempts > 0 && loginAttempts < 5 && (
@@ -160,7 +185,6 @@ export const Login = () => {
           </div>
         )}
 
-        {/* Nếu vượt quá số lần --> hiện riêng nút này */}
         {loginAttempts >= 5 && (
           <div className="mt-3">
             <button
@@ -171,7 +195,6 @@ export const Login = () => {
             </button>
           </div>
         )}
-
       </div>
     </div>
   );

@@ -56,10 +56,7 @@ const BaiLam: React.FC = () => {
   const showSubmitModal = () => {
     setIsSubmitModalVisible(true);
   };
-  const showAlertModal = (message: string) => {
-    setAlertMessage(message);
-    setIsAlertModalVisible(true);
-  };
+  // Removed duplicate declaration of showAlertModal
   const handleCancelSubmit = () => {
     setIsSubmitModalVisible(false);
   };
@@ -120,6 +117,31 @@ const BaiLam: React.FC = () => {
 
     fetchExamDetails();
   }, []);
+
+  const [tabSwitchCount, setTabSwitchCount] = useState(0); // Đếm số lần chuyển tab
+  const maxTabSwitches = 3; // Giới hạn số lần chuyển tab
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "hidden") {
+        setTabSwitchCount((prev) => prev + 1);
+        showAlertModal("Bạn đã chuyển tab. Vui lòng quay lại tab làm bài!");
+      }
+    };
+  
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+  
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (tabSwitchCount > maxTabSwitches) {
+      showAlertModal("Bạn đã chuyển tab quá nhiều lần. Bài thi sẽ bị khóa.");
+      handleSubmit(); // Nộp bài hoặc khóa bài thi
+    }
+  }, [tabSwitchCount]);
 
   // Countdown timer logic
   useEffect(() => {
@@ -279,7 +301,7 @@ const BaiLam: React.FC = () => {
       answers: enrichedAnswers,
       listeningAnswers: enrichedListeningAnswers,
       unansweredQuestions,
-      questionTypes, // Removed as it is not part of SubmitAnswer type
+      questionTypes,
     };
 
     try {
@@ -295,7 +317,7 @@ const BaiLam: React.FC = () => {
       console.error("Error submitting exam:", error);
       showAlertModal("Đã xảy ra lỗi khi nộp bài.");
     }
-  };
+};
 
   useEffect(() => {
     const fetchPostSubmitData = async () => {
@@ -543,6 +565,11 @@ const BaiLam: React.FC = () => {
 
   // Initialize globalQuestionIndex to 1
   let globalQuestionIndex = 1;
+
+  const showAlertModal = (message: string) => {
+    setAlertMessage(message);
+    setIsAlertModalVisible(true);
+  };
 
   return (
     <Layout style={{ minHeight: "100vh", background: "#fff" }}>
@@ -952,6 +979,14 @@ const BaiLam: React.FC = () => {
         <p>Còn {getUnansweredQuestions().length} câu hỏi chưa được làm.</p>
       </Modal>
       {/* modal alert */}
+      <Modal
+        title="Thông báo"
+        visible={isAlertModalVisible}
+        onOk={() => setIsAlertModalVisible(false)}
+        okText="Đóng"
+      >
+        <p>{alertMessage}</p>
+      </Modal>
       <Modal
         title="Thông báo"
         visible={isAlertModalVisible}
