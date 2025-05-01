@@ -10,6 +10,8 @@ import { ENV_VARS } from "../../config/envVars.config.js";
 import axios from "axios";
 import { redisService } from "../../config/redis.config.js";
 import { userLog } from "../../utils/logUser.js";
+import speakeasy from "speakeasy";
+import qrcode from "qrcode";
 //----RECAPTCHA---
 // export async function verifyRecaptcha(token) {
 //   const secretKey = ENV_VARS.RECAPTCHA_SECRET_KEY;
@@ -31,11 +33,9 @@ import { userLog } from "../../utils/logUser.js";
 // ------HCAPTCHA--------
 export async function verifyHCaptcha(token) {
   const secretKey = ENV_VARS.HCAPTCHA_SECRET_KEY;
-
   const form = new URLSearchParams();
   form.append("secret", secretKey);
   form.append("response", token);
-
   const response = await axios.post(
     "https://hcaptcha.com/siteverify",
     form.toString(),
@@ -45,7 +45,6 @@ export async function verifyHCaptcha(token) {
       },
     }
   );
-
   // console.log(response.data);
   return response.data.success;
 }
@@ -101,7 +100,11 @@ export async function signup(req, res) {
       const text = `A new teacher has signed up. Please review and approve the request.\n\nUsername: ${username}\nEmail: ${email}`;
       sendMail(adminEmail, subject, text);
 
-      userLog(req, "Signup", `Teacher signup request for username: ${username}`);
+      userLog(
+        req,
+        "Signup",
+        `Teacher signup request for username: ${username}`
+      );
       return res.status(201).json({
         code: 201,
         message:
@@ -117,7 +120,11 @@ export async function signup(req, res) {
       });
       await newUser.save();
       generateTokenAndSetToken(newUser._id, res); //jwt
-      userLog(req, "Signup", `Student account created for username: ${username}`);
+      userLog(
+        req,
+        "Signup",
+        `Student account created for username: ${username}`
+      );
       return res
         .status(201)
         .json({ code: 201, message: "Tạo tài khoản người dùng thành công" });
@@ -132,15 +139,16 @@ export async function signup(req, res) {
   }
 }
 export async function login(req, res) {
-  const { email, password, captchaToken , deviceId} = req.body;
+  const { email, password, captchaToken, deviceId } = req.body;
   // lay ip cua nguoi dung
   const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
   // console.log(ip); -> dia chi ip v6
   try {
     if (!email || !password) {
-      return res
-        .status(400)
-        .json({ code: 400, message: "Email, mật khẩu và deviceId là bắt buộc" });
+      return res.status(400).json({
+        code: 400,
+        message: "Email, mật khẩu và deviceId là bắt buộc",
+      });
     }
     // Kiểm tra số lần thử đăng nhập từ IP
     const attempts = (await redisService.get(ip)) || 0;
@@ -179,12 +187,13 @@ export async function login(req, res) {
       return res
         .status(400)
         .json({ code: 400, message: "Mật khẩu không hợp lệ" });
-    } 
+    }
     // Kiểm tra thiết bị đã tin cậy?
-      const isTrusted = Array.isArray(user.trustedDevices) &&
-      user.trustedDevices.some(d => d.deviceId === deviceId);
+    const isTrusted =
+      Array.isArray(user.trustedDevices) &&
+      user.trustedDevices.some((d) => d.deviceId === deviceId);
 
-      if (!isTrusted) {
+    if (!isTrusted) {
       // Gửi mail cảnh báo
       const subject = "Cảnh báo đăng nhập thiết bị lạ";
       const text = `Chúng tôi phát hiện bạn đang đăng nhập từ thiết bị mới. Nếu không phải bạn, vui lòng liên hệ hỗ trợ.`;
@@ -195,12 +204,20 @@ export async function login(req, res) {
       //   code: 200,
       //   message: "Phát hiện thiết bị mới. Chúng tôi đã gửi cảnh báo vào email của bạn."
       // });
-      }
-
+    }
     // Đăng nhập thành công
     await redisService.del(ip); // Xóa số lần thử nếu đăng nhập thành công
     generateTokenAndSetToken(user._id, res); //jwt
     userLog(req, "Login", "User logged in successfully");
+    // Kiểm tra trạng thái 2FA
+    if (user.twoFactorSecret) {
+      return res.status(200).json({
+        code: 200,
+        message: "Vui lòng nhập mã OTP để tiếp tục",
+        requires2FA: true,
+      });
+    }
+
     res.status(201).json({
       code: 201,
       message: "Đăng nhập thành công",
@@ -225,7 +242,9 @@ export async function saveTrustedDevice(req, res) {
     const user = await TaiKhoan.findById(decoded.userId);
 
     if (!user) {
-      return res.status(404).json({ code: 404, message: "Không tìm thấy người dùng" });
+      return res
+        .status(404)
+        .json({ code: 404, message: "Không tìm thấy người dùng" });
     }
 
     user.trustedDevices.push({
@@ -235,7 +254,9 @@ export async function saveTrustedDevice(req, res) {
     await user.save();
 
     userLog(req, "Save Trusted Device", `Device ID: ${deviceId} saved`);
-    res.status(200).json({ code: 200, message: "Thiết bị đã được lưu thành công" });
+    res
+      .status(200)
+      .json({ code: 200, message: "Thiết bị đã được lưu thành công" });
   } catch (error) {
     console.error(error);
     res.status(500).json({ code: 500, message: "Lỗi máy chủ" });
@@ -381,9 +402,7 @@ export async function getBlockedInfo(req, res) {
   try {
     const token = req.cookies["jwt-token"];
     if (!token) {
-      return res
-        .status(401)
-        .json({ code: 401, message: "Bạn chưa đăng nhập" });
+      return res.status(401).json({ code: 401, message: "Bạn chưa đăng nhập" });
     }
 
     const decoded = jwt.verify(token, ENV_VARS.JWT_SECRET);
@@ -392,7 +411,9 @@ export async function getBlockedInfo(req, res) {
     const user = await TaiKhoan.findById(userId).select("blockedUntil");
 
     if (!user) {
-      return res.status(404).json({ code: 404, message: "Không tìm thấy người dùng" });
+      return res
+        .status(404)
+        .json({ code: 404, message: "Không tìm thấy người dùng" });
     }
 
     userLog(req, "Get Blocked Info", "Blocked info retrieved");
@@ -401,6 +422,108 @@ export async function getBlockedInfo(req, res) {
       blockedUntil: user.blockedUntil,
       isBlocked: user.blockedUntil && new Date(user.blockedUntil) > new Date(),
     });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ code: 500, message: "Lỗi máy chủ" });
+  }
+}
+
+export async function enable2FA(req, res) {
+  try {
+    const userId = req.user._id;
+    const user = await TaiKhoan.findById(userId);
+
+    if (!user) {
+      return res
+        .status(404)
+        .json({ code: 404, message: "Không tìm thấy người dùng" });
+    }
+
+    // Tạo secret key cho Google Authenticator
+    const secret = speakeasy.generateSecret({
+      name: `English-Website (${user.email})`, // Tên hiển thị trong Google Authenticator
+    });
+
+    // Lưu secret key vào cơ sở dữ liệu
+    user.twoFactorSecret = secret.base32;
+    await user.save();
+
+    // Tạo mã QR để người dùng quét
+    const qrCodeUrl = await qrcode.toDataURL(secret.otpauth_url);
+
+    res.status(200).json({
+      code: 200,
+      message: "2FA đã được kích hoạt",
+      qrCodeUrl, // Gửi mã QR về client
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ code: 500, message: "Lỗi máy chủ" });
+  }
+}
+export async function verify2FA(req, res) {
+  try {
+    const { otp } = req.body;
+    const userId = req.user._id;
+    const user = await TaiKhoan.findById(userId);
+
+    if (!user || !user.twoFactorSecret) {
+      return res
+        .status(400)
+        .json({ code: 400, message: "2FA chưa được kích hoạt" });
+    }
+
+    // Xác minh mã OTP với khoảng thời gian chênh lệch (window)
+    const isVerified = speakeasy.totp.verify({
+      secret: user.twoFactorSecret,
+      encoding: "base32",
+      token: otp,
+      window: 2, // Cho phép chênh lệch 1 khoảng thời gian (30 giây)
+    });
+
+    if (!isVerified) {
+      return res
+        .status(400)
+        .json({ code: 400, message: "Mã OTP không hợp lệ" });
+    }
+
+    res.status(200).json({ code: 200, message: "Xác thực 2FA thành công" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ code: 500, message: "Lỗi máy chủ" });
+  }
+}
+export async function get2FAStatus(req, res) {
+  try {
+    const userId = req.user._id;
+    const user = await TaiKhoan.findById(userId);
+
+    if (!user) {
+      return res
+        .status(404)
+        .json({ code: 404, message: "Không tìm thấy người dùng" });
+    }
+
+    const is2FAEnabled = !!user.twoFactorSecret;
+    res.status(200).json({ code: 200, is2FAEnabled });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ code: 500, message: "Lỗi máy chủ" });
+  }
+}
+export async function check2FAStatus(req, res) {
+  try {
+    const { email } = req.body;
+    const user = await TaiKhoan.findOne({ email });
+
+    if (!user) {
+      return res
+        .status(404)
+        .json({ code: 404, message: "Không tìm thấy người dùng" });
+    }
+
+    const is2FAEnabled = !!user.twoFactorSecret;
+    res.status(200).json({ code: 200, is2FAEnabled });
   } catch (error) {
     console.error(error);
     res.status(500).json({ code: 500, message: "Lỗi máy chủ" });

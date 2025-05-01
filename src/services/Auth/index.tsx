@@ -26,7 +26,9 @@ export const AuthApi = {
     return response.data;
   },
   saveTrustedDevice: async (deviceId: string) => {
-    const response = await request.post("/auth/save-trusted-device", { deviceId });
+    const response = await request.post("/auth/save-trusted-device", {
+      deviceId,
+    });
     return response.data;
   },
   logout: async () => {
@@ -46,6 +48,18 @@ export const AuthApi = {
       newPassword,
       rePassword,
     });
+    return response.data;
+  },
+  enable2FA: async () => {
+    const response = await request.post(`/auth/enable-2fa`);
+    return response.data;
+  },
+  verify2FA: async (data: { otp: string }) => {
+    const response = await request.post(`/auth/verify-2fa`, data);
+    return response.data;
+  },
+  get2FAStatus: async () => {
+    const response = await request.get(`/auth/get-2fa-status`);
     return response.data;
   },
 };
