@@ -9,6 +9,7 @@ import jwt from "jsonwebtoken";
 import { ENV_VARS } from "../../config/envVars.config.js";
 import axios from "axios";
 import { redisService } from "../../config/redis.config.js";
+import { userLog } from "../../utils/logUser.js";
 //----RECAPTCHA---
 // export async function verifyRecaptcha(token) {
 //   const secretKey = ENV_VARS.RECAPTCHA_SECRET_KEY;
@@ -100,6 +101,7 @@ export async function signup(req, res) {
       const text = `A new teacher has signed up. Please review and approve the request.\n\nUsername: ${username}\nEmail: ${email}`;
       sendMail(adminEmail, subject, text);
 
+      userLog(req, "Signup", `Teacher signup request for username: ${username}`);
       return res.status(201).json({
         code: 201,
         message:
@@ -115,6 +117,7 @@ export async function signup(req, res) {
       });
       await newUser.save();
       generateTokenAndSetToken(newUser._id, res); //jwt
+      userLog(req, "Signup", `Student account created for username: ${username}`);
       return res
         .status(201)
         .json({ code: 201, message: "Tạo tài khoản người dùng thành công" });
@@ -187,6 +190,7 @@ export async function login(req, res) {
       const text = `Chúng tôi phát hiện bạn đang đăng nhập từ thiết bị mới. Nếu không phải bạn, vui lòng liên hệ hỗ trợ.`;
       await sendMail(user.email, subject, text);
 
+      userLog(req, "Login", "Untrusted device detected");
       // return res.status(200).json({
       //   code: 200,
       //   message: "Phát hiện thiết bị mới. Chúng tôi đã gửi cảnh báo vào email của bạn."
@@ -196,6 +200,7 @@ export async function login(req, res) {
     // Đăng nhập thành công
     await redisService.del(ip); // Xóa số lần thử nếu đăng nhập thành công
     generateTokenAndSetToken(user._id, res); //jwt
+    userLog(req, "Login", "User logged in successfully");
     res.status(201).json({
       code: 201,
       message: "Đăng nhập thành công",
@@ -229,6 +234,7 @@ export async function saveTrustedDevice(req, res) {
     });
     await user.save();
 
+    userLog(req, "Save Trusted Device", `Device ID: ${deviceId} saved`);
     res.status(200).json({ code: 200, message: "Thiết bị đã được lưu thành công" });
   } catch (error) {
     console.error(error);
@@ -239,6 +245,7 @@ export async function saveTrustedDevice(req, res) {
 export async function logout(req, res) {
   try {
     res.clearCookie("jwt-token");
+    userLog(req, "Logout", "User logged out");
     res.status(201).json({ code: 201, message: "Đăng xuất thành công" });
   } catch (error) {
     res.status(400).json({ code: 400, message: "Lỗi máy chủ" });
@@ -271,6 +278,7 @@ export async function forgotPost(req, res) {
       const text = `Mã xác thực của bạn là <b>${dataInfo.otp}</b>. Mã OTP có hiệu lực trong vòng 3 phút, vui lòng không cung cấp mã OTP cho bất kỳ ai.`;
       sendMail(dataInfo.email, subject, text);
     }
+    userLog(req, "Forgot Password", `OTP sent to email: ${req.body.email}`);
     res.status(201).json({
       code: 201,
       email: req.body.email,
@@ -299,6 +307,7 @@ export async function sendOtpPost(req, res) {
       status: "active",
     });
     generateTokenAndSetToken(user._id, res); //jwt
+    userLog(req, "Verify OTP", `OTP verified for email: ${req.body.email}`);
     res.status(201).json({
       code: 201,
       message: "Mã OTP hợp lệ! Vui lòng đặt lại mật khẩu!",
@@ -337,6 +346,7 @@ export async function resetPassword(req, res) {
         password: hashedPassword,
       }
     );
+    userLog(req, "Reset Password", "Password reset successfully");
     res.status(201).json({ code: 201, message: "Đặt lại mật khẩu thành công" });
   } catch (error) {
     console.log(error);
@@ -359,6 +369,7 @@ export async function getUserInfo(req, res) {
         .json({ code: 404, message: "Không tìm thấy người dùng" });
     }
 
+    userLog(req, "Get User Info", "User info retrieved");
     res.status(200).json({ code: 200, user });
   } catch (error) {
     console.error(error);
@@ -384,6 +395,7 @@ export async function getBlockedInfo(req, res) {
       return res.status(404).json({ code: 404, message: "Không tìm thấy người dùng" });
     }
 
+    userLog(req, "Get Blocked Info", "Blocked info retrieved");
     res.status(200).json({
       code: 200,
       blockedUntil: user.blockedUntil,

@@ -1,12 +1,16 @@
 import { Vocab } from "../../models/Vocab.model.js";
 import { FlashCardSet } from "../../models/FlashCardSet.model.js";
+import { userLog } from "../../utils/logUser.js";
+
 export const index = async (req, res) => {
   try {
     const flashCardSets = await FlashCardSet.find({
       deleted: false,
     }).populate("vocabs");
+    userLog(req, "View FlashCard Sets", "User accessed the list of flashcard sets.");
     res.status(200).json({ flashCardSets });
   } catch (error) {
+    userLog(req, "View FlashCard Sets", `Error accessing flashcard sets: ${error.message}`);
     res.status(500).json({ message: "Đã xảy ra lỗi trong quá trình xử lý yêu cầu." });
   }
 };
@@ -43,11 +47,13 @@ export const createPost = async (req, res) => {
       password: req.body.password || "",
     });
     await flashCardSet.save();
+    userLog(req, "Create FlashCard Set", `User created a new flashcard set with title: ${req.body.title}`);
     res.status(201).json({
       message: "Tạo thành công bộ flashcard.",
       flashCardSet,
     });
   } catch (error) {
+    userLog(req, "Create FlashCard Set", `Error creating flashcard set: ${error.message}`);
     res.status(500).json({ message: "Đã xảy ra lỗi trong quá trình tạo bộ flashcard." });
   }
 };
@@ -89,8 +95,10 @@ export const updateSet = async (req, res) => {
     }
 
     await FlashCardSet.findByIdAndUpdate(idSet, updatedSet, { new: true });
+    userLog(req, "Update FlashCard Set", `User updated flashcard set with ID: ${req.params.idSet}`);
     res.status(200).json({ message: "Cập nhật thành công bộ flashcard." });
   } catch (error) {
+    userLog(req, "Update FlashCard Set", `Error updating flashcard set: ${error.message}`);
     res.status(500).json({ message: "Đã xảy ra lỗi trong quá trình cập nhật bộ flashcard." });
   }
 };
@@ -110,8 +118,10 @@ export const detailSet = async (req, res) => {
         .status(404)
         .json({ message: "Bạn không có quyền xem bộ flashcard này." });
     }
+    userLog(req, "View FlashCard Set Detail", `User viewed details of flashcard set with ID: ${req.params.idSet}`);
     res.status(200).json({ flashCardSet });
   } catch (error) {
+    userLog(req, "View FlashCard Set Detail", `Error viewing flashcard set details: ${error.message}`);
     return res.status(500).json({ message: "Đã xảy ra lỗi trong quá trình lấy thông tin bộ flashcard." });
   }
 };
@@ -129,8 +139,10 @@ export const deleteSet = async (req, res) => {
         .json({ message: "Bạn không có quyền xóa bộ flashcard này." });
     }
     await FlashCardSet.findByIdAndUpdate(idSet, { deleted: true });
+    userLog(req, "Delete FlashCard Set", `User deleted flashcard set with ID: ${req.params.idSet}`);
     res.status(200).json({ message: "Xóa bộ flashcard thành công." });
   } catch (error) {
+    userLog(req, "Delete FlashCard Set", `Error deleting flashcard set: ${error.message}`);
     return res.status(500).json({ message: "Đã xảy ra lỗi trong quá trình xóa bộ flashcard." });
   }
 };

@@ -1,11 +1,14 @@
 import ListeningQuestion from "../../models/ListeningQuestion.js";
 import mongoose from "mongoose";
+import { userLog } from "../../utils/logUser.js";
 
 export const getAllListeningQuestionsController = async (req, res) => {
   try {
     const questions = await ListeningQuestion.find({ isDeleted: false })
       .populate("teacherId")
       .populate("questionType");
+
+    userLog(req, "Fetch Listening Questions", "Fetched all listening questions.");
 
     return res.status(200).json({
       message: "Danh sách câu hỏi",
@@ -31,6 +34,8 @@ export const getListeningQuestionController = async (req, res) => {
     })
       .populate("teacherId")
       .populate("questionType");
+
+    userLog(req, "Fetch Listening Question", `Fetched listening question with ID: ${req.params.id}`);
 
     return res.status(200).json({
       message: "Câu hỏi tìm thấy!",
@@ -83,6 +88,8 @@ export const createListeningQuestion = async (req, res) => {
     }
 
     await newQuestion.save();
+
+    userLog(req, "Create Listening Question", "Created a new listening question.");
 
     // Trả về câu hỏi mới tạo
     return res.status(201).json({
@@ -149,6 +156,8 @@ export const updateListeningQuestion = async (req, res) => {
         .json({ message: `Không tìm thấy câu hỏi với ID ${id}` });
     }
 
+    userLog(req, "Update Listening Question", `Updated listening question with ID: ${req.params.id}`);
+
     return res.status(200).json({
       code: 200,
       message: "Cập nhật câu hỏi thành công!",
@@ -210,6 +219,8 @@ export const createMultipleListeningQuestions = async (req, res) => {
       createdQuestions.push(newQuestion);
     }
 
+    userLog(req, "Create Multiple Listening Questions", "Created multiple listening questions.");
+
     return res.status(201).json({
       message: "Tạo nhiều câu hỏi thành công!",
       data: createdQuestions,
@@ -238,6 +249,9 @@ export const deleteListeningQuestion = async (req, res) => {
         .status(404)
         .json({ message: `Không tìm thấy câu hỏi với ID ${id}` });
     }
+
+    userLog(req, "Delete Listening Question", `Soft deleted listening question with ID: ${req.params.id}`);
+
     return res.status(200).json({
       code: 200,
       message: "Câu hỏi đã được xóa thành công!",

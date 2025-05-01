@@ -1,4 +1,5 @@
 import { QuestionType } from "../../models/QuestionType.model.js";
+import { userLog } from "../../utils/logUser.js";
 
 export const index = async (req, res) => {
   try {
@@ -31,6 +32,8 @@ export const index = async (req, res) => {
       limitItems: limitItems,
       hasNextPage: currentPage < totalPage,
     });
+
+    userLog(req, "Fetch Question Types", "Fetched question types with pagination.");
   } catch (error) {
     res.status(400).json({
       code: 400,
@@ -47,6 +50,8 @@ export const createPost = async (req, res) => {
       message: "Tạo loại câu hỏi mới thành công!",
       questionType: newQuestionType,
     });
+
+    userLog(req, "Create Question Type", "Created a new question type.");
   } catch (error) {
     res.status(400).json({
       code: 400,
@@ -64,6 +69,8 @@ export const update = async (req, res) => {
       message: "Lấy thông tin loại câu hỏi thành công!",
       questionType: questionType,
     });
+
+    userLog(req, "Fetch Question Type", `Fetched question type with ID: ${req.params.id}`);
   } catch (error) {
     res.status(400).json({
       code: 400,
@@ -83,6 +90,8 @@ export const updatePatch = async (req, res) => {
       code: 200,
       message: "Cập nhật loại câu hỏi thành công!",
     });
+
+    userLog(req, "Update Question Type", `Updated question type with ID: ${req.params.id}`);
   } catch (error) {
     res.status(400).json({
       code: 400,
@@ -104,6 +113,8 @@ export const deletePatch = async (req, res) => {
       code: 200,
       message: "Xóa loại câu hỏi thành công!",
     });
+
+    userLog(req, "Delete Question Type", `Soft deleted question type with ID: ${req.params.id}`);
   } catch (error) {
     res.status(400).json({
       code: 400,
@@ -120,6 +131,8 @@ export const getAllQuestionTypes = async (req, res) => {
       message: "Lấy danh sách tất cả các loại câu hỏi thành công!",
       data: questionTypes,
     });
+
+    userLog(req, "Fetch All Question Types", "Fetched all question types.");
   } catch (error) {
     console.error("Error fetching question types:", error);
     res.status(500).json({

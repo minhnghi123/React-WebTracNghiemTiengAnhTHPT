@@ -1,4 +1,5 @@
 import { QuestionType } from "../../models/QuestionType.model.js";
+import { userLog } from "../../utils/logUser.js";
 
 export const index = async (req, res) => {
   try {
@@ -31,6 +32,7 @@ export const index = async (req, res) => {
       limitItems: limitItems,
       hasNextPage: currentPage < totalPage,
     });
+    userLog(req, "Fetch Question Types", "Fetched all question types with pagination.");
   } catch (error) {
     res.status(400).json({
       code: 400,
@@ -38,6 +40,7 @@ export const index = async (req, res) => {
     });
   }
 };
+
 export const createPost = async (req, res) => {
   try {
     const newQuestionType = new QuestionType(req.body);
@@ -47,6 +50,7 @@ export const createPost = async (req, res) => {
       message: "Tạo loại câu hỏi thành công!",
       questionType: newQuestionType,
     });
+    userLog(req, "Create Question Type", `Created a new question type: ${newQuestionType.name}`);
   } catch (error) {
     res.status(400).json({
       code: 400,
@@ -54,6 +58,7 @@ export const createPost = async (req, res) => {
     });
   }
 };
+
 export const update = async (req, res) => {
   try {
     const questionType = await QuestionType.findOne({
@@ -64,6 +69,7 @@ export const update = async (req, res) => {
       message: "Lấy loại câu hỏi thành công!",
       questionType: questionType,
     });
+    userLog(req, "Fetch Question Type", `Fetched question type with ID: ${req.params.id}`);
   } catch (error) {
     res.status(400).json({
       code: 400,
@@ -71,6 +77,7 @@ export const update = async (req, res) => {
     });
   }
 };
+
 export const updatePatch = async (req, res) => {
   try {
     await QuestionType.updateOne(
@@ -83,6 +90,7 @@ export const updatePatch = async (req, res) => {
       code: 200,
       message: "Cập nhật loại câu hỏi thành công!",
     });
+    userLog(req, "Update Question Type", `Updated question type with ID: ${req.params.id}`);
   } catch (error) {
     res.status(400).json({
       code: 400,
@@ -90,6 +98,7 @@ export const updatePatch = async (req, res) => {
     });
   }
 };
+
 export const deletePatch = async (req, res) => {
   try {
     await QuestionType.updateOne(
@@ -104,6 +113,7 @@ export const deletePatch = async (req, res) => {
       code: 200,
       message: "Xóa loại câu hỏi thành công!",
     });
+    userLog(req, "Delete Question Type", `Marked question type as deleted with ID: ${req.params.id}`);
   } catch (error) {
     res.status(400).json({
       code: 400,
@@ -120,6 +130,7 @@ export const getAllQuestionTypes = async (req, res) => {
       message: "Lấy danh sách loại câu hỏi thành công!",
       data: questionTypes,
     });
+    userLog(req, "Fetch All Question Types", "Fetched all question types.");
   } catch (error) {
     console.error("Lỗi khi lấy danh sách loại câu hỏi:", error);
     res.status(500).json({

@@ -3,6 +3,7 @@ import { redisService } from "../../config/redis.config.js";
 import Result from "../../models/Result.model.js";
 import { Passage } from "../../models/Passage.model.js";
 import ListeningExam from "../../models/listeningExam.model.js";
+import { userLog } from "../../utils/logUser.js";
 
 function shuffleArray(array) {
   for (let i = array.length - 1; i > 0; i--) {
@@ -23,6 +24,12 @@ export const index = async (req, res) => {
     if (req.query.limit) {
       limitItems = parseInt(req.query.limit);
     }
+// const cacheExam = await redisService.get(
+    //   `CACHE_EXAM_PAGE_${currentPage}_LIMIT_${limitItems}`
+    // );
+    // if (cacheExam) {
+    //   return res.status(200).json(cacheExam);
+    // }
     // const cacheExam = await redisService.get(
     //   `CACHE_EXAM_PAGE_${currentPage}_LIMIT_${limitItems}`
     // );
@@ -38,7 +45,7 @@ export const index = async (req, res) => {
     const totalPage = Math.ceil(totalItems / limitItems);
     const exams = await Exam.find(condition)
       .populate("questions")
-      .populate("listeningExams") // Add this line
+      .populate("listeningExams")
       .limit(limitItems)
       .skip(skip);
     const data = {
@@ -54,8 +61,10 @@ export const index = async (req, res) => {
     //   `CACHE_EXAM_PAGE_${currentPage}_LIMIT_${limitItems}`,
     //   data
     // );
+    userLog(req, "View Exams", `User accessed exams list on page ${currentPage} with limit ${limitItems}`);
     res.status(200).json(data);
   } catch (error) {
+    userLog(req, "View Exams", `Error viewing exams: ${error.message}`);
     res.status(400).json({ code: 400, message: error.message });
   }
 };
@@ -63,6 +72,12 @@ export const index = async (req, res) => {
 export const detailExam = async (req, res) => {
   try {
     const { slug } = req.params;
+// const cacheDetailExam = await redisService.get(
+    //   `CACHE_DETAIL_EXAMPLE_${slug}`
+    // );
+    // if (cacheDetailExam) {
+    //   return res.status(200).json(cacheDetailExam);
+    // }
     // const cacheDetailExam = await redisService.get(
     //   `CACHE_DETAIL_EXAMPLE_${slug}`
     // );
@@ -71,16 +86,18 @@ export const detailExam = async (req, res) => {
     // }
     const exam = await Exam.findOne({ slug })
       .populate("questions")
-      .populate("listeningExams"); // Add this line
+      .populate("listeningExams");
     if (!exam) {
       return res.status(404).json({ message: "Exam not found" });
     }
-    // await redisService.set(`CACHE_DETAIL_EXAMPLE_${slug}`, { code: 200, exam });
+    userLog(req, "View Exam Detail", `User viewed exam detail for slug: ${slug}`);
     res.status(200).json({ code: 200, exam });
   } catch (error) {
+    userLog(req, "View Exam Detail", `Error viewing exam detail: ${error.message}`);
     res.status(400).json({ code: 400, message: error.message });
   }
 };
+
 
 export const joinedExam = async (req, res) => {
   try {
@@ -191,6 +208,7 @@ export const joinedExam = async (req, res) => {
     });
 
     await result.save();
+    userLog(req, "Join Exam", `User joined exam with ID: ${req.params.examId}`);
 
     res.status(200).json({
       code: 200,
@@ -203,11 +221,10 @@ export const joinedExam = async (req, res) => {
       resultId: result._id,
     });
   } catch (error) {
-    console.error(error);
+    userLog(req, "Join Exam", `Error joining exam: ${error.message}`);
     res.status(500).json({ code: 500, message: "Lỗi khi tham gia đề thi." });
   }
 };
-
 export const getListeningExams = async (req, res) => {
   try {
     let currentPage = req.query.page ? parseInt(req.query.page) : 1;
@@ -223,6 +240,7 @@ export const getListeningExams = async (req, res) => {
       .limit(limitItems)
       .skip(skip);
 
+    userLog(req, "View Listening Exams", `User accessed listening exams list on page ${currentPage} with limit ${limitItems}`);
     res.status(200).json({
       code: 200,
       listeningExams,
@@ -233,6 +251,7 @@ export const getListeningExams = async (req, res) => {
       hasNextPage: currentPage < totalPage,
     });
   } catch (error) {
+    userLog(req, "View Listening Exams", `Error viewing listening exams: ${error.message}`);
     res.status(400).json({ code: 400, message: error.message });
   }
 };
@@ -249,8 +268,10 @@ export const detailListeningExam = async (req, res) => {
       return res.status(404).json({ message: "Listening exam not found" });
     }
 
+    userLog(req, "View Listening Exam Detail", `User viewed listening exam detail for slug: ${slug}`);
     res.status(200).json({ code: 200, listeningExam });
   } catch (error) {
+    userLog(req, "View Listening Exam Detail", `Error viewing listening exam detail: ${error.message}`);
     res.status(400).json({ code: 400, message: error.message });
   }
 };
@@ -290,6 +311,7 @@ export const joinListeningExam = async (req, res) => {
 
     await result.save();
 
+    userLog(req, "Join Listening Exam", `User joined listening exam with ID: ${req.params.examId}`);
     res.status(200).json({
       code: 200,
       title: listeningExam.title,
@@ -299,6 +321,7 @@ export const joinListeningExam = async (req, res) => {
       resultId: result._id,
     });
   } catch (error) {
+    userLog(req, "Join Listening Exam", `Error joining listening exam: ${error.message}`);
     res
       .status(500)
       .json({ code: 500, message: "Error joining listening exam." });
@@ -344,8 +367,10 @@ export const calculateListeningExamScore = async (req, res) => {
     result.isCompleted = true;
     await result.save();
 
+    userLog(req, "Calculate Listening Exam Score", `User calculated score for result ID: ${resultId}`);
     res.status(200).json({ code: 200, score, correctAnswer, wrongAnswer });
   } catch (error) {
+    userLog(req, "Calculate Listening Exam Score", `Error calculating score: ${error.message}`);
     res.status(500).json({ code: 500, message: "Error calculating score." });
   }
 };
