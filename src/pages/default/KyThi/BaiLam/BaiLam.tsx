@@ -157,36 +157,35 @@ const BaiLam: React.FC = () => {
     const savedCount = localStorage.getItem("alertCount");
     return savedCount ? parseInt(savedCount, 10) : 0;
   });
-  // useEffect(() => {
-  //   // Lưu số lần vi phạm vào localStorage mỗi khi alertCount thay đổi
-  //   localStorage.setItem("alertCount", alertCount.toString());
-
-  //   // Nếu vượt quá 5 lần, tự động nộp bài
-  //   if (alertCount > 5) {
-  //     alert("Bạn đã vi phạm quá nhiều lần. Hệ thống sẽ tự động nộp bài.");
-  //     handleSubmit();
-  //     handleReportViolation()
-      
-  //   }
-  // }, [alertCount]);
+  const [isViolationTriggered, setIsViolationTriggered] = useState(false); // Thêm state để kiểm soát vi phạm
+  const [isreport, setisprot] = useState(false);
+  const lastViolationTimeRef = useRef<number>(0); // Use useRef instead of useState
   const handleReportViolation = async () => {
+    if (isreport) return; // Nếu đã báo cáo vi phạm, không làm gì cả
+    setisprot(true); // Đánh dấu đã báo cáo vi phạm
     try {
-      const res= await ResultAPI.reportViolation();
-      if (res.code === 200) {
-      } else {
+      const res = await ResultAPI.reportViolation();
+      if (res.code !== 200) {
         console.error("Failed to report violation:", res.message);
       }
     } catch (error) {
       console.error("Error reporting violation:", error);
     }
   };
-  // Hàm tăng số lần vi phạm
+  // Hàm tăng số lần vi phạm (đã sửa đổi)
   const incrementAlertCount = () => {
-    if (Examresult) return; // không tăng nữa khi đã nộp bài
+    if (Examresult || isViolationTriggered) return;
+
+    const now = Date.now();
+    console.log(lastViolationTimeRef.current, now, now - lastViolationTimeRef.current);
+    if (now - lastViolationTimeRef.current < 5000) return; // Ignore violations within 5 seconds
+
+    lastViolationTimeRef.current = now; // Update the ref value immediately
+    setIsViolationTriggered(true);
+
     setAlertCount((prev) => {
       const newCount = prev + 1;
 
-      // Hiển thị cảnh báo nếu chưa đạt giới hạn
       if (newCount < 5) {
         const remaining = 5 - newCount;
         if (remaining > 0) {
@@ -198,17 +197,19 @@ const BaiLam: React.FC = () => {
         alert(
           "Bạn đã vi phạm quá nhiều lần. Hệ thống sẽ tự động nộp bài.\nHành vi của bạn đã được báo cáo. Nếu bạn vi phạm thi quá 5 lần, hệ thống sẽ cấm thi bạn trong 3 ngày"
         );
-        handleSubmit(); // Tự động nộp bài khi vượt quá giới hạn
-        handleReportViolation()
-
+        handleSubmit();
+        handleReportViolation();
       }
 
       return newCount;
     });
+
+    setTimeout(() => setIsViolationTriggered(false), 2000);
   };
+
   usePreventDevTools(incrementAlertCount);
   usePreventCopyPaste(incrementAlertCount);
-  
+
   // fullscreen 
   useEffect(() => {
     if (!Examresult && examDetails) {
@@ -233,7 +234,6 @@ const BaiLam: React.FC = () => {
         if (document.visibilityState === "hidden") {
           incrementAlertCount();
           alert("Bạn đã chuyển tab. Hãy quay lại ngay!");
-          // showAlertModal("Bạn đã chuyển tab. Hãy quay lại ngay!");
         }
       };
 
