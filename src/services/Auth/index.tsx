@@ -21,6 +21,11 @@ export const AuthApi = {
     const response = await request.post("/auth/login", data);
     return response;
   },
+  loginOTP: async (email: string, otp: string,deviceId:string) => {
+    const response = await request.post("/auth/verify-otp", { email, otp ,deviceId});
+    return response;
+  }
+  ,
   getBlockInfo: async () => {
     const response = await request.get("/auth/blocked-info/");
     return response.data;

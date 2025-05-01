@@ -42,6 +42,10 @@ const taiKhoanSchema = new mongoose.Schema({
     type: Date,
     default: null,
   },
+  otpInfo: {
+    otp: { type: String },
+    expireAt: { type: Date },
+  },
   lastLoginInfo: {
     ip: { type: String },             // IP đăng nhập lần gần nhất
     userAgent: { type: String },      // Trình duyệt + hệ điều hành (User-Agent)

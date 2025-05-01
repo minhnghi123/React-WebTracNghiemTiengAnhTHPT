@@ -41,6 +41,7 @@ import { CreateExamQuestion } from "@/pages/giaovien/QuanLyDeThi/DeThi/CreateExa
 import BaiLam from "@/pages/default/KyThi/BaiLam/BaiLam";
 import QuanLyBaoLoi from "@/pages/giaovien/QuanLyBaoLoi/index.tsx";
 import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
+import { LoginWithSteps } from "@/pages/default/Login/login";
 export enum ERolePath {
   ADMIN = 2,
   GIAOVIEN = 3,
@@ -111,7 +112,7 @@ export const router = [
       createRoute(
         "/Login",
         <GoogleReCaptchaProvider reCaptchaKey={RECAPTCHA_SITE_KEY}>
-          <Login />
+          <LoginWithSteps />
         </GoogleReCaptchaProvider>,
         ERolePath.USER
       ),

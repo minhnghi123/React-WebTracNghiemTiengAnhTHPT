@@ -101,7 +101,11 @@ export async function signup(req, res) {
       const text = `A new teacher has signed up. Please review and approve the request.\n\nUsername: ${username}\nEmail: ${email}`;
       sendMail(adminEmail, subject, text);
 
-      userLog(req, "Signup", `Teacher signup request for username: ${username}`);
+      userLog(
+        req,
+        "Signup",
+        `Teacher signup request for username: ${username}`
+      );
       return res.status(201).json({
         code: 201,
         message:
@@ -117,7 +121,11 @@ export async function signup(req, res) {
       });
       await newUser.save();
       generateTokenAndSetToken(newUser._id, res); //jwt
-      userLog(req, "Signup", `Student account created for username: ${username}`);
+      userLog(
+        req,
+        "Signup",
+        `Student account created for username: ${username}`
+      );
       return res
         .status(201)
         .json({ code: 201, message: "Tạo tài khoản người dùng thành công" });
@@ -132,7 +140,7 @@ export async function signup(req, res) {
   }
 }
 export async function login(req, res) {
-  const { email, password, captchaToken , deviceId} = req.body;
+  const { email, password, captchaToken, deviceId } = req.body;
   // lay ip cua nguoi dung
   const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
   // console.log(ip); -> dia chi ip v6
@@ -140,7 +148,10 @@ export async function login(req, res) {
     if (!email || !password) {
       return res
         .status(400)
-        .json({ code: 400, message: "Email, mật khẩu và deviceId là bắt buộc" });
+        .json({
+          code: 400,
+          message: "Email, mật khẩu và deviceId là bắt buộc",
+        });
     }
     // Kiểm tra số lần thử đăng nhập từ IP
     const attempts = (await redisService.get(ip)) || 0;
@@ -179,40 +190,78 @@ export async function login(req, res) {
       return res
         .status(400)
         .json({ code: 400, message: "Mật khẩu không hợp lệ" });
-    } 
-    // Kiểm tra thiết bị đã tin cậy?
-      const isTrusted = Array.isArray(user.trustedDevices) &&
-      user.trustedDevices.some(d => d.deviceId === deviceId);
+    }
+   
+    // Nếu đúng email & mật khẩu, tạo OTP và lưu vào database
+    const otp = generateRandomString(6);
+    const otpExpireTime = new Date(Date.now() + 3 * 60 * 1000); // 3 minutes
 
-      if (!isTrusted) {
-      // Gửi mail cảnh báo
+    // Save OTP in the TaiKhoan model
+    user.otpInfo = { otp, expireAt: otpExpireTime };
+    await user.save();
+    console.log(`OTP saved in database for email ${email}: ${otp}`);
+
+    // Gửi OTP qua email
+    const subject = "Xác thực OTP đăng nhập";
+    const text = `Mã OTP của bạn là <b>${otp}</b>. Mã OTP có hiệu lực trong 3 phút.`;
+    await sendMail(user.email, subject, text);
+
+    // Ghi log
+    userLog(req, "Login", `OTP sent to email: ${email}`);
+
+    return res.status(200).json({
+      code: 200,
+      message: "Mã OTP đã được gửi, vui lòng kiểm tra email.",
+      email,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ code: 500, message: "Lỗi máy chủ" });
+  }
+}
+export async function verifyLoginOtp(req, res) {
+  try {
+    const { email, otp, deviceId } = req.body;
+    if (!email || !otp) {
+      return res.status(400).json({ code: 400, message: "Email và OTP là bắt buộc" });
+    }
+    // Tìm người dùng trong database
+    const user = await TaiKhoan.findOne({ email: email });
+    if (!user) {
+      return res.status(400).json({ code: 400, message: "Không tìm thấy người dùng" });
+    }
+    const { otp: storedOtp, expireAt } = user.otpInfo || {};
+    console.log(`Stored OTP: ${storedOtp}, User OTP: ${otp} `);
+    console.log( user.otpInfo , email);
+    if (!storedOtp || storedOtp !== otp || new Date() > new Date(expireAt)) {
+      return res.status(400).json({ code: 400, message: "Mã OTP không hợp lệ hoặc đã hết hạn!" });
+    }
+
+    // Kiểm tra thiết bị đã tin cậy?
+    const isTrusted = Array.isArray(user.trustedDevices) && user.trustedDevices.some(d => d.deviceId === deviceId);
+
+    if (!isTrusted) {
       const subject = "Cảnh báo đăng nhập thiết bị lạ";
       const text = `Chúng tôi phát hiện bạn đang đăng nhập từ thiết bị mới. Nếu không phải bạn, vui lòng liên hệ hỗ trợ.`;
       await sendMail(user.email, subject, text);
 
       userLog(req, "Login", "Untrusted device detected");
-      // return res.status(200).json({
-      //   code: 200,
-      //   message: "Phát hiện thiết bị mới. Chúng tôi đã gửi cảnh báo vào email của bạn."
-      // });
-      }
-
-    // Đăng nhập thành công
-    await redisService.del(ip); // Xóa số lần thử nếu đăng nhập thành công
-    generateTokenAndSetToken(user._id, res); //jwt
+    }
+    user.otpInfo = undefined;
+    await user.save();
+    generateTokenAndSetToken(user._id, res);
     userLog(req, "Login", "User logged in successfully");
-    res.status(201).json({
-      code: 201,
+    return res.status(200).json({
+      code: 200,
       message: "Đăng nhập thành công",
-      user: user,
+      user,
     });
   } catch (error) {
-    res.status(400).json({
-      code: 400,
-      message: error.message || "Lỗi máy chủ",
-    });
+    console.error(error);
+    return res.status(500).json({ code: 500, message: "Lỗi máy chủ" });
   }
 }
+
 export async function saveTrustedDevice(req, res) {
   try {
     const { deviceId } = req.body;
@@ -225,7 +274,9 @@ export async function saveTrustedDevice(req, res) {
     const user = await TaiKhoan.findById(decoded.userId);
 
     if (!user) {
-      return res.status(404).json({ code: 404, message: "Không tìm thấy người dùng" });
+      return res
+        .status(404)
+        .json({ code: 404, message: "Không tìm thấy người dùng" });
     }
 
     // Thêm thiết bị tin cậy
@@ -236,7 +287,9 @@ export async function saveTrustedDevice(req, res) {
     await user.save();
 
     userLog(req, "Save Trusted Device", `Device ID: ${deviceId} saved`);
-    res.status(200).json({ code: 200, message: "Thiết bị đã được lưu thành công" });
+    res
+      .status(200)
+      .json({ code: 200, message: "Thiết bị đã được lưu thành công" });
   } catch (error) {
     console.error(error);
     res.status(500).json({ code: 500, message: "Lỗi máy chủ" });
@@ -382,9 +435,7 @@ export async function getBlockedInfo(req, res) {
   try {
     const token = req.cookies["jwt-token"];
     if (!token) {
-      return res
-        .status(401)
-        .json({ code: 401, message: "Bạn chưa đăng nhập" });
+      return res.status(401).json({ code: 401, message: "Bạn chưa đăng nhập" });
     }
 
     const decoded = jwt.verify(token, ENV_VARS.JWT_SECRET);
@@ -393,7 +444,9 @@ export async function getBlockedInfo(req, res) {
     const user = await TaiKhoan.findById(userId).select("blockedUntil");
 
     if (!user) {
-      return res.status(404).json({ code: 404, message: "Không tìm thấy người dùng" });
+      return res
+        .status(404)
+        .json({ code: 404, message: "Không tìm thấy người dùng" });
     }
 
     userLog(req, "Get Blocked Info", "Blocked info retrieved");

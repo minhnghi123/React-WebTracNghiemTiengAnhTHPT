@@ -17,7 +17,11 @@ interface Message {
   type: "success" | "error";
 }
 
-export const Login = () => {
+interface LoginProps {
+  onLoginSuccess: (email: string) => void;
+}
+
+export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
   const [message, setMessage] = useState<Message | null>(null);
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
@@ -141,16 +145,8 @@ export const Login = () => {
       const deviceId = getDeviceId(); // Lấy deviceId từ localStorage
       const rq = await AuthApi.login({ email, password: pass, captchaToken, deviceId });
       setMessage({ text: rq?.data.message, type: "success" });
-      if (rq?.status === 201) {
-        console.log("Login successful, showing confirm dialog..."); // Debug log
-        const confirmSave = window.confirm("Bạn có muốn lưu thiết bị này làm thiết bị tin cậy không?");
-        if (confirmSave) {
-          await handleModalOk();
-        } else {
-          handleModalCancel();
-        }
-        handleLogin(rq?.data.user);
-        setUserRole(rq?.data.user.role);
+      if (rq?.status === 200) {
+        onLoginSuccess(email); // Notify parent component to transition to Step 2
       }
     } catch (error: any) {
       setLoginAttempts((prev) => prev + 1);
