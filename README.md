@@ -1,5 +1,5 @@
-**Môi trường phát triển:
-**  Backend: Node.js + ExpressJS
+Môi trường phát triển:
+  Backend: Node.js + ExpressJS
   Frontend: ReactJS + Typescript + Vite
   Cơ sở dữ liệu: MongoDB 
 
