@@ -2,8 +2,8 @@ import express from "express";
 import cors from "cors";
 import { redisService } from "./config/redis.config.js";
 // import { crawlData } from "./utils/crawl.util.js";
-import http from 'http';
-import { Server as socketIo } from 'socket.io';
+import http from "http";
+import { Server as socketIo } from "socket.io";
 import handleErrorReport from "./socket/client/handleErrorReport.js"; // Import handleErrorReport
 
 import { connect } from "./config/db.config.js";
@@ -21,7 +21,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new socketIo(server, {
   cors: {
-    origin: "http://localhost:5173", // Allow requests from this origin
+    origin: "http://localhost:3000", // Allow requests from this origin
     methods: ["GET", "POST"], // Allowed HTTP methods
     credentials: true, // Allow credentials (cookies, etc.)
   },
@@ -35,21 +35,19 @@ handleErrorReport(); // Thêm dòng này
 // Configure CORS
 app.use(
   cors({
-    origin: "http://localhost:5173", 
+    origin: "http://localhost:3000",
     methods: "GET,POST,PUT,PATCH,DELETE",
     allowedHeaders: "Content-Type,Authorization",
-    credentials: true, 
+    credentials: true,
   })
 );
 app.use(express.json());
 app.use(cookieParser());
 await redisService.connect();
 
-
 indexClient(app);
 indexTeacher(app);
 indexAdmin(app);
-
 
 app.use((req, res, next) => {
   res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");

@@ -5,7 +5,11 @@ import { useNavigate } from "react-router-dom";
 import { useAuthContext } from "@/contexts/AuthProvider";
 import { io } from "socket.io-client";
 import { ErrorReport } from "../QuanLyBaoLoi";
-
+import dethi from "/src/Content/img/img-folder-de-thi.png";
+import cauhoi from "/src/Content/img/img-ngan-hang-cau-hoi.jpg";
+import lophoc from "/src/Content/img/img-lop-hoc.jpg";
+import baoloi from "/src/Content/img/img-bao-loi.png";
+import audio from "/src/Content/img/img-audio.jpg";
 const socket = io("http://localhost:5000");
 
 export const DashBoardGiaoVien = () => {
@@ -19,8 +23,7 @@ export const DashBoardGiaoVien = () => {
     socket.on("ERROR_REPORTS", (reports) => {
       const filteredReports = reports.filter(
         (report: ErrorReport) =>
-          report.status === "pending" &&
-          report.examId?.createdBy === user?._id
+          report.status === "pending" && report.examId?.createdBy === user?._id
       );
       setPendingReportsCount(filteredReports.length);
     });
@@ -39,7 +42,7 @@ export const DashBoardGiaoVien = () => {
         >
           <div className="bg-white p-4 rounded shadow h-100 text-center">
             <img
-              src="/src/Content/img/img-folder-de-thi.png"
+              src={dethi}
               alt="Đề thi"
               style={{ width: "64px", height: "64px" }}
             />
@@ -54,7 +57,7 @@ export const DashBoardGiaoVien = () => {
         >
           <div className="bg-white p-4 rounded shadow h-100 text-center">
             <img
-              src="/src/Content/img/img-ngan-hang-cau-hoi.jpg"
+              src={cauhoi}
               alt="Ngân hàng câu hỏi"
               style={{ width: "64px", height: "64px" }}
             />
@@ -69,7 +72,7 @@ export const DashBoardGiaoVien = () => {
         >
           <div className="bg-white p-4 rounded shadow h-100 text-center">
             <img
-              src="/src/Content/img/img-lop-hoc.jpg"
+              src={lophoc}
               alt="Quản lý lớp"
               style={{ width: "64px", height: "64px" }}
             />
@@ -84,7 +87,7 @@ export const DashBoardGiaoVien = () => {
         >
           <div className="bg-white p-4 rounded shadow h-100 text-center position-relative">
             <img
-              src="/src/Content/img/img-bao-loi.png"
+              src={baoloi}
               alt="Quản lý báo lỗi"
               style={{ width: "64px", height: "64px" }}
             />
@@ -107,7 +110,7 @@ export const DashBoardGiaoVien = () => {
         >
           <div className="bg-white p-4 rounded shadow h-100 text-center">
             <img
-              src="/src/Content/img/img-audio.jpg"
+              src={audio}
               alt="Quản lý file nghe"
               style={{ width: "64px", height: "64px" }}
             />

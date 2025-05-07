@@ -30,8 +30,6 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
   const { handleLogin } = useAuthContext();
   const [isIpBlocked, setIsIpBlocked] = useState<boolean>(false);
   const [timeLeft, setTimeLeft] = useState<number>(0);
-  const [otp, setOtp] = useState<string>(""); // Lưu mã OTP
-  const [requires2FA, setRequires2FA] = useState<boolean>(false); // Trạng thái yêu cầu 2FA
   const navigate = useNavigate();
   // ---------------- ReCAPTCHA ------------------
   // const [captchaToken, setCaptchaToken] = useState<string | null>(null);
@@ -81,6 +79,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
     // Bước 1: Kiểm tra đã nhập tài khoản/mật khẩu chưa
     if (!username.trim() || !password.trim()) {
       setMessage({
@@ -102,7 +101,6 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
       // Gửi token và thông tin đăng nhập đến server
       getUser(username, password, captchaToken);
     } catch (error) {
-      console.log(error);
       setMessage({
         text: "Lỗi khi xác minh CAPTCHA. Vui lòng thử lại.",
         type: "error",
@@ -152,21 +150,8 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
         deviceId,
       });
       setMessage({ text: rq?.data.message, type: "success" });
-      if (rq.data?.requires2FA) {
-        setRequires2FA(true); // Nếu yêu cầu 2FA, cập nhật trạng thái
-      }
-      if (rq?.status === 201) {
-        // console.log("Login successful, showing confirm dialog..."); // Debug log
-        const confirmSave = window.confirm(
-          "Bạn có muốn lưu thiết bị này làm thiết bị tin cậy không?"
-        );
-        if (confirmSave) {
-          await handleModalOk();
-        } else {
-          handleModalCancel();
-        }
-        handleLogin(rq?.data.user);
-        setUserRole(rq?.data.user.role);
+      if (rq?.status === 200) {
+        onLoginSuccess(email); // Notify parent component to transition to Step 2
       }
     } catch (error: any) {
       setLoginAttempts((prev) => prev + 1);
@@ -182,24 +167,11 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
         setIsIpBlocked(true);
         setTimeLeft(error.response?.data?.ttl || 0);
       } else {
-        console.log(error);
         setMessage({
           text: error.response?.data?.message || "Đăng nhập thất bại.",
           type: "error",
         });
       }
-    }
-  };
-  const handleVerify2FA = async () => {
-    try {
-      const response = await AuthApi.verify2FA({ otp });
-      setMessage(response.data.message);
-    } catch (error) {
-      console.log(error);
-      setMessage({
-        text: "Mã OTP không hợp lệ hoặc đã hết hạn.",
-        type: "error",
-      });
     }
   };
 
@@ -247,87 +219,75 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
       <div className={styles.container}>
         <div className={styles.loginForm}>
           <h2 className={styles.title}>Đăng nhập</h2>
-          {!requires2FA ? (
-            <form onSubmit={handleSubmit}>
-              <div className="mb-3">
-                <label htmlFor="username" className="form-label">
-                  Tài khoản
-                </label>
-                <input
-                  type="text"
-                  className="form-control"
-                  id="username"
-                  value={username}
-                  placeholder="Nhập email"
-                  onChange={(e) => setUsername(e.target.value)}
-                />
-              </div>
-
-              <div className="mb-3">
-                <label htmlFor="password" className="form-label">
-                  Mật khẩu
-                </label>
-                <div className={styles.passwordWrapper}>
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    className="form-control"
-                    id="password"
-                    value={password}
-                    placeholder="Nhập mật khẩu"
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-                  <i
-                    className={`bi ${
-                      showPassword ? "bi-eye-slash" : "bi-eye"
-                    } eyeIcon`}
-                    onClick={togglePasswordVisibility}
-                  ></i>
-                </div>
-              </div>
-
-              <div className="mb-3">
-                <HCaptcha
-                  sitekey={HCAPTCHA_SITE_KEY}
-                  onVerify={handleCaptchaChange}
-                />
-              </div>
-              <button
-                type="submit"
-                className="btn btn-primary"
-                disabled={loginAttempts >= 5}
-              >
-                Đăng nhập
-              </button>
-
-              <div className="forget-password">
-                <a href="/forgetPass">Quên mật khẩu?</a>
-              </div>
-
-              <div className="formFooter">
-                <p>
-                  Chưa có tài khoản? <a href="/SignUp">Đăng ký ngay</a>
-                </p>
-              </div>
-            </form>
-          ) : (
-            <div>
-              <h3>Nhập mã OTP</h3>
-              <p>Vui lòng nhập mã OTP từ Google Authenticator để tiếp tục:</p>
+          <form onSubmit={handleSubmit}>
+            <div className="mb-3">
+              <label htmlFor="username" className="form-label">
+                Tài khoản
+              </label>
               <input
                 type="text"
                 className="form-control"
-                placeholder="Nhập mã OTP"
-                value={otp}
-                onChange={(e) => setOtp(e.target.value)}
+                id="username"
+                value={username}
+                placeholder="Nhập email"
+                onChange={(e) => setUsername(e.target.value)}
               />
-              <button
-                onClick={handleVerify2FA}
-                className="btn btn-primary mt-3"
-              >
-                Xác minh OTP
-              </button>
             </div>
-          )}
+
+            <div className="mb-3">
+              <label htmlFor="password" className="form-label">
+                Mật khẩu
+              </label>
+              <div className={styles.passwordWrapper}>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  className="form-control"
+                  id="password"
+                  value={password}
+                  placeholder="Nhập mật khẩu"
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+                <i
+                  className={`bi ${
+                    showPassword ? "bi-eye-slash" : "bi-eye"
+                  } eyeIcon`}
+                  onClick={togglePasswordVisibility}
+                ></i>
+              </div>
+            </div>
+            {/* Add reCAPTCHA
+          <div className="mb-3">
+            <ReCAPTCHA
+              sitekey={RECAPTCHA_SITE_KEY}
+              onChange={handleCaptchaChange}
+              datatype="image"
+            />
+          </div> */}
+            {/* Add hCaptcha */}
+            <div className="mb-3">
+              <HCaptcha
+                sitekey={HCAPTCHA_SITE_KEY}
+                onVerify={handleCaptchaChange}
+              />
+            </div>
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={loginAttempts >= 5}
+            >
+              Đăng nhập
+            </button>
+
+            <div className="forget-password">
+              <a href="/forgetPass">Quên mật khẩu?</a>
+            </div>
+
+            <div className="formFooter">
+              <p>
+                Chưa có tài khoản? <a href="/SignUp">Đăng ký ngay</a>
+              </p>
+            </div>
+          </form>
 
           {message && (
             <div
@@ -347,6 +307,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
             </div>
           )}
 
+          {/* Nếu vượt quá số lần --> hiện riêng nút này */}
           {loginAttempts >= 5 && (
             <div className="mt-3">
               <button

@@ -3,6 +3,7 @@ import { AuthApi } from "@/services/Auth";
 import { useLayoutEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Dropdown, MenuProps } from "antd";
+import P2N from "/src/assets/img/P2N 1.svg";
 interface navbarProps {
   rule?: boolean;
 }
@@ -64,7 +65,7 @@ export const Navbar: React.FC<navbarProps> = ({ rule = true }) => {
           className="cursor-pointer"
           style={{ cursor: "pointer" }}
         >
-          <img src="/src/assets/img/P2N 1.svg" alt="Logo"></img>
+          <img src={P2N} alt="Logo"></img>
         </div>
 
         {rule && (

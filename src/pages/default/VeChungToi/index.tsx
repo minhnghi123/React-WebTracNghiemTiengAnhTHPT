@@ -1,6 +1,6 @@
 import "./VeChungToi.css";
 import "bootstrap/dist/css/bootstrap.min.css";
-
+import lino from "/src/assets/img/phan-mem-thi-truc-tuyen-lino 1.png";
 export const VeChungToi = () => {
   return (
     <div>
@@ -28,7 +28,7 @@ export const VeChungToi = () => {
               </div>
               <div className="col-md-6 text-center">
                 <img
-                  src="/src/assets/img/phan-mem-thi-truc-tuyen-lino 1.png"
+                  src={lino}
                   alt="About us illustration"
                   className="img-fluid rounded"
                 />

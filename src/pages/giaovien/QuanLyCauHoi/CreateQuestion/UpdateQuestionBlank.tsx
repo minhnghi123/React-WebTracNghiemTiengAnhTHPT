@@ -1,9 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { Modal, Button, Input, Form, Select, Upload } from "antd";
-import { Question, QuestionAPI, AudioAPI, Audio } from "@/services/teacher/Teacher"; // Adjust the import path as needed
-import {  QuestionOutlined } from "@ant-design/icons";
-import { explainInVietnamese, translateEnglishToVietnamese } from "@/services/GropApi";
-
+import {
+  Question,
+  QuestionAPI,
+  AudioAPI,
+  Audio,
+} from "@/services/teacher/Teacher"; // Adjust the import path as needed
+import { QuestionOutlined } from "@ant-design/icons";
+import {
+  explainInVietnamese,
+  translateEnglishToVietnamese,
+} from "@/services/GropApi";
+import gg from "/src/Content/img/Google_Translate_Icon.png";
 interface UpdateBlankQuestionModalProps {
   visible: boolean;
   handleClose: () => void;
@@ -228,12 +236,7 @@ const UpdateBlankQuestionModal: React.FC<UpdateBlankQuestionModalProps> = ({
             <div className="align-items-center d-flex flex-column justify-content-center">
               <Button
                 type="link"
-                icon={
-                  <img
-                    src="/src/Content/img/Google_Translate_Icon.png"
-                    height="16px"
-                  />
-                }
+                icon={<img src={gg} height="16px" />}
                 onClick={() => handleTranslate(question.content)}
                 style={{ color: "#FF0000" }}
               />

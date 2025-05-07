@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Modal, Input, Form, Button } from "antd";
 import { Audio, AudioAPI } from "@/services/teacher/Teacher";
 import createTranscription from "@/services/GropApi/createTranscription";
+import gg from "/src/Content/img/Google_Translate_Icon.png";
 
 interface UpdateAudioProps {
   visible: boolean;
@@ -180,13 +181,7 @@ export const UpdateAudioModal: React.FC<UpdateAudioProps> = ({
             <div className="align-items-center d-flex flex-column justify-content-center">
               <Button
                 type="link"
-                icon={
-                  <img
-                    src="/src/Content/img/Google_Translate_Icon.png"
-                    height="16px"
-                    alt="Translate Icon"
-                  />
-                }
+                icon={<img src={gg} height="16px" alt="Translate Icon" />}
                 onClick={handleSubmit}
                 style={{ color: "#FF0000" }}
               />

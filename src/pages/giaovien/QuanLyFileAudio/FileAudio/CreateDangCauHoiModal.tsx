@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Modal, Input, Form, Button, Spin } from "antd";
 import { Audio, AudioAPI } from "@/services/teacher/Teacher";
 import createTranscription from "@/services/GropApi/createTranscription";
+import gg from "/src/Content/img/Google_Translate_Icon.png";
 
 interface CreateAudioProps {
   visible: boolean;
@@ -31,7 +32,9 @@ export const CreateAudioModal: React.FC<CreateAudioProps> = ({
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0] || null;
     if (selectedFile) {
-      if (!["audio/mp3", "audio/wav", "audio/mpeg"].includes(selectedFile.type)) {
+      if (
+        !["audio/mp3", "audio/wav", "audio/mpeg"].includes(selectedFile.type)
+      ) {
         alert("Chỉ chấp nhận các file âm thanh định dạng .mp3 hoặc .wav");
         return;
       }
@@ -69,11 +72,11 @@ export const CreateAudioModal: React.FC<CreateAudioProps> = ({
 
   const saveAudio = () => {
     setQuestion({
-      filePath: '',
+      filePath: "",
       description: "",
       transcription: "",
     });
-   
+
     handleClose();
   };
   const handleSubmit = async () => {
@@ -112,7 +115,9 @@ export const CreateAudioModal: React.FC<CreateAudioProps> = ({
       <Form layout="vertical">
         <Form.Item label="Upload Audio File">
           <input type="file" accept="audio/*" onChange={handleFileChange} />
-          {question.filePath instanceof File && <p>Tệp đã chọn: {question.filePath.name}</p>}
+          {question.filePath instanceof File && (
+            <p>Tệp đã chọn: {question.filePath.name}</p>
+          )}
         </Form.Item>
         <Form.Item label="Tên file nghe">
           <Input.TextArea
@@ -133,13 +138,7 @@ export const CreateAudioModal: React.FC<CreateAudioProps> = ({
             <div className="align-items-center d-flex flex-column justify-content-center">
               <Button
                 type="link"
-                icon={
-                  <img
-                    src="/src/Content/img/Google_Translate_Icon.png"
-                    height="16px"
-                    alt="Translate Icon"
-                  />
-                }
+                icon={<img src={gg} height="16px" alt="Translate Icon" />}
                 onClick={handleSubmit}
                 style={{ color: "#FF0000" }}
               />

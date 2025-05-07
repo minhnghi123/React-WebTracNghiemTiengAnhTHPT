@@ -1,6 +1,8 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./DashBoard.css";
 import { useNavigate } from "react-router-dom";
+import dethi from "/src/Content/img/img-folder-de-thi.png";
+import lophoc from "/src/Content/img/img-lop-hoc.jpg";
 export const DashBoarAdmin = () => {
   const navigate = useNavigate();
 
@@ -13,7 +15,7 @@ export const DashBoarAdmin = () => {
         >
           <div className="bg-white p-4 rounded shadow h-100 text-center">
             <img
-              src="/src/Content/img/img-folder-de-thi.png"
+              src={dethi}
               alt="Đề thi"
               style={{ width: "64px", height: "64px" }}
             />
@@ -37,12 +39,13 @@ export const DashBoarAdmin = () => {
             </p>
           </div>
         </div> */}
-        <div 
+        <div
           onClick={() => navigate("/Admin/QuanLyTaiKhoan")}
-          className="col-12 col-md-6 col-lg-3 dashboard-item">
+          className="col-12 col-md-6 col-lg-3 dashboard-item"
+        >
           <div className="bg-white p-4 rounded shadow h-100 text-center">
             <img
-              src="/src/Content/img/img-lop-hoc.jpg"
+              src={lophoc}
               alt="Quản lý lớp"
               style={{ width: "64px", height: "64px" }}
             />

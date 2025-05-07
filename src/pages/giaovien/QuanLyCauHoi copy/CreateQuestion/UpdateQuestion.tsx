@@ -17,7 +17,7 @@ import {
   explainInVietnamese,
   translateEnglishToVietnamese,
 } from "@/services/GropApi";
-
+import gg from "/src/Content/img/Google_Translate_Icon.png";
 interface UpdateQuestionModalProps {
   visible: boolean;
   handleClose: () => void;
@@ -300,12 +300,7 @@ const UpdateQuestionModal: React.FC<UpdateQuestionModalProps> = ({
             <div className=" align-items-center d-flex flex-column justify-content-center">
               <Button
                 type="link"
-                icon={
-                  <img
-                    src="/src/Content/img/Google_Translate_Icon.png"
-                    height="16px"
-                  />
-                }
+                icon={<img src={gg} height="16px" />}
                 onClick={() => handleTranslate(question.content)}
                 style={{ color: "#FF0000" }}
               />

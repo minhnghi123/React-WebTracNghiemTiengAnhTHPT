@@ -3,7 +3,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import styles from "./ForgetPass.module.css";
 import { AuthApi } from "@/services/Auth";
-
+import P2N from "/src/assets/img/P2N 1.svg";
 export const ForgetPass = () => {
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
@@ -78,11 +78,7 @@ export const ForgetPass = () => {
         <h2>Quên Mật Khẩu</h2>
         <div>
           <div className={`${styles.fadeIn} ${styles.first}`}>
-            <img
-              src="/src/assets/img/P2N 1.svg"
-              className={styles.icon}
-              alt="User Icon"
-            />
+            <img src={P2N} className={styles.icon} alt="User Icon" />
           </div>
 
           {step === 1 && (

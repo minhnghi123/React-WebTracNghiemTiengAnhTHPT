@@ -3,7 +3,11 @@ import "./reponsive.css";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "antd";
-
+import thithu from "/src/assets/img/thithu.jpg";
+import ontap from "/src/assets/img/ontap.jpg";
+import lophoc from "/src/assets/img/lophoc.jpg";
+import giaodien from "/src/assets/img/giaodien.jpg";
+import maytinhban from "/src/assets/img/maytinhbang.png";
 const Home = () => {
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -21,17 +25,17 @@ const Home = () => {
 
   const slides = [
     {
-      image: "/src/assets/img/giaodien.jpg",
+      image: giaodien,
       title: "Ôn Thi Trắc Nghiệm Tiếng Anh",
       desc: "Nền tảng luyện tập và nâng cao kỹ năng làm bài thi hiệu quả",
     },
     {
-      image: "/src/assets/img/ontap.jpg",
+      image: ontap,
       title: "Kho Đề Thi Đa Dạng",
       desc: "Cập nhật đề thi mới nhất, sát với đề thi THPT quốc gia",
     },
     {
-      image: "/src/assets/img/maytinhbang.png",
+      image: maytinhban,
       title: "Theo Dõi Tiến Trình Học Tập",
       desc: "Thống kê kết quả học tập, giúp bạn cải thiện từng ngày",
     },
@@ -92,11 +96,7 @@ const Home = () => {
       <div className="exam-prep-section grid grid-cols-1 md:grid-cols-3 gap-8 mt-8">
         {/* Tham gia Đề Thi */}
         <div className="exam-card">
-          <img
-            src="/src/assets/img/thithu.jpg"
-            alt="Tham gia Đề Thi"
-            className="exam-image"
-          />
+          <img src={thithu} alt="Tham gia Đề Thi" className="exam-image" />
           <div className="exam-info">
             <h3 className="text-xl font-bold">Tham gia Đề Thi</h3>
             <p className="text-gray-600 mt-2">
@@ -115,11 +115,7 @@ const Home = () => {
         {/* Ôn tập */}
 
         <div className="exam-card">
-          <img
-            src="/src/assets/img/ontap.jpg"
-            alt="Ôn tập hiệu quả"
-            className="exam-image"
-          />
+          <img src={ontap} alt="Ôn tập hiệu quả" className="exam-image" />
           <div className="exam-info">
             <h3 className="text-xl font-bold">Ôn tập hiệu quả</h3>
             <p className="text-gray-600 mt-2">
@@ -136,11 +132,7 @@ const Home = () => {
 
         {/* Tham gia vào lớp học */}
         <div className="exam-card">
-          <img
-            src="/src/assets/img/lophoc.jpg"
-            alt="Tham gia lớp học"
-            className="exam-image"
-          />
+          <img src={lophoc} alt="Tham gia lớp học" className="exam-image" />
           <div className="exam-info">
             <h3 className="text-xl font-bold">Tham gia vào lớp học</h3>
             <p className="text-gray-600 mt-2">
