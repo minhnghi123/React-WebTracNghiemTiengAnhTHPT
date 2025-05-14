@@ -32,7 +32,11 @@ export const index = async (req, res) => {
       limitItems: limitItems,
       hasNextPage: currentPage < totalPage,
     });
-    userLog(req, "Fetch Question Types", "Fetched all question types with pagination.");
+    userLog(
+      req,
+      "Fetch Question Types",
+      "Fetched all question types with pagination."
+    );
   } catch (error) {
     res.status(400).json({
       code: 400,
@@ -50,7 +54,11 @@ export const createPost = async (req, res) => {
       message: "Tạo loại câu hỏi thành công!",
       questionType: newQuestionType,
     });
-    userLog(req, "Create Question Type", `Created a new question type: ${newQuestionType.name}`);
+    userLog(
+      req,
+      "Create Question Type",
+      `Created a new question type: ${newQuestionType.name}`
+    );
   } catch (error) {
     res.status(400).json({
       code: 400,
@@ -69,7 +77,11 @@ export const update = async (req, res) => {
       message: "Lấy loại câu hỏi thành công!",
       questionType: questionType,
     });
-    userLog(req, "Fetch Question Type", `Fetched question type with ID: ${req.params.id}`);
+    userLog(
+      req,
+      "Fetch Question Type",
+      `Fetched question type with ID: ${req.params.id}`
+    );
   } catch (error) {
     res.status(400).json({
       code: 400,
@@ -90,7 +102,11 @@ export const updatePatch = async (req, res) => {
       code: 200,
       message: "Cập nhật loại câu hỏi thành công!",
     });
-    userLog(req, "Update Question Type", `Updated question type with ID: ${req.params.id}`);
+    userLog(
+      req,
+      "Update Question Type",
+      `Updated question type with ID: ${req.params.id}`
+    );
   } catch (error) {
     res.status(400).json({
       code: 400,
@@ -113,7 +129,11 @@ export const deletePatch = async (req, res) => {
       code: 200,
       message: "Xóa loại câu hỏi thành công!",
     });
-    userLog(req, "Delete Question Type", `Marked question type as deleted with ID: ${req.params.id}`);
+    userLog(
+      req,
+      "Delete Question Type",
+      `Marked question type as deleted with ID: ${req.params.id}`
+    );
   } catch (error) {
     res.status(400).json({
       code: 400,

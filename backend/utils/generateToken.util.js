@@ -9,10 +9,11 @@ export const generateTokenAndSetToken = (userId, res) => {
     maxAge: 15 * 24 * 60 * 60 * 1000,
     httpOnly: true,
     sameSite: "none",
-    secure: ENV_VARS.NODE_ENV !== "development",
+    // secure: ENV_VARS.NODE_ENV !== "development",
+    secure: true,
   });
   console.log("Cookie được gửi:", res.getHeaders()["jwt-cookie"]);
-console.log("Cookie được gửi:", res.getHeaders()["set-cookie"]);
+  console.log("Cookie được gửi:", res.getHeaders()["set-cookie"]);
   return token;
 };
 
