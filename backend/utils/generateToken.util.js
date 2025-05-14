@@ -11,7 +11,8 @@ export const generateTokenAndSetToken = (userId, res) => {
     sameSite: "none",
     secure: ENV_VARS.NODE_ENV !== "development",
   });
-
+  console.log("Cookie được gửi:", res.getHeaders()["jwt-cookie"]);
+console.log("Cookie được gửi:", res.getHeaders()["set-cookie"]);
   return token;
 };
 
