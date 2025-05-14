@@ -21,7 +21,11 @@ const app = express();
 const server = http.createServer(app);
 const io = new socketIo(server, {
   cors: {
-    origin: "http://localhost:3000", // Allow requests from this origin
+    origin: [
+      "http://localhost:5173", 
+      "https://localhost:3000",
+      "https://react-web-trac-nghiem-tieng-anh-thpt.vercel.app"
+    ], // Allow requests from this origin
     methods: ["GET", "POST"], // Allowed HTTP methods
     credentials: true, // Allow credentials (cookies, etc.)
   },
@@ -35,7 +39,11 @@ handleErrorReport(); // Thêm dòng này
 // Configure CORS
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: [
+      "http://localhost:5173", 
+      "https://localhost:3000",
+      "https://react-web-trac-nghiem-tieng-anh-thpt.vercel.app"
+    ],
     methods: "GET,POST,PUT,PATCH,DELETE",
     allowedHeaders: "Content-Type,Authorization",
     credentials: true,

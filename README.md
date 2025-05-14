@@ -16,5 +16,4 @@ Truy cập giao diện người dùng tại: http://localhost:5173/
 
 3. Chạy backend (Express)
 npm start
-API Backend hoạt động tại: http://localhost:5000/
-
+API Backend hoạt động tại: http://localhost:5000/ https://react-webtracnghiemtienganhthpt-ke5j.onrender.com

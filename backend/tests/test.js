@@ -96,7 +96,7 @@ questionsData.forEach((q, idx) => {
   q["explanationData"] = explanationData[idx];
 });
 
-fetch("http://localhost:5000/question/post", {
+fetch("https://react-webtracnghiemtienganhthpt-ke5j.onrender.com/question/post", {
   method: "POST",
   headers: {
     "Content-Type": "application/json",

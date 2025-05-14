@@ -10,7 +10,7 @@ import cauhoi from "/src/Content/img/img-ngan-hang-cau-hoi.jpg";
 import lophoc from "/src/Content/img/img-lop-hoc.jpg";
 import baoloi from "/src/Content/img/img-bao-loi.png";
 import audio from "/src/Content/img/img-audio.jpg";
-const socket = io("http://localhost:5000");
+const socket = io("http://https://react-webtracnghiemtienganhthpt-ke5j.onrender.com");
 
 export const DashBoardGiaoVien = () => {
   const [pendingReportsCount, setPendingReportsCount] = useState(0);

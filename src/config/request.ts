@@ -1,7 +1,7 @@
 import axios from "axios";
 
 export const request = axios.create({
-  baseURL: "http://localhost:5000",
+  baseURL: "https://react-webtracnghiemtienganhthpt-ke5j.onrender.com",
   timeout: 50000,
   headers: {
     "Content-Type": "application/json; charset=utf-8",

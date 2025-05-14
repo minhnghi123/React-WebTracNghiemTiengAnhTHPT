@@ -8,7 +8,7 @@ import { useAuthContext } from "@/contexts/AuthProvider";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { ErrorReport } from "./QuanLyBaoLoi";
 
-const socket = io("http://localhost:5000");
+const socket = io("http://https://react-webtracnghiemtienganhthpt-ke5j.onrender.com");
 
 const LayoutGiaoVien = () => {
   const { user } = useAuthContext();
