@@ -24,6 +24,7 @@ const io = new socketIo(server, {
     origin: [
       "http://localhost:5173", 
       "https://localhost:3000",
+      "https://react-webtracnghiemtienganhthpt-1-ji25.onrender.com/",
      "https://react-web-trac-nghiem-tieng-anh-thpt.vercel.app", // FE domain
       "https://react-webtracnghiemtienganhthpt-ke5j.onrender.com", // BE domain
     ],// Allow requests from this origin
@@ -43,6 +44,7 @@ app.use(
     origin: [
       "http://localhost:5173", 
       "https://localhost:3000",
+      "https://react-webtracnghiemtienganhthpt-1-ji25.onrender.com/",
       "https://react-web-trac-nghiem-tieng-anh-thpt.vercel.app", // FE domain
       "https://react-webtracnghiemtienganhthpt-ke5j.onrender.com", // BE domain
     ],
