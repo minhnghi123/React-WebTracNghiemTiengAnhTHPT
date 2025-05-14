@@ -24,8 +24,9 @@ const io = new socketIo(server, {
     origin: [
       "http://localhost:5173", 
       "https://localhost:3000",
-      "https://react-web-trac-nghiem-tieng-anh-thpt.vercel.app"
-    ], // Allow requests from this origin
+     "https://react-web-trac-nghiem-tieng-anh-thpt.vercel.app", // FE domain
+      "https://react-webtracnghiemtienganhthpt-ke5j.onrender.com", // BE domain
+    ],// Allow requests from this origin
     methods: ["GET", "POST"], // Allowed HTTP methods
     credentials: true, // Allow credentials (cookies, etc.)
   },
@@ -42,7 +43,8 @@ app.use(
     origin: [
       "http://localhost:5173", 
       "https://localhost:3000",
-      "https://react-web-trac-nghiem-tieng-anh-thpt.vercel.app"
+      "https://react-web-trac-nghiem-tieng-anh-thpt.vercel.app", // FE domain
+      "https://react-webtracnghiemtienganhthpt-ke5j.onrender.com", // BE domain
     ],
     methods: "GET,POST,PUT,PATCH,DELETE",
     allowedHeaders: "Content-Type,Authorization",
