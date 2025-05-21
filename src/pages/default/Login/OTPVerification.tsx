@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { AuthApi } from "@/services/Auth";
 import styles from "./login.module.css";
 import { getDeviceId } from "@/utils/cn";
-import { useNavigate } from "react-router-dom";
 import { useAuthContext } from "@/contexts/AuthProvider";
 
 interface OTPVerificationProps {
@@ -19,10 +18,9 @@ export const OTPVerification: React.FC<OTPVerificationProps> = ({
   const [otp, setOtp] = useState<string>("");
   const [message, setMessage] = useState<string | null>(null);
   const [saveDevice, setSaveDevice] = useState<boolean>(false); // State để lưu lựa chọn của người dùng
-  const navigate = useNavigate();
-  const [userRole, setUserRole] = useState<string>("");
+  const [, setUserRole] = useState<string>("");
   const { handleLogin } = useAuthContext();
-  const [deviceId, setDeviceId] = useState<string>("");
+  const [ ,setDeviceId] = useState<string>("");
 
   const saveTrustedDevice = async () => {
     try {
@@ -36,11 +34,11 @@ export const OTPVerification: React.FC<OTPVerificationProps> = ({
 
   const redirectUser = (role: string) => {
     if (role === "admin") {
-      navigate("/admin");
+      window.location.href = "/admin";
     } else if (role === "teacher") {
-      navigate("/giaovien");
+      window.location.href = "/giaovien";
     } else {
-      navigate("/");
+      window.location.href = "/";
     }
   };
 

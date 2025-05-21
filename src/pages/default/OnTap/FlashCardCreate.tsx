@@ -1,12 +1,11 @@
 import React from "react";
 import { Form, Input, Button, Checkbox, message } from "antd";
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
-import { useNavigate } from "react-router-dom";
 import { FlashCardAPI } from "@/services/student/FlashCardAPI";
 import "./FlashCardcss.css";
+
 export const FlashCardCreate: React.FC = () => {
   const [form] = Form.useForm();
-  const navigate = useNavigate();
 
   const onFinish = async (values: any) => {
     console.log("Received values: ", values);
@@ -15,7 +14,7 @@ export const FlashCardCreate: React.FC = () => {
       if (res.code === 201) {
         message.success("Flashcard được tạo thành công!");
       }
-      navigate(`/flashcard/${res.flashCardSet._id}`);
+      window.location.href = `/flashcard/${res.flashCardSet._id}`;
     } catch (error: any) {
       console.error("có lỗi xảy ra", error);
       message.error("Có lỗi xảy ra khi tạo flashcard!");
@@ -125,5 +124,3 @@ export const FlashCardCreate: React.FC = () => {
     </div>
   );
 };
-
-// Add the following CSS to your stylesheet

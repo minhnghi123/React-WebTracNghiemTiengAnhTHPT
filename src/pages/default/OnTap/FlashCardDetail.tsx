@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { Spin, Button, Modal,  Table, Card } from "antd";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { Spin, Button, Modal, Table, Card } from "antd";
+import { useParams } from "react-router-dom";
 import {
   FlashCardAPI,
   FlashCardSet,
   Vocab,
 } from "@/services/student/FlashCardAPI";
+import AppLink from "@/components/AppLink";
 
 export const FlashCardDetail: React.FC = () => {
   const { _id } = useParams<{ _id: string }>(); // Lấy id từ URL
@@ -13,7 +14,6 @@ export const FlashCardDetail: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [examModalVisible, setExamModalVisible] = useState<boolean>(false);
   const [examType, setExamType] = useState<string>("true false");
-  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchDetail = async () => {
@@ -47,13 +47,13 @@ export const FlashCardDetail: React.FC = () => {
           Flashcard set không tồn tại
         </h2>
         <div className="mt-4 text-center">
-          <Link
-            to="/flashcards"
+          <AppLink
+            to="/OnTap"
             className="text-blue-500 btn underline"
             style={{ fontSize: "1.25rem" }}
           >
             Quay lại danh sách flashcard
-          </Link>
+          </AppLink>
         </div>
       </div>
     );
@@ -71,17 +71,17 @@ export const FlashCardDetail: React.FC = () => {
 
   // Khi nhấn "Bắt đầu" trong modal, điều hướng đến trang làm bài
   const handleExamStart = () => {
-    navigate(
-      `/flashcard/exam/${flashCardSet._id}?examType=${encodeURIComponent(
-        examType
-      )}`
-    );
+    window.location.href = `/flashcard/exam/${flashCardSet._id}?examType=${encodeURIComponent(
+      examType
+    )}`;
   };
+
   return (
     <div className="container mx-auto px-4 py-6">
-      <h1 className="text-3xl font-bold mb-4"><center>{flashCardSet.title}</center></h1>
+      <h1 className="text-3xl font-bold mb-4">
+        <center>{flashCardSet.title}</center>
+      </h1>
       <p className="mb-6 text-lg">Mô tả: {flashCardSet.description}</p>
-
 
       <Table
         dataSource={flashCardSet.vocabs as Vocab[]}
@@ -161,10 +161,10 @@ export const FlashCardDetail: React.FC = () => {
       </Modal>
 
       <div className="mt-6">
-        <Button> 
-        <Link to="/Ontap" className="btn text-blue-500 underline">
-          Quay lại danh sách flashcard
-        </Link>
+        <Button>
+          <AppLink to="/OnTap" className="btn text-blue-500 underline">
+            Quay lại danh sách flashcard
+          </AppLink>
         </Button>
       </div>
     </div>

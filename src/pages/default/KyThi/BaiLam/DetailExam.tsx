@@ -1,8 +1,8 @@
 import { ExamAPIStudent } from "@/services/student";
 import { Exam } from "@/services/teacher/Teacher";
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { Card, Typography, Row, Col, Button, Space } from "antd";
+import { useParams } from "react-router-dom";
+import { Card, Typography, Row, Col, Space } from "antd";
 import {
   CalendarOutlined,
   ClockCircleOutlined,
@@ -11,6 +11,7 @@ import {
   PlayCircleOutlined,
 } from "@ant-design/icons";
 import { KetQua } from "../KetQua";
+import AppLink from "@/components/AppLink";
 
 const { Title, Text } = Typography;
 
@@ -20,8 +21,6 @@ export const DetailExam = () => {
   const [questionCount, setQuestionCount] = useState<number>(0);
   const [isPracticed, setIsPracticed] = useState(false);
 
-  const navigate = useNavigate();
-
   const fetchExam = async () => {
     const response = await ExamAPIStudent.getDetailExam(_id ?? "");
     if (response.code === 200) {
@@ -29,11 +28,6 @@ export const DetailExam = () => {
       setQuestionCount(response.exam.questions.length);
       setIsPracticed(response.exam.hasDone);
     }
-  };
-
-  const handleJoinExam = async () => {
-    const res = await ExamAPIStudent.joinExam(exam?._id ?? "");
-    if (res.code === 200) navigate(`/KyThi/BaiLam/`);
   };
 
   const formatDate = (dateStr?: string) =>
@@ -123,15 +117,21 @@ export const DetailExam = () => {
               </Col>
             </Row>
 
-            <Button
-              type="primary"
-              icon={<PlayCircleOutlined />}
-              size="large"
-              onClick={handleJoinExam}
-              style={{ width: "100%", borderRadius: 6 }}
-            >
-              Làm bài
-            </Button>
+            {exam._id && (
+              <AppLink
+                to="/KyThi/BaiLam/"
+                className="ant-btn ant-btn-primary"
+                style={{
+                  width: "100%",
+                  borderRadius: 6,
+                  display: "inline-block",
+                  textAlign: "center",
+                  padding: "8px 0",
+                }}
+              >
+                <PlayCircleOutlined /> Làm bài
+              </AppLink>
+            )}
 
             <KetQua DeThi={exam._id} />
           </Space>

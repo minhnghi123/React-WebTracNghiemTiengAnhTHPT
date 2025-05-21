@@ -1,16 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { Form, Input, Button, Checkbox, message, Spin } from "antd";
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { FlashCardAPI, FlashCardSet } from "@/services/student/FlashCardAPI";
 import "./FlashCardcss.css";
 
 export const FlashCardUpdate: React.FC = () => {
   const [form] = Form.useForm();
-  const navigate = useNavigate();
   const { _id } = useParams<{ _id: string }>();
   const [loading, setLoading] = useState<boolean>(true);
-    console.log(" _id: ", _id); 
+  console.log(" _id: ", _id); 
     
   useEffect(() => {
     const fetchFlashcardSet = async () => {
@@ -46,7 +45,7 @@ export const FlashCardUpdate: React.FC = () => {
       if (res.code === 200) {
         message.success("Flashcard được cập nhật thành công!");
       }
-      navigate(`/flashcard/${_id}`);
+      window.location.href = `/flashcard/${_id}`;
     } catch (error: any) {
       console.error("Lỗi khi cập nhật flashcard:", error);
       message.error("Có lỗi xảy ra khi cập nhật flashcard!");

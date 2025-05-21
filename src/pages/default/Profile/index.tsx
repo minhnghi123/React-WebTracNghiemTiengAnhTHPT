@@ -1,5 +1,4 @@
-import { useEffect, useState, ChangeEvent } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { Tabs, List, Card } from "antd";
 import { useAuthContext } from "@/contexts/AuthProvider";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -10,45 +9,45 @@ import {
 } from "@/services/student/ClassroomAPI";
 import "./prolife.css";
 import { Enable2FA } from "@/pages/Enable2FA";
+import AppLink from "@/components/AppLink";
 const { TabPane } = Tabs;
 
 export const Profile = () => {
   const { user } = useAuthContext();
-  const navigate = useNavigate();
   const [classrooms, setClassrooms] = useState<ClassroomReponse[]>([]);
-  const [isEditing, setIsEditing] = useState(false);
-  interface EditedUser {
-    username?: string;
-    email?: string;
-    [key: string]: any; // Optional: To allow additional properties
-  }
+  // const [, setIsEditing] = useState(false);
+  // interface EditedUser {
+  //   username?: string;
+  //   email?: string;
+  //   [key: string]: any; // Optional: To allow additional properties
+  // }
 
-  const [editedUser, setEditedUser] = useState<EditedUser>({});
+  // const [editedUser, setEditedUser] = useState<EditedUser>({});
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setEditedUser((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
+  // const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+  //   const { name, value } = e.target;
+  //   setEditedUser((prev) => ({
+  //     ...prev,
+  //     [name]: value,
+  //   }));
+  // };
 
-  const handleEditClick = () => {
-    setIsEditing(true);
-    setEditedUser({ ...user }); // Reset editedUser khi bắt đầu chỉnh sửa
-  };
+  // const handleEditClick = () => {
+  //   setIsEditing(true);
+  //   setEditedUser({ ...user }); // Reset editedUser khi bắt đầu chỉnh sửa
+  // };
 
-  const handleSaveClick = () => {
-    // Gọi API để cập nhật thông tin người dùng (ví dụ: sử dụng fetch hoặc axios)
-    // Sau khi API thành công, gọi onUpdateUser(editedUser) để cập nhật state ở component cha (nếu cần)
-    console.log("Lưu thông tin:", editedUser);
-    setIsEditing(false);
-    // **Lưu ý:** Bạn cần triển khai logic gọi API thực tế ở đây
-  };
+  // const handleSaveClick = () => {
+  //   // Gọi API để cập nhật thông tin người dùng (ví dụ: sử dụng fetch hoặc axios)
+  //   // Sau khi API thành công, gọi onUpdateUser(editedUser) để cập nhật state ở component cha (nếu cần)
+  //   console.log("Lưu thông tin:", editedUser);
+  //   setIsEditing(false);
+  //   // **Lưu ý:** Bạn cần triển khai logic gọi API thực tế ở đây
+  // };
 
-  const handleCancelClick = () => {
-    setIsEditing(false);
-  };
+  // const handleCancelClick = () => {
+  //   setIsEditing(false);
+  // };
 
   const getAllClassrooms = async () => {
     try {
@@ -102,12 +101,14 @@ export const Profile = () => {
               dataSource={classrooms}
               renderItem={(item) => (
                 <List.Item>
-                  <Card
-                    hoverable
-                    onClick={() => navigate(`/PhongThi/Detail/${item._id}`)}
+                  <AppLink
+                    to="/PhongThi/Detail/:classroomId"
+                    params={{ classroomId: item._id }}
                   >
-                    {item.title}
-                  </Card>
+                    <Card hoverable>
+                      {item.title}
+                    </Card>
+                  </AppLink>
                 </List.Item>
               )}
             />

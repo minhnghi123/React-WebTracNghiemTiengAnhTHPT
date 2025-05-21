@@ -1,15 +1,14 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./reponsive.css";
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { Button } from "antd";
 import thithu from "/src/assets/img/thithu.jpg";
 import ontap from "/src/assets/img/ontap.jpg";
 import lophoc from "/src/assets/img/lophoc.jpg";
 import giaodien from "/src/assets/img/giaodien.jpg";
 import maytinhban from "/src/assets/img/maytinhbang.png";
+import AppLink from "@/components/AppLink";
+
 const Home = () => {
-  const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [fade, setFade] = useState(true);
@@ -64,14 +63,6 @@ const Home = () => {
     return () => clearInterval(interval);
   }, [currentIndex]);
 
-  const handleNavigation = (path: string) => {
-    if (isLoggedIn) {
-      navigate(path); // Đã đăng nhập -> Chuyển đến trang cần thiết
-    } else {
-      navigate("/Login"); // Chưa đăng nhập -> Chuyển đến trang đăng nhập
-    }
-  };
-
   return (
     <div className="container my-5">
       <div className="slider relative mb-10">
@@ -103,17 +94,16 @@ const Home = () => {
               Thử sức với các đề thi sát với đề thi THPT quốc gia, nâng cao kỹ
               năng làm bài.
             </p>
-            <Button
-              className="mt-4 px-6 py-2 bg-blue-500 text-black font-semibold rounded-lg shadow-md hover:bg-blue-600 transition"
-              onClick={() => handleNavigation("/KyThi")}
+            <AppLink
+              className="ant-btn mt-4 px-6 py-2 bg-blue-500 text-black font-semibold rounded-lg shadow-md hover:bg-blue-600 transition"
+              to={isLoggedIn ? "/KyThi" : "/Login"}
             >
               Tham gia ngay
-            </Button>
+            </AppLink>
           </div>
         </div>
 
         {/* Ôn tập */}
-
         <div className="exam-card">
           <img src={ontap} alt="Ôn tập hiệu quả" className="exam-image" />
           <div className="exam-info">
@@ -121,12 +111,12 @@ const Home = () => {
             <p className="text-gray-600 mt-2">
               Hệ thống ôn tập thông minh giúp bạn cải thiện điểm số nhanh chóng.
             </p>
-            <Button
-              className="mt-4 px-6 py-2 bg-green-500 text-black font-semibold rounded-lg shadow-md hover:bg-green-600 transition"
-              onClick={() => handleNavigation("/OnTap")}
+            <AppLink
+              className="ant-btn mt-4 px-6 py-2 bg-green-500 text-black font-semibold rounded-lg shadow-md hover:bg-green-600 transition"
+              to={isLoggedIn ? "/OnTap" : "/Login"}
             >
               Ôn tập ngay
-            </Button>
+            </AppLink>
           </div>
         </div>
 
@@ -139,12 +129,12 @@ const Home = () => {
               Học tập cùng bạn bè, trao đổi kiến thức và nhận hỗ trợ từ giáo
               viên.
             </p>
-            <Button
-              className="mt-4 px-6 py-2 bg-purple-500 text-black font-semibold rounded-lg shadow-md hover:bg-purple-600 transition"
-              onClick={() => handleNavigation("/PhongThi")}
+            <AppLink
+              className="ant-btn mt-4 px-6 py-2 bg-purple-500 text-black font-semibold rounded-lg shadow-md hover:bg-purple-600 transition"
+              to={isLoggedIn ? "/PhongThi" : "/Login"}
             >
               Tham gia ngay
-            </Button>
+            </AppLink>
           </div>
         </div>
       </div>

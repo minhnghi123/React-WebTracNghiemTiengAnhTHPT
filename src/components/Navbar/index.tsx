@@ -1,9 +1,10 @@
 import { useAuthContext } from "@/contexts/AuthProvider";
 import { AuthApi } from "@/services/Auth";
 import { useLayoutEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Dropdown, MenuProps } from "antd";
 import P2N from "/src/assets/img/P2N 1.svg";
+import AppLink from "@/components/AppLink";
+
 interface navbarProps {
   rule?: boolean;
 }
@@ -12,12 +13,9 @@ export const Navbar: React.FC<navbarProps> = ({ rule = true }) => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [userName, setUserName] = useState<string>("");
   const { user, handleLogout } = useAuthContext();
-  const navigator = useNavigate();
 
   const handleBTNLogout = async () => {
     handleLogout();
-    // logout();
-    navigator("/");
     setIsLoggedIn(false);
     setUserName("");
     try {
@@ -27,19 +25,21 @@ export const Navbar: React.FC<navbarProps> = ({ rule = true }) => {
       console.log(error);
     }
   };
+
   useLayoutEffect(() => {
     if (user) {
       setIsLoggedIn(true);
       setUserName(user.username);
     }
   }, [user]);
+
   const items: MenuProps["items"] = [
     {
       key: "1",
       label: (
-        <a rel="noopener noreferrer" href="/profile">
+        <AppLink rel="noopener noreferrer" to="/profile">
           Thông tin cá nhân
-        </a>
+        </AppLink>
       ),
     },
     {
@@ -56,42 +56,38 @@ export const Navbar: React.FC<navbarProps> = ({ rule = true }) => {
       ),
     },
   ];
+
   return (
     <div id="main">
       <div id="header">
-        <div
-          onClick={() => navigator("/")}
-          id="logo"
-          className="cursor-pointer"
-          style={{ cursor: "pointer" }}
-        >
+        <AppLink to="/" id="logo" className="cursor-pointer" style={{ cursor: "pointer" }}>
           <img src={P2N} alt="Logo"></img>
-        </div>
+        </AppLink>
 
         {rule && (
           <div id="menu">
             <ul className="dsMenu">
               <li>
-                <a href="/">Trang chủ </a>
+                <AppLink to="/">Trang chủ </AppLink>
               </li>
               {user && (
                 <>
                   <li>
-                    <a href="/KyThi">Danh sách Đề Thi</a>
+                    <AppLink to="/KyThi">Danh sách Đề Thi</AppLink>
                   </li>
                   <li>
-                    <a href="/Ontap">Thẻ Ghi Nhớ</a>
+                    <AppLink to="/OnTap">Thẻ Ghi Nhớ</AppLink>
                   </li>
                   <li>
-                    <a href="/PhongThi">Lớp học</a>
+                    <AppLink to="/PhongThi">Lớp học</AppLink>
                   </li>
                 </>
               )}
               <li>
-                <a href="/About">Về chúng tôi</a>
+                <AppLink to="/About">Về chúng tôi</AppLink>
               </li>
               <li>
-                <a href="/Contact">Liên hệ</a>
+                <AppLink to="/Contact">Liên hệ</AppLink>
               </li>
             </ul>
           </div>
@@ -103,34 +99,32 @@ export const Navbar: React.FC<navbarProps> = ({ rule = true }) => {
               placement="bottomRight"
               trigger={["hover"]}
             >
-              <div
-                onClick={() =>
-                  user &&
-                  (user.role === "student"
-                    ? navigator("/profile")
-                    : user?.role === "teacher"
-                    ? navigator("/giaovien/")
-                    : navigator("/admin"))
-                }
-                style={{ cursor: "pointer" }}
-              >
-                <a
-                  onClick={(e) => e.preventDefault()}
-                  className="nav-link"
-                  style={{ color: "#007bff", fontWeight: "bold" }}
-                >
-                  <li className="nav-item">
-                    <span className="fas fa-user"></span> {userName}
-                  </li>
-                  <li className="nav-item">
-                    <span className="fas fa-user"></span>{" "}
-                    {user?.role === "student"
-                      ? "Học sinh"
-                      : user?.role === "teacher"
-                      ? "Giáo viên"
-                      : "Admin"}
-                  </li>
-                </a>
+              <div style={{ cursor: "pointer" }}>
+                {user && (
+                  <AppLink
+                    to={
+                      user.role === "student"
+                        ? "/profile"
+                        : user.role === "teacher"
+                        ? "/GiaoVien"
+                        : "/Admin"
+                    }
+                    className="nav-link"
+                    style={{ color: "#007bff", fontWeight: "bold", display: "block" }}
+                  >
+                    <li className="nav-item">
+                      <span className="fas fa-user"></span> {userName}
+                    </li>
+                    <li className="nav-item">
+                      <span className="fas fa-user"></span>{" "}
+                      {user?.role === "student"
+                        ? "Học sinh"
+                        : user?.role === "teacher"
+                        ? "Giáo viên"
+                        : "Admin"}
+                    </li>
+                  </AppLink>
+                )}
               </div>
             </Dropdown>
           </ul>
@@ -141,29 +135,29 @@ export const Navbar: React.FC<navbarProps> = ({ rule = true }) => {
             role="tablist"
           >
             <li className="nav-item rounded-pill shadow-sm" role="presentation">
-              <a
+              <AppLink
                 className="nav-dn bg-secondary text-white px-4 py-2 rounded-pill hover-bg-dark"
                 id="tab-login"
-                href="/Login"
+                to="/Login"
                 role="tab"
                 aria-controls="pills-login"
                 aria-selected="true"
               >
                 Đăng nhập
-              </a>
+              </AppLink>
             </li>
 
             <li className="nav-item rounded-pill shadow-sm" role="presentation">
-              <a
+              <AppLink
                 className="nav-dn bg-primary text-white px-4 py-2 rounded-pill hover-bg-dark"
                 id="tab-register"
-                href="/SignUp"
+                to="/SignUp"
                 role="tab"
                 aria-controls="pills-register"
                 aria-selected="false"
               >
                 Đăng ký
-              </a>
+              </AppLink>
             </li>
           </ul>
         )}

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import {
   Card,
   Tabs,
@@ -16,6 +16,7 @@ import { studentClassroomAPI } from "@/services/student/ClassroomAPI";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { ColumnsType } from "antd/es/table";
 import { Exam, Question } from "@/services/teacher/Teacher";
+import AppLink from "@/components/AppLink";
 
 const { TabPane } = Tabs;
 const examColumns: ColumnsType<Exam> = [
@@ -63,12 +64,10 @@ const examColumns: ColumnsType<Exam> = [
   },
 ];
 export const ClassroomDetail = () => {
-  const navigator = useNavigate();
   const navagiteToDetail = (id: string) => {
-    navigator(`/KyThi/ChiTiet/${id}`);
+    window.location.href = `/KyThi/ChiTiet/${id}`;
   };
   const { classroomId } = useParams<{ classroomId: string }>();
-  const navigate = useNavigate();
   const [classroom, setClassroom] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
@@ -135,12 +134,9 @@ export const ClassroomDetail = () => {
 
   return (
     <div className="container py-4">
-      <Button
-        onClick={() => navigate("/PhongThi")}
-        style={{ marginBottom: 16 }}
-      >
-        Quay lại
-      </Button>
+      <AppLink to="/PhongThi">
+        <Button style={{ marginBottom: 16 }}>Quay lại</Button>
+      </AppLink>
       <Card
         title={<h3 style={{ textAlign: "center" }}>{classroom.title}</h3>}
         bordered={false}

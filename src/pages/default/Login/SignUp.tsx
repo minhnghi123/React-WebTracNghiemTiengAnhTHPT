@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import "./SignUp.css";
 import { AuthApi } from "@/services/Auth";
+import AppLink from "@/components/AppLink";
 
 export const SignUp = () => {
   const [step, setStep] = useState<number>(1);
@@ -16,7 +17,7 @@ export const SignUp = () => {
   const [confirmPassword, setConfirmPassword] = useState<string>("");
   const [showPassword, setShowPassword] = useState<boolean>(false);
 
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -37,11 +38,9 @@ export const SignUp = () => {
         setMessage(response.data.message);
         if (selectedRole === "teacher") {
           alert("Đăng ký thành công. Đang chờ xác nhận từ quản trị viên");
-          navigate("/");
+          window.location.href = "/";
         } else {
-          navigate("/Login", {
-            state: { message: "Đăng ký thành công" },
-          });
+          window.location.href = "/Login";
         }
       } else {
         setMessage(response.data.message);
@@ -199,7 +198,7 @@ export const SignUp = () => {
         </form>
         <div className="formFooter">
           <p>
-            Đã có tài khoản? <a href="/Login">Đăng nhập</a>
+            Đã có tài khoản? <AppLink to="/Login">Đăng nhập</AppLink>
           </p>
           <button className="btn btn-link" onClick={() => setStep(1)}>
             Quay lại chọn loại tài khoản

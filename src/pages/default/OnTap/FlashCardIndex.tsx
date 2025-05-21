@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Button, Card, Space, Spin, message } from "antd";
-import { useNavigate } from "react-router-dom";
 import { FlashCardAPI, FlashCardSet } from "@/services/student/FlashCardAPI";
 import { useAuthContext } from "@/contexts/AuthProvider";
 import "./FlashCardcss.css";
+import AppLink from "@/components/AppLink";
 
 export const FlashCardIndex: React.FC = () => {
   const [, setFlashCardSets] = useState<FlashCardSet[]>([]);
@@ -13,7 +13,6 @@ export const FlashCardIndex: React.FC = () => {
   );
   const [loading, setLoading] = useState<boolean>(true);
   const { user } = useAuthContext();
-  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchFlashcardSets = async () => {
@@ -51,12 +50,12 @@ export const FlashCardIndex: React.FC = () => {
   }
 
   const handleExam = (id: string) => {
-    navigate(`/flashcard/${id}`);
+    window.location.href = `/flashcard/${id}`;
   };
 
   const handleEdit = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    navigate(`/flashcard/edit/${id}`);
+    window.location.href = `/flashcard/edit/${id}`;
   };
 
   const handleDelete = async (id: string, e: React.MouseEvent) => {
@@ -83,14 +82,12 @@ export const FlashCardIndex: React.FC = () => {
       <p className="text-center text-gray-600 mb-4">
         Trang này cho phép bạn quản lý và sử dụng các bộ từ vựng. Bạn có thể tạo mới, chỉnh sửa, hoặc xóa các bộ từ vựng của mình. Ngoài ra, bạn cũng có thể truy cập các bộ từ vựng công khai khác để ôn tập.
       </p>
-      <button
+      <AppLink
+        to="/flashcard/create"
         className="btn btn-primary my-3 mx-3"
-        onClick={() => {
-          navigate("/flashcard/create");
-        }}
       >
         Tạo bộ từ vựng mới
-      </button>
+      </AppLink>
       <hr />
       <h2>
         <center>Bộ từ vựng của tôi</center>

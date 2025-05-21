@@ -22,13 +22,13 @@ const server = http.createServer(app);
 const io = new socketIo(server, {
   cors: {
     origin: [
-      "http://localhost:5173", 
-      "https://localhost:5173", 
+      "http://localhost:5173",
+      "http://localhost:5000",
       "https://localhost:3000",
-      "https://react-webtracnghiemtienganhthpt-1-ji25.onrender.com/",
-     "https://react-web-trac-nghiem-tieng-anh-thpt.vercel.app", // FE domain
+      "https://react-webtracnghiemtienganhthpt-1-ji25.onrender.com",
+      "https://react-web-trac-nghiem-tieng-anh-thpt.vercel.app", // FE domain
       "https://react-webtracnghiemtienganhthpt-ke5j.onrender.com", // BE domain
-    ],// Allow requests from this origin
+    ], // Allow requests from these origins
     methods: ["GET", "POST"], // Allowed HTTP methods
     credentials: true, // Allow credentials (cookies, etc.)
   },
@@ -43,9 +43,10 @@ handleErrorReport(); // Thêm dòng này
 app.use(
   cors({
     origin: [
-      "http://localhost:5173", 
+      "http://localhost:5173",
+      "http://localhost:5000",
       "https://localhost:3000",
-      "https://react-webtracnghiemtienganhthpt-1-ji25.onrender.com/",
+      "https://react-webtracnghiemtienganhthpt-1-ji25.onrender.com",
       "https://react-web-trac-nghiem-tieng-anh-thpt.vercel.app", // FE domain
       "https://react-webtracnghiemtienganhthpt-ke5j.onrender.com", // BE domain
     ],

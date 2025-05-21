@@ -3,10 +3,10 @@ import {
   ClassroomReponse,
   studentClassroomAPI,
 } from "@/services/student/ClassroomAPI";
-import { useNavigate } from "react-router-dom";
-import { Card, Button, Input, Row, Col, Typography } from "antd";
+import { Card, Input, Row, Col, Typography } from "antd";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./phongthi.css"; // Import your CSS file here
+import AppLink from "@/components/AppLink";
 const { Title, Text } = Typography;
 
 export const PhongThi = () => {
@@ -17,7 +17,6 @@ export const PhongThi = () => {
     classroom.title.toLowerCase().includes(searchText.toLowerCase()) ||
     classroom.teacherId.username.toLowerCase().includes(searchText.toLowerCase())
   ) : [];
-  const navigate = useNavigate();
 
   const getAllClassrooms = async () => {
     try {
@@ -58,34 +57,35 @@ export const PhongThi = () => {
               onChange={(e) => setJoinClassroomId(e.target.value)}
               style={{ marginBottom: 8, width: "100%" }}
             />
-            <Button
-              type="primary"
-              block
-              onClick={() => navigate(`/PhongThi/Detail/${joinClassroomId}`)}
-              disabled={!joinClassroomId.trim()}
+            <AppLink
+              to="/PhongThi/Detail/:classroomId"
+              params={{ classroomId: joinClassroomId }}
+              className={`ant-btn ant-btn-primary${!joinClassroomId.trim() ? " ant-btn-disabled" : ""}`}
+              style={{ display: "block", pointerEvents: !joinClassroomId.trim() ? "none" : "auto" }}
             >
               Tham gia
-            </Button>
+            </AppLink>
           </Card>
         </Col>
         {/* Danh sách lớp học */}
         {filteredClassrooms.length > 0 ? (
           filteredClassrooms.map((classroom) => (
             <Col xs={24} sm={12} md={8} key={classroom._id}>
-              <Card
-                title={classroom.title}
-                bordered
-                hoverable
-                onClick={() => navigate(`/PhongThi/Detail/${classroom._id}`)}
-              >
-                <p>
-                  <Text strong>Giáo viên: </Text> {classroom.teacherId.username}
-                </p>
-                <p>
-                  <Text strong>Số lượng học sinh: </Text>{" "}
-                  {classroom.students.length}
-                </p>
-              </Card>
+              <AppLink to="/PhongThi/Detail/:classroomId" params={{ classroomId: classroom._id }}>
+                <Card
+                  title={classroom.title}
+                  bordered
+                  hoverable
+                >
+                  <p>
+                    <Text strong>Giáo viên: </Text> {classroom.teacherId.username}
+                  </p>
+                  <p>
+                    <Text strong>Số lượng học sinh: </Text>{" "}
+                    {classroom.students.length}
+                  </p>
+                </Card>
+              </AppLink>
             </Col>
           ))
         ) : (

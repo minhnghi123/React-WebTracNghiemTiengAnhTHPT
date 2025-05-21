@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { Spin, Button, message } from "antd";
-import { useParams, useLocation, useNavigate } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
 import { FlashCardAPI, FlashCardSet } from "@/services/student/FlashCardAPI";
 import { FlashCardExamTrueFalse } from "./ExamFlashCard/TrueFalse";
 import { FlashCardExamMultipleChoice } from "./ExamFlashCard/FlashCardExamMultipleChoice";
 import { FlashCardExamWritten } from "./ExamFlashCard/FlashCardExamWritten";
 import { FlashCardMatch } from "./ExamFlashCard/FlashCardMatch";
+import AppLink from "@/components/AppLink";
 
 export const FlashCardExam: React.FC = () => {
   const { id } = useParams<{ id: string }>(); // Lấy id của flashcard set
   const location = useLocation();
-  const navigate = useNavigate();
   const [flashCardSet, setFlashCardSet] = useState<FlashCardSet | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -90,9 +90,11 @@ export const FlashCardExam: React.FC = () => {
      
       {renderExam()}
       <div className="mt-6 text-center">
-        <Button type="primary" onClick={() => navigate(`/flashcard/${flashCardSet._id}`)}>
-          Quay lại chi tiết flashcard
-        </Button>
+        <AppLink to="/FlashCard/:_id" params={{ _id: flashCardSet._id ?? "" }}>
+          <Button type="primary">
+            Quay lại chi tiết flashcard
+          </Button>
+        </AppLink>
       </div>
     </div>
   );

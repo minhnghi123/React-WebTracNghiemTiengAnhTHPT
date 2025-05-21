@@ -4,7 +4,7 @@ import Table, { ColumnsType } from "antd/es/table";
 
 import { useEffect, useState } from "react";
 import CreateExamModal from "./DeThi/CreateExam";
-import { useNavigate } from "react-router-dom";
+import AppLink from "@/components/AppLink";
 import CreateExamModalAuTo from "./DeThi/CreateExamQuestion.tsx/CreateExamAuto";
 import CreateExamModalShedule from "./DeThi/CreateExamQuestion.tsx/SetExamModalShedule";
 import ExportWordModal from "./DeThi/ExportWord/ExportWordModal";
@@ -158,17 +158,16 @@ export const QuanLyDeThi = () => {
     null
   );
   const [showModalCreatAuto, setShowModalCreatAuto] = useState<boolean>(false);
-  const navigatetor = useNavigate();
 
   return (
     <div className="container mx-auto p-4">
       <div className="flex justify-end mb-4">
-        <button
+        <AppLink
+          to="/giaovien/QuanLyDeThi/CreateExam"
           className="btn btn-primary mx-3"
-          onClick={() => navigatetor("/giaovien/QuanLyDeThi/CreateExam")}
         >
           Tạo đề thi thủ công
-        </button>
+        </AppLink>
         <button
           className="btn btn-primary mx-3"
           onClick={() => setShowModalCreatAuto(true)}
@@ -235,17 +234,18 @@ export const QuanLyDeThi = () => {
               key: "action",
               render: (_, record) => (
                 <Space size="small">
-                  <Button
-                    color="primary"
-                    variant="solid"
-                    onClick={() =>
-                      navigatetor(
-                        "/giaovien/QuanLyDeThi/UpdateExam/" + record.slug
-                      )
-                    }
+                  <AppLink
+                    to="/giaovien/QuanLyDeThi/UpdateExam/:_id"
+                    params={{ _id: record.slug }}
+                    className="ant-btn"
                   >
-                    Chi tiết
-                  </Button>
+                    <Button
+                      color="primary"
+                      variant="solid"
+                    >
+                      Chi tiết
+                    </Button>
+                  </AppLink>
                   <Button
                     color="default"
                     variant="solid"

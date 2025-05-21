@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import {
   Card,
   List,
@@ -29,6 +29,7 @@ import OverviewTab from "./OverviewTab";
 import ExamsTab from "./ExamsTab";
 import StudentsTab from "./StudentsTab";
 import UpdateClassTab from "./UpdateClassTab";
+import AppLink from "@/components/AppLink";
 
 const { TabPane } = Tabs;
 
@@ -77,7 +78,6 @@ const examColumns: ColumnsType<Exam> = [
 
 const DetailClass: React.FC = () => {
   const { _classroom_id } = useParams<{ _classroom_id: string }>();
-  const navigate = useNavigate();
   const [classroom, setClassroom] = useState<Classroom | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -184,6 +184,7 @@ const DetailClass: React.FC = () => {
           classroom._id,
           updateData
         );
+        if (updatedClassroom)
         message.success("Cập nhật lớp học thành công");
         // Cập nhật lại thông tin lớp học sau khi update
         fetchClassroom();
@@ -422,9 +423,9 @@ const DetailClass: React.FC = () => {
     <div className="detail-class-container">
       <Row style={{ marginBottom: 16 }}>
         <Col>
-          <Button onClick={() => navigate("/giaovien/quanlylophoc")}>
-            Quay lại danh sách lớp học
-          </Button>
+          <AppLink to="/giaovien/QuanLyLopHoc">
+            <Button>Quay lại danh sách lớp học</Button>
+          </AppLink>
         </Col>
       </Row>
       <Row style={{ marginBottom: 16 }}>

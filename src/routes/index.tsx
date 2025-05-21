@@ -8,7 +8,7 @@ import {
 } from "@/components/ProtectedRoute";
 import Layout from "@/pages/default/Layout";
 import Home from "@/pages/default/Home";
-import { Login } from "@/pages/default/Login";
+// import { Login } from "@/pages/default/Login";
 import { SignUp } from "@/pages/default/Login/SignUp";
 import { VeChungToi } from "@/pages/default/VeChungToi";
 import { LienHe } from "@/pages/default/LienHe";

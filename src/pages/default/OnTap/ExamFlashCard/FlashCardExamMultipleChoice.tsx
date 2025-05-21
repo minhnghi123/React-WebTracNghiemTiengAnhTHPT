@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Card, Button, Radio, message } from "antd";
-import { useNavigate } from "react-router-dom";
 import { FlashCardSet } from "@/services/student/FlashCardAPI";
 import "./index.css"; 
 import clsx from "clsx";
+import AppLink from "@/components/AppLink";
 
 interface MultipleChoiceQuestion {
   id: string;
@@ -17,7 +17,6 @@ interface FlashCardExamMultipleChoiceProps {
 }
 
 export const FlashCardExamMultipleChoice: React.FC<FlashCardExamMultipleChoiceProps> = ({ flashCardSet }) => {
-  const navigate = useNavigate();
   const [questions, setQuestions] = useState<MultipleChoiceQuestion[]>([]);
   const [userAnswers, setUserAnswers] = useState<Record<number, string>>({});
   const [score, setScore] = useState<{ correct: number; wrong: number } | null>(null);
@@ -45,9 +44,6 @@ export const FlashCardExamMultipleChoice: React.FC<FlashCardExamMultipleChoicePr
               options.push(candidate);
             }
           }
-        //   while (options.length < 4) {
-        //     options.push("...");
-        //   }
           options = shuffleArray(options);
           return {
             id: vocab._id || "",
@@ -126,9 +122,11 @@ export const FlashCardExamMultipleChoice: React.FC<FlashCardExamMultipleChoicePr
       )}
 
       <div className="mt-6 text-center">
-        <Button onClick={() => navigate(`/flashcard/${flashCardSet._id}`)}>
-          Quay lại chi tiết flashcard
-        </Button>
+        <AppLink to="/FlashCard/:_id" params={{ _id: flashCardSet._id ?? "" }}>
+          <Button>
+            Quay lại chi tiết flashcard
+          </Button>
+        </AppLink>
       </div>
     </div>
   );

@@ -8,10 +8,10 @@ import {
 
 import { useEffect, useState } from "react";
 import { ExamAPIStudent } from "@/services/student";
-import { useNavigate } from "react-router-dom";
 import flex from "antd/es/flex";
 import { AuthApi } from "@/services/Auth";
 import BlockPage, { BlockInfo } from "@/pages/BlockPage";
+import AppLink from "@/components/AppLink";
 
 const { Title, Text } = Typography;
 const { Search } = Input;
@@ -22,7 +22,6 @@ export const KyThi = () => {
   const [total, setTotal] = useState<number>(0);
   const [searchText, setSearchText] = useState<string>("");
   const [selectedClass, setSelectedClass] = useState<string | undefined>();
-  const navigator = useNavigate();
 
   const handleSearch = (value: string) => {
     setSearchText(value);
@@ -92,54 +91,55 @@ export const KyThi = () => {
     <Row gutter={[16, 16]}>
       {exams.map((exam) => (
         <Col xs={24} sm={12} md={8} lg={6} key={exam._id}>
-          <Card
-            bordered
-            hoverable
-            onClick={() => navigator(`/KyThi/ChiTiet/${exam.slug}`)}
-            style={{
-              borderRadius: 12,
-              height: "100%",
-              cursor: "pointer",
-              transition: "all 0.3s ease",
-              boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-            }}
-            bodyStyle={{ minHeight: 200 }}
-            className="exam-card"
-          >
-            <Space direction="vertical" size="middle" style={{ width: "100%" }}>
-              <Title level={5} style={{ marginBottom: 0 }}>
-                {exam.title}
-              </Title>
-              <Text type="secondary" ellipsis={{ tooltip: exam.description }}>
-                {exam.description}
-              </Text>
-              <Space wrap size={[8, 8]}>
-                <Tag icon={<ClockCircleOutlined />} color="blue">
-                  {exam.duration} phút
-                </Tag>
-                <Tag icon={<CalendarOutlined />} color="green">
-                  Bắt đầu: {formatDate(exam.startTime as unknown as string)}
-                </Tag>
-                <Tag icon={<CalendarOutlined />} color="red">
-                  Kết thúc: {formatDate(exam.endTime as unknown as string)}
-                </Tag>
-                <Tag icon={<QuestionCircleOutlined />} color="purple">
-                  {exam.questions?.length ?? 0} câu hỏi
-                </Tag>
-                <Tag color="gold">Lớp: {exam.class}</Tag>
-                {exam.topic?.map((topic, index) => (
-                  <Tag color="cyan" key={index}>
-                    {topic}
+          <AppLink to={`/KyThi/ChiTiet/${exam.slug}`} style={{ textDecoration: "none" }}>
+            <Card
+              bordered
+              hoverable
+              style={{
+                borderRadius: 12,
+                height: "100%",
+                cursor: "pointer",
+                transition: "all 0.3s ease",
+                boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+              }}
+              bodyStyle={{ minHeight: 200 }}
+              className="exam-card"
+            >
+              <Space direction="vertical" size="middle" style={{ width: "100%" }}>
+                <Title level={5} style={{ marginBottom: 0 }}>
+                  {exam.title}
+                </Title>
+                <Text type="secondary" ellipsis={{ tooltip: exam.description }}>
+                  {exam.description}
+                </Text>
+                <Space wrap size={[8, 8]}>
+                  <Tag icon={<ClockCircleOutlined />} color="blue">
+                    {exam.duration} phút
                   </Tag>
-                ))}
-                {exam.knowledge?.map((knowledge, index) => (
-                  <Tag color="magenta" key={index}>
-                    {knowledge}
+                  <Tag icon={<CalendarOutlined />} color="green">
+                    Bắt đầu: {formatDate(exam.startTime as unknown as string)}
                   </Tag>
-                ))}
+                  <Tag icon={<CalendarOutlined />} color="red">
+                    Kết thúc: {formatDate(exam.endTime as unknown as string)}
+                  </Tag>
+                  <Tag icon={<QuestionCircleOutlined />} color="purple">
+                    {exam.questions?.length ?? 0} câu hỏi
+                  </Tag>
+                  <Tag color="gold">Lớp: {exam.class}</Tag>
+                  {exam.topic?.map((topic, index) => (
+                    <Tag color="cyan" key={index}>
+                      {topic}
+                    </Tag>
+                  ))}
+                  {exam.knowledge?.map((knowledge, index) => (
+                    <Tag color="magenta" key={index}>
+                      {knowledge}
+                    </Tag>
+                  ))}
+                </Space>
               </Space>
-            </Space>
-          </Card>
+            </Card>
+          </AppLink>
         </Col>
       ))}
     </Row>

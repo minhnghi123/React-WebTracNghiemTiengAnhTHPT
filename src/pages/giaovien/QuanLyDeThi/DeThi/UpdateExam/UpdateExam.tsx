@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Modal, Input, Select, Form, DatePicker, message } from "antd";
 import { Exam, ExamAPI, Question } from "@/services/teacher/Teacher";
-import { useNavigate } from "react-router-dom";
 import moment from "moment";
 import { ExamDataRecieve } from "@/services/teacher/ListeningQuestion";
 
@@ -92,15 +91,13 @@ const UpdateExamModal: React.FC<UpdateExamModalProps> = ({
     const response = await ExamAPI.UpdateExam(exam as Exam, slug);
     if (response?.success === true) {
       alert("Sửa đề thi thành công");
-      navigate("/giaovien/QuanLyDeThi/");
+      window.location.href = "/giaovien/QuanLyDeThi/";
       handleClose();
       onCreateSuccess();
     } else {
       message.error(response?.message);
     }
   };
-
-  const navigate = useNavigate();
 
   return (
     <Modal
