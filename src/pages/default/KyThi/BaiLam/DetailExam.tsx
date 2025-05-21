@@ -1,7 +1,7 @@
 import { ExamAPIStudent } from "@/services/student";
 import { Exam } from "@/services/teacher/Teacher";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { Card, Typography, Row, Col, Space } from "antd";
 import {
   CalendarOutlined,
@@ -20,6 +20,7 @@ export const DetailExam = () => {
   const [exam, setExam] = useState<Exam | null>(null);
   const [questionCount, setQuestionCount] = useState<number>(0);
   const [isPracticed, setIsPracticed] = useState(false);
+  const navigate = useNavigate();
 
   const fetchExam = async () => {
     const response = await ExamAPIStudent.getDetailExam(_id ?? "");
@@ -27,6 +28,17 @@ export const DetailExam = () => {
       setExam(response.exam);
       setQuestionCount(response.exam.questions.length);
       setIsPracticed(response.exam.hasDone);
+    }
+  };
+
+  const handleJoinExam = async () => {
+    if (exam?._id) {
+      try {
+        await ExamAPIStudent.joinExam(exam._id);
+        navigate("/KyThi/BaiLam/");
+      } catch (error) {
+        // Xử lý lỗi nếu cần
+      }
     }
   };
 
@@ -118,8 +130,7 @@ export const DetailExam = () => {
             </Row>
 
             {exam._id && (
-              <AppLink
-                to="/KyThi/BaiLam/"
+              <span
                 className="ant-btn ant-btn-primary"
                 style={{
                   width: "100%",
@@ -127,10 +138,12 @@ export const DetailExam = () => {
                   display: "inline-block",
                   textAlign: "center",
                   padding: "8px 0",
+                  cursor: "pointer",
                 }}
+                onClick={handleJoinExam}
               >
                 <PlayCircleOutlined /> Làm bài
-              </AppLink>
+              </span>
             )}
 
             <KetQua DeThi={exam._id} />

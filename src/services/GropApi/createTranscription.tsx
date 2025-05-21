@@ -11,7 +11,6 @@ const createTranscription = async (request: TranscriptionRequest) => {
     'Content-Type': 'multipart/form-data',
     'Authorization': `Bearer ${apiKey}`,
   };
-
   const formData = new FormData();
   formData.append('file', request.file);
   formData.append('language', 'en');

@@ -3,7 +3,7 @@ import { Modal } from "antd";
 import { io } from "socket.io-client";
 import { useAuthContext } from "@/contexts/AuthProvider";
 
-const socket = io("https://react-webtracnghiemtienganhthpt-ke5j.onrender.com");
+const socket = io("http://localhost:5000");
 
 const GlobalLayout: React.FC = ({ children }) => {
 const { user } = useAuthContext();

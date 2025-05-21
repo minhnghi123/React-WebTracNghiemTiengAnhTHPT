@@ -208,6 +208,7 @@ export async function login(req, res) {
 
     // Ghi log
     userLog(req, "Login", `OTP sent to email: ${email}`);
+    generateTokenAndSetToken(user._id, res); //jwt
 
     return res.status(200).json({
       code: 200,
@@ -249,6 +250,7 @@ export async function verifyLoginOtp(req, res) {
     }
     user.otpInfo = undefined;
     await user.save();
+    console.log(user._id);
     generateTokenAndSetToken(user._id, res);
     userLog(req, "Login", "User logged in successfully");
     return res.status(200).json({
@@ -280,6 +282,8 @@ export async function saveTrustedDevice(req, res) {
     }
 
     // Thêm thiết bị tin cậy
+    generateTokenAndSetToken(user._id, res); //jwt
+
     user.trustedDevices.push({
       deviceId, // Chỉ lưu chuỗi deviceId
       addedAt: new Date(),

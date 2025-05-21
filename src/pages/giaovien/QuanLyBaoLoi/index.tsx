@@ -10,7 +10,7 @@ import { useAuthContext } from "@/contexts/AuthProvider";
 const { TextArea } = Input;
 const { Title, Text } = Typography;
 
-const socket = io("http://https://react-webtracnghiemtienganhthpt-ke5j.onrender.com");
+const socket = io("http://localhost:5000");
 
 export interface ErrorReport {
   _id: string;

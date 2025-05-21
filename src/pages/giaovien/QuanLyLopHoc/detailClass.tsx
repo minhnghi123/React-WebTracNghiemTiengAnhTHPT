@@ -249,7 +249,8 @@ const DetailClass: React.FC = () => {
     setIsStudentModalOpen(true);
   };
 
-  const handleExcelUpload = (file: File) => {
+  const handleExcelUpload = async (file: File) => {
+    if(listAllStudents) await  fetchAllStudents()
     const reader = new FileReader();
     reader.onload = async (evt: any) => {
       try {
