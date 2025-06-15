@@ -3,10 +3,10 @@ import { Modal } from "antd";
 import { io } from "socket.io-client";
 import { useAuthContext } from "@/contexts/AuthProvider";
 
-const socket = io("http://localhost:5000");
+const socket = io("https://react-webtracnghiemtienganhthpt-ke5j.onrender.com");
 
 const GlobalLayout: React.FC = ({ children }) => {
-const { user } = useAuthContext();
+  const { user } = useAuthContext();
   useEffect(() => {
     socket.on("TEACHER_RESPONSE_SUCCESS", (data) => {
       if (data.userId === user?._id) {

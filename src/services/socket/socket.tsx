@@ -1,9 +1,8 @@
 import { io } from "socket.io-client";
 
-const socket = io("http://localhost:5000"); 
+const socket = io("https://react-webtracnghiemtienganhthpt-ke5j.onrender.com");
 
-socket.on("connect", () => {
-});
+socket.on("connect", () => {});
 
 const reportError = (errorData) => {
   socket.emit("REPORT_ERROR", errorData);

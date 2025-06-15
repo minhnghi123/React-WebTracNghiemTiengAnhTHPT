@@ -3,7 +3,7 @@ import { io } from "socket.io-client";
 import { Modal } from "antd";
 import { useAuthContext } from "@/contexts/AuthProvider";
 
-const socket = io("http://localhost:5000"); // Kết nối đến server WebSocket
+const socket = io("https://react-webtracnghiemtienganhthpt-ke5j.onrender.com"); // Kết nối đến server WebSocket
 
 socket.on("connect", () => {
   console.log(`Connected to server with ID: ${socket.id}`);
@@ -22,7 +22,7 @@ const ErrorReportModal: React.FC<ErrorReportModalProps> = ({
   userId,
   onClose,
 }) => {
-  const {user}= useAuthContext()
+  const { user } = useAuthContext();
   const [description, setDescription] = useState("");
   const [additionalInfo, setAdditionalInfo] = useState("");
 
