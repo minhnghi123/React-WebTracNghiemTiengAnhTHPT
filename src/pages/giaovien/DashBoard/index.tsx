@@ -10,7 +10,7 @@ import lophoc from "/src/Content/img/img-lop-hoc.jpg";
 import baoloi from "/src/Content/img/img-bao-loi.png";
 import audio from "/src/Content/img/img-audio.jpg";
 import AppLink from "@/components/AppLink";
-const socket = io("https://react-webtracnghiemtienganhthpt-ke5j.onrender.com");
+const socket = io(import.meta.env.VITE_API_URL_PROD);
 
 export const DashBoardGiaoVien = () => {
   const [pendingReportsCount, setPendingReportsCount] = useState(0);
@@ -36,7 +36,10 @@ export const DashBoardGiaoVien = () => {
     <div className="container mb-3 mt-5">
       <div className="row g-4">
         <div className="col-12 col-md-6 col-lg-3 dashboard-item">
-          <AppLink to="/giaovien/QuanLyDeThi" style={{ textDecoration: "none" }}>
+          <AppLink
+            to="/giaovien/QuanLyDeThi"
+            style={{ textDecoration: "none" }}
+          >
             <div className="bg-white p-4 rounded shadow h-100 text-center">
               <img
                 src={dethi}
@@ -50,7 +53,10 @@ export const DashBoardGiaoVien = () => {
           </AppLink>
         </div>
         <div className="col-12 col-md-6 col-lg-3 dashboard-item">
-          <AppLink to="/giaovien/NganHangCauHoi" style={{ textDecoration: "none" }}>
+          <AppLink
+            to="/giaovien/NganHangCauHoi"
+            style={{ textDecoration: "none" }}
+          >
             <div className="bg-white p-4 rounded shadow h-100 text-center">
               <img
                 src={cauhoi}
@@ -64,7 +70,10 @@ export const DashBoardGiaoVien = () => {
           </AppLink>
         </div>
         <div className="col-12 col-md-6 col-lg-3 dashboard-item">
-          <AppLink to="/giaovien/QuanLyLopHoc" style={{ textDecoration: "none" }}>
+          <AppLink
+            to="/giaovien/QuanLyLopHoc"
+            style={{ textDecoration: "none" }}
+          >
             <div className="bg-white p-4 rounded shadow h-100 text-center">
               <img
                 src={lophoc}
@@ -78,7 +87,10 @@ export const DashBoardGiaoVien = () => {
           </AppLink>
         </div>
         <div className="col-12 col-md-6 col-lg-3 dashboard-item">
-          <AppLink to="/GiaoVien/QuanLyBaoLoi" style={{ textDecoration: "none" }}>
+          <AppLink
+            to="/GiaoVien/QuanLyBaoLoi"
+            style={{ textDecoration: "none" }}
+          >
             <div className="bg-white p-4 rounded shadow h-100 text-center position-relative">
               <img
                 src={baoloi}
@@ -100,7 +112,10 @@ export const DashBoardGiaoVien = () => {
           </AppLink>
         </div>
         <div className="col-12 col-md-6 col-lg-3 dashboard-item">
-          <AppLink to="/giaovien/QuanLyAudio" style={{ textDecoration: "none" }}>
+          <AppLink
+            to="/giaovien/QuanLyAudio"
+            style={{ textDecoration: "none" }}
+          >
             <div className="bg-white p-4 rounded shadow h-100 text-center">
               <img
                 src={audio}

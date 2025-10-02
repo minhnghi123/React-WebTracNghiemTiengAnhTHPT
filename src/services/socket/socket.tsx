@@ -1,6 +1,6 @@
 import { io } from "socket.io-client";
 
-const socket = io("https://react-webtracnghiemtienganhthpt-ke5j.onrender.com");
+const socket = io(import.meta.env.VITE_API_URL_PROD);
 
 socket.on("connect", () => {});
 

@@ -8,7 +8,7 @@ import { useAuthContext } from "@/contexts/AuthProvider";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { ErrorReport } from "./QuanLyBaoLoi";
 
-const socket = io("https://react-webtracnghiemtienganhthpt-ke5j.onrender.com");
+const socket = io(import.meta.env.VITE_API_URL_PROD);
 
 const LayoutGiaoVien = () => {
   const { user } = useAuthContext();

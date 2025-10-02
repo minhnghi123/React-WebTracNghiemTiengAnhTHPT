@@ -1,6 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { io } from "socket.io-client";
-import { Table, Button, Modal, Input, Space, Typography, message, Tag } from "antd";
+import {
+  Table,
+  Button,
+  Modal,
+  Input,
+  Space,
+  Typography,
+  message,
+  Tag,
+} from "antd";
 import type { ColumnsType } from "antd/es/table";
 import QuestionComponent from "../QuanLyCauHoi/Question";
 import { Question } from "@/services/teacher/Teacher";
@@ -10,7 +19,7 @@ import { useAuthContext } from "@/contexts/AuthProvider";
 const { TextArea } = Input;
 const { Title, Text } = Typography;
 
-const socket = io("https://react-webtracnghiemtienganhthpt-ke5j.onrender.com");
+const socket = io(import.meta.env.VITE_API_URL_PROD);
 
 export interface ErrorReport {
   _id: string;
@@ -27,11 +36,15 @@ const QuanLyBaoLoi: React.FC = () => {
   const [, setErrorReports] = useState<ErrorReport[]>([]);
   const [filteredReports, setFilteredReports] = useState<ErrorReport[]>([]); // Danh sách đã lọc
   const [response, setResponse] = useState("");
-  const [selectedReport, setSelectedReport] = useState<ErrorReport | null>(null);
+  const [selectedReport, setSelectedReport] = useState<ErrorReport | null>(
+    null
+  );
   const [questionModalVisible, setQuestionModalVisible] = useState(false);
-  const [selectedQuestionId, setSelectedQuestionId] = useState<Question>({} as Question);
+  const [selectedQuestionId, setSelectedQuestionId] = useState<Question>(
+    {} as Question
+  );
 
-  const {user} = useAuthContext()
+  const { user } = useAuthContext();
   useEffect(() => {
     // Yêu cầu danh sách báo lỗi khi component được render
     socket.emit("GET_ERROR_REPORTS");

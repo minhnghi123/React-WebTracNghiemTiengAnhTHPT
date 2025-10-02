@@ -22,6 +22,7 @@ const server = http.createServer(app);
 const io = new socketIo(server, {
   cors: {
     origin: [
+      "http://localhost",
       "http://localhost:5173",
       "http://localhost:5000",
       "https://localhost:3000",
@@ -43,6 +44,7 @@ handleErrorReport(); // Thêm dòng này
 app.use(
   cors({
     origin: [
+      "http://localhost",
       "http://localhost:5173",
       "http://localhost:5000",
       "https://localhost:3000",

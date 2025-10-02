@@ -3,7 +3,7 @@ import { io } from "socket.io-client";
 import { Modal } from "antd";
 import { useAuthContext } from "@/contexts/AuthProvider";
 
-const socket = io("https://react-webtracnghiemtienganhthpt-ke5j.onrender.com"); // Kết nối đến server WebSocket
+const socket = io(import.meta.env.VITE_API_URL_PROD); // Kết nối đến server WebSocket
 
 socket.on("connect", () => {
   console.log(`Connected to server with ID: ${socket.id}`);
@@ -93,7 +93,7 @@ const ErrorReportModal: React.FC<ErrorReportModalProps> = ({
 
 const styles = {
   overlay: {
-    position: "fixed" as "fixed",
+    position: "fixed" as const,
     top: 0,
     left: 0,
     width: "100%",
