@@ -25,7 +25,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          file: ./backend/Dockerfile
+          file: ./Dockerfile.be
           push: true
           tags: aliennguyenn/p2nenglish-be:latest
 
@@ -34,7 +34,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          file: ./frontend/Dockerfile
+          file: ./Dockerfile.fe
           push: true
           tags: aliennguyenn/p2nenglish-fe:latest
 
@@ -43,7 +43,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          file: ./proxy/Dockerfile
+          file: ./Dockerfile.proxy
           push: true
           tags: aliennguyenn/p2nenglish-proxy:latest
 
