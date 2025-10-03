@@ -64,11 +64,11 @@ jobs:
             cd /home/ec2-user/React-WebTracNghiemTiengAnhTHPT/
 
             # Tải về TẤT CẢ images mới nhất từ Docker Hub
-            docker compose pull
+            docker-compose pull
 
             # Khởi động lại TẤT CẢ các container với images mới
             # Docker Compose sẽ chỉ restart những service có image đã thay đổi
-            docker compose up -d
-            
+            docker-compose up -d
+
             # (Tùy chọn) Xóa các image cũ không còn dùng đến để dọn dẹp
             docker image prune -f
