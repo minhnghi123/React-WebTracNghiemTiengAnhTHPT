@@ -153,25 +153,61 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
       if (rq?.status === 200) {
         onLoginSuccess(email); // Notify parent component to transition to Step 2
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       setLoginAttempts((prev) => prev + 1);
+      // Only show detailed error in development, generic in production
+      let errorMessage = "Đăng nhập thất bại.";
       if (
-        (error.response?.status === 400 &&
-          error.response?.data?.message.includes(
-            "Vui lòng thử lại sau 15 phút"
-          )) ||
-        error.response?.data.message.includes(
-          "Bạn đã vượt quá số lần thử đăng nhập."
-        )
+        process.env.NODE_ENV !== "production" &&
+        error &&
+        typeof error === "object"
       ) {
-        setIsIpBlocked(true);
-        setTimeLeft(error.response?.data?.ttl || 0);
-      } else {
-        setMessage({
-          text: error.response?.data?.message || "Đăng nhập thất bại.",
-          type: "error",
-        });
+        const err = error as {
+          response?: {
+            status?: number;
+            data?: { message?: string; ttl?: number };
+          };
+        };
+        if (
+          (err.response?.status === 400 &&
+            err.response?.data?.message?.includes(
+              "Vui lòng thử lại sau 15 phút"
+            )) ||
+          err.response?.data?.message?.includes(
+            "Bạn đã vượt quá số lần thử đăng nhập."
+          )
+        ) {
+          setIsIpBlocked(true);
+          setTimeLeft(err.response?.data?.ttl || 0);
+          return;
+        } else if (err.response?.data?.message) {
+          errorMessage = err.response.data.message;
+        }
+      } else if (error && typeof error === "object") {
+        const err = error as {
+          response?: {
+            status?: number;
+            data?: { message?: string; ttl?: number };
+          };
+        };
+        if (
+          (err.response?.status === 400 &&
+            err.response?.data?.message?.includes(
+              "Vui lòng thử lại sau 15 phút"
+            )) ||
+          err.response?.data?.message?.includes(
+            "Bạn đã vượt quá số lần thử đăng nhập."
+          )
+        ) {
+          setIsIpBlocked(true);
+          setTimeLeft(err.response?.data?.ttl || 0);
+          return;
+        }
       }
+      setMessage({
+        text: errorMessage,
+        type: "error",
+      });
     }
   };
 

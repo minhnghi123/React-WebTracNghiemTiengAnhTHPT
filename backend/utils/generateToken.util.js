@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 import { ENV_VARS } from "../config/envVars.config.js";
 export const generateTokenAndSetToken = (userId, res) => {
+  const isProduction = ENV_VARS.NODE_ENV === "production";
   const token = jwt.sign({ userId }, ENV_VARS.JWT_SECRET, {
     expiresIn: "15d",
   });
@@ -8,8 +9,8 @@ export const generateTokenAndSetToken = (userId, res) => {
   res.cookie("jwt-token", token, {
     maxAge: 15 * 24 * 60 * 60 * 1000,
     httpOnly: true,
-    sameSite: "none",
-    secure: true,
+    sameSite: isProduction ? "none" : "lax",
+    secure: isProduction, // Sẽ là `true` trên production, `false` trên dev
   });
 
   return token;

@@ -146,12 +146,10 @@ export async function login(req, res) {
   // console.log(ip); -> dia chi ip v6
   try {
     if (!email || !password) {
-      return res
-        .status(400)
-        .json({
-          code: 400,
-          message: "Email, mật khẩu và deviceId là bắt buộc",
-        });
+      return res.status(400).json({
+        code: 400,
+        message: "Email, mật khẩu và deviceId là bắt buộc",
+      });
     }
     // Kiểm tra số lần thử đăng nhập từ IP
     const attempts = (await redisService.get(ip)) || 0;
@@ -191,7 +189,7 @@ export async function login(req, res) {
         .status(400)
         .json({ code: 400, message: "Mật khẩu không hợp lệ" });
     }
-   
+
     // Nếu đúng email & mật khẩu, tạo OTP và lưu vào database
     const otp = generateRandomString(6);
     const otpExpireTime = new Date(Date.now() + 3 * 60 * 1000); // 3 minutes
@@ -224,22 +222,30 @@ export async function verifyLoginOtp(req, res) {
   try {
     const { email, otp, deviceId } = req.body;
     if (!email || !otp) {
-      return res.status(400).json({ code: 400, message: "Email và OTP là bắt buộc" });
+      return res
+        .status(400)
+        .json({ code: 400, message: "Email và OTP là bắt buộc" });
     }
     // Tìm người dùng trong database
     const user = await TaiKhoan.findOne({ email: email });
     if (!user) {
-      return res.status(400).json({ code: 400, message: "Không tìm thấy người dùng" });
+      return res
+        .status(400)
+        .json({ code: 400, message: "Không tìm thấy người dùng" });
     }
     const { otp: storedOtp, expireAt } = user.otpInfo || {};
     console.log(`Stored OTP: ${storedOtp}, User OTP: ${otp} `);
-    console.log( user.otpInfo , email);
+    console.log(user.otpInfo, email);
     if (!storedOtp || storedOtp !== otp || new Date() > new Date(expireAt)) {
-      return res.status(400).json({ code: 400, message: "Mã OTP không hợp lệ hoặc đã hết hạn!" });
+      return res
+        .status(400)
+        .json({ code: 400, message: "Mã OTP không hợp lệ hoặc đã hết hạn!" });
     }
 
     // Kiểm tra thiết bị đã tin cậy?
-    const isTrusted = Array.isArray(user.trustedDevices) && user.trustedDevices.some(d => d.deviceId === deviceId);
+    const isTrusted =
+      Array.isArray(user.trustedDevices) &&
+      user.trustedDevices.some((d) => d.deviceId === deviceId);
 
     if (!isTrusted) {
       const subject = "Cảnh báo đăng nhập thiết bị lạ";
@@ -314,7 +320,6 @@ export async function forgotPost(req, res) {
     const existedUser = await TaiKhoan.findOne({
       email: req.body.email,
       deleted: false,
-      status: "active",
     });
     if (!existedUser) {
       return res
