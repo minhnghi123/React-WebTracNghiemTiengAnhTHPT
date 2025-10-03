@@ -3,6 +3,13 @@ services:
     build: 
       context: .
       dockerfile: Dockerfile.fe
+      args:
+        VITE_RECAPTCHA_SITE_KEY: ${VITE_RECAPTCHA_SITE_KEY}
+        VITE_HCAPTCHA_SITE_KEY: ${VITE_HCAPTCHA_SITE_KEY}
+        VITE_MYMEMORY_API_KEY: ${VITE_MYMEMORY_API_KEY}
+        VITE_GROQ_API_KEY: ${VITE_GROQ_API_KEY}
+        VITE_API_URL_PROD: ${VITE_API_URL_PROD}
+        VITE_GEMINI_API_KEY: ${GEMINI_API_KEY}
     image: aliennguyenn/p2nenglish-fe:latest
     expose:
       - "80"

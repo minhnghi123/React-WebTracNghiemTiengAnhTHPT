@@ -37,6 +37,13 @@ jobs:
           file: ./Dockerfile.fe
           push: true
           tags: aliennguyenn/p2nenglish-fe:latest
+          build-args: |
+            VITE_RECAPTCHA_SITE_KEY=${{ secrets.VITE_RECAPTCHA_SITE_KEY }}
+            VITE_HCAPTCHA_SITE_KEY=${{ secrets.VITE_HCAPTCHA_SITE_KEY }}
+            VITE_MYMEMORY_API_KEY=${{ secrets.VITE_MYMEMORY_API_KEY }}
+            VITE_GROQ_API_KEY=${{ secrets.VITE_GROQ_API_KEY }}
+            VITE_API_URL_PROD=${{ secrets.VITE_API_URL_PROD }}
+            VITE_GEMINI_API_KEY=${{ secrets.VITE_GEMINI_API_KEY }}
 
       # Bước 3.3: Build và Push image của PROXY (NGINX)
       - name: Build and push proxy image
