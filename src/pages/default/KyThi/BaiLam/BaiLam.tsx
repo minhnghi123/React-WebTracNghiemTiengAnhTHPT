@@ -7,7 +7,7 @@ import {
   Card,
   Collapse,
   Spin,
-  Layout,
+  Layout, // ✅ Thêm dòng này
   Typography,
   Row,
   Col,
@@ -21,8 +21,8 @@ import { gemini } from "@/services/GoogleApi";
 import QuestionSubmit from "./QuestionSumit";
 import ListeningQuestionSubmit from "./listeningQuestionSubmit";
 import { Question } from "@/types/interface";
-import ErrorReportModal from "@/components/ErrorReportModal"; // Import ErrorReportModal
-import errorrIcon from "@/Content/img/errorr.png"; // Import your error icon
+import ErrorReportModal from "@/components/ErrorReportModal";
+import errorrIcon from "@/Content/img/errorr.png";
 import SuggestedQuestionAnswer from "@/components/SuggestedQuestionAnswer";
 import usePreventDevTools from "@/security/devtools.security";
 import usePreventCopyPaste from "@/security/copyPaste.security";
@@ -41,7 +41,7 @@ import { Pie } from "@ant-design/plots";
 
 const { Panel } = Collapse;
 const { Title, Text: AntText } = Typography;
-const { Sider, Content } = Layout;
+const { Sider, Content } = Layout; // ✅ Thêm dòng này
 
 const BaiLam: React.FC = () => {
   const [isAlertModalVisible, setIsAlertModalVisible] = useState(false);
@@ -452,13 +452,33 @@ const BaiLam: React.FC = () => {
         setAlertCount(0);
         setIsSubmitModalVisible(false);
 
-        // Scroll to result section smoothly
+        // ✅ FIX: Đảm bảo scroll xuống result section
+        // Đợi React re-render xong
         setTimeout(() => {
-          resultSectionRef.current?.scrollIntoView({
-            behavior: "smooth",
-            block: "start",
-          });
-        }, 300);
+          // Method 1: Scroll bằng scrollIntoView
+          const resultSection = document.getElementById("result-section");
+          if (resultSection) {
+            resultSection.scrollIntoView({
+              behavior: "smooth",
+              block: "start",
+            });
+          }
+
+          // Method 2: Fallback nếu method 1 không work
+          if (resultSectionRef.current) {
+            const yOffset = -20; // Offset từ top
+            const element = resultSectionRef.current;
+            const y =
+              element.getBoundingClientRect().top +
+              window.pageYOffset +
+              yOffset;
+
+            window.scrollTo({
+              top: y,
+              behavior: "smooth",
+            });
+          }
+        }, 1000); // Tăng delay lên 1 giây để đảm bảo DOM đã render
       }
     } catch (error) {
       console.error("Error submitting exam:", error);
@@ -871,9 +891,14 @@ const BaiLam: React.FC = () => {
             </div>
           )}
 
-          {/* Result Section */}
+          {/* Result Section - ✅ Thêm ID và ref để dễ scroll */}
           {Examresult && (
-            <div className="result-section-modern" ref={resultSectionRef}>
+            <div
+              className="result-section-modern"
+              ref={resultSectionRef}
+              id="result-section"
+              style={{ scrollMarginTop: "20px" }} // ✅ Thêm margin khi scroll
+            >
               <Card className="result-card-main" bordered={false}>
                 <div className="result-header">
                   <TrophyOutlined className="result-trophy-icon" />
@@ -946,7 +971,7 @@ const BaiLam: React.FC = () => {
                         colorField: "type",
                         radius: 0.8,
                         innerRadius: 0.6,
-                        label: false, // Disable labels to avoid shape.outer error
+                        label: false,
                         legend: {
                           position: "bottom" as const,
                           itemName: {
@@ -1112,7 +1137,7 @@ const BaiLam: React.FC = () => {
                                             <div className="video-info-box">
                                               <AntText className="video-title-text">
                                                 {video.title ||
-                                                  "Untitled Video"}
+                                                  "Video không có tiêu đề"}
                                               </AntText>
                                             </div>
                                           </a>

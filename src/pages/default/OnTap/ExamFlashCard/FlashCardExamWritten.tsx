@@ -1,8 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { Card, Button, Input, message } from "antd";
+import { Button, Input, Modal, Card } from "antd";
 import { FlashCardSet } from "@/services/student/FlashCardAPI";
+import {
+  CheckCircleOutlined,
+  BookOutlined,
+  ArrowLeftOutlined,
+} from "@ant-design/icons";
+import { useNavigate } from "react-router-dom";
 import "./index.css";
-import clsx from "clsx";
+
+const { TextArea } = Input;
 
 interface WrittenQuestion {
   id: string;
@@ -15,15 +22,23 @@ interface FlashCardExamWrittenProps {
   flashCardSet: FlashCardSet;
 }
 
-export const FlashCardExamWritten: React.FC<FlashCardExamWrittenProps> = ({ flashCardSet }) => {
+export const FlashCardExamWritten: React.FC<FlashCardExamWrittenProps> = ({
+  flashCardSet,
+}) => {
+  const navigate = useNavigate();
   const [questions, setQuestions] = useState<WrittenQuestion[]>([]);
   const [userAnswers, setUserAnswers] = useState<Record<number, string>>({});
-  const [score, setScore] = useState<{ correct: number; wrong: number } | null>(null);
+  const [score, setScore] = useState<{ correct: number; wrong: number } | null>(
+    null
+  );
+  const [showResultModal, setShowResultModal] = useState(false); // ✅ Thêm state
 
   // Sinh câu hỏi từ danh sách từ vựng có sẵn
   useEffect(() => {
     if (flashCardSet && flashCardSet.vocabs) {
-        const shuffledVocabs = flashCardSet.vocabs.sort(() => Math.random() - 0.5);
+      const shuffledVocabs = flashCardSet.vocabs.sort(
+        () => Math.random() - 0.5
+      );
       const generatedQuestions: WrittenQuestion[] = shuffledVocabs
         .filter((vocab) => typeof vocab !== "string")
         .map((vocab: any) => ({
@@ -31,7 +46,6 @@ export const FlashCardExamWritten: React.FC<FlashCardExamWrittenProps> = ({ flas
           term: vocab.term,
           correctAnswer: vocab.term,
           definition: vocab.definition,
-          
         }));
       setQuestions(generatedQuestions);
     }
@@ -55,68 +69,200 @@ export const FlashCardExamWritten: React.FC<FlashCardExamWrittenProps> = ({ flas
     const total = questions.length;
     const wrongCount = total - correctCount;
     setScore({ correct: correctCount, wrong: wrongCount });
-    message.success("Bài làm đã được chấm điểm!");
+    setShowResultModal(true); // ✅ Show modal
   };
 
+  const handleCloseModal = () => {
+    setShowResultModal(false);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const isAnswered = (index: number) =>
+    userAnswers[index] !== undefined && userAnswers[index].trim() !== "";
+  const isCorrect = (index: number) =>
+    userAnswers[index]?.trim().toLowerCase() ===
+    questions[index].correctAnswer.trim().toLowerCase();
+
   return (
-    <div className="container mx-auto px-4 py-6">
-      <h1 className="text-3xl font-bold mb-4">Làm bài: Written</h1>
-      <p className="mb-6">Flashcard Set: {flashCardSet.title}</p>
-
-      {questions.map((q, index) => {
-        let borderClass = "";
-        if (score !== null) {
-          borderClass =
-            userAnswers[index]?.trim().toLowerCase() === q.correctAnswer.trim().toLowerCase()
-              ? "correct-border"
-              : "wrong-border";
-        }
-        return (
-          <Card key={q.id} className={clsx("mb-1", borderClass)}>
-            <div className="question-row">
-              <div className="question-col label-col">
-               
-                <p>
-                Câu {index + 1}: Viết tiếng Anh của từ <strong>{q.definition}</strong>
-                </p>
-              </div>
-              <div className="question-col input-col">
-                <Input.TextArea
-                  rows={3}
-                  placeholder="Nhập đáp án của bạn..."
-                  value={userAnswers[index] || ""}
-                  onChange={(e) => handleAnswerChange(index, e.target.value)}
-                />
-                {score !== null &&
-                  userAnswers[index]?.trim().toLowerCase() !== q.correctAnswer.trim().toLowerCase() && (
-                    <div className="correct-answer">
-                      Đáp án đúng: {q.correctAnswer}
-                    </div>
-                  )}
-              </div>
-            </div>
-          </Card>
-        );
-      })}
-
-      <div className="mt-6 text-center">
-        <Button type="primary" onClick={handleSubmit}>
-          Nộp bài
-        </Button>
+    <div className="flashcard-exam-page">
+      {/* Hero Section */}
+      <div className="exam-hero-compact">
+        <div className="hero-background"></div>
+        <div className="hero-content">
+          <BookOutlined className="hero-icon" />
+          <h1 className="hero-title">Written</h1>
+          <p className="hero-subtitle">{flashCardSet.title}</p>
+        </div>
       </div>
 
-      {score && (
-        <div className="mt-4 text-center">
-          <h2>
-            Số câu đúng: <span style={{ color: "green" }}>{score.correct}</span> / {questions.length}
-          </h2>
-          <h2>
-            Số câu sai: <span style={{ color: "red" }}>{score.wrong}</span>
-          </h2>
-        </div>
-      )}
+      {/* Main Content */}
+      <div className="flashcard-exam-container">
+        {questions.map((q, index) => (
+          <div
+            key={q.id}
+            className={`exam-question-card ${
+              score && isAnswered(index)
+                ? isCorrect(index)
+                  ? "correct-border"
+                  : "wrong-border"
+                : ""
+            }`}
+          >
+            <div className="question-header">
+              <span className="question-number-badge">Câu {index + 1}</span>
+              <div className="question-text">
+                Viết tiếng Anh của từ:{" "}
+                <span className="question-definition">{q.definition}</span>
+              </div>
+            </div>
 
-      
+            <TextArea
+              rows={3}
+              placeholder="Nhập đáp án của bạn..."
+              value={userAnswers[index] || ""}
+              onChange={(e) => handleAnswerChange(index, e.target.value)}
+              className="answer-input-field"
+              disabled={!!score}
+            />
+
+            {score && !isCorrect(index) && isAnswered(index) && (
+              <div className="correct-answer-display">
+                <strong>Đáp án đúng:</strong> {q.correctAnswer}
+              </div>
+            )}
+          </div>
+        ))}
+
+        {/* Submit Section */}
+        <div className="exam-submit-section">
+          {!score ? (
+            <Button
+              type="primary"
+              onClick={handleSubmit}
+              className="submit-button"
+              icon={<CheckCircleOutlined />}
+            >
+              Nộp bài
+            </Button>
+          ) : (
+            <div className="score-display-card">
+              <h2
+                style={{
+                  fontSize: "1.5rem",
+                  fontWeight: 700,
+                  color: "#1f2937",
+                  marginBottom: "1rem",
+                }}
+              >
+                Kết quả làm bài
+              </h2>
+              <div className="score-stats">
+                <div className="score-stat-item">
+                  <div className="score-value correct">{score.correct}</div>
+                  <div className="score-label">Câu đúng</div>
+                </div>
+                <div className="score-stat-item">
+                  <div className="score-value wrong">{score.wrong}</div>
+                  <div className="score-label">Câu sai</div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <Button
+            onClick={() => navigate(`/flashcard/${flashCardSet._id}`)}
+            className="back-button"
+            icon={<ArrowLeftOutlined />}
+          >
+            Quay lại chi tiết
+          </Button>
+        </div>
+      </div>
+
+      {/* ✅ Result Modal */}
+      <Modal
+        visible={showResultModal}
+        onCancel={handleCloseModal}
+        footer={null}
+        width={800}
+        className="result-detail-modal"
+        centered
+      >
+        <div className="modal-result-content">
+          <div className="modal-result-header">
+            <BookOutlined className="modal-icon" />
+            <h2>Kết quả chi tiết</h2>
+          </div>
+
+          <div className="modal-score-summary">
+            <div className="score-item correct">
+              <div className="score-number">{score?.correct || 0}</div>
+              <div className="score-text">Câu đúng</div>
+            </div>
+            <div className="score-divider">/</div>
+            <div className="score-item total">
+              <div className="score-number">{questions.length}</div>
+              <div className="score-text">Tổng câu</div>
+            </div>
+          </div>
+
+          <div className="modal-questions-list">
+            {questions.map((q, index) => {
+              const userAns = userAnswers[index];
+              const isAnswered = userAns !== undefined && userAns.trim() !== "";
+              const isCorrect =
+                userAns?.trim().toLowerCase() ===
+                q.correctAnswer.trim().toLowerCase();
+
+              return (
+                <Card
+                  key={q.id}
+                  className={`result-question-card ${
+                    isAnswered
+                      ? isCorrect
+                        ? "correct"
+                        : "wrong"
+                      : "unanswered"
+                  }`}
+                >
+                  <div className="question-result-header">
+                    <span className="question-index">Câu {index + 1}</span>
+                    <span
+                      className={`result-badge ${
+                        isCorrect ? "correct" : "wrong"
+                      }`}
+                    >
+                      {isCorrect ? "✓ Đúng" : "✗ Sai"}
+                    </span>
+                  </div>
+                  <div className="question-content-modal">
+                    <p>
+                      <strong>Định nghĩa:</strong> {q.definition}
+                    </p>
+                    <p>
+                      <strong>Đáp án của bạn:</strong>{" "}
+                      {userAns || "Chưa trả lời"}
+                    </p>
+                    <p>
+                      <strong>Đáp án đúng:</strong> {q.correctAnswer}
+                    </p>
+                  </div>
+                </Card>
+              );
+            })}
+          </div>
+
+          <Button
+            type="primary"
+            size="large"
+            onClick={handleCloseModal}
+            className="modal-close-btn"
+            block
+          >
+            Đóng
+          </Button>
+        </div>
+      </Modal>
     </div>
   );
 };

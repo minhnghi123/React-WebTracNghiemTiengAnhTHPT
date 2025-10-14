@@ -85,20 +85,20 @@ export const FlashCardIndex: React.FC = () => {
     );
   }
 
-  const renderFlashcardGrid = (sets: FlashCardSet[], isMy: boolean) => (
+  const renderFlashcardGrid = (sets: FlashCardSet[], isMy: boolean) =>
     sets.length > 0 ? (
       <div className="flashcard-grid">
         {sets.map((set) => (
           <Card
             key={set._id}
-            className={`flashcard-card ${isMy ? 'my-card' : 'public-card'}`}
+            className={`flashcard-card ${isMy ? "my-card" : "public-card"}`}
             hoverable
             onClick={() => set._id && handleExam(set._id)}
           >
             <div className="card-header">
-              <div className={`card-badge ${!isMy ? 'public' : ''}`}>
+              <div className={`card-badge ${!isMy ? "public" : ""}`}>
                 {isMy ? <UserOutlined /> : <GlobalOutlined />}
-                <span>{isMy ? 'Của tôi' : 'Công khai'}</span>
+                <span>{isMy ? "Của tôi" : "Công khai"}</span>
               </div>
               <div className="card-badge">
                 <BookOutlined />
@@ -141,7 +141,9 @@ export const FlashCardIndex: React.FC = () => {
       </div>
     ) : (
       <Empty
-        description={isMy ? "Bạn chưa có bộ từ vựng nào" : "Chưa có bộ từ vựng công khai"}
+        description={
+          isMy ? "Bạn chưa có bộ từ vựng nào" : "Chưa có bộ từ vựng công khai"
+        }
         className="empty-state"
       >
         {isMy && (
@@ -152,8 +154,7 @@ export const FlashCardIndex: React.FC = () => {
           </AppLink>
         )}
       </Empty>
-    )
-  );
+    );
 
   return (
     <div className="flashcard-index-page">
@@ -181,11 +182,7 @@ export const FlashCardIndex: React.FC = () => {
 
       {/* Main Content with Tabs */}
       <div className="flashcard-container">
-        <Tabs
-          defaultActiveKey="my"
-          className="flashcard-tabs"
-          size="large"
-        >
+        <Tabs defaultActiveKey="my" className="flashcard-tabs" size="large">
           <TabPane
             tab={
               <span className="tab-title">

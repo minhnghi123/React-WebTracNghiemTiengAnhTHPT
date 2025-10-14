@@ -1,7 +1,14 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { FlashCardSet } from "@/services/student/FlashCardAPI";
+import { Button, Modal, Card } from "antd";
+import {
+  CheckCircleOutlined,
+  ReloadOutlined,
+  BookOutlined,
+  ArrowLeftOutlined,
+} from "@ant-design/icons";
+import { useNavigate } from "react-router-dom";
 import "./index.css";
-import { Button } from "antd";
 
 const nodeRadius = 8;
 
@@ -40,7 +47,10 @@ const hasEdge = (edges: [Node, Node][], edge: [Node, Node]) =>
   edges.some((otherEdge) => equalsEdge(edge, otherEdge));
 const addEdge = (edges: [Node, Node][], edge: [Node, Node]) => {
   if (!hasEdge(edges, edge)) {
-    filterInPlace(edges, edges.filter((o) => equalsNode(edge[0], o[0])));
+    filterInPlace(
+      edges,
+      edges.filter((o) => equalsNode(edge[0], o[0]))
+    );
     edges.push(edge);
     return true;
   }
@@ -69,16 +79,23 @@ const isCorrectEdge = (
   const original = flashCardSet.vocabs.find(
     (v: any) => typeof v !== "string" && v.term === term
   );
-  return original && typeof original !== "string" ? original.definition === definition : false;
+  return original && typeof original !== "string"
+    ? original.definition === definition
+    : false;
 };
 
 export const FlashCardMatch: React.FC<FlashCardMatchProps> = ({
   flashCardSet,
 }) => {
+  const navigate = useNavigate();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [correctCount, setCorrectCount] = useState(0);
   const [edges, setEdges] = useState<[Node, Node][]>([]);
+  const [showResultModal, setShowResultModal] = useState(false); // ✅ Thêm state
+  const [detailedResults, setDetailedResults] = useState<
+    Array<{ term: string; definition: string; isCorrect: boolean }>
+  >([]);
 
   const leftArr = useMemo(
     () =>
@@ -167,7 +184,13 @@ export const FlashCardMatch: React.FC<FlashCardMatchProps> = ({
         ctx.beginPath();
         ctx.lineWidth = 2;
         if (isSubmitted) {
-          const isCorrect = isCorrectEdge([start, end], nodes, leftArr, rightArr, flashCardSet);
+          const isCorrect = isCorrectEdge(
+            [start, end],
+            nodes,
+            leftArr,
+            rightArr,
+            flashCardSet
+          );
           ctx.strokeStyle = isCorrect ? "green" : "red";
           if (isCorrect) currentCorrectCount++;
         } else {
@@ -223,37 +246,248 @@ export const FlashCardMatch: React.FC<FlashCardMatchProps> = ({
 
   const handleSubmit = () => {
     setIsSubmitted(true);
+
+    // ✅ Tính toán kết quả chi tiết
+    const results: Array<{
+      term: string;
+      definition: string;
+      isCorrect: boolean;
+    }> = [];
+    const leftNodes = nodes.slice(0, leftArr.length);
+    const rightNodes = nodes.slice(leftArr.length);
+
+    edges.forEach((edge) => {
+      const leftIdx = leftNodes.findIndex(
+        (n) => Math.abs(n.x - edge[0].x) < 1 && Math.abs(n.y - edge[0].y) < 1
+      );
+      const rightIdx = rightNodes.findIndex(
+        (n) => Math.abs(n.x - edge[1].x) < 1 && Math.abs(n.y - edge[1].y) < 1
+      );
+
+      if (leftIdx !== -1 && rightIdx !== -1) {
+        const term = leftArr[leftIdx];
+        const definition = rightArr[rightIdx];
+        const isCorrect = isCorrectEdge(
+          edge,
+          nodes,
+          leftArr,
+          rightArr,
+          flashCardSet
+        );
+        results.push({ term, definition, isCorrect });
+      }
+    });
+
+    setDetailedResults(results);
+    setShowResultModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowResultModal(false);
   };
 
   const handleReset = () => {
     setIsSubmitted(false);
     setCorrectCount(0);
+    setEdges([]);
   };
 
   return (
-    <div className="body2">
-      <div className="App">
-        <div className="Col">
-          {leftArr.map((e, i) => (
-            <div key={i}>{e}</div>
-          ))}
-        </div>
-        <canvas ref={canvasRef} className="Lines"></canvas>
-        <div className="Col">
-          {rightArr.map((e, i) => (
-            <div key={i}>{e}</div>
-          ))}
+    <div className="flashcard-exam-page">
+      {/* Hero Section */}
+      <div className="exam-hero-compact">
+        <div className="hero-background"></div>
+        <div className="hero-content">
+          <BookOutlined className="hero-icon" />
+          <h1 className="hero-title">Match Game</h1>
+          <p className="hero-subtitle">{flashCardSet.title}</p>
         </div>
       </div>
-      <center>
-        <div className="controls">
-          <Button onClick={handleSubmit}>Nộp bài</Button>{" "}
-          <Button onClick={handleReset}>Thử lại</Button>
+
+      {/* Main Content */}
+      <div className="flashcard-exam-container">
+        <div className="match-game-container">
+          <p
+            style={{
+              textAlign: "center",
+              marginBottom: "1.5rem",
+              color: "#6b7280",
+              fontSize: "0.9375rem",
+            }}
+          >
+            Kéo từ các điểm bên trái sang các điểm bên phải để nối từ với định
+            nghĩa tương ứng
+          </p>
+
+          <div className="match-game-app">
+            <div className="match-column">
+              {leftArr.map((e, i) => (
+                <div key={i} className="match-item">
+                  {e}
+                </div>
+              ))}
+            </div>
+            <canvas
+              ref={canvasRef}
+              className="match-canvas"
+              width={400}
+              height={600}
+            />
+            <div className="match-column">
+              {rightArr.map((e, i) => (
+                <div key={i} className="match-item">
+                  {e}
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
-        <hr />
-        {isSubmitted && <div>Số câu đúng: {correctCount}</div>}
-      </center>
+
+        {/* Controls Section */}
+        <div className="exam-submit-section">
+          {!isSubmitted ? (
+            <div className="match-controls">
+              <Button
+                type="primary"
+                onClick={handleSubmit}
+                className="submit-button"
+                icon={<CheckCircleOutlined />}
+              >
+                Nộp bài
+              </Button>
+              <Button
+                onClick={handleReset}
+                className="back-button"
+                icon={<ReloadOutlined />}
+              >
+                Làm lại
+              </Button>
+            </div>
+          ) : (
+            <div className="score-display-card">
+              <h2
+                style={{
+                  fontSize: "1.5rem",
+                  fontWeight: 700,
+                  color: "#1f2937",
+                  marginBottom: "1rem",
+                }}
+              >
+                Kết quả làm bài
+              </h2>
+              <div className="score-stats">
+                <div className="score-stat-item">
+                  <div className="score-value correct">{correctCount}</div>
+                  <div className="score-label">Câu đúng</div>
+                </div>
+                <div className="score-stat-item">
+                  <div className="score-value wrong">
+                    {leftArr.length - correctCount}
+                  </div>
+                  <div className="score-label">Câu sai</div>
+                </div>
+              </div>
+              <div style={{ marginTop: "1.5rem" }}>
+                <Button
+                  onClick={handleReset}
+                  className="back-button"
+                  icon={<ReloadOutlined />}
+                  style={{ marginLeft: 0 }}
+                >
+                  Làm lại
+                </Button>
+              </div>
+            </div>
+          )}
+
+          <Button
+            onClick={() => navigate(`/flashcard/${flashCardSet._id}`)}
+            className="back-button"
+            icon={<ArrowLeftOutlined />}
+            style={{ marginTop: "1rem" }}
+          >
+            Quay lại chi tiết
+          </Button>
+        </div>
+      </div>
+
+      {/* ✅ Result Modal */}
+      <Modal
+        visible={showResultModal}
+        onCancel={handleCloseModal}
+        footer={null}
+        width={800}
+        className="result-detail-modal"
+        centered
+      >
+        <div className="modal-result-content">
+          <div className="modal-result-header">
+            <BookOutlined className="modal-icon" />
+            <h2>Kết quả chi tiết</h2>
+          </div>
+
+          <div className="modal-score-summary">
+            <div className="score-item correct">
+              <div className="score-number">{correctCount}</div>
+              <div className="score-text">Cặp đúng</div>
+            </div>
+            <div className="score-divider">/</div>
+            <div className="score-item total">
+              <div className="score-number">{leftArr.length}</div>
+              <div className="score-text">Tổng cặp</div>
+            </div>
+          </div>
+
+          <div className="modal-questions-list">
+            {detailedResults.map((result, index) => (
+              <Card
+                key={index}
+                className={`result-question-card ${
+                  result.isCorrect ? "correct" : "wrong"
+                }`}
+              >
+                <div className="question-result-header">
+                  <span className="question-index">Cặp {index + 1}</span>
+                  <span
+                    className={`result-badge ${
+                      result.isCorrect ? "correct" : "wrong"
+                    }`}
+                  >
+                    {result.isCorrect ? "✓ Đúng" : "✗ Sai"}
+                  </span>
+                </div>
+                <div className="question-content-modal">
+                  <p>
+                    <strong>Từ vựng:</strong> {result.term}
+                  </p>
+                  <p>
+                    <strong>Bạn đã nối với:</strong> {result.definition}
+                  </p>
+                  {!result.isCorrect && (
+                    <p style={{ color: "#10b981" }}>
+                      <strong>Đáp án đúng:</strong>{" "}
+                      {flashCardSet.vocabs.find(
+                        (v: any) =>
+                          typeof v !== "string" && v.term === result.term
+                      )?.definition || ""}
+                    </p>
+                  )}
+                </div>
+              </Card>
+            ))}
+          </div>
+
+          <Button
+            type="primary"
+            size="large"
+            onClick={handleCloseModal}
+            className="modal-close-btn"
+            block
+          >
+            Đóng
+          </Button>
+        </div>
+      </Modal>
     </div>
   );
 };
-

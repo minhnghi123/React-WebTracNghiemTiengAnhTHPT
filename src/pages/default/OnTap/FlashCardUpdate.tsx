@@ -1,5 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { Form, Input, Button, Checkbox, message, Card, Space, Spin } from "antd";
+import {
+  Form,
+  Input,
+  Button,
+  Checkbox,
+  message,
+  Card,
+  Space,
+  Spin,
+} from "antd";
 import {
   MinusCircleOutlined,
   PlusOutlined,
@@ -49,7 +58,10 @@ export const FlashCardUpdate: React.FC = () => {
     setSubmitting(true);
     values.idSet = _id;
     try {
-      const res = await FlashCardAPI.updateFlashCardSet(_id!, values as FlashCardSet);
+      const res = await FlashCardAPI.updateFlashCardSet(
+        _id!,
+        values as FlashCardSet
+      );
       if (res.code === 200) {
         message.success("Flashcard được cập nhật thành công!");
         navigate(`/flashcard/${_id}`);
@@ -79,9 +91,7 @@ export const FlashCardUpdate: React.FC = () => {
         <div className="hero-content">
           <BookOutlined className="hero-icon" />
           <h1 className="hero-title">Chỉnh sửa bộ từ vựng</h1>
-          <p className="hero-subtitle">
-            Cập nhật thông tin và từ vựng của bạn
-          </p>
+          <p className="hero-subtitle">Cập nhật thông tin và từ vựng của bạn</p>
         </div>
       </div>
 
