@@ -42,6 +42,7 @@ import BaiLam from "@/pages/default/KyThi/BaiLam/BaiLam";
 import QuanLyBaoLoi from "@/pages/giaovien/QuanLyBaoLoi/index.tsx";
 import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
 import { LoginWithSteps } from "@/pages/default/Login/login";
+import { LichSuLamBai } from "@/pages/default/KyThi/LichSu";
 export enum ERolePath {
   ADMIN = 2,
   GIAOVIEN = 3,
@@ -103,6 +104,7 @@ export const router = [
       createRoute("/flashcard/create", <FlashCardCreate />, ERolePath.USER),
       createRoute("/flashcard/edit/:_id", <FlashCardUpdate />, ERolePath.USER),
       createRoute("/flashcard/exam/:id", <FlashCardExam />, ERolePath.USER),
+      createRoute("/KyThi/LichSu/:examId", <LichSuLamBai />, ERolePath.USER),
     ],
   },
   {
@@ -206,6 +208,7 @@ const paths = {
   "/KyThi/ChiTiet/:_id": ["/KyThi/ChiTiet/:_id"],
   "/KyThi": ["/KyThi"],
   "/KyThi/BaiLam/": ["/KyThi/BaiLam/"],
+  "/KyThi/LichSu/:examId": ["/KyThi/LichSu/:examId"],
   "/KetQua": ["/KetQua"],
   "/giaovien/QuanLyAudio": ["/giaovien/QuanLyAudio"],
   "/FlashCard/:_id": ["/FlashCard/:_id"],

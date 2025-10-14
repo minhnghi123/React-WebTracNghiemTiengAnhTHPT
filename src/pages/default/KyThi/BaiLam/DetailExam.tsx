@@ -53,6 +53,7 @@ export const DetailExam = () => {
     dateStr ? new Date(dateStr).toLocaleString("vi-VN") : "Không giới hạn";
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     fetchExam();
   }, [_id]);
 

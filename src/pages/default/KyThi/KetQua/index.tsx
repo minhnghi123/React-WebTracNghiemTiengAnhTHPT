@@ -28,6 +28,7 @@ export const KetQua: React.FC<KetQuaProps> = ({ DeThi }) => {
   };
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     fetchAllResult();
   }, [DeThi]);
 
