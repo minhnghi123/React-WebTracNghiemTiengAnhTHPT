@@ -1,12 +1,21 @@
 import React, { useEffect, useState } from "react";
-import { Button, Card, Space, Spin, message } from "antd";
+import { Button, Card, Space, Spin, message, Empty, Tabs } from "antd";
 import { FlashCardAPI, FlashCardSet } from "@/services/student/FlashCardAPI";
 import { useAuthContext } from "@/contexts/AuthProvider";
+import {
+  PlusOutlined,
+  EditOutlined,
+  DeleteOutlined,
+  BookOutlined,
+  UserOutlined,
+  GlobalOutlined,
+} from "@ant-design/icons";
 import "./FlashCardcss.css";
 import AppLink from "@/components/AppLink";
 
+const { TabPane } = Tabs;
+
 export const FlashCardIndex: React.FC = () => {
-  const [, setFlashCardSets] = useState<FlashCardSet[]>([]);
   const [myFlashCardSets, setMyFlashCardSets] = useState<FlashCardSet[]>([]);
   const [otherFlashCardSets, setOtherFlashCardSets] = useState<FlashCardSet[]>(
     []
@@ -20,19 +29,18 @@ export const FlashCardIndex: React.FC = () => {
         const res = await FlashCardAPI.getAllFlashCardSets();
         const allSets = res.flashCardSets ? res.flashCardSets : res;
 
-        // Phân loại bộ từ vựng
         const mySets = allSets.filter(
           (set: FlashCardSet) => set.createdBy === user?._id
         );
         const otherSets = allSets.filter(
-          (set: FlashCardSet) => set.createdBy !== user?._id
+          (set: FlashCardSet) => set.createdBy !== user?._id && set.public
         );
 
-        setFlashCardSets(allSets);
         setMyFlashCardSets(mySets);
         setOtherFlashCardSets(otherSets);
       } catch (error) {
         console.error("Lỗi khi lấy flashcard sets:", error);
+        message.error("Không thể tải danh sách flashcard");
       } finally {
         setLoading(false);
       }
@@ -40,14 +48,6 @@ export const FlashCardIndex: React.FC = () => {
 
     fetchFlashcardSets();
   }, [user?._id]);
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <Spin size="large" />
-      </div>
-    );
-  }
 
   const handleExam = (id: string) => {
     window.location.href = `/flashcard/${id}`;
@@ -76,91 +76,142 @@ export const FlashCardIndex: React.FC = () => {
     }
   };
 
-  return (
-    <div className="container mx-auto px-4 py-6">
-      <h1 className="text-3xl font-bold mb-6 text-center">Ôn tập theo bộ từ vựng</h1>
-      <p className="text-center text-gray-600 mb-4">
-        Trang này cho phép bạn quản lý và sử dụng các bộ từ vựng. Bạn có thể tạo mới, chỉnh sửa, hoặc xóa các bộ từ vựng của mình. Ngoài ra, bạn cũng có thể truy cập các bộ từ vựng công khai khác để ôn tập.
-      </p>
-      <AppLink
-        to="/flashcard/create"
-        className="btn btn-primary my-3 mx-3"
-      >
-        Tạo bộ từ vựng mới
-      </AppLink>
-      <hr />
-      <h2>
-        <center>Bộ từ vựng của tôi</center>
-      </h2>
-      <div className="flash-card-grid" style={{ margin: "1rem" }}>
-        {myFlashCardSets.map((set) => (
-          <div
+  if (loading) {
+    return (
+      <div className="flashcard-loading">
+        <Spin size="large" />
+        <p>Đang tải danh sách flashcard...</p>
+      </div>
+    );
+  }
+
+  const renderFlashcardGrid = (sets: FlashCardSet[], isMy: boolean) => (
+    sets.length > 0 ? (
+      <div className="flashcard-grid">
+        {sets.map((set) => (
+          <Card
             key={set._id}
-            className="flash-card-link cursor-pointer"
+            className={`flashcard-card ${isMy ? 'my-card' : 'public-card'}`}
+            hoverable
             onClick={() => set._id && handleExam(set._id)}
           >
-            <Card
-              hoverable
-              title={set.title}
-              className="shadow-lg hover:shadow-2xl transition-shadow duration-300"
-            >
-              <p>{set.description}</p>
-              <div className="flex justify-between items-center mt-2">
-                <span className="text-gray-500 text-sm">
-                  Số lượng từ vựng: {set.vocabs.length}
-                </span>
-                <div className="flex space-x-2">
-                  <Space size={"small"}>
-                    <Button
-                      color="default"
-                      variant="outlined"
-                      style={{ backgroundColor: "orange" }}
-                      onClick={(e) => handleEdit(set._id || "", e)}
-                    >
-                      Sửa
-                    </Button>
-                    <Button
-                      color="danger"
-                      variant="solid"
-                      onClick={(e) => handleDelete(set._id || "", e)}
-                    >
-                      Xóa
-                    </Button>
-                  </Space>
-                </div>
+            <div className="card-header">
+              <div className={`card-badge ${!isMy ? 'public' : ''}`}>
+                {isMy ? <UserOutlined /> : <GlobalOutlined />}
+                <span>{isMy ? 'Của tôi' : 'Công khai'}</span>
               </div>
-            </Card>
-          </div>
+              <div className="card-badge">
+                <BookOutlined />
+                <span>{set.vocabs.length} từ</span>
+              </div>
+            </div>
+
+            <h3 className="card-title">{set.title}</h3>
+            <p className="card-description">{set.description}</p>
+
+            <div className="card-footer">
+              {isMy ? (
+                <Space size="small">
+                  <Button
+                    type="primary"
+                    ghost
+                    size="small"
+                    icon={<EditOutlined />}
+                    onClick={(e) => handleEdit(set._id || "", e)}
+                  >
+                    Sửa
+                  </Button>
+                  <Button
+                    danger
+                    size="small"
+                    icon={<DeleteOutlined />}
+                    onClick={(e) => handleDelete(set._id || "", e)}
+                  >
+                    Xóa
+                  </Button>
+                </Space>
+              ) : (
+                <Button type="primary" ghost size="small">
+                  Xem chi tiết
+                </Button>
+              )}
+            </div>
+          </Card>
         ))}
       </div>
-      <hr />
-      <h2>
-        <center>Bộ từ vựng có sẵn</center>
-      </h2>
-      <div className="flash-card-grid" style={{ margin: "1rem" }}>
-        {otherFlashCardSets.map(
-          (set) =>
-            set.public && (
-              <div
-                key={set._id}
-                className="flash-card-link cursor-pointer"
-                onClick={() => set._id && handleExam(set._id)}
-              >
-                <Card
-                  hoverable
-                  title={set.title}
-                  className="shadow-lg hover:shadow-2xl transition-shadow duration-300"
-                >
-                  <p>{set.description}</p>
-                  <div className="flex justify-between items-center mt-2">
-                    <span className="text-gray-500 text-sm">
-                      Số lượng từ vựng: {set.vocabs.length}
-                    </span>
-                  </div>
-                </Card>
-              </div>
-            )
+    ) : (
+      <Empty
+        description={isMy ? "Bạn chưa có bộ từ vựng nào" : "Chưa có bộ từ vựng công khai"}
+        className="empty-state"
+      >
+        {isMy && (
+          <AppLink to="/flashcard/create">
+            <Button type="primary" icon={<PlusOutlined />}>
+              Tạo bộ từ vựng đầu tiên
+            </Button>
+          </AppLink>
         )}
+      </Empty>
+    )
+  );
+
+  return (
+    <div className="flashcard-index-page">
+      {/* Hero Section */}
+      <div className="flashcard-hero">
+        <div className="hero-background"></div>
+        <div className="hero-content">
+          <BookOutlined className="hero-icon" />
+          <h1 className="hero-title">Ôn tập với Flashcard</h1>
+          <p className="hero-subtitle">
+            Tạo và học tập với các bộ từ vựng cá nhân hóa
+          </p>
+          <AppLink to="/flashcard/create">
+            <Button
+              type="primary"
+              size="large"
+              className="create-btn"
+              icon={<PlusOutlined />}
+            >
+              Tạo bộ từ vựng mới
+            </Button>
+          </AppLink>
+        </div>
+      </div>
+
+      {/* Main Content with Tabs */}
+      <div className="flashcard-container">
+        <Tabs
+          defaultActiveKey="my"
+          className="flashcard-tabs"
+          size="large"
+        >
+          <TabPane
+            tab={
+              <span className="tab-title">
+                <UserOutlined />
+                Bộ từ vựng của tôi
+                <span className="tab-count">{myFlashCardSets.length}</span>
+              </span>
+            }
+            key="my"
+          >
+            {renderFlashcardGrid(myFlashCardSets, true)}
+          </TabPane>
+
+          <TabPane
+            tab={
+              <span className="tab-title">
+                <GlobalOutlined />
+                Bộ từ vựng công khai
+                <span className="tab-count">{otherFlashCardSets.length}</span>
+              </span>
+            }
+            key="public"
+          >
+            {renderFlashcardGrid(otherFlashCardSets, false)}
+          </TabPane>
+        </Tabs>
       </div>
     </div>
   );

@@ -83,9 +83,8 @@ const SuggestedQuestionAnswer: React.FC<SuggestedQuestionAnswerProps> = ({
             style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}
           >
             {["true", "false", "not given"].map((choice) => {
-              const isCorrect = question.correctAnswerForTrueFalseNGV?.includes(
-                choice
-              );
+              const isCorrect =
+                question.correctAnswerForTrueFalseNGV?.includes(choice);
               return (
                 <div
                   key={choice}
@@ -156,9 +155,7 @@ const SuggestedQuestionAnswer: React.FC<SuggestedQuestionAnswerProps> = ({
         ) : (
           // Multiple Choice Questions
           <Radio.Group
-            value={
-              question.answers?.find((ans) => ans.isCorrect)?._id || null
-            }
+            value={question.answers?.find((ans) => ans.isCorrect)?._id || null}
             style={{
               width: "100%",
               display: "flex",
@@ -196,7 +193,10 @@ const SuggestedQuestionAnswer: React.FC<SuggestedQuestionAnswerProps> = ({
                   />
                 </Radio>
                 {answer.isCorrect && (
-                  <Tag color="success" style={{ margin: 0, marginLeft: "0.5rem" }}>
+                  <Tag
+                    color="success"
+                    style={{ margin: 0, marginLeft: "0.5rem" }}
+                  >
                     Đáp án đúng
                   </Tag>
                 )}

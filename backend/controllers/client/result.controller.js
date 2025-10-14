@@ -196,7 +196,7 @@ export const submitExam = async (req, res) => {
       if (question) {
         // KHÔNG tăng wrongAnswer ở đây nữa
         // wrongAnswer++; // <-- BỎ DÒNG NÀY
-        
+
         const know = question.knowledge;
         wrongAnswerByKnowledge[know] = (wrongAnswerByKnowledge[know] || 0) + 1;
 
@@ -246,7 +246,8 @@ export const submitExam = async (req, res) => {
                 text: opt.optionText || opt.text || "",
                 correctAnswerForBlank: "",
                 isCorrect: question.correctAnswer
-                  ? String(opt.option_id) === String(question.correctAnswer[0]?.answer_id)
+                  ? String(opt.option_id) ===
+                    String(question.correctAnswer[0]?.answer_id)
                   : false,
               }))
             : (question.answers || []).map((ans) => ({

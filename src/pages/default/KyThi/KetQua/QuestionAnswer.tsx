@@ -2,7 +2,11 @@ import React from "react";
 import { QuestionAnswerResult } from "@/services/student";
 import { cleanString } from "@/utils/cn";
 import { Card, Tag, Typography } from "antd";
-import { CheckCircleOutlined, CloseCircleOutlined, QuestionCircleOutlined } from "@ant-design/icons";
+import {
+  CheckCircleOutlined,
+  CloseCircleOutlined,
+  QuestionCircleOutlined,
+} from "@ant-design/icons";
 import "./question.css";
 
 const { Title, Text: AntText } = Typography;
@@ -97,25 +101,44 @@ const QuestionAnswerComponent: React.FC<QuestionComponentProps> = ({
               marginBottom: "1rem",
             }}
           >
-            <AntText type="warning" style={{ fontWeight: 600, fontSize: "0.9375rem" }}>
+            <AntText
+              type="warning"
+              style={{ fontWeight: 600, fontSize: "0.9375rem" }}
+            >
               ⚠️ Bạn đã bỏ qua câu hỏi này
             </AntText>
           </div>
 
           {/* Hiển thị đáp án đúng cho câu bỏ qua */}
           <div style={{ marginTop: "1rem" }}>
-            <AntText strong style={{ display: "block", marginBottom: "0.75rem", color: "#1f2937" }}>
+            <AntText
+              strong
+              style={{
+                display: "block",
+                marginBottom: "0.75rem",
+                color: "#1f2937",
+              }}
+            >
               Đáp án đúng:
             </AntText>
-            
+
             {isTrueFalseNotGiven ? (
-              <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "0.5rem",
+                }}
+              >
                 {["true", "false", "not given"].map((choice) => {
-                  const isCorrectChoice = question.correctAnswerForTrueFalseNGV?.includes(choice);
+                  const isCorrectChoice =
+                    question.correctAnswerForTrueFalseNGV?.includes(choice);
                   return (
                     <div
                       key={choice}
-                      className={`answer-option ${isCorrectChoice ? "correct" : "neutral"}`}
+                      className={`answer-option ${
+                        isCorrectChoice ? "correct" : "neutral"
+                      }`}
                       style={{
                         display: "flex",
                         justifyContent: "space-between",
@@ -133,11 +156,21 @@ const QuestionAnswerComponent: React.FC<QuestionComponentProps> = ({
                 })}
               </div>
             ) : isFillInTheBlank ? (
-              <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-                {(question.correctAnswerForBlank || (question as any).blankAnswer
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "0.75rem",
+                }}
+              >
+                {(question.correctAnswerForBlank ||
+                (question as any).blankAnswer
                   ? Array.isArray(question.correctAnswerForBlank)
                     ? question.correctAnswerForBlank
-                    : [question.correctAnswerForBlank || (question as any).blankAnswer]
+                    : [
+                        question.correctAnswerForBlank ||
+                          (question as any).blankAnswer,
+                      ]
                   : []
                 ).map((correctAns: any, index: number) => (
                   <div
@@ -149,7 +182,10 @@ const QuestionAnswerComponent: React.FC<QuestionComponentProps> = ({
                       border: "1px solid #10b981",
                     }}
                   >
-                    <AntText strong style={{ display: "block", marginBottom: "0.25rem" }}>
+                    <AntText
+                      strong
+                      style={{ display: "block", marginBottom: "0.25rem" }}
+                    >
                       Đáp án {index + 1}:
                     </AntText>
                     <AntText style={{ color: "#059669", fontWeight: 600 }}>
@@ -159,12 +195,20 @@ const QuestionAnswerComponent: React.FC<QuestionComponentProps> = ({
                 ))}
               </div>
             ) : (
-              <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "0.5rem",
+                }}
+              >
                 {/* HIỂN THỊ ĐỦ TẤT CẢ ĐÁP ÁN - không giới hạn 4 */}
                 {(question.answers || []).map((answer) => (
                   <div
                     key={answer._id}
-                    className={`answer-option ${answer.isCorrect ? "correct" : "neutral"}`}
+                    className={`answer-option ${
+                      answer.isCorrect ? "correct" : "neutral"
+                    }`}
                     style={{
                       display: "flex",
                       justifyContent: "space-between",
@@ -188,7 +232,9 @@ const QuestionAnswerComponent: React.FC<QuestionComponentProps> = ({
           </div>
         </div>
       ) : isTrueFalseNotGiven ? (
-        <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+        <div
+          style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}
+        >
           {["true", "false", "not given"].map((choice) => (
             <div
               key={choice}
@@ -196,7 +242,9 @@ const QuestionAnswerComponent: React.FC<QuestionComponentProps> = ({
                 question.correctAnswerForTrueFalseNGV?.includes(choice)
                   ? "correct"
                   : question.selectedAnswerId === choice ||
-                    question.userAnswers?.some((ua: any) => ua.userAnswer === choice)
+                    question.userAnswers?.some(
+                      (ua: any) => ua.userAnswer === choice
+                    )
                   ? "incorrect"
                   : "neutral"
               }`}
@@ -213,7 +261,9 @@ const QuestionAnswerComponent: React.FC<QuestionComponentProps> = ({
                 </Tag>
               )}
               {(question.selectedAnswerId === choice ||
-                question.userAnswers?.some((ua: any) => ua.userAnswer === choice)) &&
+                question.userAnswers?.some(
+                  (ua: any) => ua.userAnswer === choice
+                )) &&
                 !question.correctAnswerForTrueFalseNGV?.includes(choice) && (
                   <Tag color="error" style={{ margin: 0 }}>
                     Sai
@@ -223,7 +273,9 @@ const QuestionAnswerComponent: React.FC<QuestionComponentProps> = ({
           ))}
         </div>
       ) : isFillInTheBlank ? (
-        <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+        <div
+          style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}
+        >
           {question.answers && question.answers.length > 0
             ? question.answers.map((answer, index) => {
                 const userAnsObj =
@@ -292,7 +344,9 @@ const QuestionAnswerComponent: React.FC<QuestionComponentProps> = ({
               ))}
         </div>
       ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+        <div
+          style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}
+        >
           {/* HIỂN THỊ ĐỦ TẤT CẢ ĐÁP ÁN - không giới hạn 4 */}
           {(question.answers || []).map((answer) => (
             <div

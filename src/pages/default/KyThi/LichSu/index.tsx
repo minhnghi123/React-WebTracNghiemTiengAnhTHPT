@@ -154,7 +154,11 @@ export const LichSuLamBai = () => {
               {paginatedResults.map((result, index) => {
                 const actualIndex = startIndex + index;
                 return (
-                  <Card key={result._id} className="result-card" bordered={false}>
+                  <Card
+                    key={result._id}
+                    className="result-card"
+                    bordered={false}
+                  >
                     <div className="result-header">
                       <div className="result-number">
                         Lần {results.length - actualIndex}
@@ -177,7 +181,9 @@ export const LichSuLamBai = () => {
                           <div className="info-content">
                             <div className="info-label">Ngày làm bài</div>
                             <div className="info-value">
-                              {new Date(result.createdAt).toLocaleString("vi-VN")}
+                              {new Date(result.createdAt).toLocaleString(
+                                "vi-VN"
+                              )}
                             </div>
                           </div>
                         </div>
@@ -201,7 +207,8 @@ export const LichSuLamBai = () => {
                           <div className="info-content">
                             <div className="info-label">Số câu đúng</div>
                             <div className="info-value">
-                              {result.correctAnswer}/{result.questions.length} câu
+                              {result.correctAnswer}/{result.questions.length}{" "}
+                              câu
                             </div>
                           </div>
                         </div>
