@@ -1,100 +1,117 @@
 /* PC */
 @media (min-width: 1024px) {
-    #logo{
-        display: block!important;
-    }
-    .mobile-menu-icon {
-        display: none;
-      }
+  #logo {
+    display: block !important;
+  }
+  .mobile-menu-icon {
+    display: none;
+  }
 }
 
 /* Tablet */
 @media (min-width: 768px) and (max-width: 1023px) {
-  
 }
 
 /* Mobile */
 @media (max-width: 767px) {
-    #logo {
-      display: none;
-    }
-  
-    .mobile-menu-icon {
-        font-size: 24px;
-        background: none;
-        color: black;
-        border: none;
-        position: relative; /* Đảm bảo nằm trong header */
-    }
-  
-    /* Menu mặc định ẩn */
-    #menu {
-        position: absolute;
-        top: 60px;
-        left: -100%; /* Đẩy toàn bộ menu ra ngoài */
-        width: 100%;
-        background: white;
-        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-        z-index: 1000;
-        display: flex;
-        flex-direction: column;
-        transition: transform 0.4s ease-in-out; /* Hiệu ứng trượt */
-        transform: translateX(0);
-      }
-  
-    /* Khi mở menu */
-    #menu.show {
-        transform: translateX(100%);
-    }
-  
-    .dsMenu {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-        display: flex;
-        flex-direction: column; /* Sắp xếp menu theo chiều dọc */
-    }
-  
-    .dsMenu li {
-      padding: 10px;
-      border-bottom: 1px solid #ddd;
-      text-align: center;
-    }
-  
-    /* Nút đăng nhập / đăng ký */
-    .auth-buttons {
-      display: flex;
-      gap: 10px;
-      margin-top: 10px;
-    }
-  
-    .login-btn, .signup-btn {
-      padding: 8px 16px;
-      border-radius: 20px;
-      text-decoration: none;
-      text-align: center;
-    }
-  
-    .login-btn {
-      background: #6c757d;
-      color: white;
-    }
-  
-    .signup-btn {
-      background: #007bff;
-      color: white;
-    }
-    #header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between; /* Căn đều logo và icon menu */
-        padding: 20px 20px;
-        position: relative;
-      }
-    .ant-dropdown-trigger {
-      position: absolute;
-      right: 10px;
-    }
+  #logo {
+    display: none;
   }
-  
-  
+
+  .mobile-menu-icon {
+    font-size: 24px;
+    background: none;
+    color: black;
+    border: none;
+    position: relative; /* Đảm bảo nằm trong header */
+  }
+
+  /* Menu mặc định ẩn */
+  #menu {
+    position: absolute;
+    top: 60px;
+    left: -100%; /* Đẩy toàn bộ menu ra ngoài */
+    width: 100%;
+    background: white;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.4s ease-in-out; /* Hiệu ứng trượt */
+    transform: translateX(0);
+  }
+
+  /* Khi mở menu */
+  #menu.show {
+    transform: translateX(100%);
+  }
+
+  .dsMenu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column; /* Sắp xếp menu theo chiều dọc */
+  }
+
+  .dsMenu li {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    text-align: center;
+  }
+
+  /* Nút đăng nhập / đăng ký */
+  .auth-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  .login-btn,
+  .signup-btn {
+    padding: 8px 16px;
+    border-radius: 20px;
+    text-decoration: none;
+    text-align: center;
+  }
+
+  .login-btn {
+    background: #6c757d;
+    color: white;
+  }
+
+  .signup-btn {
+    background: #007bff;
+    color: white;
+  }
+  #header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Căn đều logo và icon menu */
+    padding: 20px 20px;
+    position: relative;
+  }
+  .ant-dropdown-trigger {
+    position: absolute;
+    right: 10px;
+  }
+}
+
+/* Clean responsive - Remove conflicts */
+@media (min-width: 769px) {
+  #logo {
+    display: flex !important;
+    position: static !important;
+    transform: none !important;
+  }
+
+  .mobile-menu-icon {
+    display: none !important;
+  }
+}
+
+@media (max-width: 768px) {
+  #logo {
+    display: flex !important;
+  }
+}

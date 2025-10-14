@@ -1,0 +1,155 @@
+.exam-list-container {
+  min-height: 100vh;
+  background: #fafafa;
+  padding: 2rem;
+}
+
+.exam-list-header {
+  background: white;
+  border-radius: 16px;
+  padding: 3rem 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid #f0f0f0;
+}
+
+.header-content {
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.page-title {
+  margin-bottom: 1rem !important;
+  font-size: 2.25rem !important;
+  font-weight: 700 !important;
+  color: #1a1a1a !important;
+}
+
+.page-description {
+  font-size: 1.125rem;
+  color: #666;
+}
+
+.filter-section {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.search-input,
+.filter-select {
+  border-radius: 8px !important;
+}
+
+.exam-sections {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.exam-section {
+  margin-bottom: 3rem;
+}
+
+.section-title {
+  font-weight: 600 !important;
+  font-size: 1.5rem !important;
+  color: #1a1a1a !important;
+  margin-bottom: 1.5rem !important;
+}
+
+.exam-card {
+  height: 100%;
+  border-radius: 12px !important;
+  border: 1px solid #f0f0f0 !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+}
+
+.exam-card:hover {
+  transform: translateY(-4px) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1) !important;
+  border-color: #1890ff !important;
+}
+
+.ongoing-exam {
+  border-left: 3px solid #52c41a !important;
+}
+
+.ended-exam {
+  border-left: 3px solid #ff4d4f !important;
+  opacity: 0.85;
+}
+
+.exam-status-tag {
+  border-radius: 6px !important;
+  padding: 2px 10px !important;
+  font-weight: 500 !important;
+  font-size: 0.875rem !important;
+}
+
+.exam-title {
+  font-weight: 600 !important;
+  color: #1a1a1a !important;
+  font-size: 1.125rem !important;
+}
+
+.exam-description {
+  color: #666;
+  font-size: 0.95rem;
+}
+
+.exam-meta {
+  display: flex;
+  gap: 1rem;
+  padding: 0.75rem 0;
+  border-top: 1px solid #f5f5f5;
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.exam-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #666;
+  font-size: 0.875rem;
+}
+
+.exam-meta-item .anticon {
+  color: #1890ff;
+}
+
+.exam-tags .ant-tag {
+  border-radius: 6px;
+  font-size: 0.875rem;
+}
+
+.exam-date {
+  font-size: 0.875rem;
+  color: #999;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .filter-section {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .exam-list-container {
+    padding: 1rem;
+  }
+
+  .exam-list-header {
+    padding: 2rem 1rem;
+  }
+
+  .page-title {
+    font-size: 1.75rem !important;
+  }
+}
