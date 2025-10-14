@@ -2,7 +2,7 @@
 name: CI/CD Deploy to EC2
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   # Job đầu tiên: Build tất cả images và đẩy lên Docker Hub
@@ -65,6 +65,32 @@ jobs:
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_KEY }}
+          script: |
+            # Di chuyển đến thư mục project trên EC2
+            cd /home/ec2-user/React-WebTracNghiemTiengAnhTHPT/
+
+            # Tải về TẤT CẢ images mới nhất từ Docker Hub
+            docker-compose pull
+
+            # Khởi động lại TẤT CẢ các container với images mới
+            # Docker Compose sẽ chỉ restart những service có image đã thay đổi
+            docker-compose up -d
+
+            # (Tùy chọn) Xóa các image cũ không còn dùng đến để dọn dẹp
+            docker image prune -f
+
+  # Job thứ ba: Deploy tất cả services trên EC2 thứ 2
+  deploy-ec2-2:
+    # Job này chỉ chạy sau khi job "build-and-push" thành công
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to EC2 Instance 2
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST_2 }}
+          username: ${{ secrets.EC2_USERNAME_2 }}
           key: ${{ secrets.EC2_KEY }}
           script: |
             # Di chuyển đến thư mục project trên EC2

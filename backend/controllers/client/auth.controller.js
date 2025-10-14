@@ -142,7 +142,7 @@ export async function signup(req, res) {
 export async function login(req, res) {
   const { email, password, captchaToken, deviceId } = req.body;
   const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
-  
+
   try {
     if (!email || !password) {
       return res.status(400).json({
@@ -188,9 +188,9 @@ export async function login(req, res) {
     if (!user) {
       await redisService.incr(ip);
       await redisService.expire(ip, 900);
-      return res.status(400).json({ 
-        code: 400, 
-        message: "Email không tồn tại trong hệ thống" // ✅ Message rõ ràng hơn
+      return res.status(400).json({
+        code: 400,
+        message: "Email không tồn tại trong hệ thống", // ✅ Message rõ ràng hơn
       });
     }
 
@@ -199,9 +199,9 @@ export async function login(req, res) {
     if (!isPasswordMatch) {
       await redisService.incr(ip);
       await redisService.expire(ip, 900);
-      return res.status(400).json({ 
-        code: 400, 
-        message: "Mật khẩu không chính xác" // ✅ Message rõ ràng hơn
+      return res.status(400).json({
+        code: 400,
+        message: "Mật khẩu không chính xác", // ✅ Message rõ ràng hơn
       });
     }
 
