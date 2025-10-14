@@ -133,11 +133,20 @@ const QuestionSubmit: React.FC<QuestionComponentProps> = ({
           whiteSpace: "normal",
           wordBreak: "break-word",
           fontSize: "16px",
-          lineHeight: "1.5",
+          lineHeight: "1.6",
           marginBottom: 16,
+          color: "#1f2937",
+          fontWeight: 600,
         }}
       >
-        {questionIndex}. {/* Use questionIndex for numbering */}
+        <span style={{ 
+          color: "#3b82f6", 
+          fontSize: "18px", 
+          fontWeight: 700,
+          marginRight: "8px"
+        }}>
+          Câu {questionIndex}.
+        </span>
         {questionType === "6742fb3bd56a2e75dbd817ec" ? (
           renderFillInBlankContent()
         ) : (

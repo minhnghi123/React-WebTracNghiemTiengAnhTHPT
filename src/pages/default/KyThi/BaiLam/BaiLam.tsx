@@ -25,7 +25,15 @@ import errorrIcon from "@/Content/img/errorr.png"; // Import your error icon
 import SuggestedQuestionAnswer from "@/components/SuggestedQuestionAnswer";
 import usePreventDevTools from "@/security/devtools.security";
 import usePreventCopyPaste from "@/security/copyPaste.security";
-
+import "./BaiLam.css";
+import {
+  AlertOutlined,
+  ClockCircleOutlined,
+  QuestionCircleOutlined,
+  CheckCircleOutlined,
+  TrophyOutlined,
+  PlayCircleOutlined,
+} from "@ant-design/icons";
 const { Panel } = Collapse;
 const { Title } = Typography;
 const { Sider, Content } = Layout;
@@ -130,9 +138,9 @@ const BaiLam: React.FC = () => {
         showAlertModal("Bạn đã chuyển tab. Vui lòng quay lại tab làm bài!");
       }
     };
-  
+
     document.addEventListener("visibilitychange", handleVisibilityChange);
-  
+
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
@@ -199,7 +207,11 @@ const BaiLam: React.FC = () => {
     if (Examresult || isViolationTriggered) return;
 
     const now = Date.now();
-    console.log(lastViolationTimeRef.current, now, now - lastViolationTimeRef.current);
+    console.log(
+      lastViolationTimeRef.current,
+      now,
+      now - lastViolationTimeRef.current
+    );
     if (now - lastViolationTimeRef.current < 5000) return; // Ignore violations within 5 seconds
 
     lastViolationTimeRef.current = now; // Update the ref value immediately
@@ -232,7 +244,7 @@ const BaiLam: React.FC = () => {
   usePreventDevTools(incrementAlertCount);
   usePreventCopyPaste(incrementAlertCount);
 
-  // fullscreen 
+  // fullscreen
   useEffect(() => {
     if (!Examresult && examDetails) {
       const enterFullscreen = () => {
@@ -263,8 +275,14 @@ const BaiLam: React.FC = () => {
       document.addEventListener("visibilitychange", handleVisibilityChange);
 
       return () => {
-        document.removeEventListener("fullscreenchange", handleFullscreenChange);
-        document.removeEventListener("visibilitychange", handleVisibilityChange);
+        document.removeEventListener(
+          "fullscreenchange",
+          handleFullscreenChange
+        );
+        document.removeEventListener(
+          "visibilitychange",
+          handleVisibilityChange
+        );
       };
     }
   }, [Examresult, examDetails]);
@@ -362,13 +380,11 @@ const BaiLam: React.FC = () => {
 
     if (intervalRef.current) clearInterval(intervalRef.current);
 
-    // Reset số lần vi phạm sau khi nộp bài
     localStorage.removeItem("alertCount");
     setAlertCount(0);
-    // Xác định các câu hỏi chưa trả lời
+
     const unansweredQuestions = getUnansweredQuestions();
 
-    // Map answers and listeningAnswers to the required format
     const enrichedAnswers = answers.map((ans) => {
       const question = Object.values(groupedQuestions)
         .flat()
@@ -393,7 +409,6 @@ const BaiLam: React.FC = () => {
       };
     });
 
-    // Extract questionTypes from answers and listeningAnswers
     const questionTypes = [
       ...enrichedAnswers.map((ans) => ans.questionType),
       ...enrichedListeningAnswers.map((ans) => ans.questionType),
@@ -408,22 +423,28 @@ const BaiLam: React.FC = () => {
     };
 
     try {
-      console.log("Submitting answers:", submitAnswer);
       const response = await ResultAPI.submitAnswer(submitAnswer);
       if (response.code === 200) {
-        showAlertModal("Nộp bài thành công");
         setExamresult(response);
         setSuggestedQuestions(response.suggestionQuestion);
         setRemainingTime(0);
-        localStorage.removeItem("alertCount"); // Reset alertCount
-        setAlertCount(0); // Reset state
-        resultSectionRef.current?.scrollIntoView({ behavior: "smooth" });
+        localStorage.removeItem("alertCount");
+        setAlertCount(0);
+        setIsSubmitModalVisible(false);
+
+        // Scroll to result section smoothly
+        setTimeout(() => {
+          resultSectionRef.current?.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          });
+        }, 300);
       }
     } catch (error) {
       console.error("Error submitting exam:", error);
       showAlertModal("Đã xảy ra lỗi khi nộp bài.");
     }
-};
+  };
 
   useEffect(() => {
     const fetchPostSubmitData = async () => {
@@ -538,13 +559,11 @@ const BaiLam: React.FC = () => {
 
     const getButtonColor = (questionId: string) => {
       if (!Examresult) {
-        // Before submission
         const isAnswered =
           answers.some((ans) => ans.questionId === questionId) ||
           listeningAnswers.some((ans) => ans.questionId === questionId);
-        return isAnswered ? "#52c41a" : "#d9d9d9"; // Green if answered, gray if not
+        return isAnswered ? "#52c41a" : "#d9d9d9";
       } else {
-        // After submission
         const correctAnswer =
           Examresult.details?.find((ans) => ans.questionId === questionId) ||
           Examresult.listeningQuestions?.find(
@@ -552,119 +571,58 @@ const BaiLam: React.FC = () => {
           );
 
         if (!correctAnswer) {
-          return "#ff4d4f"; // Red for unanswered questions
+          return "#ff4d4f";
         }
 
-        return correctAnswer.isCorrect ? "#52c41a" : "#ff4d4f"; // Green if correct, red if incorrect
+        return correctAnswer.isCorrect ? "#52c41a" : "#ff4d4f";
       }
     };
 
+    const allQuestions: { id: string; index: number }[] = [];
+
+    // Collect all listening questions
+    listeningSections.forEach((section: any) => {
+      section.questions.forEach((q: any) => {
+        allQuestions.push({ id: q._id, index: questionNumber++ });
+      });
+    });
+
+    // Collect all reading questions
+    readingSections.forEach((passageId) => {
+      groupedQuestions[passageId].forEach((q) => {
+        allQuestions.push({ id: q._id, index: questionNumber++ });
+      });
+    });
+
+    // Collect other questions
+    otherQuestions.forEach((q) => {
+      allQuestions.push({ id: q._id, index: questionNumber++ });
+    });
+
     return (
-      <div
-        style={{
-          maxHeight: "calc(100vh - 200px)", // Adjust height to avoid overlapping navbar and footer
-          paddingRight: "8px",
-          overflowY: "auto",
-        }}
-      >
-        {/* Listening Sections */}
-        {listeningSections.map((_: any, idx: number) => (
-          <div key={`listening-${idx}`} style={{ marginBottom: "16px" }}>
-            <Title level={5} style={{ marginBottom: "8px" }}>
-              Phần nghe {idx + 1}
-            </Title>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
-              {listeningSections[idx].questions.map((_: any, qIdx: number) => {
-                const questionIndex = questionNumber++;
-                const buttonColor = getButtonColor(
-                  listeningSections[idx].questions[qIdx]._id
-                );
-                return (
-                  <Button
-                    size="small"
-                    key={`listening-btn-${questionIndex}`}
-                    style={{
-                      backgroundColor: buttonColor,
-                      color: buttonColor === "#d9d9d9" ? "#000" : "#fff",
-                    }}
-                    onClick={() =>
-                      questionRefs.current[questionIndex - 1]?.scrollIntoView({
-                        behavior: "smooth",
-                        block: "center",
-                      })
-                    }
-                  >
-                    {questionIndex}
-                  </Button>
-                );
-              })}
-            </div>
-          </div>
-        ))}
-
-        {/* Reading Sections */}
-        {readingSections.map((passageId, idx) => (
-          <div key={`reading-${idx}`} style={{ marginBottom: "16px" }}>
-            <Title level={5} style={{ marginBottom: "8px" }}>
-              Phần đọc {idx + 1}
-            </Title>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
-              {groupedQuestions[passageId].map((q) => {
-                const questionIndex = questionNumber++;
-                const buttonColor = getButtonColor(q._id);
-                return (
-                  <Button
-                    size="small"
-                    key={`reading-btn-${questionIndex}`}
-                    style={{
-                      backgroundColor: buttonColor,
-                      color: buttonColor === "#d9d9d9" ? "#000" : "#fff",
-                    }}
-                    onClick={() =>
-                      questionRefs.current[questionIndex - 1]?.scrollIntoView({
-                        behavior: "smooth",
-                        block: "center",
-                      })
-                    }
-                  >
-                    {questionIndex}
-                  </Button>
-                );
-              })}
-            </div>
-          </div>
-        ))}
-
-        {/* Other Questions */}
-        <div>
-          <Title level={5} style={{ marginBottom: "8px" }}>
-            Câu hỏi khác
-          </Title>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
-            {otherQuestions.map((q) => {
-              const questionIndex = questionNumber++;
-              const buttonColor = getButtonColor(q._id);
-              return (
-                <Button
-                  size="small"
-                  key={`other-btn-${questionIndex}`}
-                  style={{
-                    backgroundColor: buttonColor,
-                    color: buttonColor === "#d9d9d9" ? "#000" : "#fff",
-                  }}
-                  onClick={() =>
-                    questionRefs.current[questionIndex - 1]?.scrollIntoView({
-                      behavior: "smooth",
-                      block: "center",
-                    })
-                  }
-                >
-                  {questionIndex}
-                </Button>
-              );
-            })}
-          </div>
-        </div>
+      <div className="question-map-grid">
+        {allQuestions.map((q) => {
+          const buttonColor = getButtonColor(q.id);
+          return (
+            <Button
+              key={`map-btn-${q.index}`}
+              className="question-map-btn"
+              style={{
+                backgroundColor: buttonColor,
+                color: buttonColor === "#d9d9d9" ? "#000" : "#fff",
+                borderColor: buttonColor,
+              }}
+              onClick={() =>
+                questionRefs.current[q.index - 1]?.scrollIntoView({
+                  behavior: "smooth",
+                  block: "center",
+                })
+              }
+            >
+              {q.index}
+            </Button>
+          );
+        })}
       </div>
     );
   };
@@ -678,204 +636,155 @@ const BaiLam: React.FC = () => {
   };
 
   return (
-    <Layout style={{ minHeight: "100vh", background: "#fff" }}>
-      <Content style={{ padding: "2rem", maxWidth: 1200, margin: "0 auto" }}>
-        <Title level={3} style={{ textAlign: "center", marginBottom: 32 }}>
-          {examDetails?.examId.title}
-        </Title>
+    <Layout className="exam-layout-container">
+      <Layout className="exam-main-layout">
+        <Content className="exam-content-modern">
+          {/* Render Listening Sections */}
+          {examDetails?.examId.listeningExams?.map((le: any, idx: number) =>
+            renderListeningSection(le, idx + 1)
+          )}
 
-        {/* Render Listening Sections */}
-        {examDetails?.examId.listeningExams?.map((le: any, idx: number) =>
-          renderListeningSection(le, idx + 1)
-        )}
-
-        {/* Render Non-Listening Questions */}
-        {Object.keys(groupedQuestions).length > 1 ||
-        !groupedQuestions["no-passage"] ? (
-          // Case: Questions grouped by passages
-          Object.keys(groupedQuestions).map((passageId, groupIndex) => {
-            // Filter out listening questions
-            const filteredQuestions = groupedQuestions[passageId].filter(
-              (q) =>
-                !examDetails?.examId.listeningExams?.some((le: any) =>
-                  le.questions.some((lq: any) => lq._id === q._id)
-                )
-            );
-
-            if (filteredQuestions.length === 0) return null; // Skip if no questions remain after filtering
-
-            return (
-              <div
-                key={groupIndex}
-                style={{
-                  display: "flex",
-                  gap: "16px",
-                  marginBottom: "24px",
-                  border: "1px solid #ddd",
-                  borderRadius: 8,
-                  padding: 16,
-                }}
-              >
-                {passageId !== "no-passage" &&
-                  filteredQuestions[0]?.passageId?.content && (
-                    // Left Panel: Passage Content
-                    <div
-                      style={{
-                        flex: 1,
-                        overflowY: "auto",
-                        maxHeight: "500px",
-                        padding: "16px",
-                        borderRight: "1px solid #ddd",
-                      }}
-                      dangerouslySetInnerHTML={{
-                        __html: filteredQuestions[0].passageId.content.replace(
-                          /\n/g,
-                          "<br />"
-                        ),
-                      }}
-                    ></div>
-                  )}
-
-                {/* Right Panel: Scrollable Questions */}
-                <div
-                  style={{
-                    flex: 2,
-                    overflowY: "auto",
-                    maxHeight: "500px",
-                    padding: "16px",
-                  }}
-                >
-                  {filteredQuestions.map((q, idx) => {
-                    // Use globalQuestionIndex for consistent numbering
-                    const questionIndex = globalQuestionIndex++;
-                    return (
-                      <Card
-                        key={q._id || idx}
-                        ref={(el) => {
-                          if (el) questionRefs.current[questionIndex] = el; // Only add non-null elements
-                        }}
-                        style={{
-                          marginBottom: 24,
-                          borderRadius: 12,
-                          boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
-                        }}
-                      >
-                        <div
-                          style={{
-                            display: "flex",
-                            justifyContent: "flex-end",
-                          }}
-                        >
-                          <img
-                            src={errorrIcon}
-                            alt="Báo lỗi"
-                            onClick={() => handleReportError(q)}
-                            style={{
-                              marginTop: 8,
-                              height: 20,
-                              width: 20,
-                              cursor: "pointer",
-                            }}
-                          />
-                        </div>
-
-                        {q.audio ? (
-                          <>
-                            <audio controls style={{ marginBottom: 8 }}>
-                              <source
-                                src={q.audio.filePath}
-                                type="audio/mpeg"
-                              />
-                            </audio>
-                            <ListeningQuestionSubmit
-                              question={q}
-                              questionType={q.questionType || ""}
-                              onAnswerChange={handleListeningAnswerChange}
-                              currentAnswer={listeningAnswers.find(
-                                (ans) => ans.questionId === q._id
-                              )}
-                              viewOnly={!!Examresult}
-                              questionIndex={questionIndex} // Pass questionIndex
-                            />
-                          </>
-                        ) : (
-                          <QuestionSubmit
-                            question={q}
-                            questionType={q.questionType || ""}
-                            onAnswerChange={handleAnswerChange}
-                            currentAnswer={answers.find(
-                              (ans) => ans.questionId === q._id
-                            )}
-                            index={questionIndex}
-                            viewOnly={!!Examresult}
-                            questionIndex={questionIndex} // Pass questionIndex
-                          />
-                        )}
-                      </Card>
-                    );
-                  })}
-                </div>
-              </div>
-            );
-          })
-        ) : (
-          // Case: No passages, display questions in a single column
-          <div>
-            {groupedQuestions["no-passage"]
-              ?.filter(
+          {/* Render Non-Listening Questions */}
+          {Object.keys(groupedQuestions).length > 1 ||
+          !groupedQuestions["no-passage"] ? (
+            Object.keys(groupedQuestions).map((passageId, groupIndex) => {
+              const filteredQuestions = groupedQuestions[passageId].filter(
                 (q) =>
                   !examDetails?.examId.listeningExams?.some((le: any) =>
                     le.questions.some((lq: any) => lq._id === q._id)
                   )
-              )
-              .map((q, idx) => {
-                const questionIndex = globalQuestionIndex++;
-                return (
-                  <Card
-                    key={q._id || idx}
-                    ref={(el) => {
-                      if (el) questionRefs.current[questionIndex] = el; // Only add non-null elements
-                    }}
-                    style={{
-                      marginBottom: 24,
-                      borderRadius: 12,
-                      boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
-                    }}
-                  >
-                    <div
-                      style={{ display: "flex", justifyContent: "flex-end" }}
-                    >
-                      <img
-                        src={errorrIcon}
-                        alt="Báo lỗi"
-                        onClick={() => handleReportError(q)}
-                        style={{
-                          marginTop: 8,
-                          height: 20,
-                          width: 20,
-                          cursor: "pointer",
-                        }}
-                      />
-                    </div>
+              );
 
-                    {q.audio ? (
-                      <>
-                        <audio controls style={{ marginBottom: 8 }}>
-                          <source src={q.audio.filePath} type="audio/mpeg" />
-                        </audio>
-                        <ListeningQuestionSubmit
-                          question={q}
-                          questionType={q.questionType || ""}
-                          onAnswerChange={handleListeningAnswerChange}
-                          currentAnswer={listeningAnswers.find(
-                            (ans) => ans.questionId === q._id
-                          )}
-                          viewOnly={!!Examresult}
-                          questionIndex={questionIndex} // Pass questionIndex
+              if (filteredQuestions.length === 0) return null;
+
+              return (
+                <div key={groupIndex} className="passage-container">
+                  {passageId !== "no-passage" &&
+                    filteredQuestions[0]?.passageId?.content && (
+                      <div className="passage-grid">
+                        <div
+                          className="passage-text"
+                          dangerouslySetInnerHTML={{
+                            __html:
+                              filteredQuestions[0].passageId.content.replace(
+                                /\n/g,
+                                "<br />"
+                              ),
+                          }}
+                        ></div>
+
+                        <div className="passage-questions-list">
+                          {filteredQuestions.map((q, idx) => {
+                            const questionIndex = globalQuestionIndex++;
+                            return (
+                              <Card
+                                key={q._id || idx}
+                                ref={(el) => {
+                                  if (el)
+                                    questionRefs.current[questionIndex] = el;
+                                }}
+                                className="question-card-modern"
+                              >
+                                <div className="question-actions">
+                                  <img
+                                    src={errorrIcon}
+                                    alt="Báo lỗi"
+                                    onClick={() => handleReportError(q)}
+                                    className="report-icon"
+                                  />
+                                </div>
+
+                                {q.audio ? (
+                                  <>
+                                    <audio
+                                      controls
+                                      className="audio-player-modern"
+                                    >
+                                      <source
+                                        src={q.audio.filePath}
+                                        type="audio/mpeg"
+                                      />
+                                    </audio>
+                                    <ListeningQuestionSubmit
+                                      question={q}
+                                      questionType={q.questionType || ""}
+                                      onAnswerChange={
+                                        handleListeningAnswerChange
+                                      }
+                                      currentAnswer={listeningAnswers.find(
+                                        (ans) => ans.questionId === q._id
+                                      )}
+                                      viewOnly={!!Examresult}
+                                      questionIndex={questionIndex}
+                                    />
+                                  </>
+                                ) : (
+                                  <QuestionSubmit
+                                    question={q}
+                                    questionType={q.questionType || ""}
+                                    onAnswerChange={handleAnswerChange}
+                                    currentAnswer={answers.find(
+                                      (ans) => ans.questionId === q._id
+                                    )}
+                                    index={questionIndex}
+                                    viewOnly={!!Examresult}
+                                    questionIndex={questionIndex}
+                                  />
+                                )}
+                              </Card>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                </div>
+              );
+            })
+          ) : (
+            <div className="questions-list-single">
+              {groupedQuestions["no-passage"]
+                ?.filter(
+                  (q) =>
+                    !examDetails?.examId.listeningExams?.some((le: any) =>
+                      le.questions.some((lq: any) => lq._id === q._id)
+                    )
+                )
+                .map((q, idx) => {
+                  const questionIndex = globalQuestionIndex++;
+                  return (
+                    <Card
+                      key={q._id || idx}
+                      ref={(el) => {
+                        if (el) questionRefs.current[questionIndex] = el;
+                      }}
+                      className="question-card-modern"
+                    >
+                      <div className="question-actions">
+                        <img
+                          src={errorrIcon}
+                          alt="Báo lỗi"
+                          onClick={() => handleReportError(q)}
+                          className="report-icon"
                         />
-                      </>
-                    ) : (
-                      <>
+                      </div>
+
+                      {q.audio ? (
+                        <>
+                          <audio controls className="audio-player-modern">
+                            <source src={q.audio.filePath} type="audio/mpeg" />
+                          </audio>
+                          <ListeningQuestionSubmit
+                            question={q}
+                            questionType={q.questionType || ""}
+                            onAnswerChange={handleListeningAnswerChange}
+                            currentAnswer={listeningAnswers.find(
+                              (ans) => ans.questionId === q._id
+                            )}
+                            viewOnly={!!Examresult}
+                            questionIndex={questionIndex}
+                          />
+                        </>
+                      ) : (
                         <QuestionSubmit
                           question={q}
                           questionType={q.questionType || ""}
@@ -885,209 +794,219 @@ const BaiLam: React.FC = () => {
                           )}
                           index={questionIndex}
                           viewOnly={!!Examresult}
-                          questionIndex={questionIndex} // Pass questionIndex
+                          questionIndex={questionIndex}
                         />
-                      </>
-                    )}
-                  </Card>
-                );
-              })}
-          </div>
-        )}
+                      )}
+                    </Card>
+                  );
+                })}
+            </div>
+          )}
 
-        {showErrorModal && selectedQuestion && (
-          <ErrorReportModal
-            questionId={selectedQuestion._id}
-            examId={examDetails.examId._id}
-            userId={examDetails.userId}
-            onClose={handleCloseModal}
-          />
-        )}
+          {/* Result Section */}
+          {Examresult && (
+            <div className="result-section-modern" ref={resultSectionRef}>
+              <Card className="result-card-main" bordered={false}>
+                <div className="result-header">
+                  <TrophyOutlined className="result-trophy-icon" />
+                  <Title level={2} className="result-title">
+                    Kết quả làm bài
+                  </Title>
+                </div>
 
-        {Examresult && (
-          <div className="my-4" ref={resultSectionRef}>
-            <Card>
-              <Title level={4}>🎯 Kết quả làm bài</Title>
+                <div className="result-stats-grid">
+                  <div className="result-stat-card score-card">
+                    <div className="stat-icon-wrapper">
+                      <TrophyOutlined />
+                    </div>
+                    <div className="stat-info">
+                      <div className="stat-number">{Examresult.score}</div>
+                      <div className="stat-label">Điểm số / 10</div>
+                    </div>
+                  </div>
 
-              <Row gutter={[24, 24]} justify="center">
-                <Col xs={24} sm={12} md={8}>
-                  <Statistic
-                    title="Điểm số"
-                    value={Examresult.score}
-                    precision={1}
-                    suffix="/ 10"
-                  />
-                </Col>
-                <Col xs={24} sm={12} md={8}>
-                  <Statistic
-                    title="Câu đúng"
-                    value={Examresult.correctAnswer}
-                    suffix={`/ ${Examresult.totalQuestion}`}
-                  />
-                </Col>
-              </Row>
+                  <div className="result-stat-card correct-card">
+                    <div className="stat-icon-wrapper">
+                      <CheckCircleOutlined />
+                    </div>
+                    <div className="stat-info">
+                      <div className="stat-number">
+                        {Examresult.correctAnswer}/{Examresult.totalQuestion}
+                      </div>
+                      <div className="stat-label">Câu đúng</div>
+                    </div>
+                  </div>
 
-              <Divider />
+                  <div className="result-stat-card time-card">
+                    <div className="stat-icon-wrapper">
+                      <ClockCircleOutlined />
+                    </div>
+                    <div className="stat-info">
+                      <div className="stat-number">
+                        {examDetails?.examId.duration -
+                          Math.floor(remainingTime / 60)}
+                      </div>
+                      <div className="stat-label">Phút đã làm</div>
+                    </div>
+                  </div>
+                </div>
 
-              <Button type="link" onClick={() => setShowDetails(!showDetails)}>
-                {showDetails ? "Ẩn chi tiết" : "Xem chi tiết"}
-              </Button>
+                <Divider />
 
-              {showDetails && (
-                <Collapse
-                  onChange={(activeKeys) => {
-                    if (Array.isArray(activeKeys)) {
-                      activeKeys.forEach((key) =>
-                        handleExpandSuggestedQuestion(key)
-                      );
-                    } else {
-                      handleExpandSuggestedQuestion(activeKeys);
-                    }
-                  }}
+                <Button
+                  type="link"
+                  onClick={() => setShowDetails(!showDetails)}
+                  className="toggle-details-btn"
                 >
-                  {/* Lời khuyên */}
-                  <Panel header="Lời khuyên" key="advice">
-                    {loading ? (
-                      <Spin />
-                    ) : (
-                      <div
-                        dangerouslySetInnerHTML={{
-                          __html: advice
-                            .replace(/\*/g, "")
-                            .replace(/\n/g, "<br />"),
-                        }}
-                      />
-                    )}
-                  </Panel>
+                  {showDetails ? "Ẩn chi tiết" : "Xem chi tiết"}
+                </Button>
 
-                  {/* Video liên quan */}
-                  <Panel header="Video liên quan" key="videos">
-                    {Examresult.videos &&
-                      Object.keys(Examresult.videos).map((key) => (
-                        <div key={key}>
-                          <Title level={5}>{key}</Title>
-                          <Row gutter={[16, 16]}>
-                            {Examresult.videos[key].map((video: any) => (
-                              <Col span={8} key={video.videoId}>
-                                <a
-                                  href={video.linkUrl}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                >
-                                  <img
-                                    src={video.thumbnail}
-                                    alt={video.title}
-                                    style={{ width: "100%", borderRadius: 8 }}
-                                  />
-                                  <p>{video.title}</p>
-                                </a>
-                              </Col>
-                            ))}
-                          </Row>
-                        </div>
-                      ))}
-                  </Panel>
-                  {/* key={q._id ?? id} */}
-                  {/* Câu hỏi đề nghị */}
-                  <Panel header="Câu hỏi đề nghị" key="suggested">
-                    <Collapse>
-                      {suggestedQuestions.map((q: Question, id: number) => (
-                        <Panel
-                          header={`${id + 1}. ${q.content.slice(0, 200)}...`}
-                          key={q._id ?? id}
-                          onClick={() => handleExpandSuggestedQuestion(q._id)}
-                        >
-                          {q.detailsFetched ? (
-                            <SuggestedQuestionAnswer question={q} />
-                          ) : (
-                            <Spin />
-                          )}
-                        </Panel>
-                      ))}
-                    </Collapse>
-                  </Panel>
-                </Collapse>
-              )}
-            </Card>
-          </div>
-        )}
-      </Content>
+                {showDetails && (
+                  <Collapse
+                    className="result-collapse-modern"
+                    onChange={(activeKeys) => {
+                      if (Array.isArray(activeKeys)) {
+                        activeKeys.forEach((key) =>
+                          handleExpandSuggestedQuestion(key)
+                        );
+                      } else {
+                        handleExpandSuggestedQuestion(activeKeys);
+                      }
+                    }}
+                  >
+                    <Panel
+                      header="💡 Lời khuyên"
+                      key="advice"
+                      className="collapse-panel-modern"
+                    >
+                      {loading ? (
+                        <Spin />
+                      ) : (
+                        <div
+                          className="advice-content"
+                          dangerouslySetInnerHTML={{
+                            __html: advice
+                              .replace(/\*/g, "")
+                              .replace(/\n/g, "<br />"),
+                          }}
+                        />
+                      )}
+                    </Panel>
 
-      <Sider
-        width={260}
-        theme="light"
-        style={{
-          position: "sticky", // Prevent overlapping by using sticky positioning
-          top: 0,
-          height: "100vh", // Chiều cao toàn màn hình
-          background: "#f7f8fa",
-          borderLeft: "1px solid #f0f0f0",
-          display: "flex",
-          flexDirection: "column",
-          padding: "1rem",
-          overflowY: "auto", // Ensure scrolling works for long content
-        }}
-      >
-        <Affix offsetTop={20}>
-          <div style={{ paddingBottom: "80px" /* Space for footer */ }}>
-            <Title level={5}>Sơ đồ câu hỏi</Title>
-            {renderQuestionMap()}
-            <Divider />
-            <Title level={5}>
-              Thời gian còn lại :{" "}
-              <strong
-                style={{
-                  fontWeight: "bold",
-                  color: remainingTime <= 60 ? "#ff4d4f" : "#000",
-                }}
-              >
-                {formatTime(remainingTime)}
-              </strong>
-            </Title>
-            <Button
-              type="primary"
-              onClick={showSubmitModal}
-              disabled={!!Examresult || loading}
-              block
-            >
-              Nộp bài
-            </Button>
+                    <Panel
+                      header="📺 Video liên quan"
+                      key="videos"
+                      className="collapse-panel-modern"
+                    >
+                      {Examresult.videos &&
+                        Object.keys(Examresult.videos).map((key) => (
+                          <div key={key} className="video-section">
+                            <Title level={5}>{key}</Title>
+                            <Row gutter={[16, 16]}>
+                              {Examresult.videos[key].map((video: any) => (
+                                <Col xs={24} sm={12} md={8} key={video.videoId}>
+                                  <a
+                                    href={video.linkUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="video-card"
+                                  >
+                                    <img
+                                      src={video.thumbnail}
+                                      alt={video.title}
+                                      className="video-thumbnail"
+                                    />
+                                    <p className="video-title">{video.title}</p>
+                                  </a>
+                                </Col>
+                              ))}
+                            </Row>
+                          </div>
+                        ))}
+                    </Panel>
+
+                    <Panel
+                      header="📝 Câu hỏi đề nghị"
+                      key="suggested"
+                      className="collapse-panel-modern"
+                    >
+                      <Collapse className="suggested-questions-collapse">
+                        {suggestedQuestions.map((q: Question, id: number) => (
+                          <Panel
+                            header={`${id + 1}. ${q.content.slice(0, 200)}...`}
+                            key={q._id ?? id}
+                            onClick={() => handleExpandSuggestedQuestion(q._id)}
+                          >
+                            {q.detailsFetched ? (
+                              <SuggestedQuestionAnswer question={q} />
+                            ) : (
+                              <Spin />
+                            )}
+                          </Panel>
+                        ))}
+                      </Collapse>
+                    </Panel>
+                  </Collapse>
+                )}
+              </Card>
+            </div>
+          )}
+        </Content>
+
+        {/* Mini Sidebar Fixed */}
+        <div className="exam-minimap-fixed">
+          <div className="minimap-timer">
+            <ClockCircleOutlined />
+            <span className={remainingTime <= 60 ? "critical" : ""}>
+              {formatTime(remainingTime)}
+            </span>
           </div>
-        </Affix>
-      </Sider>
-      {/*  */}
-      <Modal
-        title="Xác nhận nộp bài"
-        visible={isSubmitModalVisible}
-        onOk={() => {
-          handleSubmit(); // Gọi hàm handleSubmit khi người dùng xác nhận
-          setIsSubmitModalVisible(false); // Đóng Modal sau khi xác nhận
-        }}
-        onCancel={handleCancelSubmit}
-        okText="Có"
-        cancelText="Không"
-      >
-        <p>Bạn có chắc chắn muốn nộp bài không?</p>
-      </Modal>
-      {/*modal xac nhan nop bai  */}
+
+          <div className="minimap-questions">{renderQuestionMap()}</div>
+
+          <Button
+            type="primary"
+            onClick={showSubmitModal}
+            disabled={!!Examresult || loading}
+            className="minimap-submit-btn"
+            block
+          >
+            <PlayCircleOutlined /> Nộp bài
+          </Button>
+        </div>
+      </Layout>
+
+      {/* Modals */}
+      {showErrorModal && selectedQuestion && (
+        <ErrorReportModal
+          questionId={selectedQuestion._id}
+          examId={examDetails.examId._id}
+          userId={examDetails.userId}
+          onClose={handleCloseModal}
+        />
+      )}
+
       <Modal
         title="Xác nhận nộp bài"
         visible={isSubmitModalVisible}
         onOk={async () => {
-          setIsSubmitting(true); // Bật trạng thái loading
-          await handleSubmit(); // Gọi hàm handleSubmit
-          setIsSubmitting(false); // Tắt trạng thái loading
-          setIsSubmitModalVisible(false); // Đóng Modal
+          setIsSubmitting(true);
+          await handleSubmit();
+          setIsSubmitting(false);
         }}
         onCancel={handleCancelSubmit}
         okText="Có"
         cancelText="Không"
-        confirmLoading={isSubmitting} // Hiển thị loading trên nút "Có"
+        confirmLoading={isSubmitting}
+        className="submit-modal-modern"
       >
         <p>Bạn có chắc chắn muốn nộp bài không?</p>
-        <p>Còn {getUnansweredQuestions().length} câu hỏi chưa được làm.</p>
+        <p className="unanswered-notice">
+          Còn <strong>{getUnansweredQuestions().length}</strong> câu hỏi chưa
+          được làm.
+        </p>
       </Modal>
-      {/* modal alert */}
+
       <Modal
         title="Thông báo"
         visible={isAlertModalVisible}
@@ -1102,14 +1021,7 @@ const BaiLam: React.FC = () => {
           }
         }}
         okText="Đóng"
-      >
-        <p>{alertMessage}</p>
-      </Modal>
-      <Modal
-        title="Thông báo"
-        visible={isAlertModalVisible}
-        onOk={() => setIsAlertModalVisible(false)}
-        okText="Đóng"
+        className="alert-modal-modern"
       >
         <p>{alertMessage}</p>
       </Modal>

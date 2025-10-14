@@ -135,8 +135,25 @@ const ListeningQuestionSubmit: React.FC<ListeningQuestionComponentProps> = ({
 
   return (
     <div className="bg-white p-4 rounded shadow mb-4">
-      <h5 className="text-xl font-bold mb-2" style={{ whiteSpace: "pre-wrap" }}>
-        {questionIndex}. {/* Use questionIndex for numbering */}
+      <h5
+        className="text-xl font-bold mb-2"
+        style={{
+          whiteSpace: "pre-wrap",
+          color: "#1f2937",
+          fontSize: "16px",
+          lineHeight: "1.6",
+        }}
+      >
+        <span
+          style={{
+            color: "#3b82f6",
+            fontSize: "18px",
+            fontWeight: 700,
+            marginRight: "8px",
+          }}
+        >
+          Câu {questionIndex}.
+        </span>
         {questionType === "6742fb3bd56a2e75dbd817ec" ? (
           renderFillInTheBlanks()
         ) : (
