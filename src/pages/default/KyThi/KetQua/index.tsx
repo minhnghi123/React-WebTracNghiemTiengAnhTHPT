@@ -3,7 +3,7 @@ import { Button, Table, Typography } from "antd";
 import { useEffect, useState } from "react";
 import ChiTietKetQua from "./ChiTietKetQua";
 
-const { Title } = Typography;
+const { Title, Text: AntText } = Typography;
 
 type KetQuaProps = {
   DeThi?: string;
@@ -36,18 +36,35 @@ export const KetQua: React.FC<KetQuaProps> = ({ DeThi }) => {
       title: "Ngày làm bài",
       dataIndex: "createdAt",
       key: "createdAt",
-      render: (val: string) => new Date(val).toLocaleString(),
+      render: (val: string) => (
+        <span style={{ fontSize: "0.9375rem" }}>
+          {new Date(val).toLocaleString("vi-VN")}
+        </span>
+      ),
     },
     {
       title: "Điểm",
       key: "score",
-      render: (record: Result) => `${record.score}/${10.0} điểm`,
+      render: (record: Result) => (
+        <span
+          style={{
+            fontWeight: 600,
+            fontSize: "1.125rem",
+            color: record.score >= 5 ? "#52c41a" : "#ff4d4f",
+          }}
+        >
+          {record.score}/10
+        </span>
+      ),
     },
     {
       title: "Số câu đúng",
-      key: "score",
-      render: (record: Result) =>
-        `${record.correctAnswer}/${record.questions.length} câu đúng`,
+      key: "correct",
+      render: (record: Result) => (
+        <span style={{ fontSize: "0.9375rem" }}>
+          {record.correctAnswer}/{record.questions.length}
+        </span>
+      ),
     },
     {
       title: "Thời gian làm",
@@ -55,20 +72,23 @@ export const KetQua: React.FC<KetQuaProps> = ({ DeThi }) => {
       render: (record: Result) => {
         const start = new Date(record.createdAt).getTime();
         const end = new Date(record.endTime).getTime();
-        const duration = Math.round((end - start) / 60000); // ms -> phút
-        return `${duration} phút`;
+        const duration = Math.round((end - start) / 60000);
+        return <span style={{ fontSize: "0.9375rem" }}>{duration} phút</span>;
       },
     },
-
     {
       title: "",
       key: "action",
       render: (record: Result) => (
         <Button
-          type="link"
+          type="primary"
           onClick={() => {
             setDetail(record);
             setIsDetail(true);
+          }}
+          style={{
+            borderRadius: "6px",
+            fontWeight: 500,
           }}
         >
           Xem chi tiết
@@ -76,30 +96,60 @@ export const KetQua: React.FC<KetQuaProps> = ({ DeThi }) => {
       ),
     },
   ];
-  // console.log(detail);
-  return (
-    <div>
-      <center>
-        <Title level={3}>Kết quả các lần làm bài</Title>
-      </center>
 
+  return (
+    <div style={{ padding: "0" }}>
       {isDetail && detail !== undefined ? (
         <div>
-          <center style={{ marginBottom: 16 }}>
-            <Button type="default" onClick={() => setIsDetail(false)}>
-              Quay về danh sách
+          <div style={{ marginBottom: "1.5rem", textAlign: "center" }}>
+            <Button
+              onClick={() => setIsDetail(false)}
+              style={{
+                borderRadius: "6px",
+                fontWeight: 500,
+                height: "40px",
+                padding: "0 24px",
+              }}
+            >
+              ← Quay về danh sách
             </Button>
-          </center>
+          </div>
           <ChiTietKetQua result={detail} />
         </div>
       ) : (
-        <Table
-          style={{ width: "90%", margin: "auto" }}
-          columns={columns}
-          dataSource={result}
-          rowKey="_id"
-          pagination={{ pageSize: 5 }}
-        />
+        <>
+          {result.length > 0 ? (
+            <Table
+              columns={columns}
+              dataSource={result}
+              rowKey="_id"
+              pagination={{
+                pageSize: 5,
+                showSizeChanger: false,
+                style: { marginTop: "1.5rem" },
+              }}
+              style={{
+                background: "white",
+                borderRadius: "8px",
+                boxShadow: "0 1px 3px rgba(0, 0, 0, 0.06)",
+              }}
+            />
+          ) : (
+            <div
+              style={{
+                textAlign: "center",
+                padding: "3rem 1rem",
+                background: "white",
+                borderRadius: "8px",
+                boxShadow: "0 1px 3px rgba(0, 0, 0, 0.06)",
+              }}
+            >
+              <AntText type="secondary" style={{ fontSize: "1rem" }}>
+                Chưa có lịch sử làm bài
+              </AntText>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

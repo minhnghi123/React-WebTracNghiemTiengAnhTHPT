@@ -1,8 +1,11 @@
 import React from "react";
 import { QuestionAnswerResult } from "@/services/student";
 import { cleanString } from "@/utils/cn";
-import { Divider, Tag } from "antd";
+import { Card, Tag, Typography } from "antd";
+import { CheckCircleOutlined, CloseCircleOutlined } from "@ant-design/icons";
 import "./question.css";
+
+const { Title, Text: AntText } = Typography;
 
 type QuestionComponentProps = {
   question: QuestionAnswerResult;
@@ -23,18 +26,36 @@ const QuestionAnswerComponent: React.FC<QuestionComponentProps> = ({
     question.correctAnswerForTrueFalseNGV !== undefined;
 
   return (
-    <div className="bg-white p-4 rounded shadow mb-4">
-      {question.isCorrect ? (
-        <Divider orientation="left" style={{ borderColor: "#7cb305" }}>
-          Đáp án chọn đúng
-        </Divider>
-      ) : (
-        <Divider orientation="left" style={{ borderColor: "#ff0000" }}>
-          Đáp án chọn sai
-        </Divider>
-      )}
+    <Card className="question-answer-card">
+      <div style={{ marginBottom: "1rem" }}>
+        {question.isCorrect ? (
+          <Tag
+            icon={<CheckCircleOutlined />}
+            color="success"
+            style={{ fontSize: "0.875rem", padding: "4px 12px" }}
+          >
+            Đáp án đúng
+          </Tag>
+        ) : (
+          <Tag
+            icon={<CloseCircleOutlined />}
+            color="error"
+            style={{ fontSize: "0.875rem", padding: "4px 12px" }}
+          >
+            Đáp án sai
+          </Tag>
+        )}
+      </div>
 
-      <h3 className="text-xl font-bold mb-2" style={{ whiteSpace: "pre-wrap" }}>
+      <Title
+        level={5}
+        style={{
+          fontSize: "1rem",
+          fontWeight: 600,
+          marginBottom: "1rem",
+          color: "#1a1a1a",
+        }}
+      >
         <span
           dangerouslySetInnerHTML={{
             __html: cleanString(
@@ -42,14 +63,16 @@ const QuestionAnswerComponent: React.FC<QuestionComponentProps> = ({
             ),
           }}
         />
-      </h3>
+      </Title>
 
       {isTrueFalseNotGiven ? (
-        <div className="ml-2 rounded my-2 p-2 border flex flex-col">
+        <div
+          style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}
+        >
           {["true", "false", "not given"].map((choice) => (
             <div
               key={choice}
-              className={`p-2 my-1 rounded ${
+              className={`answer-option ${
                 question.correctAnswerForTrueFalseNGV === choice
                   ? "bg-green-100"
                   : question.selectedAnswerId === choice
@@ -57,21 +80,20 @@ const QuestionAnswerComponent: React.FC<QuestionComponentProps> = ({
                   : ""
               }`}
               style={{
-                border: "1px solid #ddd",
-                whiteSpace: "pre-wrap",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
               }}
             >
-              <span>
-                <strong>{choice.toUpperCase()}</strong>
-              </span>
+              <AntText strong>{choice.toUpperCase()}</AntText>
               {question.correctAnswerForTrueFalseNGV === choice && (
-                <Tag color="green" style={{ marginLeft: "8px" }}>
+                <Tag color="success" style={{ margin: 0 }}>
                   Đúng
                 </Tag>
               )}
               {question.selectedAnswerId === choice &&
                 question.correctAnswerForTrueFalseNGV !== choice && (
-                  <Tag color="red" style={{ marginLeft: "8px" }}>
+                  <Tag color="error" style={{ margin: 0 }}>
                     Sai
                   </Tag>
                 )}
@@ -79,7 +101,9 @@ const QuestionAnswerComponent: React.FC<QuestionComponentProps> = ({
           ))}
         </div>
       ) : isFillInTheBlank ? (
-        <>
+        <div
+          style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}
+        >
           {question.answers && question.answers.length > 0
             ? question.answers.map((answer, index) => {
                 const userAnsObj =
@@ -87,35 +111,52 @@ const QuestionAnswerComponent: React.FC<QuestionComponentProps> = ({
                 return (
                   <div
                     key={answer._id}
-                    className="ml-2 rounded my-2 p-2 border flex flex-col"
-                    style={{ whiteSpace: "pre-wrap" }}
+                    style={{
+                      background: "#fafafa",
+                      padding: "0.75rem",
+                      borderRadius: "6px",
+                    }}
                   >
-                    <div>
-                      <strong>Đáp án {index + 1}:</strong>
-                    </div>
-                    <div>
-                      <span>
-                        <em>Đáp án của bạn:</em>{" "}
-                        <span
-                          dangerouslySetInnerHTML={{
-                            __html: cleanString(userAnsObj?.userAnswer || ""),
-                          }}
-                        />
-                      </span>
-                    </div>
-                    <div>
-                      <span>
-                        <em>Đáp án chính xác:</em>{" "}
+                    <AntText
+                      strong
+                      style={{
+                        display: "block",
+                        marginBottom: "0.5rem",
+                      }}
+                    >
+                      Đáp án {index + 1}:
+                    </AntText>
+                    <div style={{ marginLeft: "1rem" }}>
+                      <AntText
+                        type="secondary"
+                        style={{
+                          display: "block",
+                          marginBottom: "0.25rem",
+                        }}
+                      >
+                        Câu trả lời của bạn:{" "}
                         <span
                           dangerouslySetInnerHTML={{
                             __html: cleanString(
-                              answer.correctAnswerForBlank ||
-                                (question as any).blankAnswer ||
-                                ""
+                              userAnsObj?.userAnswer || "Không có"
                             ),
                           }}
                         />
-                      </span>
+                      </AntText>
+                      <AntText style={{ display: "block" }}>
+                        Đáp án đúng:{" "}
+                        <AntText strong style={{ color: "#52c41a" }}>
+                          <span
+                            dangerouslySetInnerHTML={{
+                              __html: cleanString(
+                                answer.correctAnswerForBlank ||
+                                  (question as any).blankAnswer ||
+                                  ""
+                              ),
+                            }}
+                          />
+                        </AntText>
+                      </AntText>
                     </div>
                   </div>
                 );
@@ -123,55 +164,68 @@ const QuestionAnswerComponent: React.FC<QuestionComponentProps> = ({
             : question.userAnswers.map((userAns, index) => (
                 <div
                   key={userAns._id}
-                  className="ml-2 rounded my-2 p-2 border flex flex-col"
-                  style={{ whiteSpace: "pre-wrap" }}
+                  style={{
+                    background: "#fafafa",
+                    padding: "0.75rem",
+                    borderRadius: "6px",
+                  }}
                 >
-                  <div>
-                    <strong>Đáp án {index + 1}:</strong>
-                  </div>
-                  <div>
-                    <span>
-                      <em>Đáp án của bạn:</em>{" "}
-                      <span
-                        dangerouslySetInnerHTML={{
-                          __html: cleanString(userAns.userAnswer),
-                        }}
-                      />
-                    </span>
-                  </div>
+                  <AntText strong>Đáp án {index + 1}:</AntText>
+                  <AntText type="secondary" style={{ marginLeft: "0.5rem" }}>
+                    <span
+                      dangerouslySetInnerHTML={{
+                        __html: cleanString(userAns.userAnswer),
+                      }}
+                    />
+                  </AntText>
                 </div>
               ))}
-        </>
+        </div>
       ) : (
-        <>
+        <div
+          style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}
+        >
           {question.answers.map((answer) => (
-            <div key={answer._id}>
-              <div
-                className={`ml-2 rounded my-2 d-flex justify-content-between align-items-center 
-                ${
-                  question.selectedAnswerId === answer._id
-                    ? "boder-dap-an-chon"
-                    : ""
-                } 
-                ${answer.isCorrect ? "bg-green-100" : "bg-red-100"}`}
-                style={{ whiteSpace: "pre-wrap" }}
-              >
-                <span
-                  dangerouslySetInnerHTML={{
-                    __html: cleanString(answer.text),
-                  }}
-                />
-                <span>
-                  <strong>
-                    {question.selectedAnswerId === answer._id && "Đáp án chọn"}
-                  </strong>
-                </span>
-              </div>
+            <div
+              key={answer._id}
+              className={`answer-option ${
+                question.selectedAnswerId === answer._id
+                  ? "boder-dap-an-chon"
+                  : ""
+              } ${answer.isCorrect ? "bg-green-100" : ""} ${
+                question.selectedAnswerId === answer._id && !answer.isCorrect
+                  ? "bg-red-100"
+                  : ""
+              }`}
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <span
+                dangerouslySetInnerHTML={{
+                  __html: cleanString(answer.text),
+                }}
+              />
+              {question.selectedAnswerId === answer._id && (
+                <Tag
+                  color={answer.isCorrect ? "success" : "error"}
+                  style={{ margin: 0 }}
+                >
+                  {answer.isCorrect ? "Đúng" : "Đã chọn"}
+                </Tag>
+              )}
+              {answer.isCorrect && question.selectedAnswerId !== answer._id && (
+                <Tag color="success" style={{ margin: 0 }}>
+                  Đáp án đúng
+                </Tag>
+              )}
             </div>
           ))}
-        </>
+        </div>
       )}
-    </div>
+    </Card>
   );
 };
 

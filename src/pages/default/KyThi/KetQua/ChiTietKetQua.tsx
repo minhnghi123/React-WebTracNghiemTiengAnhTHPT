@@ -52,17 +52,40 @@ const ChiTietKetQua: React.FC<ChiTietKetQuaProps> = ({ result }) => {
         )
       : result.listeningQuestions.length;
   return (
-    <div className="container mx-auto p-4">
-      <center>
-        <h1 className="text-3xl font-bold">
-          Chi tiết kết quả{" "}
+    <div style={{ padding: "2rem", maxWidth: "1200px", margin: "0 auto" }}>
+      <div style={{ textAlign: "center", marginBottom: "2rem" }}>
+        <h1
+          style={{
+            fontSize: "1.75rem",
+            fontWeight: 600,
+            color: "#1a1a1a",
+            marginBottom: "0.5rem",
+          }}
+        >
+          Chi tiết kết quả
+        </h1>
+        <h2
+          style={{
+            fontSize: "1.25rem",
+            fontWeight: 500,
+            color: "#666",
+          }}
+        >
           {typeof result.examId === "object"
             ? result.examId.title
             : result.examId}
-        </h1>
-      </center>
-      <div>
-        {result.score} / {result.questions.length + totalListeningQuestions}
+        </h2>
+        <div
+          style={{
+            marginTop: "1rem",
+            fontSize: "1.125rem",
+            color: "#1890ff",
+            fontWeight: 600,
+          }}
+        >
+          Điểm số: {result.score} /{" "}
+          {result.questions.length + totalListeningQuestions}
+        </div>
       </div>
 
       {/* Hiển thị các câu hỏi trắc nghiệm, đọc, điền khuyết (với API gốc) */}
@@ -78,8 +101,17 @@ const ChiTietKetQua: React.FC<ChiTietKetQuaProps> = ({ result }) => {
       result.examId.listeningExams &&
       result.examId.listeningExams.length > 0
         ? result.examId.listeningExams.map((exam: any) => (
-            <div key={exam._id} className="mb-8">
-              <h2 className="text-2xl font-semibold mb-4">{exam.title}</h2>
+            <div key={exam._id} style={{ marginBottom: "2rem" }}>
+              <h2
+                style={{
+                  fontSize: "1.25rem",
+                  fontWeight: 600,
+                  marginBottom: "1rem",
+                  color: "#1a1a1a",
+                }}
+              >
+                {exam.title}
+              </h2>
               {exam.questions &&
                 exam.questions.map((listeningExamQuestion: any) => {
                   // Ghép kết quả của câu hỏi nghe dựa trên questionId

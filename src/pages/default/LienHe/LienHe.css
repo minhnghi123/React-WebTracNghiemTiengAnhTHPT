@@ -14,14 +14,13 @@
   border-radius: 16px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
   overflow: hidden;
-  border: 1px solid #f0f0f0;
+  border: none;
 }
 
 .contact-header {
   text-align: center;
   padding: 3rem 2rem;
   background: #f5f7fa;
-  border-bottom: 1px solid #e8e8e8;
 }
 
 .contact-title {
@@ -49,7 +48,6 @@
 .contact-info-section {
   background: #f9fafb;
   padding: 3rem;
-  border-right: 1px solid #e8e8e8;
 }
 
 .contact-method {
@@ -57,12 +55,12 @@
   padding: 1.5rem;
   background: white;
   border-radius: 12px;
-  border: 1px solid #e8e8e8;
+  border: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
   transition: all 0.3s ease;
 }
 
 .contact-method:hover {
-  border-color: #1890ff;
   box-shadow: 0 2px 8px rgba(24, 144, 255, 0.1);
 }
 
@@ -161,17 +159,18 @@ input,
 textarea {
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid #d9d9d9;
+  border: none;
   border-radius: 8px;
   font-size: 0.95rem;
   transition: all 0.3s ease;
   font-family: inherit;
+  background: #f5f5f5;
 }
 
 input:focus,
 textarea:focus {
   outline: none;
-  border-color: #1890ff;
+  background: white;
   box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.1);
 }
 

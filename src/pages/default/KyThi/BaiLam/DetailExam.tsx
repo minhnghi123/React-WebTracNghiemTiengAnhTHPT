@@ -2,16 +2,19 @@ import { ExamAPIStudent } from "@/services/student";
 import { Exam } from "@/services/teacher/Teacher";
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Card, Typography, Row, Col, Space } from "antd";
+import { Card, Typography, Row, Col, Space, Badge, Tag, Divider } from "antd";
 import {
   CalendarOutlined,
   ClockCircleOutlined,
   QuestionCircleOutlined,
   CheckCircleTwoTone,
   PlayCircleOutlined,
+  BookOutlined,
+  TeamOutlined,
+  HistoryOutlined,
+  TrophyOutlined,
 } from "@ant-design/icons";
-import { KetQua } from "../KetQua";
-import AppLink from "@/components/AppLink";
+import "./Detail.css";
 
 const { Title, Text } = Typography;
 
@@ -37,123 +40,211 @@ export const DetailExam = () => {
         await ExamAPIStudent.joinExam(exam._id);
         navigate("/KyThi/BaiLam/");
       } catch (error) {
-        // Xử lý lỗi nếu cần
+        console.error("Error joining exam:", error);
       }
     }
   };
 
+  const handleViewHistory = () => {
+    navigate(`/KyThi/LichSu/${_id}`);
+  };
+
   const formatDate = (dateStr?: string) =>
-    dateStr ? new Date(dateStr).toLocaleString() : "Không giới hạn thời gian";
+    dateStr ? new Date(dateStr).toLocaleString("vi-VN") : "Không giới hạn";
 
   useEffect(() => {
     fetchExam();
   }, [_id]);
 
+  if (!exam) {
+    return (
+      <div className="loading-container">
+        <div className="loading-spinner"></div>
+        <Text className="loading-text">Đang tải thông tin đề thi...</Text>
+      </div>
+    );
+  }
+
   return (
-    <div className="container mt-4">
-      {exam ? (
-        <Card
-          bordered
-          style={{
-            maxWidth: 800,
-            margin: "0 auto",
-            borderRadius: 10,
-            boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
-          }}
-        >
-          <Space direction="vertical" style={{ width: "100%" }} size="large">
-            <Title level={3} style={{ textAlign: "center" }}>
-              {exam.title}{" "}
-              {isPracticed && <CheckCircleTwoTone twoToneColor="#52c41a" />}
-            </Title>
+    <div className="detail-exam-page">
+      {/* Hero Section */}
+      <div className="exam-hero-section">
+        <div className="hero-background"></div>
+        <div className="hero-content">
+          {isPracticed && (
+            <div className="status-badge">
+              <Badge status="success" text="Đã hoàn thành" />
+            </div>
+          )}
+          <Title level={1} className="hero-title">
+            {exam.title}
+          </Title>
+          <Text className="hero-subtitle">
+            Đề thi trắc nghiệm tiếng Anh THPT
+          </Text>
+        </div>
+      </div>
 
-            <Row gutter={[16, 16]}>
-              <Col span={12}>
-                <Text>
-                  <CalendarOutlined /> <strong>Thời gian bắt đầu:</strong>
-                </Text>
-                <br />
-                <Text type="secondary">
+      {/* Main Content */}
+      <div className="exam-main-content">
+        {/* Stats Cards */}
+        <Row gutter={[16, 16]} className="stats-row">
+          <Col xs={12} sm={12} md={6}>
+            <div className="stat-card stat-primary">
+              <div className="stat-icon">
+                <QuestionCircleOutlined />
+              </div>
+              <div className="stat-content">
+                <div className="stat-value">{questionCount}</div>
+                <div className="stat-label">Câu hỏi</div>
+              </div>
+            </div>
+          </Col>
+          <Col xs={12} sm={12} md={6}>
+            <div className="stat-card stat-success">
+              <div className="stat-icon">
+                <ClockCircleOutlined />
+              </div>
+              <div className="stat-content">
+                <div className="stat-value">{exam.duration}</div>
+                <div className="stat-label">Phút</div>
+              </div>
+            </div>
+          </Col>
+          <Col xs={12} sm={12} md={6}>
+            <div className="stat-card stat-warning">
+              <div className="stat-icon">
+                <TeamOutlined />
+              </div>
+              <div className="stat-content">
+                <div className="stat-value">Lớp {exam.class}</div>
+                <div className="stat-label">Cấp độ</div>
+              </div>
+            </div>
+          </Col>
+          <Col xs={12} sm={12} md={6}>
+            <div className="stat-card stat-info">
+              <div className="stat-icon">
+                <BookOutlined />
+              </div>
+              <div className="stat-content">
+                <div className="stat-value">{exam.topic?.length || 0}</div>
+                <div className="stat-label">Chủ đề</div>
+              </div>
+            </div>
+          </Col>
+        </Row>
+
+        {/* Exam Details Card */}
+        <Card className="exam-details-card" bordered={false}>
+          <div className="card-title">
+            <BookOutlined className="title-icon" />
+            <span>Thông tin chi tiết</span>
+          </div>
+
+          <div className="details-grid">
+            <div className="detail-item">
+              <div className="detail-icon">
+                <CalendarOutlined />
+              </div>
+              <div className="detail-content">
+                <div className="detail-label">Thời gian bắt đầu</div>
+                <div className="detail-value">
                   {formatDate(exam.startTime as unknown as string)}
-                </Text>
-              </Col>
-              <Col span={12}>
-                <Text>
-                  <CalendarOutlined /> <strong>Thời gian kết thúc:</strong>
-                </Text>
-                <br />
-                <Text type="secondary">
+                </div>
+              </div>
+            </div>
+
+            <div className="detail-item">
+              <div className="detail-icon">
+                <CalendarOutlined />
+              </div>
+              <div className="detail-content">
+                <div className="detail-label">Thời gian kết thúc</div>
+                <div className="detail-value">
                   {formatDate(exam.endTime as unknown as string)}
-                </Text>
-              </Col>
+                </div>
+              </div>
+            </div>
 
-              <Col span={12}>
-                <Text>
-                  <QuestionCircleOutlined /> <strong>Số câu hỏi:</strong>
-                </Text>
-                <br />
-                <Text type="secondary">{questionCount}</Text>
-              </Col>
-              <Col span={12}>
-                <Text>
-                  <ClockCircleOutlined /> <strong>Thời gian làm bài:</strong>
-                </Text>
-                <br />
-                <Text type="secondary">{exam.duration} phút</Text>
-              </Col>
+            <div className="detail-item">
+              <div className="detail-icon">
+                <ClockCircleOutlined />
+              </div>
+              <div className="detail-content">
+                <div className="detail-label">Thời lượng</div>
+                <div className="detail-value">{exam.duration} phút</div>
+              </div>
+            </div>
 
-              <Col span={12}>
-                <Text>
-                  <strong>Lớp:</strong>
-                </Text>
-                <br />
-                <Text type="secondary">{exam.class}</Text>
-              </Col>
-              <Col span={12}>
-                <Text>
-                  <strong>Chủ đề:</strong>
-                </Text>
-                <br />
-                <Text type="secondary">
-                  {exam.topic?.join(", ") || "Không có"}
-                </Text>
-              </Col>
-              <Col span={24}>
-                <Text>
-                  <strong>Kiến thức:</strong>
-                </Text>
-                <br />
-                <Text type="secondary">
-                  {exam.knowledge?.join(", ") || "Không có"}
-                </Text>
-              </Col>
-            </Row>
+            <div className="detail-item">
+              <div className="detail-icon">
+                <TeamOutlined />
+              </div>
+              <div className="detail-content">
+                <div className="detail-label">Lớp học</div>
+                <div className="detail-value">Lớp {exam.class}</div>
+              </div>
+            </div>
+          </div>
 
-            {exam._id && (
-              <span
-                className="ant-btn ant-btn-primary"
-                style={{
-                  width: "100%",
-                  borderRadius: 6,
-                  display: "inline-block",
-                  textAlign: "center",
-                  padding: "8px 0",
-                  cursor: "pointer",
-                }}
-                onClick={handleJoinExam}
-              >
-                <PlayCircleOutlined /> Làm bài
-              </span>
-            )}
+          {exam.topic && exam.topic.length > 0 && (
+            <>
+              <Divider style={{ margin: "24px 0" }} />
+              <div className="topics-section">
+                <div className="topics-label">
+                  <BookOutlined /> Chủ đề
+                </div>
+                <div className="topics-tags">
+                  {exam.topic.map((topic, idx) => (
+                    <Tag key={idx} color="blue" className="topic-tag">
+                      {topic}
+                    </Tag>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
 
-            <KetQua DeThi={exam._id} />
-          </Space>
+          {exam.knowledge && exam.knowledge.length > 0 && (
+            <>
+              <Divider style={{ margin: "24px 0" }} />
+              <div className="topics-section">
+                <div className="topics-label">
+                  <TrophyOutlined /> Kiến thức
+                </div>
+                <div className="topics-tags">
+                  {exam.knowledge.map((item, idx) => (
+                    <Tag key={idx} color="cyan" className="topic-tag">
+                      {item}
+                    </Tag>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
         </Card>
-      ) : (
-        <center>
-          <Text>Đang tải thông tin Đề Thi...</Text>
-        </center>
-      )}
+
+        {/* Action Buttons */}
+        <div className="action-buttons">
+          <button className="btn-primary" onClick={handleJoinExam}>
+            <PlayCircleOutlined />
+            <span>Bắt đầu làm bài</span>
+          </button>
+          <button className="btn-secondary" onClick={handleViewHistory}>
+            <HistoryOutlined />
+            <span>Xem lịch sử làm bài</span>
+          </button>
+        </div>
+
+        {/* Completion Badge */}
+        {isPracticed && (
+          <div className="completion-badge">
+            <CheckCircleTwoTone twoToneColor="#52c41a" />
+            <span>Bạn đã hoàn thành đề thi này</span>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

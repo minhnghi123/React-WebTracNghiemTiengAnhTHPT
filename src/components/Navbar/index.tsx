@@ -7,6 +7,7 @@ import {
   CloseOutlined,
   UserOutlined,
   LogoutOutlined,
+  AppstoreOutlined,
 } from "@ant-design/icons";
 import P2N from "/src/assets/img/P2N 1.svg";
 import AppLink from "@/components/AppLink";
@@ -56,6 +57,14 @@ export const Navbar: React.FC<navbarProps> = ({ rule = true }) => {
       label: (
         <AppLink to="/profile" className="dropdown-item">
           <UserOutlined /> Thông tin cá nhân
+        </AppLink>
+      ),
+    },
+    {
+      key: "2",
+      label: (
+        <AppLink to="/GiaoVien" className="dropdown-item">
+          <AppstoreOutlined /> Dành cho giáo viên
         </AppLink>
       ),
     },

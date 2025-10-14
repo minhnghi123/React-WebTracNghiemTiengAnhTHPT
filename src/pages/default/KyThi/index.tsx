@@ -90,67 +90,83 @@ export const KyThi = () => {
   const renderExamList = (exams: Exam[], status: "ongoing" | "ended") => (
     <Row gutter={[24, 24]}>
       {exams.map((exam) => (
-        <Col xs={24} sm={12} lg={8} xl={6} key={exam._id}>
-          <AppLink
-            to={`/KyThi/ChiTiet/${exam.slug}`}
-            style={{ textDecoration: "none" }}
+        <Col
+          xs={24}
+          sm={12}
+          lg={8}
+          xl={6}
+          key={exam._id}
+          style={{ display: "flex" }}
+        >
+          <Card
+            className={`exam-card ${status}-exam`}
+            hoverable
+            style={{ width: "100%" }}
           >
-            <Card className={`exam-card ${status}-exam`} hoverable>
-              <div className="exam-card-header">
-                <Tag
-                  color={status === "ongoing" ? "green" : "red"}
-                  className="exam-status-tag"
-                >
-                  {status === "ongoing" ? "🟢 Đang diễn ra" : "🔴 Đã kết thúc"}
-                </Tag>
-              </div>
-
-              <Title
-                level={5}
-                className="exam-title"
-                ellipsis={{ rows: 2 }}
-                style={{ marginBottom: 8 }}
+            <div className="exam-card-header">
+              <Tag
+                color={status === "ongoing" ? "green" : "default"}
+                className="exam-status-tag"
               >
-                {exam.title}
-              </Title>
+                {status === "ongoing" ? "🟢 Đang diễn ra" : "⚪ Đã kết thúc"}
+              </Tag>
+            </div>
 
+            <Title level={5} className="exam-title" title={exam.title}>
+              {exam.title}
+            </Title>
+
+            {exam.description && (
               <Text
                 type="secondary"
                 className="exam-description"
-                ellipsis={{ rows: 2 }}
-                style={{ marginBottom: 16 }}
+                title={exam.description}
               >
                 {exam.description}
               </Text>
+            )}
 
-              <div className="exam-meta" style={{ marginBottom: 16 }}>
-                <div className="exam-meta-item">
-                  <ClockCircleOutlined />
-                  <span>{exam.duration} phút</span>
-                </div>
-                <div className="exam-meta-item">
-                  <QuestionCircleOutlined />
-                  <span>{exam.questions?.length ?? 0} câu</span>
-                </div>
+            <div className="exam-date-section">
+              <CalendarOutlined className="date-icon" />
+              <Text type="secondary" className="exam-date-text">
+                {formatDate(exam.startTime as unknown as string)}
+              </Text>
+            </div>
+
+            <div className="exam-info-row">
+              <div className="info-item-inline">
+                <ClockCircleOutlined />
+                <span>{exam.duration}p</span>
               </div>
+              <div className="info-item-inline">
+                <QuestionCircleOutlined />
+                <span>{exam.questions?.length ?? 0} câu</span>
+              </div>
+              <div className="info-item-inline">
+                <span>Lớp {exam.class}</span>
+              </div>
+            </div>
 
-              <div className="exam-tags" style={{ marginBottom: 16 }}>
-                <Tag color="blue">Lớp {exam.class}</Tag>
-                {exam.topic?.slice(0, 2).map((topic, index) => (
-                  <Tag color="cyan" key={index}>
+            {exam.topic && exam.topic.length > 0 && (
+              <div className="exam-topics">
+                {exam.topic.slice(0, 2).map((topic, index) => (
+                  <Tag color="cyan" key={index} className="topic-tag">
                     {topic}
                   </Tag>
                 ))}
+                {exam.topic.length > 2 && (
+                  <Tag className="topic-tag">+{exam.topic.length - 2}</Tag>
+                )}
               </div>
+            )}
 
-              <div className="exam-footer">
-                <Text type="secondary" className="exam-date">
-                  <CalendarOutlined />{" "}
-                  {formatDate(exam.startTime as unknown as string)}
-                </Text>
-              </div>
-            </Card>
-          </AppLink>
+            <AppLink
+              to={`/KyThi/ChiTiet/${exam.slug}`}
+              style={{ textDecoration: "none" }}
+            >
+              <button className="exam-action-button">Làm bài</button>
+            </AppLink>
+          </Card>
         </Col>
       ))}
     </Row>
@@ -161,36 +177,39 @@ export const KyThi = () => {
       <div className="exam-list-header">
         <div className="header-content">
           <Title level={2} className="page-title">
-            📚 Danh sách Đề Thi
+            Kho Đề Thi Online
           </Title>
           <Text type="secondary" className="page-description">
-            Khám phá và tham gia các đề thi để nâng cao kỹ năng của bạn
+            Nâng cao kỹ năng với hệ thống đề thi chuẩn hóa, đa dạng và được cập
+            nhật liên tục
           </Text>
         </div>
       </div>
 
       <div className="filter-section">
         <Search
-          placeholder="Tìm kiếm theo tiêu đề"
-          prefix={<SearchOutlined />}
-          onSearch={handleSearch}
-          onChange={(e) => handleSearch(e.target.value)}
+          placeholder="Tìm kiếm đề thi..."
+          allowClear
           enterButton="Tìm kiếm"
           size="large"
+          onSearch={handleSearch}
+          onChange={(e) => handleSearch(e.target.value)}
           className="search-input"
+          prefix={<SearchOutlined />}
         />
         <Select
-          placeholder="Lọc theo lớp"
-          prefix={<FilterOutlined />}
+          placeholder="Chọn lớp"
+          allowClear
           size="large"
           onChange={handleClassFilter}
-          allowClear
           className="filter-select"
-        >
-          <Option value="10">Lớp 10</Option>
-          <Option value="11">Lớp 11</Option>
-          <Option value="12">Lớp 12</Option>
-        </Select>
+          suffixIcon={<FilterOutlined />}
+          options={[
+            { value: "10", label: "Lớp 10" },
+            { value: "11", label: "Lớp 11" },
+            { value: "12", label: "Lớp 12" },
+          ]}
+        />
       </div>
 
       <div className="exam-sections">
@@ -209,7 +228,7 @@ export const KyThi = () => {
           <div className="exam-section">
             <div className="section-header">
               <Title level={3} className="section-title ended">
-                🔴 Đã kết thúc ({ended.length})
+                ⚪ Đã kết thúc ({ended.length})
               </Title>
             </div>
             {renderExamList(ended, "ended")}
