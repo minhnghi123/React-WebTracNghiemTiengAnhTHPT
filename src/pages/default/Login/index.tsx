@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import { AuthApi } from "@/services/Auth";
@@ -41,9 +41,22 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
   // -----------------------HCAPTCHA-------------------------------
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const HCAPTCHA_SITE_KEY: string = import.meta.env.VITE_HCAPTCHA_SITE_KEY;
+
+  // Thêm ref để control hCaptcha
+  const captchaRef = useRef<any>(null);
+
   const handleCaptchaChange = (token: string | null) => {
     setCaptchaToken(token);
   };
+
+  // Function để reset hCaptcha
+  const resetCaptcha = () => {
+    if (captchaRef.current) {
+      captchaRef.current.resetCaptcha();
+      setCaptchaToken(null);
+    }
+  };
+
   // ----------------------- HCAPTCHA -----------------------------
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -142,7 +155,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
 
   const getUser = async (email: string, pass: string, captchaToken: string) => {
     try {
-      const deviceId = getDeviceId(); // Lấy deviceId từ localStorage
+      const deviceId = getDeviceId();
       const rq = await AuthApi.login({
         email,
         password: pass,
@@ -151,11 +164,14 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
       });
       setMessage({ text: rq?.data.message, type: "success" });
       if (rq?.status === 200) {
-        onLoginSuccess(email); // Notify parent component to transition to Step 2
+        onLoginSuccess(email);
       }
     } catch (error: unknown) {
       setLoginAttempts((prev) => prev + 1);
-      // Only show detailed error in development, generic in production
+
+      // Reset hCaptcha khi có lỗi
+      resetCaptcha();
+
       let errorMessage = "Đăng nhập thất bại.";
       if (
         process.env.NODE_ENV !== "production" &&
@@ -284,41 +300,57 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                   onChange={(e) => setPassword(e.target.value)}
                 />
                 <i
-                  className={`bi ${
-                    showPassword ? "bi-eye-slash" : "bi-eye"
-                  } eyeIcon`}
+                  className={`bi ${showPassword ? "bi-eye-slash" : "bi-eye"} ${
+                    styles.eyeIcon
+                  }`}
                   onClick={togglePasswordVisibility}
                 ></i>
               </div>
             </div>
-            {/* Add reCAPTCHA
-          <div className="mb-3">
-            <ReCAPTCHA
-              sitekey={RECAPTCHA_SITE_KEY}
-              onChange={handleCaptchaChange}
-              datatype="image"
-            />
-          </div> */}
-            {/* Add hCaptcha */}
-            <div className="mb-3">
+
+            {/* hCaptcha */}
+            <div
+              className="mb-3"
+              style={{ display: "flex", justifyContent: "center" }}
+            >
               <HCaptcha
+                ref={captchaRef}
                 sitekey={HCAPTCHA_SITE_KEY}
                 onVerify={handleCaptchaChange}
+                onExpire={resetCaptcha}
+                onError={resetCaptcha}
               />
             </div>
-            <button
-              type="submit"
-              className="btn btn-primary"
-              disabled={loginAttempts >= 5}
-            >
-              Đăng nhập
-            </button>
 
-            <div className="forget-password">
+            {/* ✅ Wrap button trong div để căn giữa */}
+            <div
+              style={{
+                width: "100%",
+                display: "flex",
+                justifyContent: "center",
+              }}
+            >
+              <button
+                type="submit"
+                className="btn btn-primary"
+                disabled={loginAttempts >= 5}
+                style={{ display: "block", width: "100%" }}
+              >
+                Đăng nhập
+              </button>
+            </div>
+
+            <div
+              className="forget-password"
+              style={{ textAlign: "center", width: "100%" }}
+            >
               <a href="/forgetPass">Quên mật khẩu?</a>
             </div>
 
-            <div className="formFooter">
+            <div
+              className="formFooter"
+              style={{ textAlign: "center", width: "100%" }}
+            >
               <p>
                 Chưa có tài khoản? <a href="/SignUp">Đăng ký ngay</a>
               </p>
@@ -327,8 +359,8 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
 
           {message && (
             <div
-              className={`alert alert-${
-                message.type === "success" ? "success" : "danger"
+              className={`alert ${
+                message.type === "success" ? "alert-success" : "alert-danger"
               } mt-3`}
             >
               {message.text}
@@ -343,12 +375,20 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
             </div>
           )}
 
-          {/* Nếu vượt quá số lần --> hiện riêng nút này */}
+          {/* Nếu vượt quá số lần */}
           {loginAttempts >= 5 && (
-            <div className="mt-3">
+            <div
+              className="mt-3"
+              style={{
+                width: "100%",
+                display: "flex",
+                justifyContent: "center",
+              }}
+            >
               <button
                 onClick={() => navigate("/forgetPass")}
                 className="btn btn-warning"
+                style={{ display: "block", width: "100%" }}
               >
                 ➡️ Đi đến trang Quên mật khẩu
               </button>

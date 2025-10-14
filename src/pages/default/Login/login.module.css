@@ -1,55 +1,627 @@
-/* Login.css */
+/* ============================================
+   AUTH PAGE - MODERN DESIGN
+   =================  ========================= */
 .container {
   display: flex;
   justify-content: center;
-  align-items: center;  
-  height: 80vh;
-  background: linear-gradient(135deg, #d0e1ff 0%, #eee4f9 100%);
-  transition: background-color 0.3s ease, color 0.3s ease;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  padding: 2rem 1rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.container::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(
+      circle at 20% 30%,
+      rgba(255, 255, 255, 0.1) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 80% 70%,
+      rgba(255, 255, 255, 0.08) 0%,
+      transparent 50%
+    );
+  pointer-events: none;
 }
 
 .loginForm {
-  background: linear-gradient(135deg, #9abaf2 0%, #d7b2ff 100%);
-  padding: 2rem;
-  border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-  width: 400px;
+  background: white;
+  padding: 3rem 2.5rem;
+  border-radius: 24px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  width: 100%;
+  max-width: 480px;
+  position: relative;
+  z-index: 2;
+  animation: fadeInUp 0.6s ease-out;
+  margin: 0 auto; /* ✅ Thêm margin auto */
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .title {
   text-align: center;
-  margin-bottom: 1rem;
-  color: #333;
+  margin-bottom: 2rem;
+  color: #1f2937;
+  font-size: 2rem;
+  font-weight: 800;
+  position: relative;
+  padding-bottom: 1rem;
 }
 
-.form-label {
-  font-weight: bold;
+.title::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 4px;
+  background: linear-gradient(90deg, #3b82f6, #2563eb);
+  border-radius: 2px;
 }
 
-.form-control {
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+/* ============================================
+   FORM CONTROLS - FIX CENTER
+   ============================================ */
+.loginForm .mb-3 {
+  margin-bottom: 1.5rem;
 }
 
-.form-control::placeholder {
-  color: #aaa;
-  font-style: italic;
+.loginForm .form-label {
+  font-weight: 600;
+  color: #374151;
+  font-size: 0.9375rem;
+  margin-bottom: 0.5rem;
+  display: block;
+  text-align: left; /* ✅ Label căn trái */
 }
 
-.alert {
-  text-align: center;
-  padding: 10px;
-  border-radius: 5px;
+.loginForm .form-control {
+  padding: 0.875rem 1rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  width: 100%;
+  box-sizing: border-box;
+  display: block; /* ✅ Đảm bảo input là block element */
 }
 
+.loginForm .form-control:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.loginForm .form-control::placeholder {
+  color: #9ca3af;
+  font-weight: 400;
+}
+
+/* ============================================
+   PASSWORD WRAPPER
+   ============================================ */
 .passwordWrapper {
   position: relative;
   display: flex;
   align-items: center;
 }
 
+.passwordWrapper .form-control {
+  padding-right: 3rem;
+}
 
+.passwordWrapper .eyeIcon {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  font-size: 1.25rem;
+  color: #6b7280;
+  transition: color 0.3s ease;
+  z-index: 10;
+}
 
+.passwordWrapper .eyeIcon:hover {
+  color: #3b82f6;
+}
 
+/* ============================================
+   BUTTONS - FIX CENTER ALIGNMENT
+   ============================================ */
+.loginForm .btn-primary,
+.loginForm .btn-warning {
+  width: 100%;
+  padding: 0.875rem 1.5rem;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 1.5rem;
+  display: block; /* ✅ Block để width 100% hoạt động */
+  text-align: center; /* ✅ Text căn giữa */
+  line-height: 1.5;
+  box-sizing: border-box;
+}
 
+/* ✅ Fix button wrapper */
+.loginForm form > button,
+.loginForm form > div > button {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.loginForm .btn-primary {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+}
+
+.loginForm .btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(59, 130, 246, 0.5);
+}
+
+.loginForm .btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  background: #9ca3af;
+  box-shadow: none;
+}
+
+.loginForm .btn-warning {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+}
+
+.loginForm .btn-warning:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(245, 158, 11, 0.5);
+}
+
+/* ============================================
+   CAPTCHA CONTAINER - FIX CENTER
+   ============================================ */
+.loginForm .mb-3:has(> div[data-hcaptcha-widget-id]) {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  margin: 1.5rem 0 !important;
+}
+
+/* ============================================
+   ALERTS
+   ============================================ */
+.loginForm .alert {
+  padding: 1rem;
+  border-radius: 12px;
+  margin-top: 1rem;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  animation: slideIn 0.3s ease-out;
+  border: 2px solid;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.loginForm .alert-success {
+  background: #d1fae5;
+  color: #065f46;
+  border-color: #10b981;
+}
+
+.loginForm .alert-danger {
+  background: #fee2e2;
+  color: #991b1b;
+  border-color: #ef4444;
+}
+
+/* ============================================
+   FORGET PASSWORD - FIX CENTER ALIGNMENT
+   ============================================ */
+.loginForm .forget-password {
+  text-align: center; /* ✅ Căn giữa */
+  margin-top: 1rem;
+  width: 100%; /* ✅ Full width */
+  display: block; /* ✅ Block element */
+}
+
+.loginForm .forget-password a {
+  color: #3b82f6;
+  text-decoration: none;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  transition: color 0.3s ease;
+  display: inline-block; /* ✅ Inline-block để có thể căn giữa */
+}
+
+.loginForm .forget-password a:hover {
+  color: #2563eb;
+  text-decoration: underline;
+}
+
+/* ============================================
+   FORM FOOTER - FIX CENTER
+   ============================================ */
+.loginForm .formFooter {
+  text-align: center;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid #f3f4f6;
+  width: 100%; /* ✅ Full width */
+  display: block; /* ✅ Block element */
+}
+
+.loginForm .formFooter p {
+  margin-bottom: 1rem;
+  color: #6b7280;
+}
+
+.loginForm .formFooter a {
+  color: #3b82f6;
+  text-decoration: none;
+  font-weight: 700;
+  transition: color 0.3s ease;
+}
+
+.loginForm .formFooter a:hover {
+  color: #2563eb;
+  text-decoration: underline;
+}
+
+/* ============================================
+   OTP VERIFICATION IMPROVEMENTS
+   ============================================ */
+.otpIconWrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  animation: bounceIn 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.3) rotate(-180deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1) rotate(10deg);
+  }
+  70% {
+    transform: scale(0.95) rotate(-5deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+.otpIcon {
+  font-size: 5rem;
+  color: #3b82f6;
+  filter: drop-shadow(0 8px 24px rgba(59, 130, 246, 0.4));
+  animation: pulse-icon 2s ease-in-out infinite;
+}
+
+@keyframes pulse-icon {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.otpDescription {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem;
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  border-radius: 14px;
+  border: 2px solid #bfdbfe;
+  margin-bottom: 2rem;
+  animation: slideInLeft 0.6s ease-out;
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.emailIcon {
+  font-size: 2rem;
+  color: #3b82f6;
+  flex-shrink: 0;
+}
+
+.emailContent {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+}
+
+.emailLabel {
+  font-size: 0.875rem;
+  color: #4b5563;
+  font-weight: 500;
+}
+
+.emailValue {
+  font-size: 1rem;
+  color: #1e40af;
+  font-weight: 700;
+  word-break: break-all;
+}
+
+.otpHint {
+  margin-top: 0.5rem;
+  font-size: 0.8125rem;
+  color: #6b7280;
+  font-weight: 500;
+  text-align: center;
+  animation: fadeIn 0.6s ease-out 0.3s both;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ============================================
+   OTP INPUT FIELD IMPROVEMENTS
+   ============================================ */
+.loginForm input[type="text"]#otp {
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.5rem;
+  font-family: "Courier New", monospace;
+  padding: 1rem;
+  border: 3px solid #e5e7eb;
+  transition: all 0.3s ease;
+}
+
+.loginForm input[type="text"]#otp:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+  transform: scale(1.02);
+}
+
+.loginForm input[type="text"]#otp::placeholder {
+  color: #d1d5db;
+  letter-spacing: 1rem;
+}
+
+/* ============================================
+   CHECKBOX WRAPPER IMPROVEMENTS
+   ============================================ */
+.checkboxWrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  margin-bottom: 1.75rem;
+  padding: 1rem 1.25rem;
+  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+  border-radius: 12px;
+  border: 2px solid #e5e7eb;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  animation: fadeInUp 0.6s ease-out 0.2s both;
+}
+
+.checkboxWrapper:hover {
+  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+  border-color: #3b82f6;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.customCheckbox {
+  width: 22px;
+  height: 22px;
+  cursor: pointer;
+  accent-color: #3b82f6;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.customCheckbox:checked {
+  transform: scale(1.1);
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  cursor: pointer;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0;
+  flex: 1;
+}
+
+.checkIcon {
+  font-size: 1.25rem;
+  color: #10b981;
+  animation: bounce-small 1s ease-in-out infinite;
+}
+
+@keyframes bounce-small {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+/* ============================================
+   LOADING SPINNER
+   ============================================ */
+.spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-right: 0.5rem;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ============================================
+   RESPONSIVE - OTP
+   ============================================ */
+@media (max-width: 768px) {
+  .otpIcon {
+    font-size: 4rem;
+  }
+
+  .otpDescription {
+    padding: 1rem;
+    gap: 0.875rem;
+  }
+
+  .emailIcon {
+    font-size: 1.75rem;
+  }
+
+  .emailLabel {
+    font-size: 0.8125rem;
+  }
+
+  .emailValue {
+    font-size: 0.9375rem;
+  }
+
+  .loginForm input[type="text"]#otp {
+    font-size: 1.25rem;
+    letter-spacing: 0.375rem;
+    padding: 0.875rem;
+  }
+
+  .checkboxWrapper {
+    padding: 0.875rem 1rem;
+    gap: 0.75rem;
+  }
+
+  .checkboxLabel {
+    font-size: 0.875rem;
+  }
+
+  .checkIcon {
+    font-size: 1.125rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .otpIconWrapper {
+    margin-bottom: 1.25rem;
+  }
+
+  .otpIcon {
+    font-size: 3.5rem;
+  }
+
+  .otpDescription {
+    padding: 0.875rem;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .emailIcon {
+    font-size: 1.5rem;
+  }
+
+  .emailLabel {
+    font-size: 0.75rem;
+  }
+
+  .emailValue {
+    font-size: 0.875rem;
+  }
+
+  .loginForm input[type="text"]#otp {
+    font-size: 1.125rem;
+    letter-spacing: 0.25rem;
+    padding: 0.75rem;
+  }
+
+  .otpHint {
+    font-size: 0.75rem;
+    margin-top: 0.375rem;
+  }
+
+  .checkboxWrapper {
+    padding: 0.75rem 0.875rem;
+    gap: 0.625rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .customCheckbox {
+    width: 20px;
+    height: 20px;
+  }
+
+  .checkboxLabel {
+    font-size: 0.8125rem;
+    gap: 0.5rem;
+  }
+
+  .checkIcon {
+    font-size: 1rem;
+  }
+}

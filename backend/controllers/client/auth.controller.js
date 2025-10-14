@@ -141,16 +141,16 @@ export async function signup(req, res) {
 }
 export async function login(req, res) {
   const { email, password, captchaToken, deviceId } = req.body;
-  // lay ip cua nguoi dung
   const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
-  // console.log(ip); -> dia chi ip v6
+  
   try {
     if (!email || !password) {
       return res.status(400).json({
         code: 400,
-        message: "Email, mật khẩu và deviceId là bắt buộc",
+        message: "Email và mật khẩu là bắt buộc",
       });
     }
+
     // Kiểm tra số lần thử đăng nhập từ IP
     const attempts = (await redisService.get(ip)) || 0;
     if (attempts >= 5) {
@@ -161,40 +161,54 @@ export async function login(req, res) {
         ttl,
       });
     }
-    // xac minh captcha
-    const recaptchaResponse = await verifyHCaptcha(captchaToken);
-    // console.log(recaptchaResponse);
-    if (!recaptchaResponse) {
-      await redisService.incr(ip); // Tăng số lần thử cho IP
-      await redisService.expire(ip, 900); // Đặt thời gian hết hạn là 15 phút
+
+    // ✅ Kiểm tra captcha trước khi verify user
+    if (!captchaToken) {
+      await redisService.incr(ip);
+      await redisService.expire(ip, 900);
       return res.status(400).json({
         code: 400,
-        message: "Captcha không hợp lệ. Vui lòng thử lại.",
+        message: "Vui lòng xác minh CAPTCHA.",
       });
     }
 
+    // Xác minh captcha
+    const recaptchaResponse = await verifyHCaptcha(captchaToken);
+    if (!recaptchaResponse) {
+      await redisService.incr(ip);
+      await redisService.expire(ip, 900);
+      return res.status(400).json({
+        code: 400,
+        message: "CAPTCHA không hợp lệ. Vui lòng thử lại.",
+      });
+    }
+
+    // Kiểm tra user
     const user = await TaiKhoan.findOne({ email: email });
     if (!user) {
-      await redisService.incr(ip); // Tăng số lần thử cho IP
-      await redisService.expire(ip, 900); // Đặt thời gian hết hạn là 15 phút
-      return res
-        .status(400)
-        .json({ code: 400, message: "Không tìm thấy người dùng" });
+      await redisService.incr(ip);
+      await redisService.expire(ip, 900);
+      return res.status(400).json({ 
+        code: 400, 
+        message: "Email không tồn tại trong hệ thống" // ✅ Message rõ ràng hơn
+      });
     }
+
+    // Kiểm tra password
     const isPasswordMatch = await bcryptjs.compare(password, user.password);
     if (!isPasswordMatch) {
-      await redisService.incr(ip); // Tăng số lần thử cho IP
-      await redisService.expire(ip, 900); // Đặt thời gian hết hạn là 15 phút
-      return res
-        .status(400)
-        .json({ code: 400, message: "Mật khẩu không hợp lệ" });
+      await redisService.incr(ip);
+      await redisService.expire(ip, 900);
+      return res.status(400).json({ 
+        code: 400, 
+        message: "Mật khẩu không chính xác" // ✅ Message rõ ràng hơn
+      });
     }
 
     // Nếu đúng email & mật khẩu, tạo OTP và lưu vào database
     const otp = generateRandomString(6);
-    const otpExpireTime = new Date(Date.now() + 3 * 60 * 1000); // 3 minutes
+    const otpExpireTime = new Date(Date.now() + 3 * 60 * 1000);
 
-    // Save OTP in the TaiKhoan model
     user.otpInfo = { otp, expireAt: otpExpireTime };
     await user.save();
     console.log(`OTP saved in database for email ${email}: ${otp}`);
@@ -204,9 +218,8 @@ export async function login(req, res) {
     const text = `Mã OTP của bạn là <b>${otp}</b>. Mã OTP có hiệu lực trong 3 phút.`;
     await sendMail(user.email, subject, text);
 
-    // Ghi log
     userLog(req, "Login", `OTP sent to email: ${email}`);
-    generateTokenAndSetToken(user._id, res); //jwt
+    generateTokenAndSetToken(user._id, res);
 
     return res.status(200).json({
       code: 200,
