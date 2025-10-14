@@ -15,6 +15,7 @@ import {
   Divider,
   Modal,
   Statistic,
+  Pagination,
 } from "antd";
 import { gemini } from "@/services/GoogleApi";
 import QuestionSubmit from "./QuestionSumit";
@@ -33,9 +34,13 @@ import {
   CheckCircleOutlined,
   TrophyOutlined,
   PlayCircleOutlined,
+  YoutubeFilled,
+  BulbOutlined,
 } from "@ant-design/icons";
+import { Pie } from "@ant-design/plots";
+
 const { Panel } = Collapse;
-const { Title } = Typography;
+const { Title, Text: AntText } = Typography;
 const { Sider, Content } = Layout;
 
 const BaiLam: React.FC = () => {
@@ -133,25 +138,30 @@ const BaiLam: React.FC = () => {
 
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.visibilityState === "hidden") {
+      if (document.visibilityState === "hidden" && !Examresult) {
+        // Thêm check Examresult
         setTabSwitchCount((prev) => prev + 1);
         showAlertModal("Bạn đã chuyển tab. Vui lòng quay lại tab làm bài!");
       }
     };
 
-    document.addEventListener("visibilitychange", handleVisibilityChange);
+    if (!Examresult) {
+      // CHỈ add listener khi chưa có kết quả
+      document.addEventListener("visibilitychange", handleVisibilityChange);
+    }
 
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, []);
+  }, [Examresult]);
 
   useEffect(() => {
-    if (tabSwitchCount > maxTabSwitches) {
+    if (tabSwitchCount > maxTabSwitches && !Examresult) {
+      // Thêm check Examresult
       showAlertModal("Bạn đã chuyển tab quá nhiều lần. Bài thi sẽ bị khóa.");
-      handleSubmit(); // Nộp bài hoặc khóa bài thi
+      handleSubmit();
     }
-  }, [tabSwitchCount]);
+  }, [tabSwitchCount, Examresult]);
 
   // Countdown timer logic
   useEffect(() => {
@@ -241,10 +251,11 @@ const BaiLam: React.FC = () => {
     setTimeout(() => setIsViolationTriggered(false), 2000);
   };
 
-  usePreventDevTools(incrementAlertCount);
-  usePreventCopyPaste(incrementAlertCount);
+  // SECURITY - CHỈ kích hoạt khi chưa nộp bài
+  usePreventDevTools(Examresult ? () => {} : incrementAlertCount); // Disable khi đã có kết quả
+  usePreventCopyPaste(Examresult ? () => {} : incrementAlertCount); // Disable khi đã có kết quả
 
-  // fullscreen
+  // fullscreen - CHỈ kích hoạt khi chưa nộp bài
   useEffect(() => {
     if (!Examresult && examDetails) {
       const enterFullscreen = () => {
@@ -258,14 +269,16 @@ const BaiLam: React.FC = () => {
       enterFullscreen();
 
       const handleFullscreenChange = () => {
-        if (!document.fullscreenElement) {
+        if (!document.fullscreenElement && !Examresult) {
+          // Thêm check Examresult
           incrementAlertCount();
           alert("Bạn đã thoát chế độ toàn màn hình. Hãy quay lại ngay!");
         }
       };
 
       const handleVisibilityChange = () => {
-        if (document.visibilityState === "hidden") {
+        if (document.visibilityState === "hidden" && !Examresult) {
+          // Thêm check Examresult
           incrementAlertCount();
           alert("Bạn đã chuyển tab. Hãy quay lại ngay!");
         }
@@ -284,6 +297,13 @@ const BaiLam: React.FC = () => {
           handleVisibilityChange
         );
       };
+    }
+
+    // Nếu đã có kết quả, exit fullscreen
+    if (Examresult && document.fullscreenElement) {
+      document
+        .exitFullscreen()
+        .catch((err) => console.log("Exit fullscreen error:", err));
     }
   }, [Examresult, examDetails]);
 
@@ -487,21 +507,38 @@ const BaiLam: React.FC = () => {
     const existingQuestion = suggestedQuestions.find(
       (q) => q._id === questionId
     );
+
+    // Nếu đã fetch rồi thì return luôn
     if (existingQuestion && existingQuestion.detailsFetched) return;
 
     try {
+      // Set loading state cho câu hỏi cụ thể
+      setSuggestedQuestions((prev) =>
+        prev.map((q) => (q._id === questionId ? { ...q, loading: true } : q))
+      );
+
       let response = await QuestionAPIStudent.getQuestionForStudent(questionId);
+
       if (response.code === 200) {
         setSuggestedQuestions((prev) =>
           prev.map((q) =>
             q._id === questionId
-              ? { ...q, ...response.question, detailsFetched: true }
+              ? {
+                  ...q,
+                  ...response.question,
+                  detailsFetched: true,
+                  loading: false,
+                }
               : q
           )
         );
       }
     } catch (error) {
       console.error("Error fetching question details:", error);
+      // Set loading false khi có lỗi
+      setSuggestedQuestions((prev) =>
+        prev.map((q) => (q._id === questionId ? { ...q, loading: false } : q))
+      );
     }
   };
 
@@ -851,6 +888,70 @@ const BaiLam: React.FC = () => {
                   </div>
                 </div>
 
+                {/* Pie Chart */}
+                <Card className="chart-card" bordered={false}>
+                  <Title level={3} className="chart-title">
+                    Phân tích kết quả
+                  </Title>
+                  <div className="chart-container">
+                    {(() => {
+                      const correctCount = Examresult.correctAnswer || 0;
+                      const totalQuestions = Examresult.totalQuestion || 0;
+                      const answeredCount =
+                        (Examresult.details?.length || 0) +
+                        (Examresult.listeningQuestions?.length || 0);
+                      const incorrectCount = answeredCount - correctCount;
+                      const skippedCount = totalQuestions - answeredCount;
+
+                      const chartData = [
+                        { type: "Đúng", value: correctCount },
+                        { type: "Sai", value: incorrectCount },
+                        { type: "Bỏ qua", value: skippedCount },
+                      ];
+
+                      const config = {
+                        data: chartData,
+                        angleField: "value",
+                        colorField: "type",
+                        radius: 0.8,
+                        innerRadius: 0.6,
+                        label: {
+                          type: "outer" as const,
+                          content: "{name}: {value} ({percentage})",
+                          style: { fontSize: 14, fontWeight: 600 },
+                        },
+                        legend: { position: "bottom" as const },
+                        statistic: {
+                          title: {
+                            offsetY: -8,
+                            content: "Tổng số",
+                            style: { fontSize: "14px", color: "#6b7280" },
+                          },
+                          content: {
+                            offsetY: 4,
+                            content: totalQuestions.toString(),
+                            style: {
+                              fontSize: "32px",
+                              fontWeight: "bold",
+                              color: "#1f2937",
+                            },
+                          },
+                        },
+                        color: ({ type }: any) => {
+                          const colors: Record<string, string> = {
+                            Đúng: "#22c55e",
+                            Sai: "#ef4444",
+                            "Bỏ qua": "#9ca3af",
+                          };
+                          return colors[type] || "#3b82f6";
+                        },
+                      };
+
+                      return <Pie {...config} />;
+                    })()}
+                  </div>
+                </Card>
+
                 <Divider />
 
                 <Button
@@ -862,89 +963,155 @@ const BaiLam: React.FC = () => {
                 </Button>
 
                 {showDetails && (
-                  <Collapse
-                    className="result-collapse-modern"
-                    onChange={(activeKeys) => {
-                      if (Array.isArray(activeKeys)) {
-                        activeKeys.forEach((key) =>
-                          handleExpandSuggestedQuestion(key)
-                        );
-                      } else {
-                        handleExpandSuggestedQuestion(activeKeys);
-                      }
-                    }}
-                  >
+                  <Collapse className="result-collapse-modern">
+                    {/* AI Advice */}
                     <Panel
-                      header="💡 Lời khuyên"
+                      header={
+                        <div className="panel-header-custom">
+                          <BulbOutlined className="panel-icon" />
+                          <span>Lời khuyên từ AI</span>
+                        </div>
+                      }
                       key="advice"
-                      className="collapse-panel-modern"
                     >
                       {loading ? (
-                        <Spin />
+                        <div className="loading-content">
+                          <Spin />
+                          <AntText>Đang phân tích kết quả...</AntText>
+                        </div>
                       ) : (
-                        <div
-                          className="advice-content"
-                          dangerouslySetInnerHTML={{
-                            __html: advice
-                              .replace(/\*/g, "")
-                              .replace(/\n/g, "<br />"),
-                          }}
-                        />
+                        <div className="advice-content-wrapper">
+                          <div
+                            className="advice-text"
+                            dangerouslySetInnerHTML={{
+                              __html: advice
+                                .replace(/\*\*/g, "<strong>")
+                                .replace(/\*/g, "")
+                                .replace(/\n/g, "<br />"),
+                            }}
+                          />
+                        </div>
                       )}
                     </Panel>
 
-                    <Panel
-                      header="📺 Video liên quan"
-                      key="videos"
-                      className="collapse-panel-modern"
-                    >
-                      {Examresult.videos &&
-                        Object.keys(Examresult.videos).map((key) => (
-                          <div key={key} className="video-section">
-                            <Title level={5}>{key}</Title>
-                            <Row gutter={[16, 16]}>
-                              {Examresult.videos[key].map((video: any) => (
-                                <Col xs={24} sm={12} md={8} key={video.videoId}>
-                                  <a
-                                    href={video.linkUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="video-card"
-                                  >
-                                    <img
-                                      src={video.thumbnail}
-                                      alt={video.title}
-                                      className="video-thumbnail"
-                                    />
-                                    <p className="video-title">{video.title}</p>
-                                  </a>
-                                </Col>
-                              ))}
-                            </Row>
+                    {/* YouTube Videos */}
+                    {Examresult.videos &&
+                      Object.keys(Examresult.videos).length > 0 && (
+                        <Panel
+                          header={
+                            <div className="panel-header-custom">
+                              <YoutubeFilled className="panel-icon youtube" />
+                              <span>Video gợi ý học tập</span>
+                            </div>
+                          }
+                          key="videos"
+                        >
+                          <div className="videos-content">
+                            {Object.keys(Examresult.videos).map((topic) => (
+                              <div key={topic} className="video-topic-section">
+                                <Title level={5} className="topic-title">
+                                  📚 {topic}
+                                </Title>
+                                <Row gutter={[16, 16]}>
+                                  {Examresult.videos[topic].map(
+                                    (video: any, idx: number) => (
+                                      <Col
+                                        xs={24}
+                                        sm={12}
+                                        md={8}
+                                        key={video.videoId || `video-${idx}`}
+                                      >
+                                        <a
+                                          href={
+                                            video.linkUrl ||
+                                            `https://youtube.com/watch?v=${video.videoId}`
+                                          }
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="video-card-link"
+                                        >
+                                          <div className="video-thumbnail-wrapper">
+                                            <img
+                                              src={
+                                                video.thumbnail ||
+                                                `https://i.ytimg.com/vi/${video.videoId}/maxresdefault.jpg`
+                                              }
+                                              alt={video.title}
+                                              className="video-thumb"
+                                            />
+                                            <div className="play-overlay">
+                                              <YoutubeFilled />
+                                            </div>
+                                          </div>
+                                          <div className="video-info-box">
+                                            <AntText className="video-title-text">
+                                              {video.title}
+                                            </AntText>
+                                          </div>
+                                        </a>
+                                      </Col>
+                                    )
+                                  )}
+                                </Row>
+                              </div>
+                            ))}
                           </div>
-                        ))}
-                    </Panel>
+                        </Panel>
+                      )}
 
+                    {/* Suggested Questions */}
                     <Panel
-                      header="📝 Câu hỏi đề nghị"
+                      header={
+                        <div className="panel-header-custom">
+                          <QuestionCircleOutlined className="panel-icon" />
+                          <span>Câu hỏi gợi ý luyện tập</span>
+                        </div>
+                      }
                       key="suggested"
-                      className="collapse-panel-modern"
                     >
-                      <Collapse className="suggested-questions-collapse">
-                        {suggestedQuestions.map((q: Question, id: number) => (
-                          <Panel
-                            header={`${id + 1}. ${q.content.slice(0, 200)}...`}
-                            key={q._id ?? id}
-                            onClick={() => handleExpandSuggestedQuestion(q._id)}
-                          >
-                            {q.detailsFetched ? (
-                              <SuggestedQuestionAnswer question={q} />
-                            ) : (
-                              <Spin />
-                            )}
-                          </Panel>
-                        ))}
-                      </Collapse>
+                      <div className="suggested-questions-wrapper">
+                        <Collapse
+                          className="suggested-questions-collapse"
+                          ghost
+                        >
+                          {suggestedQuestions.map((q: Question, id: number) => {
+                            const cleanContent = q.content
+                              .replace(/<[^>]*>/g, "")
+                              .replace(/&nbsp;/g, " ")
+                              .trim();
+                            return (
+                              <Panel
+                                header={
+                                  <div className="question-header">
+                                    <span className="question-number">
+                                      Câu {id + 1}:
+                                    </span>
+                                    <span className="question-preview">
+                                      {cleanContent.slice(0, 100)}
+                                      {cleanContent.length > 100 ? "..." : ""}
+                                    </span>
+                                  </div>
+                                }
+                                key={q._id ?? id}
+                                className="suggested-question-panel"
+                              >
+                                {q.detailsFetched ? (
+                                  <SuggestedQuestionAnswer question={q} />
+                                ) : (
+                                  <div
+                                    style={{
+                                      textAlign: "center",
+                                      padding: "2rem",
+                                    }}
+                                  >
+                                    <Spin />
+                                  </div>
+                                )}
+                              </Panel>
+                            );
+                          })}
+                        </Collapse>
+                      </div>
                     </Panel>
                   </Collapse>
                 )}
@@ -953,8 +1120,8 @@ const BaiLam: React.FC = () => {
           )}
         </Content>
 
-        {/* Mini Sidebar Fixed */}
-        <div className="exam-minimap-fixed">
+        {/* Desktop Minimap - Fixed Right */}
+        <div className="exam-minimap-fixed desktop-minimap">
           <div className="minimap-timer">
             <ClockCircleOutlined />
             <span className={remainingTime <= 60 ? "critical" : ""}>
@@ -973,6 +1140,38 @@ const BaiLam: React.FC = () => {
           >
             <PlayCircleOutlined /> Nộp bài
           </Button>
+        </div>
+
+        {/* Mobile Minimap - Fixed Bottom */}
+        <div className="exam-minimap-mobile">
+          <div className="mobile-minimap-content">
+            <div className="mobile-timer">
+              <ClockCircleOutlined />
+              <span className={remainingTime <= 60 ? "critical" : ""}>
+                {formatTime(remainingTime)}
+              </span>
+            </div>
+
+            <Button
+              type="primary"
+              onClick={showSubmitModal}
+              disabled={!!Examresult || loading}
+              className="mobile-submit-btn"
+            >
+              <PlayCircleOutlined /> Nộp bài
+            </Button>
+          </div>
+
+          {/* Expandable Question Map */}
+          <Collapse
+            ghost
+            className="mobile-question-collapse"
+            expandIconPosition="end"
+          >
+            <Panel header="Xem bản đồ câu hỏi" key="1">
+              <div className="mobile-question-map">{renderQuestionMap()}</div>
+            </Panel>
+          </Collapse>
         </div>
       </Layout>
 

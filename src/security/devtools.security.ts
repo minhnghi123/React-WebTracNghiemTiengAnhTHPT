@@ -1,34 +1,51 @@
 import { useEffect } from "react";
 
-const usePreventDevTools = (onViolation?: () => void) => {
+const usePreventDevTools = (onViolation: () => void) => {
   useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      const isDevToolKey =
-        event.key === "F12" ||
-        (event.ctrlKey &&
-          event.shiftKey &&
-          (event.key === "I" || event.key === "C" || event.key === "J")) ||
-        (event.ctrlKey && event.key === "U");
+    // Nếu onViolation là empty function, không làm gì cả (disabled)
+    if (onViolation.toString().includes("{}")) {
+      return;
+    }
 
-      if (isDevToolKey) {
-        event.preventDefault();
-        alert("Chức năng này bị vô hiệu hóa!");
-        if (onViolation) onViolation(); // Chỉ gọi khi thực sự vi phạm
+    const detectDevTools = () => {
+      const threshold = 160;
+      const widthThreshold = window.outerWidth - window.innerWidth > threshold;
+      const heightThreshold =
+        window.outerHeight - window.innerHeight > threshold;
+
+      if (widthThreshold || heightThreshold) {
+        onViolation();
       }
     };
 
-    const handleContextMenu = (event: MouseEvent) => {
-      event.preventDefault();
-      alert("Chức năng chuột phải bị vô hiệu hóa!");
-      if (onViolation) onViolation();
+    const preventContextMenu = (e: MouseEvent) => {
+      e.preventDefault();
+      onViolation();
     };
 
-    window.addEventListener("keydown", handleKeyDown);
-    window.addEventListener("contextmenu", handleContextMenu);
+    const preventKeyboardShortcuts = (e: KeyboardEvent) => {
+      if (
+        e.key === "F12" ||
+        (e.ctrlKey && e.shiftKey && e.key === "I") ||
+        (e.ctrlKey && e.shiftKey && e.key === "J") ||
+        (e.ctrlKey && e.key === "U")
+      ) {
+        e.preventDefault();
+        onViolation();
+      }
+    };
+
+    window.addEventListener("resize", detectDevTools);
+    document.addEventListener("contextmenu", preventContextMenu);
+    document.addEventListener("keydown", preventKeyboardShortcuts);
+
+    const interval = setInterval(detectDevTools, 1000);
 
     return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-      window.removeEventListener("contextmenu", handleContextMenu);
+      window.removeEventListener("resize", detectDevTools);
+      document.removeEventListener("contextmenu", preventContextMenu);
+      document.removeEventListener("keydown", preventKeyboardShortcuts);
+      clearInterval(interval);
     };
   }, [onViolation]);
 };

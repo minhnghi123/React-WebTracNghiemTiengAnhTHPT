@@ -16,7 +16,7 @@ import {
 } from "@ant-design/icons";
 import "./Detail.css";
 
-const { Title, Text } = Typography;
+const { Title, Text: AntText } = Typography;
 
 export const DetailExam = () => {
   const { _id } = useParams<{ _id: string }>();
@@ -61,7 +61,7 @@ export const DetailExam = () => {
     return (
       <div className="loading-container">
         <div className="loading-spinner"></div>
-        <Text className="loading-text">Đang tải thông tin đề thi...</Text>
+        <AntText className="loading-text">Đang tải thông tin đề thi...</AntText>
       </div>
     );
   }
@@ -80,9 +80,9 @@ export const DetailExam = () => {
           <Title level={1} className="hero-title">
             {exam.title}
           </Title>
-          <Text className="hero-subtitle">
+          <AntText className="hero-subtitle">
             Đề thi trắc nghiệm tiếng Anh THPT
-          </Text>
+          </AntText>
         </div>
       </div>
 

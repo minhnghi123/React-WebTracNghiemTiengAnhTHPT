@@ -2,6 +2,7 @@ import { Result, ResultAPI } from "@/services/student";
 import { Button, Table, Typography } from "antd";
 import { useEffect, useState } from "react";
 import ChiTietKetQua from "./ChiTietKetQua";
+import "./KetQua.css";
 
 const { Title, Text: AntText } = Typography;
 
@@ -37,6 +38,7 @@ export const KetQua: React.FC<KetQuaProps> = ({ DeThi }) => {
       title: "Ngày làm bài",
       dataIndex: "createdAt",
       key: "createdAt",
+      responsive: ["md"] as any,
       render: (val: string) => (
         <span style={{ fontSize: "0.9375rem" }}>
           {new Date(val).toLocaleString("vi-VN")}
@@ -47,20 +49,20 @@ export const KetQua: React.FC<KetQuaProps> = ({ DeThi }) => {
       title: "Điểm",
       key: "score",
       render: (record: Result) => (
-        <span
-          style={{
-            fontWeight: 600,
-            fontSize: "1.125rem",
-            color: record.score >= 5 ? "#52c41a" : "#ff4d4f",
-          }}
-        >
-          {record.score}/10
-        </span>
+        <div className="score-cell">
+          <span className={`score-badge ${record.score >= 5 ? "pass" : "fail"}`}>
+            {record.score}/10
+          </span>
+          <span className="mobile-date">
+            {new Date(record.createdAt).toLocaleDateString("vi-VN")}
+          </span>
+        </div>
       ),
     },
     {
       title: "Số câu đúng",
       key: "correct",
+      responsive: ["lg"] as any,
       render: (record: Result) => (
         <span style={{ fontSize: "0.9375rem" }}>
           {record.correctAnswer}/{record.questions.length}
@@ -68,12 +70,13 @@ export const KetQua: React.FC<KetQuaProps> = ({ DeThi }) => {
       ),
     },
     {
-      title: "Thời gian làm",
+      title: "Thời gian",
       key: "duration",
+      responsive: ["lg"] as any,
       render: (record: Result) => {
-        const start = new Date(record.createdAt).getTime();
-        const end = new Date(record.endTime).getTime();
-        const duration = Math.round((end - start) / 60000);
+        const duration = Math.round(
+          (new Date(record.endTime).getTime() - new Date(record.createdAt).getTime()) / 60000
+        );
         return <span style={{ fontSize: "0.9375rem" }}>{duration} phút</span>;
       },
     },
@@ -87,19 +90,16 @@ export const KetQua: React.FC<KetQuaProps> = ({ DeThi }) => {
             setDetail(record);
             setIsDetail(true);
           }}
-          style={{
-            borderRadius: "6px",
-            fontWeight: 500,
-          }}
+          className="view-detail-btn"
         >
-          Xem chi tiết
+          Xem
         </Button>
       ),
     },
   ];
 
   return (
-    <div style={{ padding: "0" }}>
+    <div className="ket-qua-page">
       {isDetail && detail !== undefined ? (
         <div>
           <div style={{ marginBottom: "1.5rem", textAlign: "center" }}>

@@ -134,9 +134,9 @@ const ListeningQuestionSubmit: React.FC<ListeningQuestionComponentProps> = ({
   };
 
   return (
-    <div className="bg-white p-4 rounded shadow mb-4">
+    <div className="bg-white p-4 rounded shadow mb-4 listening-question-card">
       <h5
-        className="text-xl font-bold mb-2"
+        className="text-xl font-bold mb-2 listening-question-title"
         style={{
           whiteSpace: "pre-wrap",
           color: "#1f2937",
@@ -144,14 +144,7 @@ const ListeningQuestionSubmit: React.FC<ListeningQuestionComponentProps> = ({
           lineHeight: "1.6",
         }}
       >
-        <span
-          style={{
-            color: "#3b82f6",
-            fontSize: "18px",
-            fontWeight: 700,
-            marginRight: "8px",
-          }}
-        >
+        <span className="question-number-badge">
           Câu {questionIndex}.
         </span>
         {questionType === "6742fb3bd56a2e75dbd817ec" ? (
@@ -162,7 +155,7 @@ const ListeningQuestionSubmit: React.FC<ListeningQuestionComponentProps> = ({
           />
         )}
       </h5>
-      <div className="mt-1">
+      <div className="mt-1 question-options-container">
         {questionType === "6742fb1cd56a2e75dbd817ea" ? (
           <Radio.Group
             onChange={(e) => handleCheckboxChange(question._id, e.target.value)}

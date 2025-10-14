@@ -126,9 +126,10 @@ const QuestionSubmit: React.FC<QuestionComponentProps> = ({
   };
 
   return (
-    <Card className="mb-4 shadow" bodyStyle={{ padding: "24px" }}>
+    <Card className="mb-4 shadow question-submit-card" bodyStyle={{ padding: "24px" }}>
       <Title
         level={5}
+        className="question-title-submit"
         style={{
           whiteSpace: "normal",
           wordBreak: "break-word",
@@ -139,12 +140,7 @@ const QuestionSubmit: React.FC<QuestionComponentProps> = ({
           fontWeight: 600,
         }}
       >
-        <span style={{ 
-          color: "#3b82f6", 
-          fontSize: "18px", 
-          fontWeight: 700,
-          marginRight: "8px"
-        }}>
+        <span className="question-number-badge">
           Câu {questionIndex}.
         </span>
         {questionType === "6742fb3bd56a2e75dbd817ec" ? (
@@ -158,7 +154,7 @@ const QuestionSubmit: React.FC<QuestionComponentProps> = ({
         )}
       </Title>
 
-      <div className="mt-2">
+      <div className="mt-2 question-options-container">
         {questionType === "6742fb1cd56a2e75dbd817ea" ? (
           <Radio.Group
             onChange={(e) =>

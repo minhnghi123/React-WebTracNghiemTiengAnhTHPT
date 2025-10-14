@@ -1,33 +1,35 @@
 import { useEffect } from "react";
 
-const usePreventCopyPaste = (onViolation?: () => void) => {
+const usePreventCopyPaste = (onViolation: () => void) => {
   useEffect(() => {
-    const handleCopy = (e: ClipboardEvent) => {
+    // Nếu onViolation là empty function, không làm gì cả (disabled)
+    if (onViolation.toString().includes("{}")) {
+      return;
+    }
+
+    const preventCopy = (e: ClipboardEvent) => {
       e.preventDefault();
-      alert("Sao chép nội dung bị cấm!");
-      if (onViolation) onViolation();
+      onViolation();
     };
 
-    const handlePaste = (e: ClipboardEvent) => {
+    const preventPaste = (e: ClipboardEvent) => {
       e.preventDefault();
-      alert("Dán nội dung bị cấm!");
-      if (onViolation) onViolation();
+      onViolation();
     };
 
-    const handleCut = (e: ClipboardEvent) => {
+    const preventCut = (e: ClipboardEvent) => {
       e.preventDefault();
-      alert("Cắt nội dung bị cấm!");
-      if (onViolation) onViolation();
+      onViolation();
     };
 
-    document.addEventListener("copy", handleCopy);
-    document.addEventListener("paste", handlePaste);
-    document.addEventListener("cut", handleCut);
+    document.addEventListener("copy", preventCopy);
+    document.addEventListener("paste", preventPaste);
+    document.addEventListener("cut", preventCut);
 
     return () => {
-      document.removeEventListener("copy", handleCopy);
-      document.removeEventListener("paste", handlePaste);
-      document.removeEventListener("cut", handleCut);
+      document.removeEventListener("copy", preventCopy);
+      document.removeEventListener("paste", preventPaste);
+      document.removeEventListener("cut", preventCut);
     };
   }, [onViolation]);
 };

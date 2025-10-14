@@ -91,7 +91,6 @@ export const submitExam = async (req, res) => {
       return res.status(400).json({ message: "Invalid input data." });
     }
 
-    // Fetch ongoing exam result
     const existingResult = await Result.findOne({ _id: resultId, isCompleted: false })
       .populate({
         path: "examId",
@@ -119,49 +118,37 @@ export const submitExam = async (req, res) => {
       return res.status(400).json({ code: 400, message: "Exam time has expired. Final score computed.", result: existingResult });
     }
 
-    // Initialize scoring and details
     let score = 0, correctAnswer = 0, wrongAnswer = 0;
     let unAnswerQ = unansweredQuestions.length;
-    const questionDetails = [];
-    const listeningQuestionDetails = [];
+    const questionDetails = []; // CHỈ chứa câu đã trả lời
+    const listeningQuestionDetails = []; // CHỈ chứa câu đã trả lời
     const wrongAnswerByKnowledge = {};
     const incorrectAnswer = [];
     let answerDetail = "";
 
-    // Handle unanswered questions
+    // KHÔNG xử lý unansweredQuestions ở đây nữa - chỉ đếm số lượng
     for (const qId of unansweredQuestions) {
       const question = exam.questions.find(q => String(q._id) === String(qId))
         || exam.listeningExams.flatMap(le => le.questions).find(q => String(q._id) === String(qId));
-      if (!question) {
-        return res.status(400).json({ code: 400, message: `Question ${qId} not found.` });
+      if (question) {
+        wrongAnswer++;
+        const know = question.knowledge;
+        wrongAnswerByKnowledge[know] = (wrongAnswerByKnowledge[know] || 0) + 1;
+        incorrectAnswer.push({
+          questionContent: question.content || question.questionText,
+          answerDetail: (question.answers || question.options).map(a => a.text || a.correctAnswerForBlank || a.optionText).join("\n"),
+          knowledge: know
+        });
       }
-      wrongAnswer++;
-      const know = question.knowledge;
-      wrongAnswerByKnowledge[know] = (wrongAnswerByKnowledge[know] || 0) + 1;
-      questionDetails.push({
-        questionId: question._id,
-        content: question.content || question.questionText || "",
-        answers: question.answers || question.options,
-        userAnswers: [],
-        correctAnswerForBlank: question.answers?.map(a => a.correctAnswerForBlank) || [],
-        audio: question.audio || null,
-        isCorrect: false
-      });
-      incorrectAnswer.push({
-        questionContent: question.content || question.questionText,
-        answerDetail: (question.answers || question.options).map(a => a.text || a.correctAnswerForBlank || a.optionText).join("\n"),
-        knowledge: know
-      });
     }
 
-    // Process standard answers
+    // Process standard answers - CHỈ lưu câu đã trả lời
     for (const ans of answers) {
       const { questionId, selectedAnswerId, userAnswer } = ans;
       const question = exam.questions.find(q => String(q._id) === String(questionId))
         || exam.listeningExams.flatMap(le => le.questions).find(q => String(q._id) === String(questionId));
-      if (!question) {
-        return res.status(400).json({ code: 400, message: `Question ${questionId} not found.` });
-      }
+      if (!question) continue;
+
       const typeName = questionTypeMapping[question.questionType.name] || question.questionType.name;
       let isCorrect = false;
       let detail = {};
@@ -194,26 +181,28 @@ export const submitExam = async (req, res) => {
           break;
         }
         default:
-          return res.status(400).json({ message: `Unsupported question type: ${question.questionType.name}` });
+          continue;
       }
 
-      if (isCorrect) { correctAnswer++; score++; } else {
+      if (isCorrect) { 
+        correctAnswer++; 
+        score++; 
+      } else {
         wrongAnswer++;
         const know = question.knowledge;
         wrongAnswerByKnowledge[know] = (wrongAnswerByKnowledge[know] || 0) + 1;
         answerDetail += (question.answers || []).map(a => a.text || a.correctAnswerForBlank).join("\n") + "\n";
         incorrectAnswer.push({ questionContent: question.content, answerDetail, knowledge: know });
       }
-      questionDetails.push(detail);
+      questionDetails.push(detail); // CHỈ push câu đã trả lời
     }
 
-    // Process listening answers
+    // Process listening answers - CHỈ lưu câu đã trả lời
     for (const ans of listeningAnswers) {
       const { questionId, selectedAnswerId, userAnswer } = ans;
       const question = exam.listeningExams.flatMap(le => le.questions).find(q => String(q._id) === String(questionId));
-      if (!question) {
-        return res.status(400).json({ code: 400, message: `Listening Question ${questionId} not found.` });
-      }
+      if (!question) continue;
+
       const typeName = questionTypeMapping[question.questionType.name] || question.questionType.name;
       let isCorrect = false;
       let detail = {};
@@ -242,20 +231,22 @@ export const submitExam = async (req, res) => {
           break;
         }
         default:
-          return res.status(400).json({ message: `Unsupported question type: ${question.questionType.name}` });
+          continue;
       }
 
-      if (isCorrect) { correctAnswer++; score++; } else {
+      if (isCorrect) { 
+        correctAnswer++; 
+        score++; 
+      } else {
         wrongAnswer++;
         const know = question.knowledge;
         wrongAnswerByKnowledge[know] = (wrongAnswerByKnowledge[know] || 0) + 1;
         answerDetail += (question.options || []).map(a => a.optionText || a.correctAnswerForBlank).join("\n") + "\n";
         incorrectAnswer.push({ questionContent: question.questionText, answerDetail, knowledge: know });
       }
-      listeningQuestionDetails.push(detail);
+      listeningQuestionDetails.push(detail); // CHỈ push câu đã trả lời
     }
 
-    // Finalize and save
     const suggestionQuestion = await Question.find({ knowledge: { $in: Object.keys(wrongAnswerByKnowledge) } }).select("_id content");
     const totalQuestions = (exam.questions?.length || 0) + exam.listeningExams.reduce((a, le) => a + (le.questions?.length || 0), 0);
     const finalScore = Math.round((correctAnswer / totalQuestions * 10) * 100) / 100;
@@ -264,8 +255,8 @@ export const submitExam = async (req, res) => {
       score: finalScore,
       correctAnswer,
       wrongAnswer,
-      questions: questionDetails,
-      listeningQuestions: listeningQuestionDetails,
+      questions: questionDetails, // CHỈ chứa câu đã trả lời
+      listeningQuestions: listeningQuestionDetails, // CHỈ chứa câu đã trả lời
       suggestionQuestion,
       wrongAnswerByKnowledge,
       answerDetail,
@@ -274,20 +265,19 @@ export const submitExam = async (req, res) => {
     });
     await existingResult.save();
 
-    // Fetch YouTube videos
     const videos = {};
     for (const key of Object.keys(wrongAnswerByKnowledge)) {
       try {
         videos[key] = await getYoutubeVideos(key);
       } catch (error) {
         console.error(`Error fetching YouTube videos for knowledge: ${key}`, error.message);
-        videos[key] = []; // Fallback to an empty array if the API call fails
+        videos[key] = [];
       }
     }
 
-    // Build AI prompt
     let prompt2 = incorrectAnswer.map(q => `Đây là câu hỏi tiếng anh (${q.questionContent}), đáp án: ${q.answerDetail}, kiến thức: ${q.knowledge}.`).join(" ");
     let prompt = "Hãy đưa ra lời khuyên, lộ trình học tiếng Anh biết học sinh đẫ làm các câu trả lời sai sau đây: " + prompt2;
+    
     userLog(req, "Submit Exam", `User submitted exam with result ID: ${req.body.resultId}`);
     return res.status(200).json({
       code: 200,
@@ -299,8 +289,8 @@ export const submitExam = async (req, res) => {
       wrongAnswer,
       unAnswerQ,
       totalQuestion: totalQuestions,
-      details: questionDetails,
-      listeningQuestions: listeningQuestionDetails,
+      details: questionDetails, // CHỈ câu đã trả lời
+      listeningQuestions: listeningQuestionDetails, // CHỈ câu đã trả lời
       wrongAnswerByKnowledge,
       suggestionQuestion,
       videos,

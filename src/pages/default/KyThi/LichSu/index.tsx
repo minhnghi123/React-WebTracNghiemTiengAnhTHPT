@@ -14,7 +14,7 @@ import {
 import ChiTietKetQua from "../KetQua/ChiTietKetQua";
 import "./LichSu.css";
 
-const { Title, Text } = Typography;
+const { Title, Text: AntText } = Typography;
 
 export const LichSuLamBai = () => {
   const { _id } = useParams<{ _id: string }>();
@@ -74,7 +74,7 @@ export const LichSuLamBai = () => {
     return (
       <div className="history-loading">
         <div className="loading-spinner"></div>
-        <Text>Đang tải lịch sử...</Text>
+        <AntText>Đang tải lịch sử...</AntText>
       </div>
     );
   }
@@ -106,9 +106,9 @@ export const LichSuLamBai = () => {
           <Title level={1} className="hero-title">
             Lịch sử làm bài
           </Title>
-          <Text className="hero-subtitle">
+          <AntText className="hero-subtitle">
             Xem lại kết quả và đáp án các lần làm bài trước
-          </Text>
+          </AntText>
         </div>
       </div>
 
@@ -221,11 +221,13 @@ export const LichSuLamBai = () => {
             <Empty
               description={
                 <div className="empty-description">
-                  <Text className="empty-title">Chưa có lịch sử làm bài</Text>
-                  <Text className="empty-subtitle">
+                  <AntText className="empty-title">
+                    Chưa có lịch sử làm bài
+                  </AntText>
+                  <AntText className="empty-subtitle">
                     Bạn chưa làm đề thi này lần nào. Hãy bắt đầu làm bài để xem
                     kết quả!
-                  </Text>
+                  </AntText>
                 </div>
               }
             />

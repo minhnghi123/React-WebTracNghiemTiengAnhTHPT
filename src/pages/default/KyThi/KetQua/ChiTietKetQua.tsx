@@ -1,6 +1,7 @@
 import React from "react";
 import { QuestionAnswerResult, Result } from "@/services/student";
 import QuestionAnswerComponent from "./QuestionAnswer";
+import "./ChiTietKetQua.css";
 
 interface ChiTietKetQuaProps {
   result: Result;
@@ -52,89 +53,70 @@ const ChiTietKetQua: React.FC<ChiTietKetQuaProps> = ({ result }) => {
         )
       : result.listeningQuestions.length;
   return (
-    <div style={{ padding: "2rem", maxWidth: "1200px", margin: "0 auto" }}>
-      <div style={{ textAlign: "center", marginBottom: "2rem" }}>
-        <h1
-          style={{
-            fontSize: "1.75rem",
-            fontWeight: 600,
-            color: "#1a1a1a",
-            marginBottom: "0.5rem",
-          }}
-        >
-          Chi tiết kết quả
-        </h1>
-        <h2
-          style={{
-            fontSize: "1.25rem",
-            fontWeight: 500,
-            color: "#666",
-          }}
-        >
+    <div className="chi-tiet-ket-qua-page">
+      <div className="result-header-section">
+        <div className="result-score-badge">
+          <div className="score-value">{result.score}</div>
+          <div className="score-label">
+            / {result.questions.length + totalListeningQuestions}
+          </div>
+        </div>
+        <h1 className="result-exam-title">
           {typeof result.examId === "object"
             ? result.examId.title
             : result.examId}
-        </h2>
-        <div
-          style={{
-            marginTop: "1rem",
-            fontSize: "1.125rem",
-            color: "#1890ff",
-            fontWeight: 600,
-          }}
-        >
-          Điểm số: {result.score} /{" "}
-          {result.questions.length + totalListeningQuestions}
-        </div>
+        </h1>
       </div>
 
-      {/* Hiển thị các câu hỏi trắc nghiệm, đọc, điền khuyết (với API gốc) */}
-      {result.questions &&
-        (result.questions as QuestionAnswerResult[]).map(
-          (item: QuestionAnswerResult) => (
-            <QuestionAnswerComponent question={item} key={item._id} />
-          )
-        )}
-
-      {/* Hiển thị câu hỏi nghe */}
-      {typeof result.examId === "object" &&
-      result.examId.listeningExams &&
-      result.examId.listeningExams.length > 0
-        ? result.examId.listeningExams.map((exam: any) => (
-            <div key={exam._id} style={{ marginBottom: "2rem" }}>
-              <h2
-                style={{
-                  fontSize: "1.25rem",
-                  fontWeight: 600,
-                  marginBottom: "1rem",
-                  color: "#1a1a1a",
-                }}
-              >
-                {exam.title}
-              </h2>
-              {exam.questions &&
-                exam.questions.map((listeningExamQuestion: any) => {
-                  // Ghép kết quả của câu hỏi nghe dựa trên questionId
-                  const mergedQuestion = mergeListeningQuestion(
-                    listeningExamQuestion,
-                    result.listeningQuestions || []
-                  );
-                  return (
-                    <QuestionAnswerComponent
-                      question={mergedQuestion}
-                      key={mergedQuestion._id}
-                    />
-                  );
-                })}
-            </div>
-          ))
-        : // Nếu không có listeningExams, fallback hiển thị mảng listeningQuestions theo cấu trúc ban đầu
-          result.listeningQuestions &&
-          (result.listeningQuestions as QuestionAnswerResult[]).map(
+      <div className="questions-container">
+        {/* Hiển thị các câu hỏi trắc nghiệm, đọc, điền khuyết (với API gốc) */}
+        {result.questions &&
+          (result.questions as QuestionAnswerResult[]).map(
             (item: QuestionAnswerResult) => (
               <QuestionAnswerComponent question={item} key={item._id} />
             )
           )}
+
+        {/* Hiển thị câu hỏi nghe */}
+        {typeof result.examId === "object" &&
+        result.examId.listeningExams &&
+        result.examId.listeningExams.length > 0
+          ? result.examId.listeningExams.map((exam: any) => (
+              <div key={exam._id} style={{ marginBottom: "2rem" }}>
+                <h2
+                  style={{
+                    fontSize: "1.25rem",
+                    fontWeight: 600,
+                    marginBottom: "1rem",
+                    color: "#1a1a1a",
+                  }}
+                >
+                  {exam.title}
+                </h2>
+                {exam.questions &&
+                  exam.questions.map((listeningExamQuestion: any) => {
+                    // Ghép kết quả của câu hỏi nghe dựa trên questionId
+                    const mergedQuestion = mergeListeningQuestion(
+                      listeningExamQuestion,
+                      result.listeningQuestions || []
+                    );
+                    return (
+                      <QuestionAnswerComponent
+                        question={mergedQuestion}
+                        key={mergedQuestion._id}
+                      />
+                    );
+                  })}
+              </div>
+            ))
+          : // Nếu không có listeningExams, fallback hiển thị mảng listeningQuestions theo cấu trúc ban đầu
+            result.listeningQuestions &&
+            (result.listeningQuestions as QuestionAnswerResult[]).map(
+              (item: QuestionAnswerResult) => (
+                <QuestionAnswerComponent question={item} key={item._id} />
+              )
+            )}
+      </div>
     </div>
   );
 };

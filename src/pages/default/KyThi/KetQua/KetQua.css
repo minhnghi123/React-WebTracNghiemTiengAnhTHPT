@@ -1,0 +1,167 @@
+.ket-qua-page {
+  padding: 0;
+  min-height: 100vh;
+}
+
+.score-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  align-items: flex-start;
+}
+
+.score-badge {
+  font-weight: 700;
+  font-size: 1.125rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 8px;
+  display: inline-block;
+}
+
+.score-badge.pass {
+  background: #d1fae5;
+  color: #059669;
+}
+
+.score-badge.fail {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.mobile-date {
+  display: none;
+  font-size: 0.8125rem;
+  color: #6b7280;
+}
+
+.view-detail-btn {
+  border-radius: 8px;
+  font-weight: 600;
+  height: 40px;
+  padding: 0 1.5rem;
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+  .ant-table {
+    font-size: 0.9375rem;
+  }
+
+  .ant-table-thead > tr > th {
+    padding: 14px 12px;
+  }
+
+  .ant-table-tbody > tr > td {
+    padding: 14px 12px;
+  }
+
+  .view-detail-btn {
+    height: 38px;
+    padding: 0 1.25rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .mobile-date {
+    display: block;
+  }
+
+  .score-badge {
+    font-size: 1rem;
+  }
+
+  .view-detail-btn {
+    height: 36px;
+    padding: 0 1rem;
+    font-size: 0.875rem;
+  }
+
+  .ant-table {
+    font-size: 0.875rem;
+  }
+
+  .ant-table-thead > tr > th {
+    padding: 12px 8px;
+    font-size: 0.875rem;
+  }
+
+  .ant-table-tbody > tr > td {
+    padding: 12px 8px;
+  }
+
+  .ant-table-pagination {
+    margin-top: 1rem !important;
+  }
+
+  .ant-pagination-item,
+  .ant-pagination-prev,
+  .ant-pagination-next {
+    min-width: 32px;
+    height: 32px;
+    line-height: 30px;
+  }
+}
+
+@media (max-width: 480px) {
+  .score-badge {
+    font-size: 0.9375rem;
+    padding: 0.25rem 0.625rem;
+  }
+
+  .mobile-date {
+    font-size: 0.75rem;
+  }
+
+  .view-detail-btn {
+    height: 32px;
+    padding: 0 0.75rem;
+    font-size: 0.8125rem;
+  }
+
+  .ant-table-thead > tr > th {
+    padding: 10px 6px;
+    font-size: 0.8125rem;
+  }
+
+  .ant-table-tbody > tr > td {
+    padding: 10px 6px;
+  }
+
+  .ant-pagination-item,
+  .ant-pagination-prev,
+  .ant-pagination-next {
+    min-width: 28px;
+    height: 28px;
+    line-height: 26px;
+    font-size: 0.75rem;
+  }
+
+  .score-cell {
+    gap: 0.25rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .score-badge {
+    font-size: 0.875rem;
+    padding: 0.1875rem 0.5rem;
+  }
+
+  .mobile-date {
+    font-size: 0.6875rem;
+  }
+
+  .view-detail-btn {
+    height: 30px;
+    padding: 0 0.625rem;
+    font-size: 0.75rem;
+  }
+
+  .ant-table-thead > tr > th {
+    padding: 8px 4px;
+  }
+
+  .ant-table-tbody > tr > td {
+    padding: 8px 4px;
+  }
+}
