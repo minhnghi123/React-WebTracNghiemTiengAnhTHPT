@@ -31,7 +31,9 @@ const ResultSchema = new mongoose.Schema({
           isCorrect: { type: Boolean, default: false },
         },
       ],
+      correctAnswerForTrueFalseNGV: [{ type: String }],
       isCorrect: { type: Boolean, required: true },
+      isSkipped: { type: Boolean, default: false }, // Thêm field isSkipped
     },
   ],
   listeningQuestions: [
@@ -58,7 +60,9 @@ const ResultSchema = new mongoose.Schema({
           isCorrect: { type: Boolean, default: false },
         },
       ],
+      correctAnswerForTrueFalseNGV: [{ type: String }],
       isCorrect: { type: Boolean, required: true },
+      isSkipped: { type: Boolean, default: false }, // Thêm field isSkipped
     },
   ],
   createdAt: { type: Date, default: Date.now },
@@ -71,8 +75,8 @@ const ResultSchema = new mongoose.Schema({
     type: Object,
     default: {},
   },
-  isCompleted: { type: Boolean, default: false }, // Thêm trạng thái hoàn thành
-  endTime: { type: Date }, // Thêm thời gian kết thúc
+  isCompleted: { type: Boolean, default: false },
+  endTime: { type: Date },
 });
 
 const Result = mongoose.model("Result", ResultSchema);

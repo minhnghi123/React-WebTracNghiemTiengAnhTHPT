@@ -469,24 +469,55 @@ const BaiLam: React.FC = () => {
   useEffect(() => {
     const fetchPostSubmitData = async () => {
       if (Examresult) {
-        setLoading(true); // Set loading to true before fetching
+        console.log("=== DEBUG EXAM RESULT ===");
+        console.log("Full Examresult:", Examresult);
+        console.log("Videos object:", Examresult.videos);
+        console.log("Videos type:", typeof Examresult.videos);
+        console.log(
+          "Videos keys:",
+          Examresult.videos ? Object.keys(Examresult.videos) : "null"
+        );
+        console.log("=========================");
+
+        setLoading(true);
         try {
-          const advResponse = await gemini(Examresult.arrResponse);
-          setAdvice(advResponse); // Update advice with fetched data
+          // Fetch AI advice
+          if (Examresult.arrResponse) {
+            const advResponse = await gemini(Examresult.arrResponse);
+            setAdvice(advResponse);
+          }
         } catch (error) {
           console.error("Error fetching advice:", error);
+          setAdvice("Không thể tải lời khuyên từ AI. Vui lòng thử lại sau.");
         } finally {
-          setLoading(false); // Ensure loading is set to false after fetching
+          setLoading(false);
         }
 
-        const updated: Question[] = [];
-        for (const sug of suggestedQuestions) {
-          if (sug._id) {
-            const res = await QuestionAPI.getQuestion(sug._id);
-            if (res.code === 200) updated.push(res.question);
+        // Fetch suggested questions details
+        if (
+          Examresult.suggestionQuestion &&
+          Array.isArray(Examresult.suggestionQuestion)
+        ) {
+          const updated: Question[] = [];
+          for (const sug of Examresult.suggestionQuestion) {
+            if (sug._id) {
+              try {
+                const res = await QuestionAPIStudent.getQuestionForStudent(
+                  sug._id
+                );
+                if (res.code === 200) {
+                  updated.push({
+                    ...res.question,
+                    detailsFetched: true,
+                  });
+                }
+              } catch (error) {
+                console.error(`Error fetching question ${sug._id}:`, error);
+              }
+            }
           }
+          setSuggestedQuestions(updated);
         }
-        setSuggestedQuestions(updated);
       }
     };
 
@@ -915,12 +946,19 @@ const BaiLam: React.FC = () => {
                         colorField: "type",
                         radius: 0.8,
                         innerRadius: 0.6,
-                        label: {
-                          type: "outer" as const,
-                          content: "{name}: {value} ({percentage})",
-                          style: { fontSize: 14, fontWeight: 600 },
+                        label: false, // Disable labels to avoid shape.outer error
+                        legend: {
+                          position: "bottom" as const,
+                          itemName: {
+                            formatter: (text: string, item: any) => {
+                              const percentage = (
+                                (item.value / totalQuestions) *
+                                100
+                              ).toFixed(1);
+                              return `${text}: ${item.value} (${percentage}%)`;
+                            },
+                          },
                         },
-                        legend: { position: "bottom" as const },
                         statistic: {
                           title: {
                             offsetY: -8,
@@ -979,7 +1017,7 @@ const BaiLam: React.FC = () => {
                           <Spin />
                           <AntText>Đang phân tích kết quả...</AntText>
                         </div>
-                      ) : (
+                      ) : advice ? (
                         <div className="advice-content-wrapper">
                           <div
                             className="advice-text"
@@ -991,11 +1029,20 @@ const BaiLam: React.FC = () => {
                             }}
                           />
                         </div>
+                      ) : (
+                        <div className="advice-content-wrapper">
+                          <AntText type="secondary">
+                            Không có lời khuyên nào được tạo. Bạn đã làm bài rất
+                            tốt!
+                          </AntText>
+                        </div>
                       )}
                     </Panel>
 
                     {/* YouTube Videos */}
                     {Examresult.videos &&
+                      typeof Examresult.videos === "object" &&
+                      Examresult.videos !== null &&
                       Object.keys(Examresult.videos).length > 0 && (
                         <Panel
                           header={
@@ -1007,112 +1054,149 @@ const BaiLam: React.FC = () => {
                           key="videos"
                         >
                           <div className="videos-content">
-                            {Object.keys(Examresult.videos).map((topic) => (
-                              <div key={topic} className="video-topic-section">
-                                <Title level={5} className="topic-title">
-                                  📚 {topic}
-                                </Title>
-                                <Row gutter={[16, 16]}>
-                                  {Examresult.videos[topic].map(
-                                    (video: any, idx: number) => (
-                                      <Col
-                                        xs={24}
-                                        sm={12}
-                                        md={8}
-                                        key={video.videoId || `video-${idx}`}
-                                      >
-                                        <a
-                                          href={
-                                            video.linkUrl ||
-                                            `https://youtube.com/watch?v=${video.videoId}`
+                            {Object.entries(Examresult.videos).map(
+                              ([topic, videos]: [string, any]) => {
+                                if (
+                                  !Array.isArray(videos) ||
+                                  videos.length === 0
+                                ) {
+                                  return null;
+                                }
+                                return (
+                                  <div
+                                    key={topic}
+                                    className="video-topic-section"
+                                  >
+                                    <Title level={5} className="topic-title">
+                                      📚 {topic}
+                                    </Title>
+                                    <Row gutter={[16, 16]}>
+                                      {videos.map((video: any, idx: number) => (
+                                        <Col
+                                          xs={24}
+                                          sm={12}
+                                          md={8}
+                                          key={
+                                            video.videoId ||
+                                            `video-${topic}-${idx}`
                                           }
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                          className="video-card-link"
                                         >
-                                          <div className="video-thumbnail-wrapper">
-                                            <img
-                                              src={
-                                                video.thumbnail ||
-                                                `https://i.ytimg.com/vi/${video.videoId}/maxresdefault.jpg`
-                                              }
-                                              alt={video.title}
-                                              className="video-thumb"
-                                            />
-                                            <div className="play-overlay">
-                                              <YoutubeFilled />
+                                          <a
+                                            href={
+                                              video.linkUrl ||
+                                              `https://youtube.com/watch?v=${video.videoId}`
+                                            }
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="video-card-link"
+                                          >
+                                            <div className="video-thumbnail-wrapper">
+                                              <img
+                                                src={
+                                                  video.thumbnail ||
+                                                  `https://i.ytimg.com/vi/${video.videoId}/maxresdefault.jpg`
+                                                }
+                                                alt={
+                                                  video.title ||
+                                                  "Video thumbnail"
+                                                }
+                                                className="video-thumb"
+                                                onError={(e) => {
+                                                  e.currentTarget.src = `https://i.ytimg.com/vi/${video.videoId}/hqdefault.jpg`;
+                                                }}
+                                              />
+                                              <div className="play-overlay">
+                                                <YoutubeFilled />
+                                              </div>
                                             </div>
-                                          </div>
-                                          <div className="video-info-box">
-                                            <AntText className="video-title-text">
-                                              {video.title}
-                                            </AntText>
-                                          </div>
-                                        </a>
-                                      </Col>
-                                    )
-                                  )}
-                                </Row>
-                              </div>
-                            ))}
+                                            <div className="video-info-box">
+                                              <AntText className="video-title-text">
+                                                {video.title ||
+                                                  "Untitled Video"}
+                                              </AntText>
+                                            </div>
+                                          </a>
+                                        </Col>
+                                      ))}
+                                    </Row>
+                                  </div>
+                                );
+                              }
+                            )}
                           </div>
                         </Panel>
                       )}
 
                     {/* Suggested Questions */}
-                    <Panel
-                      header={
-                        <div className="panel-header-custom">
-                          <QuestionCircleOutlined className="panel-icon" />
-                          <span>Câu hỏi gợi ý luyện tập</span>
-                        </div>
-                      }
-                      key="suggested"
-                    >
-                      <div className="suggested-questions-wrapper">
-                        <Collapse
-                          className="suggested-questions-collapse"
-                          ghost
-                        >
-                          {suggestedQuestions.map((q: Question, id: number) => {
-                            const cleanContent = q.content
-                              .replace(/<[^>]*>/g, "")
-                              .replace(/&nbsp;/g, " ")
-                              .trim();
-                            return (
-                              <Panel
-                                header={
-                                  <div className="question-header">
-                                    <span className="question-number">
-                                      Câu {id + 1}:
-                                    </span>
-                                    <span className="question-preview">
-                                      {cleanContent.slice(0, 100)}
-                                      {cleanContent.length > 100 ? "..." : ""}
-                                    </span>
-                                  </div>
-                                }
-                                key={q._id ?? id}
-                                className="suggested-question-panel"
-                              >
-                                {q.detailsFetched ? (
-                                  <SuggestedQuestionAnswer question={q} />
-                                ) : (
-                                  <div
-                                    style={{
-                                      textAlign: "center",
-                                      padding: "2rem",
-                                    }}
+                    {suggestedQuestions && suggestedQuestions.length > 0 && (
+                      <Panel
+                        header={
+                          <div className="panel-header-custom">
+                            <QuestionCircleOutlined className="panel-icon" />
+                            <span>Câu hỏi gợi ý luyện tập</span>
+                          </div>
+                        }
+                        key="suggested"
+                      >
+                        <div className="suggested-questions-wrapper">
+                          <Collapse
+                            className="suggested-questions-collapse"
+                            ghost
+                            onChange={(key) => {
+                              if (key && key.length > 0) {
+                                const questionId = key[key.length - 1];
+                                handleExpandSuggestedQuestion(
+                                  questionId as string
+                                );
+                              }
+                            }}
+                          >
+                            {suggestedQuestions.map(
+                              (q: Question, id: number) => {
+                                const cleanContent = (q.content || "")
+                                  .replace(/<[^>]*>/g, "")
+                                  .replace(/&nbsp;/g, " ")
+                                  .trim();
+                                return (
+                                  <Panel
+                                    header={
+                                      <div className="question-header">
+                                        <span className="question-number">
+                                          Câu {id + 1}:
+                                        </span>
+                                        <span className="question-preview">
+                                          {cleanContent.slice(0, 100)}
+                                          {cleanContent.length > 100
+                                            ? "..."
+                                            : ""}
+                                        </span>
+                                      </div>
+                                    }
+                                    key={q._id ?? id}
+                                    className="suggested-question-panel"
                                   >
-                                    <Spin />
-                                  </div>
-                                )}
-                              </Panel>
-                            );
-                          })}
-                        </Collapse>
-                      </div>
-                    </Panel>
+                                    {q.loading ? (
+                                      <div className="question-loading">
+                                        <Spin />
+                                        <AntText>Đang tải câu hỏi...</AntText>
+                                      </div>
+                                    ) : q.detailsFetched ? (
+                                      <SuggestedQuestionAnswer question={q} />
+                                    ) : (
+                                      <div className="question-placeholder">
+                                        <AntText type="secondary">
+                                          Nhấp để xem chi tiết câu hỏi
+                                        </AntText>
+                                      </div>
+                                    )}
+                                  </Panel>
+                                );
+                              }
+                            )}
+                          </Collapse>
+                        </div>
+                      </Panel>
+                    )}
                   </Collapse>
                 )}
               </Card>

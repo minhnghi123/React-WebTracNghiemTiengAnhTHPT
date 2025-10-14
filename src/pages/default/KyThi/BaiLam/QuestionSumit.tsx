@@ -9,7 +9,7 @@ export type UserAnswer = {
   questionId: string;
   selectedAnswerId?: string;
   userAnswer?: string[];
-  qu
+  qu;
 };
 
 type QuestionComponentProps = {
@@ -28,8 +28,8 @@ const QuestionSubmit: React.FC<QuestionComponentProps> = ({
   onAnswerChange,
   currentAnswer,
   index,
-  viewOnly = false, // Add viewOnly prop with default value
-  questionIndex, // Add questionIndex
+  viewOnly = false,
+  questionIndex,
 }) => {
   const [localAnswer, setLocalAnswer] = useState<UserAnswer>(
     currentAnswer || { questionId: question._id || "", userAnswer: [] }
@@ -79,9 +79,10 @@ const QuestionSubmit: React.FC<QuestionComponentProps> = ({
   const renderFillInBlankContent = () => {
     const placeholderRegex = /_+\d+_+/g;
     // console.log(question);
-    const matchedPlaceholders = typeof question.content === "string" 
-      ? question.content.match(placeholderRegex) 
-      : null;
+    const matchedPlaceholders =
+      typeof question.content === "string"
+        ? question.content.match(placeholderRegex)
+        : null;
 
     if (
       matchedPlaceholders &&
@@ -126,7 +127,10 @@ const QuestionSubmit: React.FC<QuestionComponentProps> = ({
   };
 
   return (
-    <Card className="mb-4 shadow question-submit-card" bodyStyle={{ padding: "24px" }}>
+    <Card
+      className="mb-4 shadow question-submit-card"
+      styles={{ body: { padding: "24px" } }}
+    >
       <Title
         level={5}
         className="question-title-submit"
@@ -140,9 +144,7 @@ const QuestionSubmit: React.FC<QuestionComponentProps> = ({
           fontWeight: 600,
         }}
       >
-        <span className="question-number-badge">
-          Câu {questionIndex}.
-        </span>
+        <span className="question-number-badge">Câu {questionIndex}.</span>
         {questionType === "6742fb3bd56a2e75dbd817ec" ? (
           renderFillInBlankContent()
         ) : (
@@ -162,9 +164,10 @@ const QuestionSubmit: React.FC<QuestionComponentProps> = ({
             }
             value={localAnswer.selectedAnswerId}
             style={{ display: "flex", flexDirection: "column", gap: "12px" }}
-            disabled={viewOnly} // Disable Radio.Group if viewOnly
+            disabled={viewOnly}
           >
-            {question.answers?.map((answer) => (
+            {/* HIỂN THỊ ĐỦ SỐ ĐÁP ÁN THỰC TẾ - không giới hạn 4 */}
+            {(question.answers || []).map((answer) => (
               <Radio key={answer._id} value={answer._id}>
                 <span
                   dangerouslySetInnerHTML={{
@@ -181,7 +184,7 @@ const QuestionSubmit: React.FC<QuestionComponentProps> = ({
             }
             value={localAnswer.userAnswer?.[0]}
             style={{ display: "flex", flexDirection: "column", gap: "12px" }}
-            disabled={viewOnly} // Disable Radio.Group if viewOnly
+            disabled={viewOnly}
           >
             <Radio value="true">True</Radio>
             <Radio value="false">False</Radio>
@@ -190,15 +193,16 @@ const QuestionSubmit: React.FC<QuestionComponentProps> = ({
         ) : (
           (() => {
             const placeholderRegex = /_+\d+_+/g;
-            const matched = typeof question.content === "string" 
-              ? question.content.match(placeholderRegex) 
-              : null;
+            const matched =
+              typeof question.content === "string"
+                ? question.content.match(placeholderRegex)
+                : null;
             if (matched && matched.length === (question.answers?.length || 0))
               return null;
 
             return (
               <div className="fill-blank-separate">
-                {question.answers?.map((_, idx) => (
+                {(question.answers || []).map((_, idx) => (
                   <div key={idx} className="mb-2">
                     <Input
                       value={localAnswer.userAnswer?.[idx] || ""}
@@ -210,7 +214,7 @@ const QuestionSubmit: React.FC<QuestionComponentProps> = ({
                         )
                       }
                       placeholder={`Điền ${idx + 1}`}
-                      disabled={viewOnly} // Disable Input if viewOnly
+                      disabled={viewOnly}
                     />
                   </div>
                 ))}

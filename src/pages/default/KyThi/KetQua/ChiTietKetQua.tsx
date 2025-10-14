@@ -2,7 +2,7 @@ import React from "react";
 import { QuestionAnswerResult, Result } from "@/services/student";
 import QuestionAnswerComponent from "./QuestionAnswer";
 import "./ChiTietKetQua.css";
-
+import { Tag } from "antd";
 interface ChiTietKetQuaProps {
   result: Result;
 }
@@ -42,8 +42,7 @@ const mergeListeningQuestion = (
 };
 
 const ChiTietKetQua: React.FC<ChiTietKetQuaProps> = ({ result }) => {
-  // console.log("Chi tiết kết quả:", result);
-  // Tính tổng số câu: kết hợp câu hỏi thường và câu hỏi nghe từ listeningExams
+  // Tính tổng số câu
   const totalListeningQuestions =
     typeof result.examId === "object" && result.examId.listeningExams
       ? result.examId.listeningExams.reduce(
@@ -52,6 +51,13 @@ const ChiTietKetQua: React.FC<ChiTietKetQuaProps> = ({ result }) => {
           0
         )
       : result.listeningQuestions.length;
+
+  // Tính số câu bỏ qua
+  const skippedQuestionsCount = [
+    ...(result.questions || []),
+    ...(result.listeningQuestions || []),
+  ].filter((q: any) => q.isSkipped).length;
+
   return (
     <div className="chi-tiet-ket-qua-page">
       <div className="result-header-section">
@@ -66,14 +72,56 @@ const ChiTietKetQua: React.FC<ChiTietKetQuaProps> = ({ result }) => {
             ? result.examId.title
             : result.examId}
         </h1>
+
+        {/* Hiển thị thống kê */}
+        <div
+          style={{
+            marginTop: "1rem",
+            display: "flex",
+            gap: "1rem",
+            justifyContent: "center",
+            flexWrap: "wrap",
+          }}
+        >
+          <Tag
+            color="success"
+            style={{ fontSize: "0.875rem", padding: "4px 12px" }}
+          >
+            ✓ Đúng: {result.correctAnswer}
+          </Tag>
+          <Tag
+            color="error"
+            style={{ fontSize: "0.875rem", padding: "4px 12px" }}
+          >
+            ✗ Sai: {result.wrongAnswer}
+          </Tag>
+          <Tag
+            color="warning"
+            style={{ fontSize: "0.875rem", padding: "4px 12px" }}
+          >
+            ? Bỏ qua: {skippedQuestionsCount}
+          </Tag>
+        </div>
       </div>
 
       <div className="questions-container">
-        {/* Hiển thị các câu hỏi trắc nghiệm, đọc, điền khuyết (với API gốc) */}
+        {/* Hiển thị các câu hỏi trắc nghiệm, đọc, điền khuyết */}
         {result.questions &&
           (result.questions as QuestionAnswerResult[]).map(
-            (item: QuestionAnswerResult) => (
-              <QuestionAnswerComponent question={item} key={item._id} />
+            (item: QuestionAnswerResult, index: number) => (
+              <div key={item._id}>
+                <h3
+                  style={{
+                    fontSize: "1rem",
+                    fontWeight: 600,
+                    color: "#3b82f6",
+                    marginBottom: "0.5rem",
+                  }}
+                >
+                  Câu {index + 1}
+                </h3>
+                <QuestionAnswerComponent question={item} />
+              </div>
             )
           )}
 
@@ -94,26 +142,47 @@ const ChiTietKetQua: React.FC<ChiTietKetQuaProps> = ({ result }) => {
                   {exam.title}
                 </h2>
                 {exam.questions &&
-                  exam.questions.map((listeningExamQuestion: any) => {
-                    // Ghép kết quả của câu hỏi nghe dựa trên questionId
-                    const mergedQuestion = mergeListeningQuestion(
-                      listeningExamQuestion,
-                      result.listeningQuestions || []
-                    );
-                    return (
-                      <QuestionAnswerComponent
-                        question={mergedQuestion}
-                        key={mergedQuestion._id}
-                      />
-                    );
-                  })}
+                  exam.questions.map(
+                    (listeningExamQuestion: any, index: number) => {
+                      const mergedQuestion = mergeListeningQuestion(
+                        listeningExamQuestion,
+                        result.listeningQuestions || []
+                      );
+                      return (
+                        <div key={mergedQuestion._id}>
+                          <h3
+                            style={{
+                              fontSize: "1rem",
+                              fontWeight: 600,
+                              color: "#3b82f6",
+                              marginBottom: "0.5rem",
+                            }}
+                          >
+                            Câu {result.questions.length + index + 1}
+                          </h3>
+                          <QuestionAnswerComponent question={mergedQuestion} />
+                        </div>
+                      );
+                    }
+                  )}
               </div>
             ))
-          : // Nếu không có listeningExams, fallback hiển thị mảng listeningQuestions theo cấu trúc ban đầu
-            result.listeningQuestions &&
+          : result.listeningQuestions &&
             (result.listeningQuestions as QuestionAnswerResult[]).map(
-              (item: QuestionAnswerResult) => (
-                <QuestionAnswerComponent question={item} key={item._id} />
+              (item: QuestionAnswerResult, index: number) => (
+                <div key={item._id}>
+                  <h3
+                    style={{
+                      fontSize: "1rem",
+                      fontWeight: 600,
+                      color: "#3b82f6",
+                      marginBottom: "0.5rem",
+                    }}
+                  >
+                    Câu {result.questions.length + index + 1}
+                  </h3>
+                  <QuestionAnswerComponent question={item} />
+                </div>
               )
             )}
       </div>

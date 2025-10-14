@@ -1,5 +1,5 @@
 import { Result, ResultAPI } from "@/services/student";
-import { Button, Card, Typography, Empty } from "antd";
+import { Button, Card, Typography, Empty, Pagination } from "antd";
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
@@ -23,6 +23,8 @@ export const LichSuLamBai = () => {
   const [isDetail, setIsDetail] = useState(false);
   const [results, setResults] = useState<Result[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(6); // 6 items per page
 
   const fetchResults = async () => {
     try {
@@ -61,6 +63,7 @@ export const LichSuLamBai = () => {
   const handleViewDetail = (result: Result) => {
     setDetail(result);
     setIsDetail(true);
+    window.scrollTo(0, 0);
   };
 
   const formatDuration = (start: string, end: string) => {
@@ -69,6 +72,17 @@ export const LichSuLamBai = () => {
     );
     return `${duration} phút`;
   };
+
+  const handlePageChange = (page: number, pageSize: number) => {
+    setCurrentPage(page);
+    setPageSize(pageSize);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  // Calculate paginated data
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const paginatedResults = results.slice(startIndex, endIndex);
 
   if (loading) {
     return (
@@ -135,87 +149,111 @@ export const LichSuLamBai = () => {
         </div>
 
         {results.length > 0 ? (
-          <div className="results-grid">
-            {results.map((result, index) => (
-              <Card key={result._id} className="result-card" bordered={false}>
-                <div className="result-header">
-                  <div className="result-number">
-                    Lần {results.length - index}
-                  </div>
-                  <div
-                    className={`result-score ${
-                      result.score >= 5 ? "pass" : "fail"
-                    }`}
-                  >
-                    {result.score}/10
-                  </div>
-                </div>
-
-                <div className="result-body">
-                  <div className="result-info-grid">
-                    <div className="result-info-item">
-                      <div className="info-icon-wrapper">
-                        <CalendarOutlined className="info-icon" />
+          <>
+            <div className="results-grid">
+              {paginatedResults.map((result, index) => {
+                const actualIndex = startIndex + index;
+                return (
+                  <Card key={result._id} className="result-card" bordered={false}>
+                    <div className="result-header">
+                      <div className="result-number">
+                        Lần {results.length - actualIndex}
                       </div>
-                      <div className="info-content">
-                        <div className="info-label">Ngày làm bài</div>
-                        <div className="info-value">
-                          {new Date(result.createdAt).toLocaleString("vi-VN")}
+                      <div
+                        className={`result-score ${
+                          result.score >= 5 ? "pass" : "fail"
+                        }`}
+                      >
+                        {result.score}/10
+                      </div>
+                    </div>
+
+                    <div className="result-body">
+                      <div className="result-info-grid">
+                        <div className="result-info-item">
+                          <div className="info-icon-wrapper">
+                            <CalendarOutlined className="info-icon" />
+                          </div>
+                          <div className="info-content">
+                            <div className="info-label">Ngày làm bài</div>
+                            <div className="info-value">
+                              {new Date(result.createdAt).toLocaleString("vi-VN")}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="result-info-item">
+                          <div className="info-icon-wrapper">
+                            <ClockCircleOutlined className="info-icon" />
+                          </div>
+                          <div className="info-content">
+                            <div className="info-label">Thời gian làm</div>
+                            <div className="info-value">
+                              {formatDuration(result.createdAt, result.endTime)}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="result-info-item">
+                          <div className="info-icon-wrapper">
+                            <CheckCircleOutlined className="info-icon" />
+                          </div>
+                          <div className="info-content">
+                            <div className="info-label">Số câu đúng</div>
+                            <div className="info-value">
+                              {result.correctAnswer}/{result.questions.length} câu
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="result-info-item">
+                          <div className="info-icon-wrapper">
+                            <QuestionCircleOutlined className="info-icon" />
+                          </div>
+                          <div className="info-content">
+                            <div className="info-label">Tổng số câu</div>
+                            <div className="info-value">
+                              {result.questions.length} câu hỏi
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
 
-                    <div className="result-info-item">
-                      <div className="info-icon-wrapper">
-                        <ClockCircleOutlined className="info-icon" />
-                      </div>
-                      <div className="info-content">
-                        <div className="info-label">Thời gian làm</div>
-                        <div className="info-value">
-                          {formatDuration(result.createdAt, result.endTime)}
-                        </div>
-                      </div>
-                    </div>
+                    <Button
+                      type="primary"
+                      icon={<EyeOutlined />}
+                      onClick={() => handleViewDetail(result)}
+                      className="view-detail-button"
+                      block
+                      size="large"
+                    >
+                      Xem chi tiết đáp án
+                    </Button>
+                  </Card>
+                );
+              })}
+            </div>
 
-                    <div className="result-info-item">
-                      <div className="info-icon-wrapper">
-                        <CheckCircleOutlined className="info-icon" />
-                      </div>
-                      <div className="info-content">
-                        <div className="info-label">Số câu đúng</div>
-                        <div className="info-value">
-                          {result.correctAnswer}/{result.questions.length} câu
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="result-info-item">
-                      <div className="info-icon-wrapper">
-                        <QuestionCircleOutlined className="info-icon" />
-                      </div>
-                      <div className="info-content">
-                        <div className="info-label">Tổng số câu</div>
-                        <div className="info-value">
-                          {result.questions.length} câu hỏi
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <Button
-                  type="primary"
-                  icon={<EyeOutlined />}
-                  onClick={() => handleViewDetail(result)}
-                  className="view-detail-button"
-                  block
-                  size="large"
-                >
-                  Xem chi tiết đáp án
-                </Button>
-              </Card>
-            ))}
-          </div>
+            {/* Pagination */}
+            {results.length > pageSize && (
+              <div className="pagination-wrapper">
+                <Pagination
+                  current={currentPage}
+                  pageSize={pageSize}
+                  total={results.length}
+                  onChange={handlePageChange}
+                  showSizeChanger
+                  showTotal={(total, range) =>
+                    `${range[0]}-${range[1]} / ${total} lần làm bài`
+                  }
+                  pageSizeOptions={["6", "12", "18", "24"]}
+                  className="history-pagination"
+                  responsive
+                />
+              </div>
+            )}
+          </>
         ) : (
           <Card className="empty-card" bordered={false}>
             <Empty

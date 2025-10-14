@@ -23,8 +23,8 @@ const ListeningQuestionSubmit: React.FC<ListeningQuestionComponentProps> = ({
   questionType,
   onAnswerChange,
   currentAnswer,
-  viewOnly = false, // Add viewOnly prop with default value
-  questionIndex, // Add questionIndex
+  viewOnly = false,
+  questionIndex,
 }) => {
   const displayContent = question.questionText || "";
 
@@ -144,9 +144,7 @@ const ListeningQuestionSubmit: React.FC<ListeningQuestionComponentProps> = ({
           lineHeight: "1.6",
         }}
       >
-        <span className="question-number-badge">
-          Câu {questionIndex}.
-        </span>
+        <span className="question-number-badge">Câu {questionIndex}.</span>
         {questionType === "6742fb3bd56a2e75dbd817ec" ? (
           renderFillInTheBlanks()
         ) : (
@@ -160,8 +158,9 @@ const ListeningQuestionSubmit: React.FC<ListeningQuestionComponentProps> = ({
           <Radio.Group
             onChange={(e) => handleCheckboxChange(question._id, e.target.value)}
             value={localAnswer.selectedAnswerId}
-            disabled={viewOnly} // Disable Radio.Group if viewOnly
+            disabled={viewOnly}
           >
+            {/* HIỂN THỊ ĐỦ SỐ ĐÁP ÁN THỰC TẾ - không giới hạn 4 */}
             {(question.options || []).map((option) => (
               <div key={String(option.option_id) || ""}>
                 <Radio value={option.option_id}>
@@ -180,7 +179,7 @@ const ListeningQuestionSubmit: React.FC<ListeningQuestionComponentProps> = ({
           <Radio.Group
             onChange={(e) => handleCheckboxChange(question._id, e.target.value)}
             value={localAnswer.selectedAnswerId}
-            disabled={viewOnly} // Disable Radio.Group if viewOnly
+            disabled={viewOnly}
           >
             <div>
               <Radio value="true">True</Radio>
@@ -194,7 +193,6 @@ const ListeningQuestionSubmit: React.FC<ListeningQuestionComponentProps> = ({
           </Radio.Group>
         ) : null}
       </div>
-      {/* Phần audio của bài nghe có thể được render ở component cha */}
     </div>
   );
 };

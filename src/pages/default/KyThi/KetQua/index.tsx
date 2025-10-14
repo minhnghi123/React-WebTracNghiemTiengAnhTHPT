@@ -50,7 +50,9 @@ export const KetQua: React.FC<KetQuaProps> = ({ DeThi }) => {
       key: "score",
       render: (record: Result) => (
         <div className="score-cell">
-          <span className={`score-badge ${record.score >= 5 ? "pass" : "fail"}`}>
+          <span
+            className={`score-badge ${record.score >= 5 ? "pass" : "fail"}`}
+          >
             {record.score}/10
           </span>
           <span className="mobile-date">
@@ -75,7 +77,9 @@ export const KetQua: React.FC<KetQuaProps> = ({ DeThi }) => {
       responsive: ["lg"] as any,
       render: (record: Result) => {
         const duration = Math.round(
-          (new Date(record.endTime).getTime() - new Date(record.createdAt).getTime()) / 60000
+          (new Date(record.endTime).getTime() -
+            new Date(record.createdAt).getTime()) /
+            60000
         );
         return <span style={{ fontSize: "0.9375rem" }}>{duration} phút</span>;
       },
