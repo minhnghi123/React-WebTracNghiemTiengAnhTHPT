@@ -96,22 +96,3 @@
     right: 10px;
   }
 }
-
-/* Clean responsive - Remove conflicts */
-@media (min-width: 769px) {
-  #logo {
-    display: flex !important;
-    position: static !important;
-    transform: none !important;
-  }
-
-  .mobile-menu-icon {
-    display: none !important;
-  }
-}
-
-@media (max-width: 768px) {
-  #logo {
-    display: flex !important;
-  }
-}

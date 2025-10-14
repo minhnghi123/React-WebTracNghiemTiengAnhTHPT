@@ -11,7 +11,7 @@ import {
 import AppLink from "@/components/AppLink";
 import "./home.css";
 
-const Home = () => {
+export const Home: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -52,13 +52,6 @@ const Home = () => {
     },
   ];
 
-  const stats = [
-    { number: "10,000+", label: "Học sinh" },
-    { number: "500+", label: "Đề thi" },
-    { number: "100+", label: "Giáo viên" },
-    { number: "98%", label: "Hài lòng" },
-  ];
-
   return (
     <div className="home-container">
       {/* Hero Section */}
@@ -88,6 +81,8 @@ const Home = () => {
               </AppLink>
             </div>
           </div>
+
+          {/* ✅ FIX: Floating cards layout - Tách riêng không chồng chéo */}
           <div className="hero-image">
             <div className="floating-card card-1">
               <div className="card-icon">📚</div>
@@ -105,17 +100,42 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Stats Section */}
+      {/* Stats Section - ✅ Updated với icons mới */}
       <section className="stats-section">
-        <Row gutter={[32, 32]}>
-          {stats.map((stat, index) => (
-            <Col xs={12} sm={12} md={6} key={index}>
-              <div className="stat-card">
-                <div className="stat-number">{stat.number}</div>
-                <div className="stat-label">{stat.label}</div>
+        <Row gutter={[24, 24]}>
+          <Col xs={24} sm={12} md={8}>
+            <Card className="stat-card" bordered={false}>
+              <div className="stat-icon-wrapper">
+                <span className="stat-icon-svg" role="img" aria-label="exam">
+                  📚
+                </span>
               </div>
-            </Col>
-          ))}
+              <div className="stat-number">500+</div>
+              <div className="stat-label">Đề thi</div>
+            </Card>
+          </Col>
+          <Col xs={24} sm={12} md={8}>
+            <Card className="stat-card" bordered={false}>
+              <div className="stat-icon-wrapper">
+                <span className="stat-icon-svg" role="img" aria-label="target">
+                  🎯
+                </span>
+              </div>
+              <div className="stat-number">98%</div>
+              <div className="stat-label">Đạt mục tiêu</div>
+            </Card>
+          </Col>
+          <Col xs={24} sm={12} md={8}>
+            <Card className="stat-card" bordered={false}>
+              <div className="stat-icon-wrapper">
+                <span className="stat-icon-svg" role="img" aria-label="students">
+                  ⭐
+                </span>
+              </div>
+              <div className="stat-number">10k+</div>
+              <div className="stat-label">Học sinh</div>
+            </Card>
+          </Col>
         </Row>
       </section>
 

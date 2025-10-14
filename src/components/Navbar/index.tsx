@@ -1,6 +1,6 @@
 import { useAuthContext } from "@/contexts/AuthProvider";
 import { AuthApi } from "@/services/Auth";
-import { useLayoutEffect, useState } from "react";
+import { useLayoutEffect, useState, useEffect } from "react";
 import { Dropdown, MenuProps } from "antd";
 import {
   MenuOutlined,
@@ -9,7 +9,8 @@ import {
   LogoutOutlined,
   AppstoreOutlined,
 } from "@ant-design/icons";
-import P2N from "/src/assets/img/P2N 1.svg";
+// TODO: Thay bằng logo màu xanh dương mới khi có file
+// import P2NBlue from "/src/assets/img/P2N-blue.svg";
 import AppLink from "@/components/AppLink";
 import "./navbar.css";
 
@@ -21,7 +22,50 @@ export const Navbar: React.FC<navbarProps> = ({ rule = true }) => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [userName, setUserName] = useState<string>("");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false); // ✅ Track scroll state
   const { user, handleLogout } = useAuthContext();
+
+  // ✅ Add scroll listener for sticky navbar effect
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // ✅ Close mobile menu when clicking outside or on overlay
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      const navbar = document.querySelector(".navbar-menu");
+      const toggle = document.querySelector(".mobile-menu-toggle");
+
+      if (
+        isMobileMenuOpen &&
+        navbar &&
+        !navbar.contains(target) &&
+        toggle &&
+        !toggle.contains(target)
+      ) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+
+    if (isMobileMenuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isMobileMenuOpen]);
+
+  // ✅ Close mobile menu when route changes
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [window.location.pathname]);
 
   const handleBTNLogout = async () => {
     handleLogout();
@@ -79,10 +123,10 @@ export const Navbar: React.FC<navbarProps> = ({ rule = true }) => {
   ];
 
   return (
-    <nav className="modern-navbar">
+    <nav className={`modern-navbar ${isScrolled ? "scrolled" : ""}`}>
       <div className="navbar-container">
         <AppLink to="/" className="navbar-logo">
-          <img src={P2N} alt="Logo" />
+          <span className="logo-text">P2N</span>
         </AppLink>
 
         {/* Desktop Menu */}
@@ -157,7 +201,10 @@ export const Navbar: React.FC<navbarProps> = ({ rule = true }) => {
 
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
-        <div className="mobile-menu-overlay" onClick={closeMobileMenu}></div>
+        <div
+          className={`mobile-menu-overlay ${isMobileMenuOpen ? "active" : ""}`}
+          onClick={closeMobileMenu}
+        ></div>
       )}
     </nav>
   );
