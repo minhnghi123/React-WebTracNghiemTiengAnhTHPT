@@ -1,0 +1,544 @@
+/* ============================================
+   CLASSROOM DETAIL PAGE
+   ============================================ */
+.classroom-detail-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  padding: 2rem 0 4rem;
+}
+
+/* ============================================
+   CONTAINER
+   ============================================ */
+.classroom-detail-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+/* ============================================
+   BACK BUTTON
+   ============================================ */
+.back-btn-classroom {
+  height: 48px !important;
+  padding: 0 2rem !important;
+  border-radius: 12px !important;
+  font-weight: 600 !important;
+  background: white !important;
+  border: 2px solid #e5e7eb !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1) !important;
+  margin-bottom: 2rem;
+  transition: all 0.3s ease !important;
+  animation: fadeInLeft 0.6s ease-out;
+}
+
+.back-btn-classroom:hover {
+  transform: translateX(-4px) !important;
+  border-color: #3b82f6 !important;
+  color: #3b82f6 !important;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* ============================================
+   HEADER CARD
+   ============================================ */
+.classroom-header-card {
+  background: white !important;
+  border-radius: 20px !important;
+  margin-bottom: 2rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
+  border: none !important;
+  animation: fadeInUp 0.6s ease-out 0.1s both;
+}
+
+.classroom-header-card .ant-card-head {
+  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+  border-bottom: 2px solid #e5e7eb;
+  padding: 1.5rem 2rem;
+  text-align: center;
+}
+
+.classroom-header-card .ant-card-head-title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #1f2937;
+}
+
+.classroom-header-card .ant-card-body {
+  padding: 2rem;
+}
+
+.classroom-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.classroom-info-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem;
+  background: #f9fafb;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.classroom-info-row:hover {
+  background: #f3f4f6;
+  transform: translateX(4px);
+}
+
+.classroom-info-icon-wrapper {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+}
+
+.classroom-info-icon-wrapper .anticon {
+  font-size: 1.25rem;
+  color: white;
+}
+
+.classroom-info-content {
+  flex: 1;
+}
+
+.classroom-info-label-detail {
+  font-size: 0.8125rem;
+  color: #6b7280;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-bottom: 0.25rem;
+}
+
+.classroom-info-value-detail {
+  font-size: 1rem;
+  color: #1f2937;
+  font-weight: 600;
+  word-break: break-word;
+}
+
+/* ============================================
+   JOIN CARD
+   ============================================ */
+.join-classroom-section {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+  border-radius: 20px !important;
+  margin-bottom: 2rem;
+  box-shadow: 0 8px 32px rgba(59, 130, 246, 0.4) !important;
+  border: none !important;
+  animation: fadeInUp 0.6s ease-out 0.2s both;
+}
+
+.join-classroom-section .ant-card-head {
+  background: rgba(255, 255, 255, 0.1);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+  padding: 1.5rem 2rem;
+}
+
+.join-classroom-section .ant-card-head-title {
+  color: white;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.join-classroom-section .ant-card-body {
+  padding: 2rem;
+}
+
+.join-description {
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+
+.join-password-input {
+  height: 52px !important;
+  border-radius: 12px !important;
+  border: 2px solid rgba(255, 255, 255, 0.3) !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: white !important;
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  margin-bottom: 1rem !important;
+}
+
+.join-password-input::placeholder {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+.join-password-input:hover,
+.join-password-input:focus {
+  background: rgba(255, 255, 255, 0.15) !important;
+  border-color: rgba(255, 255, 255, 0.5) !important;
+}
+
+.join-submit-btn {
+  height: 52px !important;
+  border-radius: 12px !important;
+  font-weight: 700 !important;
+  font-size: 1rem !important;
+  background: white !important;
+  color: #3b82f6 !important;
+  border: none !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15) !important;
+  transition: all 0.3s ease !important;
+}
+
+.join-submit-btn:hover {
+  transform: translateY(-3px) !important;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.2) !important;
+  color: #2563eb !important;
+}
+
+/* ============================================
+   TABS SECTION
+   ============================================ */
+.classroom-tabs-card {
+  background: white !important;
+  border-radius: 20px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
+  border: none !important;
+  animation: fadeInUp 0.6s ease-out 0.3s both;
+}
+
+.classroom-tabs-card .ant-card-body {
+  padding: 0 !important;
+}
+
+.classroom-tabs {
+  padding: 0 2rem;
+}
+
+.classroom-tabs .ant-tabs-nav {
+  margin-bottom: 0 !important;
+  padding: 1rem 0;
+}
+
+.classroom-tabs .ant-tabs-tab {
+  padding: 1rem 1.5rem !important;
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  color: #6b7280 !important;
+  transition: all 0.3s ease !important;
+}
+
+.classroom-tabs .ant-tabs-tab:hover {
+  color: #3b82f6 !important;
+}
+
+.classroom-tabs .ant-tabs-tab-active {
+  color: #3b82f6 !important;
+}
+
+.classroom-tabs .ant-tabs-ink-bar {
+  height: 3px !important;
+  background: linear-gradient(90deg, #3b82f6, #2563eb) !important;
+}
+
+.classroom-tabs .ant-tabs-content {
+  padding: 2rem;
+}
+
+/* ============================================
+   TABLE STYLES
+   ============================================ */
+.classroom-table .ant-table {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.classroom-table .ant-table-thead > tr > th {
+  background: #f9fafb !important;
+  font-weight: 700 !important;
+  color: #1f2937 !important;
+  border-bottom: 2px solid #e5e7eb !important;
+  font-size: 0.875rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.3px !important;
+}
+
+.classroom-table .ant-table-tbody > tr {
+  transition: all 0.3s ease;
+}
+
+.classroom-table .ant-table-tbody > tr:hover {
+  background: #f9fafb !important;
+}
+
+.classroom-table .ant-table-tbody > tr > td {
+  border-bottom: 1px solid #f3f4f6 !important;
+}
+
+.classroom-table .ant-btn {
+  height: 36px !important;
+  padding: 0 1.25rem !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  transition: all 0.3s ease !important;
+}
+
+.classroom-table .ant-btn:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* ============================================
+   OVERVIEW STATS
+   ============================================ */
+.overview-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.stat-item-detail {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+  border-radius: 16px;
+  transition: all 0.3s ease;
+}
+
+.stat-item-detail:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.stat-icon-detail {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.3);
+}
+
+.stat-icon-detail .anticon {
+  font-size: 1.5rem;
+  color: white;
+}
+
+.stat-content-detail {
+  flex: 1;
+}
+
+.stat-label-detail {
+  font-size: 0.8125rem;
+  color: #6b7280;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-bottom: 0.375rem;
+}
+
+.stat-value-detail {
+  font-size: 1.75rem;
+  color: #1f2937;
+  font-weight: 800;
+  line-height: 1;
+}
+
+/* ============================================
+   MEMBER LIST
+   ============================================ */
+.member-list .ant-list-item {
+  padding: 1rem !important;
+  border-radius: 12px !important;
+  margin-bottom: 0.75rem !important;
+  background: #f9fafb !important;
+  border: none !important;
+  transition: all 0.3s ease !important;
+}
+
+.member-list .ant-list-item:hover {
+  background: #f3f4f6 !important;
+  transform: translateX(4px) !important;
+}
+
+.member-list .ant-avatar {
+  width: 48px !important;
+  height: 48px !important;
+  border: 2px solid white !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+}
+
+.member-list .ant-list-item-meta-title {
+  font-weight: 600 !important;
+  color: #1f2937 !important;
+  font-size: 1rem !important;
+}
+
+.member-list .ant-list-item-meta-description {
+  color: #6b7280 !important;
+  font-size: 0.875rem !important;
+}
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+@media (max-width: 992px) {
+  .classroom-detail-container {
+    padding: 0 1.5rem;
+  }
+
+  .classroom-info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .overview-stats {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .classroom-detail-page {
+    padding: 1.5rem 0 3rem;
+  }
+
+  .classroom-detail-container {
+    padding: 0 1rem;
+  }
+
+  .classroom-header-card .ant-card-head {
+    padding: 1.25rem;
+  }
+
+  .classroom-header-card .ant-card-head-title {
+    font-size: 1.5rem;
+  }
+
+  .classroom-header-card .ant-card-body {
+    padding: 1.5rem;
+  }
+
+  .classroom-info-row {
+    padding: 1rem;
+  }
+
+  .classroom-info-icon-wrapper {
+    width: 44px;
+    height: 44px;
+  }
+
+  .join-classroom-section .ant-card-head {
+    padding: 1.25rem 1.5rem;
+  }
+
+  .join-classroom-section .ant-card-head-title {
+    font-size: 1.25rem;
+  }
+
+  .join-classroom-section .ant-card-body {
+    padding: 1.5rem;
+  }
+
+  .classroom-tabs {
+    padding: 0 1rem;
+  }
+
+  .classroom-tabs .ant-tabs-content {
+    padding: 1.5rem;
+  }
+
+  .classroom-table {
+    overflow-x: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .back-btn-classroom {
+    width: 100%;
+    text-align: center;
+  }
+
+  .classroom-header-card .ant-card-head-title {
+    font-size: 1.25rem;
+  }
+
+  .classroom-info-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .classroom-info-icon-wrapper {
+    width: 40px;
+    height: 40px;
+  }
+
+  .classroom-info-icon-wrapper .anticon {
+    font-size: 1.125rem;
+  }
+
+  .join-password-input {
+    height: 48px !important;
+    font-size: 0.9375rem !important;
+  }
+
+  .join-submit-btn {
+    height: 48px !important;
+    font-size: 0.9375rem !important;
+  }
+
+  .classroom-tabs .ant-tabs-tab {
+    padding: 0.875rem 1rem !important;
+    font-size: 0.9375rem !important;
+  }
+
+  .stat-item-detail {
+    padding: 1.25rem;
+  }
+
+  .stat-icon-detail {
+    width: 48px;
+    height: 48px;
+  }
+
+  .stat-icon-detail .anticon {
+    font-size: 1.25rem;
+  }
+
+  .stat-value-detail {
+    font-size: 1.5rem;
+  }
+}

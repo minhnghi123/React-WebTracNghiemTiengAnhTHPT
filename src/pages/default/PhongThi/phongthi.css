@@ -1,15 +1,570 @@
-.search-input {
-    border-radius: 5px;
-    padding: 8px 12px;
-    margin-bottom: 16px;
-    margin-left: 20px;
-    border: 1px solid #d9d9d9;
-    width: 20%;
-    box-sizing: border-box; /* Đảm bảo padding và border không làm tăng kích thước */
+/* ============================================
+   CLASSROOM PAGE
+   ============================================ */
+.classroom-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+}
+
+/* ============================================
+   HERO SECTION
+   ============================================ */
+.classroom-hero {
+  position: relative;
+  padding: 5rem 2rem 4rem;
+  text-align: center;
+  overflow: hidden;
+}
+
+.classroom-hero-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(
+      circle at 20% 30%,
+      rgba(255, 255, 255, 0.1) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 80% 70%,
+      rgba(255, 255, 255, 0.08) 0%,
+      transparent 50%
+    );
+}
+
+.classroom-hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.classroom-hero-icon {
+  font-size: 4rem;
+  color: #fbbf24;
+  margin-bottom: 1rem;
+  animation: bounce 2s ease-in-out infinite;
+}
+
+.classroom-hero-title {
+  color: white;
+  font-size: 3rem;
+  font-weight: 800;
+  margin: 0.5rem 0;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.classroom-hero-subtitle {
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 1.125rem;
+  font-weight: 500;
+  animation: fadeInUp 0.6s ease-out 0.1s both;
+}
+
+/* ============================================
+   CONTAINER
+   ============================================ */
+.classroom-container {
+  max-width: 1400px;
+  margin: -2rem auto 0;
+  padding: 0 2rem 4rem;
+  position: relative;
+  z-index: 3;
+}
+
+/* ============================================
+   SEARCH BAR
+   ============================================ */
+.classroom-search-bar {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 50px;
+  padding: 0.75rem 1.25rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  animation: fadeInUp 0.6s ease-out 0.2s both;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.classroom-search-bar:hover {
+  border-color: rgba(59, 130, 246, 0.2);
+  box-shadow: 0 6px 24px rgba(59, 130, 246, 0.12);
+}
+
+.classroom-search-bar:focus-within {
+  border-color: #3b82f6;
+  box-shadow: 0 6px 24px rgba(59, 130, 246, 0.2);
+  background: white;
+}
+
+.classroom-search-input {
+  height: 40px !important;
+  border: none !important;
+  border-radius: 50px !important;
+  background: transparent !important;
+  font-size: 0.9375rem !important;
+  padding: 0 1rem 0 0.5rem !important;
+  transition: none !important;
+  box-shadow: none !important;
+}
+
+.classroom-search-input:hover,
+.classroom-search-input:focus {
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+.classroom-search-input .ant-input {
+  background: transparent !important;
+  border: none !important;
+}
+
+.classroom-search-input .ant-input:focus {
+  box-shadow: none !important;
+}
+
+.classroom-search-input .anticon {
+  color: #3b82f6;
+  font-size: 1.125rem;
+}
+
+.classroom-search-input::placeholder {
+  color: #9ca3af;
+  font-weight: 400;
+}
+
+/* ============================================
+   CLASSROOM GRID
+   ============================================ */
+.classroom-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+  animation: fadeInUp 0.6s ease-out 0.3s both;
+}
+
+/* ============================================
+   CLASSROOM CARD
+   ============================================ */
+.classroom-card {
+  background: white;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  border: none;
+  position: relative;
+}
+
+.classroom-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #3b82f6, #2563eb);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.6s ease;
+}
+
+.classroom-card:hover::before {
+  transform: scaleX(1);
+}
+
+.classroom-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.15);
+}
+
+.classroom-card .ant-card-head {
+  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+  border-bottom: 2px solid #e5e7eb;
+  padding: 1.5rem;
+}
+
+.classroom-card .ant-card-head-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1f2937;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.classroom-card .ant-card-body {
+  padding: 1.5rem;
+}
+
+.classroom-info-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background: #f9fafb;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+.classroom-info-item:hover {
+  background: #f3f4f6;
+  transform: translateX(4px);
+}
+
+.classroom-info-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+}
+
+.classroom-info-icon .anticon {
+  font-size: 1.125rem;
+  color: white;
+}
+
+.classroom-info-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.classroom-info-label {
+  font-size: 0.75rem;
+  color: #6b7280;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-bottom: 0.125rem;
+}
+
+.classroom-info-value {
+  font-size: 0.9375rem;
+  color: #1f2937;
+  font-weight: 600;
+  word-break: break-word;
+}
+
+/* ============================================
+   JOIN CARD
+   ============================================ */
+.join-classroom-card {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border: none;
+  color: white;
+  box-shadow: 0 8px 32px rgba(59, 130, 246, 0.4);
+}
+
+.join-classroom-card::before {
+  background: linear-gradient(90deg, #fbbf24, #f59e0b);
+}
+
+.join-classroom-card .ant-card-head {
+  background: rgba(255, 255, 255, 0.1);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.join-classroom-card .ant-card-head-title {
+  color: white !important;
+  font-weight: 700 !important;
+}
+
+.join-classroom-card .ant-card-body {
+  padding: 2rem 1.5rem;
+}
+
+/* ✅ FIX: Đảm bảo Meta title và description đều màu trắng */
+.join-classroom-card .ant-card-meta-title {
+  color: white !important;
+  font-weight: 700 !important;
+  font-size: 1.25rem !important;
+}
+
+.join-classroom-card .ant-card-meta-description {
+  color: white !important;
+}
+
+.join-classroom-card .ant-card-meta-description * {
+  color: inherit !important;
+}
+
+.join-input {
+  height: 48px !important;
+  border-radius: 10px !important;
+  border: 2px solid rgba(255, 255, 255, 0.3) !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: white !important;
+  font-size: 0.9375rem !important;
+  font-weight: 600 !important;
+  margin-bottom: 1rem !important;
+}
+
+.join-input::placeholder {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.join-input:hover,
+.join-input:focus {
+  background: rgba(255, 255, 255, 0.15) !important;
+  border-color: rgba(255, 255, 255, 0.5) !important;
+}
+
+.join-button {
+  height: 48px !important;
+  width: 100% !important;
+  border-radius: 10px !important;
+  font-weight: 700 !important;
+  font-size: 0.9375rem !important;
+  background: white !important;
+  color: #3b82f6 !important;
+  border: none !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15) !important;
+  transition: all 0.3s ease !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.join-button:hover:not(:disabled) {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2) !important;
+  color: #2563eb !important;
+}
+
+.join-button:disabled {
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
+  background: rgba(255, 255, 255, 0.7) !important;
+  color: #9ca3af !important;
+}
+
+/* ============================================
+   EMPTY STATE
+   ============================================ */
+.empty-state-card {
+  background: white;
+  border-radius: 20px;
+  padding: 4rem 2rem;
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  animation: fadeInUp 0.6s ease-out 0.3s both;
+}
+
+.empty-icon {
+  font-size: 5rem;
+  color: #d1d5db;
+  margin-bottom: 1.5rem;
+}
+
+.empty-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 0.75rem;
+}
+
+.empty-subtitle {
+  font-size: 1rem;
+  color: #6b7280;
+}
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
   }
-  
-  .search-input:focus {
-    border-color: #1890ff;
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
+}
+
+@keyframes bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+@media (max-width: 992px) {
+  .classroom-hero {
+    padding: 4rem 1.5rem 3.5rem;
+  }
+
+  .classroom-hero-title {
+    font-size: 2.25rem;
+  }
+
+  .classroom-container {
+    padding: 0 1.5rem 3rem;
+  }
+
+  .classroom-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .classroom-hero {
+    padding: 3rem 1rem 3rem;
+  }
+
+  .classroom-hero-icon {
+    font-size: 3rem;
+  }
+
+  .classroom-hero-title {
+    font-size: 1.875rem;
+  }
+
+  .classroom-hero-subtitle {
+    font-size: 1rem;
+  }
+
+  .classroom-container {
+    padding: 0 1rem 2rem;
+    margin-top: -1.5rem;
+  }
+
+  .classroom-search-bar {
+    padding: 0.625rem 1rem;
+    border-radius: 40px;
+    max-width: 100%;
+  }
+
+  .classroom-search-input {
+    height: 38px !important;
+    font-size: 0.875rem !important;
+    padding: 0 0.875rem 0 0.375rem !important;
+  }
+
+  .classroom-search-input .anticon {
+    font-size: 1rem;
+  }
+
+  .classroom-grid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  .classroom-card .ant-card-head {
+    padding: 1.25rem;
+  }
+
+  .classroom-card .ant-card-body {
+    padding: 1.25rem;
+  }
+
+  .classroom-info-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .classroom-info-icon .anticon {
+    font-size: 1rem;
+  }
+
+  .join-classroom-card .ant-card-body {
+    padding: 1.75rem 1.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .classroom-hero-title {
+    font-size: 1.5rem;
+  }
+
+  .classroom-hero-subtitle {
+    font-size: 0.9375rem;
+  }
+
+  .classroom-search-bar {
+    padding: 0.5rem 0.875rem;
+    border-radius: 32px;
+  }
+
+  .classroom-search-input {
+    height: 36px !important;
+    font-size: 0.875rem !important;
+    padding: 0 0.75rem 0 0.25rem !important;
+  }
+
+  .classroom-search-input .anticon {
+    font-size: 0.9375rem;
+  }
+
+  .classroom-card .ant-card-head-title {
+    font-size: 1.125rem;
+  }
+
+  .classroom-info-item {
+    padding: 0.625rem;
+    gap: 0.625rem;
+  }
+
+  .classroom-info-icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  .classroom-info-icon .anticon {
+    font-size: 0.875rem;
+  }
+
+  .classroom-info-label {
+    font-size: 0.6875rem;
+  }
+
+  .classroom-info-value {
+    font-size: 0.875rem;
+  }
+
+  .join-input {
+    height: 44px !important;
+    font-size: 0.875rem !important;
+  }
+
+  .join-button {
+    height: 44px !important;
+    font-size: 0.875rem !important;
+  }
+
+  .empty-state-card {
+    padding: 3rem 1.5rem;
+  }
+
+  .empty-icon {
+    font-size: 4rem;
+  }
+
+  .empty-title {
+    font-size: 1.25rem;
+  }
+
+  .empty-subtitle {
+    font-size: 0.9375rem;
+  }
+}

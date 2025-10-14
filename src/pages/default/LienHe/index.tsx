@@ -1,31 +1,37 @@
 import "./LienHe.css";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFacebook } from "@fortawesome/free-brands-svg-icons";
 import {
-  faEnvelope,
-  faMapMarkerAlt,
-  faPhone,
-} from "@fortawesome/free-solid-svg-icons";
+  MailOutlined,
+  PhoneOutlined,
+  EnvironmentOutlined,
+  FacebookFilled,
+  MessageOutlined,
+} from "@ant-design/icons";
 
 export const LienHe = () => {
   return (
     <div className="contact-page">
-      <div className="contact-wrapper">
-        <div className="contact-header">
-          <h1 className="contact-title">Liên Hệ Với Chúng Tôi</h1>
-          <p className="contact-description">
+      {/* Hero Section */}
+      <div className="contact-hero">
+        <div className="contact-hero-background"></div>
+        <div className="contact-hero-content">
+          <MessageOutlined className="contact-hero-icon" />
+          <h1 className="contact-hero-title">Liên Hệ Với Chúng Tôi</h1>
+          <p className="contact-hero-subtitle">
             Nếu bạn có bất kỳ câu hỏi nào hoặc cần hỗ trợ, xin vui lòng liên hệ
-            với chúng tôi. Chúng tôi sẽ phản hồi bạn trong thời gian sớm nhất!
+            với chúng tôi
           </p>
         </div>
+      </div>
 
+      {/* Main Content */}
+      <div className="contact-wrapper">
         <div className="contact-content">
           {/* Left side - Contact Info */}
           <div className="contact-info-section">
             <div className="contact-method">
-              <span className="method-icon">
-                <FontAwesomeIcon icon={faEnvelope} />
-              </span>
+              <div className="method-icon-wrapper">
+                <MailOutlined className="method-icon" />
+              </div>
               <h2 className="method-title">Email</h2>
               <p>
                 <strong>Email chung:</strong>
@@ -44,24 +50,23 @@ export const LienHe = () => {
             </div>
 
             <div className="contact-method">
-              <span className="method-icon">
-                <FontAwesomeIcon icon={faMapMarkerAlt} />
-              </span>
+              <div className="method-icon-wrapper">
+                <EnvironmentOutlined className="method-icon" />
+              </div>
               <h2 className="method-title">Địa chỉ</h2>
               <address className="contact-address">
                 <p>06 Trần Văn Ơn, Phú Hoà</p>
                 <p>Thủ Dầu Một, Bình Dương</p>
                 <p>
-                  <FontAwesomeIcon icon={faPhone} />{" "}
-                  <strong>Điện thoại:</strong> +84 123 456 789
+                  <PhoneOutlined /> <strong>Điện thoại:</strong> +84 123 456 789
                 </p>
               </address>
             </div>
 
             <div className="contact-method">
-              <span className="method-icon">
-                <FontAwesomeIcon icon={faFacebook} />
-              </span>
+              <div className="method-icon-wrapper">
+                <FacebookFilled className="method-icon" />
+              </div>
               <h2 className="method-title">Mạng xã hội</h2>
               <ul className="social-links">
                 <li>
@@ -71,10 +76,7 @@ export const LienHe = () => {
                     rel="noopener noreferrer"
                     className="social-link"
                   >
-                    <FontAwesomeIcon
-                      icon={faFacebook}
-                      className="social-link-icon"
-                    />
+                    <FacebookFilled className="social-link-icon" />
                     Facebook
                   </a>
                 </li>
