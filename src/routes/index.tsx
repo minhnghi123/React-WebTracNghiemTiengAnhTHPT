@@ -99,6 +99,12 @@ export const router = [
       createRoute("/KyThi", <KyThi />, ERolePath.USER),
       createRoute("/KyThi/ChiTiet/:_id", <DetailExam />, ERolePath.USER),
       createRoute("/KyThi/BaiLam/", <BaiLam />, ERolePath.USER),
+      createRoute("/KetQua", <KetQua />, ERolePath.USER),
+      createRoute("/profile", <Profile />, ERolePath.USER),
+      createRoute("/flashcard/create", <FlashCardCreate />, ERolePath.USER),
+      createRoute("/flashcard/edit/:_id", <FlashCardUpdate />, ERolePath.USER),
+      createRoute("/flashcard/exam/:id", <FlashCardExam />, ERolePath.USER),
+
       createRoute("/KyThi/LichSu/:_id", <LichSuLamBai />, ERolePath.USER),
     ],
   },
