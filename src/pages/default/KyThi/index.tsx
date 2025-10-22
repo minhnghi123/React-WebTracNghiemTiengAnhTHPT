@@ -6,6 +6,7 @@ import {
   CalendarOutlined,
   SearchOutlined,
   FilterOutlined,
+  TrophyOutlined,
 } from "@ant-design/icons";
 
 import { useEffect, useState } from "react";
@@ -22,6 +23,7 @@ export const KyThi = () => {
   const [total, setTotal] = useState<number>(0);
   const [searchText, setSearchText] = useState<string>("");
   const [selectedClass, setSelectedClass] = useState<string | undefined>();
+  const [loading, setLoading] = useState(true);
 
   const handleSearch = (value: string) => {
     setSearchText(value);
@@ -33,6 +35,7 @@ export const KyThi = () => {
 
   const getAllExam = async (page: number) => {
     try {
+      setLoading(true);
       const rq = await ExamAPIStudent.getAllExam1000(page);
       if (rq?.code === 200) {
         setData((prev) => {
@@ -46,6 +49,8 @@ export const KyThi = () => {
       }
     } catch (error: any) {
       console.log(error.response?.data?.message || error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -98,11 +103,7 @@ export const KyThi = () => {
           key={exam._id}
           style={{ display: "flex" }}
         >
-          <Card
-            className={`exam-card ${status}-exam`}
-            hoverable
-            style={{ width: "100%" }}
-          >
+          <Card className="exam-card" hoverable style={{ width: "100%" }}>
             <div className="exam-card-header">
               <Tag
                 color={status === "ongoing" ? "green" : "default"}
@@ -172,75 +173,102 @@ export const KyThi = () => {
     </Row>
   );
 
+  if (loading) {
+    return (
+      <div className="ky-thi-loading">
+        <div className="loading-spinner"></div>
+        <Text>Đang tải danh sách đề thi...</Text>
+      </div>
+    );
+  }
+
   return (
-    <div className="exam-list-container">
-      <div className="exam-list-header">
-        <div className="header-content">
-          <Title level={2} className="page-title">
+    <div className="ky-thi-page">
+      {/* Hero Section */}
+      <div className="ky-thi-hero">
+        <div className="hero-background"></div>
+        <div className="hero-content">
+          <TrophyOutlined className="hero-icon" />
+          <Title level={1} className="hero-title">
             Kho Đề Thi Online
           </Title>
-          <Text type="secondary" className="page-description">
+          <Text className="hero-subtitle">
             Nâng cao kỹ năng với hệ thống đề thi chuẩn hóa, đa dạng và được cập
             nhật liên tục
           </Text>
         </div>
       </div>
 
-      <div className="filter-section">
-        <Search
-          placeholder="Tìm kiếm đề thi..."
-          allowClear
-          enterButton="Tìm kiếm"
-          size="large"
-          onSearch={handleSearch}
-          onChange={(e) => handleSearch(e.target.value)}
-          className="search-input"
-          prefix={<SearchOutlined />}
-        />
-        <Select
-          placeholder="Chọn lớp"
-          allowClear
-          size="large"
-          onChange={handleClassFilter}
-          className="filter-select"
-          suffixIcon={<FilterOutlined />}
-          options={[
-            { value: "10", label: "Lớp 10" },
-            { value: "11", label: "Lớp 11" },
-            { value: "12", label: "Lớp 12" },
-          ]}
-        />
-      </div>
-
-      <div className="exam-sections">
-        {ongoing.length > 0 && (
-          <div className="exam-section">
-            <div className="section-header">
-              <Title level={3} className="section-title ongoing">
-                🟢 Đang diễn ra ({ongoing.length})
-              </Title>
-            </div>
-            {renderExamList(ongoing, "ongoing")}
-          </div>
-        )}
-
-        {ended.length > 0 && (
-          <div className="exam-section">
-            <div className="section-header">
-              <Title level={3} className="section-title ended">
-                ⚪ Đã kết thúc ({ended.length})
-              </Title>
-            </div>
-            {renderExamList(ended, "ended")}
-          </div>
-        )}
-
-        {filteredData.length === 0 && (
-          <Empty
-            description="Không tìm thấy đề thi nào"
-            image={Empty.PRESENTED_IMAGE_SIMPLE}
+      {/* Main Container */}
+      <div className="ky-thi-container">
+        {/* Filter Section */}
+        <div className="filter-section">
+          <Input
+            placeholder="Tìm kiếm đề thi..."
+            allowClear
+            size="large"
+            value={searchText}
+            onChange={(e) => handleSearch(e.target.value)}
+            className="search-input"
+            prefix={<SearchOutlined />}
           />
-        )}
+          <Select
+            placeholder="Chọn lớp"
+            allowClear
+            size="large"
+            onChange={handleClassFilter}
+            className="filter-select"
+            suffixIcon={<FilterOutlined />}
+            options={[
+              { value: "10", label: "Lớp 10" },
+              { value: "11", label: "Lớp 11" },
+              { value: "12", label: "Lớp 12" },
+            ]}
+          />
+        </div>
+
+        {/* Exam Sections */}
+        <div className="exam-sections">
+          {ongoing.length > 0 && (
+            <div className="exam-section">
+              <div className="section-header">
+                <Title level={3} className="section-title ongoing">
+                  🟢 Đang diễn ra ({ongoing.length})
+                </Title>
+              </div>
+              {renderExamList(ongoing, "ongoing")}
+            </div>
+          )}
+
+          {ended.length > 0 && (
+            <div className="exam-section">
+              <div className="section-header">
+                <Title level={3} className="section-title ended">
+                  ⚪ Đã kết thúc ({ended.length})
+                </Title>
+              </div>
+              {renderExamList(ended, "ended")}
+            </div>
+          )}
+
+          {filteredData.length === 0 && (
+            <Card className="empty-card" bordered={false}>
+              <Empty
+                description={
+                  <div className="empty-description">
+                    <Text className="empty-title">
+                      Không tìm thấy đề thi nào
+                    </Text>
+                    <Text className="empty-subtitle">
+                      Thử thay đổi bộ lọc hoặc tìm kiếm khác
+                    </Text>
+                  </div>
+                }
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
+              />
+            </Card>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -1,53 +1,24 @@
 import { useEffect, useState } from "react";
-import { Tabs, List, Card } from "antd";
+import { Tabs, List, Card, Typography, Avatar } from "antd";
 import { useAuthContext } from "@/contexts/AuthProvider";
-import "bootstrap/dist/css/bootstrap.min.css";
 import { HistoryPage } from "./history";
 import {
   ClassroomReponse,
   studentClassroomAPI,
 } from "@/services/student/ClassroomAPI";
 import "./prolife.css";
-import { Enable2FA } from "@/pages/Enable2FA";
 import AppLink from "@/components/AppLink";
-const { TabPane } = Tabs;
+import {
+  UserOutlined,
+  TrophyOutlined,
+  BookOutlined,
+} from "@ant-design/icons";
+
+const { Title, Text: AntText } = Typography;
 
 export const Profile = () => {
   const { user } = useAuthContext();
   const [classrooms, setClassrooms] = useState<ClassroomReponse[]>([]);
-  // const [, setIsEditing] = useState(false);
-  // interface EditedUser {
-  //   username?: string;
-  //   email?: string;
-  //   [key: string]: any; // Optional: To allow additional properties
-  // }
-
-  // const [editedUser, setEditedUser] = useState<EditedUser>({});
-
-  // const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-  //   const { name, value } = e.target;
-  //   setEditedUser((prev) => ({
-  //     ...prev,
-  //     [name]: value,
-  //   }));
-  // };
-
-  // const handleEditClick = () => {
-  //   setIsEditing(true);
-  //   setEditedUser({ ...user }); // Reset editedUser khi bắt đầu chỉnh sửa
-  // };
-
-  // const handleSaveClick = () => {
-  //   // Gọi API để cập nhật thông tin người dùng (ví dụ: sử dụng fetch hoặc axios)
-  //   // Sau khi API thành công, gọi onUpdateUser(editedUser) để cập nhật state ở component cha (nếu cần)
-  //   console.log("Lưu thông tin:", editedUser);
-  //   setIsEditing(false);
-  //   // **Lưu ý:** Bạn cần triển khai logic gọi API thực tế ở đây
-  // };
-
-  // const handleCancelClick = () => {
-  //   setIsEditing(false);
-  // };
 
   const getAllClassrooms = async () => {
     try {
@@ -66,61 +37,108 @@ export const Profile = () => {
     getAllClassrooms();
   }, []);
 
-  return (
-    <div className="p-4 max-w-lg mx-auto">
-      <h1 className="text-3xl font-bold text-center">Thông tin cá nhân</h1>
-      {user ? (
-        <div>
-          <div className="mt-4">
-            <center>
-              <p>
-                <strong>Tên người dùng:</strong> {user.username}
-              </p>
-              <p>
-                <strong>Email:</strong> {user.email}
-              </p>
-              <p>
-                <strong>Vai trò:</strong> {user.role}
-              </p>
-            </center>
+  // ✅ Tabs items với icon
+  const tabItems = [
+    {
+      key: "1",
+      label: (
+        <span className="tab-label">
+          <TrophyOutlined />
+          Kết quả ôn tập
+        </span>
+      ),
+      children: <HistoryPage />,
+    },
+    {
+      key: "2",
+      label: (
+        <span className="tab-label">
+          <BookOutlined />
+          Lớp học ({classrooms.length})
+        </span>
+      ),
+      children:
+        classrooms.length > 0 ? (
+          <List
+            grid={{ gutter: 16, xs: 1, sm: 1, md: 2, lg: 2, xl: 2, xxl: 3 }}
+            dataSource={classrooms}
+            renderItem={(item) => (
+              <List.Item>
+                <AppLink
+                  to="/PhongThi/Detail/:classroomId"
+                  params={{ classroomId: item._id }}
+                >
+                  <Card hoverable className="classroom-card">
+                    <Card.Meta
+                      title={item.title}
+                      description={`Mã lớp: ${item._id.slice(0, 8)}`}
+                    />
+                  </Card>
+                </AppLink>
+              </List.Item>
+            )}
+          />
+        ) : (
+          <div className="empty-classroom">
+            <BookOutlined className="empty-icon" />
+            <AntText className="empty-text">Chưa có lớp học nào</AntText>
           </div>
-        </div>
-      ) : (
-        <p className="error-message">Không tìm thấy thông tin người dùng.</p>
-      )}
+        ),
+    },
+  ];
 
-      {/* Phần hiển thị 2 tab kết quả ôn tập và lớp học */}
-      <Tabs defaultActiveKey="1" className="mt-8">
-        <TabPane tab="Kết quả ôn tập" key="1">
-          <HistoryPage />
-        </TabPane>
-        <TabPane tab="Lớp học" key="2">
-          {classrooms.length > 0 ? (
-            <List
-              grid={{ gutter: 16, column: 1 }}
-              dataSource={classrooms}
-              renderItem={(item) => (
-                <List.Item>
-                  <AppLink
-                    to="/PhongThi/Detail/:classroomId"
-                    params={{ classroomId: item._id }}
-                  >
-                    <Card hoverable>
-                      {item.title}
-                    </Card>
-                  </AppLink>
-                </List.Item>
-              )}
-            />
-          ) : (
-            <p>Chưa có lớp học nào.</p>
-          )}
-        </TabPane>
-        <TabPane tab="Xác thực hai yếu tố" key="3">
-          <Enable2FA />
-        </TabPane>
-      </Tabs>
-      {/* <YearHeatmap /> */}
+  return (
+    <div className="profile-page">
+      {/* Hero Section */}
+      <div className="profile-hero">
+        <div className="hero-background"></div>
+        <div className="hero-content">
+          <UserOutlined className="hero-icon" />
+          <Title level={1} className="hero-title">
+            Hồ sơ của tôi
+          </Title>
+          <AntText className="hero-subtitle">
+            Quản lý thông tin cá nhân và theo dõi tiến độ học tập
+          </AntText>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="profile-container">
+        {/* ✅ User Info Card */}
+        {user && (
+          <Card className="user-info-card" bordered={false}>
+            <div className="user-info-content">
+              <Avatar
+                size={80}
+                icon={<UserOutlined />}
+                className="user-avatar"
+              />
+              <div className="user-details">
+                <div className="user-detail-item">
+                  <span className="detail-label">Tên người dùng:</span>
+                  <span className="detail-value">{user.username}</span>
+                </div>
+                <div className="user-detail-item">
+                  <span className="detail-label">Email:</span>
+                  <span className="detail-value">{user.email}</span>
+                </div>
+                <div className="user-detail-item">
+                  <span className="detail-label">Vai trò:</span>
+                  <span className="detail-value">{user.role}</span>
+                </div>
+              </div>
+            </div>
+          </Card>
+        )}
+
+        <Tabs
+          defaultActiveKey="1"
+          className="profile-tabs"
+          size="large"
+          items={tabItems}
+        />
+      </div>
     </div>
   );
 };
