@@ -8,11 +8,7 @@ import {
 } from "@/services/student/ClassroomAPI";
 import "./prolife.css";
 import AppLink from "@/components/AppLink";
-import {
-  UserOutlined,
-  TrophyOutlined,
-  BookOutlined,
-} from "@ant-design/icons";
+import { UserOutlined, TrophyOutlined, BookOutlined } from "@ant-design/icons";
 
 const { Title, Text: AntText } = Typography;
 
