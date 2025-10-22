@@ -22,10 +22,8 @@ export const Navbar: React.FC<navbarProps> = ({ rule = true }) => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [userName, setUserName] = useState<string>("");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false); // ✅ Track scroll state
+  const [isScrolled, setIsScrolled] = useState(false); //
   const { user, handleLogout } = useAuthContext();
-
-  // ✅ Add scroll listener for sticky navbar effect
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
@@ -35,7 +33,7 @@ export const Navbar: React.FC<navbarProps> = ({ rule = true }) => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // ✅ Close mobile menu when clicking outside or on overlay
+  // Close mobile menu when clicking outside or on overlay
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
@@ -105,12 +103,18 @@ export const Navbar: React.FC<navbarProps> = ({ rule = true }) => {
       ),
     },
     {
-      key: "2",
-      label: (
-        <AppLink to="/GiaoVien" className="dropdown-item">
-          <AppstoreOutlined /> Dành cho giáo viên
-        </AppLink>
-      ),
+      // check teacher or admin only
+      key: "3",
+      label:
+        user?.role === "teacher" ? (
+          <AppLink to="/GiaoVien" className="dropdown-item">
+            <AppstoreOutlined /> Dành cho giáo viên
+          </AppLink>
+        ) : user?.role === "admin" ? (
+          <AppLink to="/Admin" className="dropdown-item">
+            <AppstoreOutlined /> Trang quản trị
+          </AppLink>
+        ) : null,
     },
     {
       key: "4",
