@@ -58,8 +58,12 @@ export interface SubmitAnswerDetail {
 }
 
 export const ResultAPI = {
-  getAllResult: async (page: number) => {
-    const response = await request.get(`/result/?page=${page}`);
+  getAllResult: async (page: number, examId?: string) => {
+    const params = new URLSearchParams();
+    if (page !== undefined && page !== null) params.set("page", String(page));
+    if (examId) params.set("examId", examId);
+    const query = params.toString() ? `?${params.toString()}` : "";
+    const response = await request.get(`/result${query}`);
     return response.data;
   },
   getDetailResult: async (id: string) => {
@@ -82,24 +86,25 @@ export const ResultAPI = {
     const response = await request.post(`/result/save`, data);
     return response.data;
   },
-  reportViolation: async ()=>{
+  reportViolation: async () => {
     const response = await request.post(`/result/report-violation`);
     return response.data;
-  }
-  ,
-  saveSingleAnswer: async (p0: { resultId: any; questionId: string; selectedAnswerId: string | null; }, data: {
-  resultId: string;
-  questionId: string;
-  selectedAnswerId?: string;
-  userAnswer?: string | string[];
-  isListening: boolean;
-}) => {
+  },
+  saveSingleAnswer: async (
+    p0: { resultId: any; questionId: string; selectedAnswerId: string | null },
+    data: {
+      resultId: string;
+      questionId: string;
+      selectedAnswerId?: string;
+      userAnswer?: string | string[];
+      isListening: boolean;
+    }
+  ) => {
     const response = await request.post(`/result/save-single-answer`, data);
     return response.data;
   },
-  
 };
-  
+
 export const ExamAPIStudent = {
   getAllExam: async (page: number) => {
     const response = await request.get(`/exam/?page=${page}`);

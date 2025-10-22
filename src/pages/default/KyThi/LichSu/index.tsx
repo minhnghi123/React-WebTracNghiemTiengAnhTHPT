@@ -29,15 +29,18 @@ export const LichSuLamBai = () => {
   const fetchResults = async () => {
     try {
       setLoading(true);
-      const res = await ResultAPI.getAllResult(1);
+      console.log("📌 Fetching results for examId:", _id);
+
+      // ✅ Truyền _id để backend filter
+      const res = await ResultAPI.getAllResult(1, _id);
+
+      console.log("📌 API Response:", res);
+
       if (res.code === 200) {
-        let filtered = res.data;
-        if (_id) {
-          filtered = filtered.filter(
-            (item: { examId: { _id: string } }) => item.examId?._id === _id
-          );
-        }
-        setResults(filtered.reverse());
+        const data = res.data || [];
+        console.log(`✅ Received ${data.length} results from backend`);
+        // ✅ Backend đã filter rồi, không cần filter client-side nữa
+        setResults(Array.isArray(data) ? data.reverse() : []);
       }
     } catch (error) {
       console.error("Error fetching results:", error);

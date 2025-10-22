@@ -16,12 +16,33 @@ import { userLog } from "../../utils/logUser.js";
 // Lấy tất cả kết quả (không bị xóa và đã hoàn thành) và populate các trường liên quan
 export const getAllResults = async (req, res) => {
   try {
+    const { examId } = req.query;
+
     const filter = {
-      userId: req.user._id, // Lọc theo userId từ token
+      userId: req.user._id,
       isDeleted: false,
       isCompleted: true,
     };
-    // console.log(filter);
+
+    if (examId) {
+      // ✅ Nếu examId là ObjectId hợp lệ thì dùng trực tiếp
+      if (mongoose.Types.ObjectId.isValid(examId) && examId.length === 24) {
+        filter.examId = new mongoose.Types.ObjectId(examId);
+      } else {
+        // ✅ Nếu không phải ObjectId, giả định là slug → tìm exam
+        const exam = await Exam.findOne({ slug: examId }).select("_id");
+        if (!exam) {
+          return res.status(404).json({
+            code: 404,
+            message: "Exam not found with this slug",
+          });
+        }
+        filter.examId = exam._id;
+      }
+    }
+
+    console.log("📌 getAllResults filter:", JSON.stringify(filter, null, 2));
+
     const results = await Result.find(filter).populate({
       path: "examId",
       populate: [
@@ -30,11 +51,14 @@ export const getAllResults = async (req, res) => {
           path: "listeningExams",
           populate: {
             path: "questions",
-            select: "questionText options correctAnswer blankAnswer audio", // Include necessary fields
+            select: "questionText options correctAnswer blankAnswer audio",
           },
         },
       ],
     });
+
+    console.log(`✅ Found ${results.length} results for this filter`);
+
     userLog(req, "View All Results", "User fetched all completed results.");
     res.status(200).json({
       code: 200,
@@ -46,7 +70,10 @@ export const getAllResults = async (req, res) => {
       "View All Results",
       `Error fetching results: ${error.message}`
     );
-    res.status(500).json({ message: "Failed to fetch results", error });
+    console.error("❌ Error in getAllResults:", error);
+    res
+      .status(500)
+      .json({ message: "Failed to fetch results", error: error.message });
   }
 };
 
@@ -113,7 +140,11 @@ export const submitExam = async (req, res) => {
     console.log("- listeningAnswers count:", listeningAnswers.length);
     console.log("- unansweredQuestions count:", unansweredQuestions.length);
 
-    if (!resultId || !Array.isArray(answers) || !Array.isArray(listeningAnswers)) {
+    if (
+      !resultId ||
+      !Array.isArray(answers) ||
+      !Array.isArray(listeningAnswers)
+    ) {
       return res.status(400).json({ message: "Invalid input data." });
     }
 
@@ -138,9 +169,11 @@ export const submitExam = async (req, res) => {
     });
 
     if (!existingResult) {
-      return res.status(400).json({ code: 400, message: "No ongoing exam found for this user." });
+      return res
+        .status(400)
+        .json({ code: 400, message: "No ongoing exam found for this user." });
     }
-    
+
     const exam = existingResult.examId;
     if (!exam) {
       return res.status(400).json({ code: 400, message: "Exam not found." });
@@ -150,10 +183,22 @@ export const submitExam = async (req, res) => {
 
     // If time expired, finalize existing answers
     if (new Date() > existingResult.endTime) {
-      let score = 0, correctAnswer = 0, wrongAnswer = 0;
-      existingResult.questions?.forEach((q) => q.isCorrect ? (score++, correctAnswer++) : wrongAnswer++);
-      existingResult.listeningQuestions?.forEach((q) => q.isCorrect ? (score++, correctAnswer++) : wrongAnswer++);
-      Object.assign(existingResult, { score, correctAnswer, wrongAnswer, isCompleted: true, endTime: new Date() });
+      let score = 0,
+        correctAnswer = 0,
+        wrongAnswer = 0;
+      existingResult.questions?.forEach((q) =>
+        q.isCorrect ? (score++, correctAnswer++) : wrongAnswer++
+      );
+      existingResult.listeningQuestions?.forEach((q) =>
+        q.isCorrect ? (score++, correctAnswer++) : wrongAnswer++
+      );
+      Object.assign(existingResult, {
+        score,
+        correctAnswer,
+        wrongAnswer,
+        isCompleted: true,
+        endTime: new Date(),
+      });
       await existingResult.save();
       return res.status(400).json({
         code: 400,
@@ -162,7 +207,9 @@ export const submitExam = async (req, res) => {
       });
     }
 
-    let score = 0, correctAnswer = 0, wrongAnswer = 0;
+    let score = 0,
+      correctAnswer = 0,
+      wrongAnswer = 0;
     let skippedCount = unansweredQuestions.length;
     const questionDetails = [];
     const listeningQuestionDetails = [];
@@ -176,7 +223,9 @@ export const submitExam = async (req, res) => {
     for (const qId of unansweredQuestions) {
       const question =
         exam.questions.find((q) => String(q._id) === String(qId)) ||
-        exam.listeningExams.flatMap((le) => le.questions).find((q) => String(q._id) === String(qId));
+        exam.listeningExams
+          .flatMap((le) => le.questions)
+          .find((q) => String(q._id) === String(qId));
 
       if (!question) continue;
 
@@ -190,12 +239,17 @@ export const submitExam = async (req, res) => {
 
       if (typeName === "Fill in the Blanks") {
         if (isListeningQuestion && question.blankAnswer) {
-          correctAnswerInfo = question.blankAnswer.split(",").map((a) => a.trim());
+          correctAnswerInfo = question.blankAnswer
+            .split(",")
+            .map((a) => a.trim());
         } else if (question.answers) {
-          correctAnswerInfo = question.answers.map((a) => a.correctAnswerForBlank).filter(Boolean);
+          correctAnswerInfo = question.answers
+            .map((a) => a.correctAnswerForBlank)
+            .filter(Boolean);
         }
       } else if (typeName === "True/False/Not Given") {
-        correctAnswerForTrueFalseNGV = question.correctAnswerForTrueFalseNGV || [];
+        correctAnswerForTrueFalseNGV =
+          question.correctAnswerForTrueFalseNGV || [];
       }
 
       const skippedDetail = {
@@ -207,7 +261,8 @@ export const submitExam = async (req, res) => {
               text: opt.optionText || opt.text || "",
               correctAnswerForBlank: "",
               isCorrect: question.correctAnswer
-                ? String(opt.option_id) === String(question.correctAnswer[0]?.answer_id)
+                ? String(opt.option_id) ===
+                  String(question.correctAnswer[0]?.answer_id)
                 : false,
             }))
           : (question.answers || []).map((ans) => ({
@@ -218,8 +273,12 @@ export const submitExam = async (req, res) => {
             })),
         userAnswers: [],
         selectedAnswerId: null,
-        correctAnswerForBlank: correctAnswerInfo.length > 0 ? correctAnswerInfo : null,
-        correctAnswerForTrueFalseNGV: correctAnswerForTrueFalseNGV.length > 0 ? correctAnswerForTrueFalseNGV : undefined,
+        correctAnswerForBlank:
+          correctAnswerInfo.length > 0 ? correctAnswerInfo : null,
+        correctAnswerForTrueFalseNGV:
+          correctAnswerForTrueFalseNGV.length > 0
+            ? correctAnswerForTrueFalseNGV
+            : undefined,
         audio: question.audio || null,
         isCorrect: false,
         isSkipped: true,
@@ -239,25 +298,33 @@ export const submitExam = async (req, res) => {
       const { questionId, selectedAnswerId, userAnswer } = ans;
       if (processedQuestionIds.has(String(questionId))) continue;
 
-      const question = exam.questions.find((q) => String(q._id) === String(questionId));
+      const question = exam.questions.find(
+        (q) => String(q._id) === String(questionId)
+      );
       if (!question) {
         console.warn(`⚠️ Question ${questionId} not found`);
         continue;
       }
 
-      const typeName = questionTypeMapping[question.questionType.name] || question.questionType.name;
+      const typeName =
+        questionTypeMapping[question.questionType.name] ||
+        question.questionType.name;
       let isCorrect = false;
       let detail = {};
 
       switch (typeName) {
         case "Fill in the Blanks": {
-          const blanks = question.answers.map((a) => a.correctAnswerForBlank.trim().toLowerCase());
+          const blanks = question.answers.map((a) =>
+            a.correctAnswerForBlank.trim().toLowerCase()
+          );
           const userDetails = (userAnswer || []).map((ua, i) => ({
             userAnswer: ua,
             answerId: question.answers[i]?._id,
             isCorrect: ua?.trim().toLowerCase() === (blanks[i] || ""),
           }));
-          isCorrect = userDetails.length === blanks.length && userDetails.every((d) => d.isCorrect);
+          isCorrect =
+            userDetails.length === blanks.length &&
+            userDetails.every((d) => d.isCorrect);
           detail = {
             questionId: question._id,
             content: question.content || "",
@@ -306,7 +373,9 @@ export const submitExam = async (req, res) => {
             userAnswer: ua,
             isCorrect: correctTF.includes(ua.trim().toLowerCase()),
           }));
-          isCorrect = userTF.length === correctTF.length && userTF.every((d) => d.isCorrect);
+          isCorrect =
+            userTF.length === correctTF.length &&
+            userTF.every((d) => d.isCorrect);
           detail = {
             questionId: question._id,
             content: question.content || "",
@@ -334,7 +403,9 @@ export const submitExam = async (req, res) => {
         wrongAnswerByKnowledge[know] = (wrongAnswerByKnowledge[know] || 0) + 1;
         incorrectAnswer.push({
           questionContent: question.content,
-          answerDetail: (question.answers || []).map((a) => a.text || a.correctAnswerForBlank).join("\n"),
+          answerDetail: (question.answers || [])
+            .map((a) => a.text || a.correctAnswerForBlank)
+            .join("\n"),
           knowledge: know,
         });
       }
@@ -348,25 +419,33 @@ export const submitExam = async (req, res) => {
       const { questionId, selectedAnswerId, userAnswer } = ans;
       if (processedListeningIds.has(String(questionId))) continue;
 
-      const question = exam.listeningExams.flatMap((le) => le.questions).find((q) => String(q._id) === String(questionId));
+      const question = exam.listeningExams
+        .flatMap((le) => le.questions)
+        .find((q) => String(q._id) === String(questionId));
       if (!question) {
         console.warn(`⚠️ Listening question ${questionId} not found`);
         continue;
       }
 
-      const typeName = questionTypeMapping[question.questionType.name] || question.questionType.name;
+      const typeName =
+        questionTypeMapping[question.questionType.name] ||
+        question.questionType.name;
       let isCorrect = false;
       let detail = {};
 
       switch (typeName) {
         case "Fill in the Blanks": {
-          const blanks = question.blankAnswer.split(",").map((a) => a.trim().toLowerCase());
+          const blanks = question.blankAnswer
+            .split(",")
+            .map((a) => a.trim().toLowerCase());
           const userDetails = (userAnswer || []).map((ua, i) => ({
             userAnswer: ua,
             answerId: null,
             isCorrect: ua.trim().toLowerCase() === blanks[i],
           }));
-          isCorrect = userDetails.length === blanks.length && userDetails.every((d) => d.isCorrect);
+          isCorrect =
+            userDetails.length === blanks.length &&
+            userDetails.every((d) => d.isCorrect);
           detail = {
             questionId: question._id,
             content: question.questionText || "",
@@ -387,7 +466,9 @@ export const submitExam = async (req, res) => {
         case "Multiple Choices": {
           const correctObj = question.correctAnswer[0];
           if (!correctObj) {
-            console.error(`❌ Listening Question ${questionId} has no correct answer`);
+            console.error(
+              `❌ Listening Question ${questionId} has no correct answer`
+            );
             continue;
           }
           const transformed = (question.options || []).map((opt) => ({
@@ -416,7 +497,9 @@ export const submitExam = async (req, res) => {
             userAnswer: ua,
             isCorrect: correctTF.includes(ua.trim().toLowerCase()),
           }));
-          isCorrect = userTF.length === correctTF.length && userTF.every((d) => d.isCorrect);
+          isCorrect =
+            userTF.length === correctTF.length &&
+            userTF.every((d) => d.isCorrect);
           detail = {
             questionId: question._id,
             content: question.questionText || "",
@@ -444,7 +527,9 @@ export const submitExam = async (req, res) => {
         wrongAnswerByKnowledge[know] = (wrongAnswerByKnowledge[know] || 0) + 1;
         incorrectAnswer.push({
           questionContent: question.questionText,
-          answerDetail: (question.options || []).map((a) => a.optionText || a.correctAnswerForBlank).join("\n"),
+          answerDetail: (question.options || [])
+            .map((a) => a.optionText || a.correctAnswerForBlank)
+            .join("\n"),
           knowledge: know,
         });
       }
@@ -457,7 +542,8 @@ export const submitExam = async (req, res) => {
       (exam.questions?.length || 0) +
       exam.listeningExams.reduce((a, le) => a + (le.questions?.length || 0), 0);
 
-    const finalScore = Math.round((correctAnswer / totalQuestions) * 10 * 100) / 100;
+    const finalScore =
+      Math.round((correctAnswer / totalQuestions) * 10 * 100) / 100;
 
     // ✅ CHỈ fetch suggestionQuestion và videos NẾU có wrongAnswer
     let suggestionQuestion = [];
@@ -482,14 +568,20 @@ export const submitExam = async (req, res) => {
             videos[key] = fetchedVideos;
           }
         } catch (error) {
-          console.error(`Error fetching YouTube videos for knowledge: ${key}`, error.message);
+          console.error(
+            `Error fetching YouTube videos for knowledge: ${key}`,
+            error.message
+          );
           videos[key] = [];
         }
       }
 
       if (incorrectAnswer.length > 0) {
         const prompt2 = incorrectAnswer
-          .map((q) => `Câu hỏi: ${q.questionContent}, Đáp án: ${q.answerDetail}, Kiến thức: ${q.knowledge}.`)
+          .map(
+            (q) =>
+              `Câu hỏi: ${q.questionContent}, Đáp án: ${q.answerDetail}, Kiến thức: ${q.knowledge}.`
+          )
           .join(" ");
         prompt =
           "Hãy đưa ra lời khuyên chi tiết và lộ trình học tiếng Anh cho học sinh dựa trên các câu trả lời sai sau: " +
@@ -504,7 +596,7 @@ export const submitExam = async (req, res) => {
       wrongAnswer,
       questions: questionDetails,
       listeningQuestions: listeningQuestionDetails,
-      suggestionQuestion: suggestionQuestion.map(q => q._id),
+      suggestionQuestion: suggestionQuestion.map((q) => q._id),
       wrongAnswerByKnowledge,
       isCompleted: true,
       endTime: new Date(),
@@ -518,7 +610,11 @@ export const submitExam = async (req, res) => {
     console.log("- Wrong answers:", wrongAnswer);
     console.log("- Skipped questions:", skippedCount);
 
-    userLog(req, "Submit Exam", `User submitted exam with result ID: ${req.body.resultId}`);
+    userLog(
+      req,
+      "Submit Exam",
+      `User submitted exam with result ID: ${req.body.resultId}`
+    );
 
     return res.status(200).json({
       code: 200,
@@ -541,7 +637,9 @@ export const submitExam = async (req, res) => {
     userLog(req, "Submit Exam", `Error submitting exam: ${error.message}`);
     console.error("❌ Error processing exam:", error);
     console.error("Stack trace:", error.stack);
-    return res.status(500).json({ message: "Error submitting exam.", error: error.message });
+    return res
+      .status(500)
+      .json({ message: "Error submitting exam.", error: error.message });
   }
 };
 
@@ -1229,7 +1327,7 @@ export const reportViolation = async (req, res) => {
 export const getInCompletedExam = async (req, res) => {
   try {
     console.log("📌 getInCompletedExam called for user:", req.user._id);
-    
+
     // ✅ FIX: Tự động complete tất cả exam hết hạn
     const now = new Date();
     const expiredResults = await Result.updateMany(
@@ -1246,7 +1344,9 @@ export const getInCompletedExam = async (req, res) => {
       }
     );
 
-    console.log(`✅ Auto-completed ${expiredResults.modifiedCount} expired exams`);
+    console.log(
+      `✅ Auto-completed ${expiredResults.modifiedCount} expired exams`
+    );
 
     // ✅ Lấy result chưa complete MỚI NHẤT và chưa hết hạn
     const result = await Result.findOne({
@@ -1254,17 +1354,14 @@ export const getInCompletedExam = async (req, res) => {
       isCompleted: false,
       endTime: { $gt: now },
     })
-      .sort({ createdAt: -1 }) // ← Lấy exam MỚI NHẤT
+      .sort({ createdAt: -1 })
       .populate({
         path: "examId",
         select: "title duration _id",
         populate: [
           {
             path: "questions",
-            populate: [
-              { path: "answers" },
-              { path: "passageId" }
-            ],
+            populate: [{ path: "answers" }, { path: "passageId" }],
           },
           {
             path: "listeningExams",
@@ -1288,7 +1385,11 @@ export const getInCompletedExam = async (req, res) => {
       });
     }
 
-    console.log(`✅ Found incomplete exam:`, result.examId._id, result.examId.title);
+    console.log(
+      `✅ Found incomplete exam:`,
+      result.examId._id,
+      result.examId.title
+    );
 
     return res.status(200).json({
       code: 200,
