@@ -16,7 +16,6 @@ function shuffleArray(array) {
 
 export const index = async (req, res) => {
   try {
-    //pagination
     let currentPage = 1;
     if (req.query.page) {
       currentPage = parseInt(req.query.page);
@@ -25,44 +24,76 @@ export const index = async (req, res) => {
     if (req.query.limit) {
       limitItems = parseInt(req.query.limit);
     }
-// const cacheExam = await redisService.get(
-    //   `CACHE_EXAM_PAGE_${currentPage}_LIMIT_${limitItems}`
-    // );
-    // if (cacheExam) {
-    //   return res.status(200).json(cacheExam);
-    // }
-    // const cacheExam = await redisService.get(
-    //   `CACHE_EXAM_PAGE_${currentPage}_LIMIT_${limitItems}`
-    // );
-    // if (cacheExam) {
-    //   return res.status(200).json(cacheExam);
-    // }
+
+    // ✅ NEW: Thêm filter type
+    const { type } = req.query; // type: 'reading', 'listening', 'both'
+
     const condition = {
       isPublic: true,
     };
-    const totalItems = await Exam.countDocuments({ isPublic: true });
 
+    const totalItems = await Exam.countDocuments(condition);
     const skip = (currentPage - 1) * limitItems;
     const totalPage = Math.ceil(totalItems / limitItems);
+    
     const exams = await Exam.find(condition)
       .populate("questions")
-      .populate("listeningExams")
+      .populate({
+        path: "listeningExams",
+        populate: [
+          { path: "audio" },
+          { path: "questions" }
+        ]
+      })
+      .sort({ createdAt: -1 })
       .limit(limitItems)
-      .skip(skip);
+      .skip(skip)
+      .lean();
+
+    const enrichedExams = exams.map(exam => {
+      const readingQuestions = exam.questions?.length || 0;
+      const listeningQuestions = (exam.listeningExams || [])
+        .filter(le => le && le.questions)
+        .reduce((sum, le) => sum + (le.questions?.length || 0), 0);
+      
+      const totalQuestions = readingQuestions + listeningQuestions;
+
+      return {
+        ...exam,
+        totalQuestions,
+        hasReading: readingQuestions > 0,
+        hasListening: listeningQuestions > 0,
+        readingCount: readingQuestions,
+        listeningCount: listeningQuestions,
+      };
+    });
+
+    // ✅ NEW: Apply filter based on type
+    let filteredExams = enrichedExams;
+    if (type === 'reading') {
+      filteredExams = enrichedExams.filter(exam => exam.hasReading && !exam.hasListening);
+    } else if (type === 'listening') {
+      filteredExams = enrichedExams.filter(exam => exam.hasListening && !exam.hasReading);
+    } else if (type === 'both') {
+      filteredExams = enrichedExams.filter(exam => exam.hasReading && exam.hasListening);
+    }
+    // 'all' or undefined: return all
+      
     const data = {
       code: 200,
-      exams,
+      exams: filteredExams,
       currentPage: currentPage,
-      totalItems: totalItems,
-      totalPage: totalPage,
+      totalItems: filteredExams.length, // ✅ Update total after filter
+      totalPage: Math.ceil(filteredExams.length / limitItems),
       limitItems: limitItems,
-      hasNextPage: currentPage < totalPage,
+      hasNextPage: currentPage < Math.ceil(filteredExams.length / limitItems),
     };
-    // await redisService.set(
-    //   `CACHE_EXAM_PAGE_${currentPage}_LIMIT_${limitItems}`,
-    //   data
-    // );
-    userLog(req, "View Exams", `User accessed exams list on page ${currentPage} with limit ${limitItems}`);
+    
+    userLog(
+      req,
+      "View Exams",
+      `User accessed exams list on page ${currentPage} with limit ${limitItems} and type filter: ${type || 'all'}`
+    );
     res.status(200).json(data);
   } catch (error) {
     userLog(req, "View Exams", `Error viewing exams: ${error.message}`);
@@ -73,48 +104,67 @@ export const index = async (req, res) => {
 export const detailExam = async (req, res) => {
   try {
     const { slug } = req.params;
-// const cacheDetailExam = await redisService.get(
-    //   `CACHE_DETAIL_EXAMPLE_${slug}`
-    // );
-    // if (cacheDetailExam) {
-    //   return res.status(200).json(cacheDetailExam);
-    // }
-    // const cacheDetailExam = await redisService.get(
-    //   `CACHE_DETAIL_EXAMPLE_${slug}`
-    // );
-    // if (cacheDetailExam) {
-    //   return res.status(200).json(cacheDetailExam);
-    // }
+    
+    // ✅ FIX: Populate FULL listeningExams (audio + questions)
     const exam = await Exam.findOne({ slug })
       .populate("questions")
-      .populate("listeningExams");
+      .populate({
+        path: "listeningExams",
+        populate: [
+          { path: "audio" }, // ✅ Thêm populate audio
+          { path: "questions" }
+        ]
+      })
+      .lean();
+      
     if (!exam) {
       return res.status(404).json({ message: "Exam not found" });
     }
-    userLog(req, "View Exam Detail", `User viewed exam detail for slug: ${slug}`);
-    res.status(200).json({ code: 200, exam });
+
+    // ✅ Thêm thông tin tổng số câu hỏi
+    const readingQuestions = exam.questions?.length || 0;
+    
+    // ✅ FIX: Đếm listening questions an toàn
+    const listeningQuestions = (exam.listeningExams || [])
+      .filter(le => le && le.questions) // ✅ Filter null/undefined
+      .reduce((sum, le) => sum + (le.questions?.length || 0), 0);
+
+    const enrichedExam = {
+      ...exam,
+      totalQuestions: readingQuestions + listeningQuestions,
+      hasReading: readingQuestions > 0,
+      hasListening: listeningQuestions > 0,
+      readingCount: readingQuestions,
+      listeningCount: listeningQuestions,
+    };
+
+    console.log(`📊 Exam detail "${exam.title}":`, {
+      reading: readingQuestions,
+      listening: listeningQuestions,
+      total: readingQuestions + listeningQuestions,
+    });
+    
+    userLog(
+      req,
+      "View Exam Detail",
+      `User viewed exam detail for slug: ${slug}`
+    );
+    res.status(200).json({ code: 200, exam: enrichedExam });
   } catch (error) {
-    userLog(req, "View Exam Detail", `Error viewing exam detail: ${error.message}`);
+    userLog(
+      req,
+      "View Exam Detail",
+      `Error viewing exam detail: ${error.message}`
+    );
     res.status(400).json({ code: 400, message: error.message });
   }
 };
 
-
 export const joinedExam = async (req, res) => {
   try {
-    // Kiểm tra xem người dùng có đang tham gia Đề Thi khác không
-    // const ongoingExam = await Result.findOne({
-    //   userId: req.user._id,
-    //   isCompleted: false,
-    //   endTime: { $gt: new Date() },
-    // });
-    // if (ongoingExam) {
-    //   return res.status(400).json({
-    //     code: 400,
-    //     message: "Bạn đang tham gia Đề Thi khác.",
-    //   });
-    // }
-    // Kiểm tra xem người dùng có đang bị chặn không
+    console.log("📌 joinedExam called with examId:", req.params.examId);
+    
+    // ✅ Kiểm tra user
     const userAccount = await TaiKhoan.findById(req.user._id);
     if (!userAccount) {
       return res.status(404).json({ message: "Tài khoản không tồn tại." });
@@ -126,35 +176,69 @@ export const joinedExam = async (req, res) => {
         message: `Tài khoản của bạn bị chặn đến ${userAccount.blockedUntil.toLocaleString()}.`,
       });
     }
-    // Tìm đề thi và populate các câu hỏi của đề chính và phần nghe
-    const exam = await Exam.findOne({ _id: req.params.examId })
+
+    // ✅ TỰ ĐỘNG XÓA/HOÀN THÀNH tất cả bài thi cũ chưa hoàn thành
+    const now = new Date();
+    const oldResults = await Result.find({
+      userId: req.user._id,
+      isCompleted: false,
+    });
+
+    console.log(`📌 Found ${oldResults.length} incomplete results for user ${req.user._id}`);
+
+    if (oldResults && oldResults.length > 0) {
+      for (const oldResult of oldResults) {
+        oldResult.isCompleted = true;
+        oldResult.score = 0;
+        await oldResult.save();
+        console.log(`✅ Force completed result: ${oldResult._id}`);
+      }
+    }
+
+    // ✅ Kiểm tra examId là slug hay ObjectId
+    const { examId } = req.params;
+    const isObjectId = /^[0-9a-fA-F]{24}$/.test(examId);
+    
+    const query = isObjectId 
+      ? { _id: examId, isPublic: true }
+      : { slug: examId, isPublic: true };
+
+    console.log(`🔍 Looking for exam with query:`, query);
+
+    // ✅ FIX: Populate FULL listening exams (audio + questions)
+    const exam = await Exam.findOne(query)
       .populate({
         path: "questions",
         populate: { path: "answers" },
       })
       .populate({
         path: "listeningExams",
-        populate: {
-          path: "questions",
-          populate: { path: "options" },
-        },
+        populate: [
+          { path: "audio" }, // ✅ Thêm populate audio
+          {
+            path: "questions",
+            populate: { path: "options" },
+          }
+        ],
       });
 
     if (!exam) {
       return res.status(404).json({ message: "Đề thi không tồn tại." });
     }
 
-    // 1. Shuffle toàn bộ câu hỏi và shuffle cả câu trả lời trong mỗi câu hỏi
-    const allShuffled = shuffleArray(exam.questions).map((question) => {
+    console.log(`✅ Found exam:`, exam._id, exam.title);
+    console.log(`📌 Listening exams count:`, exam.listeningExams?.length || 0);
+
+    // Shuffle câu hỏi
+    const allShuffled = shuffleArray([...(exam.questions || [])]).map((question) => {
       return {
         ...question.toObject(),
-        answers: shuffleArray(question.answers),
+        answers: question.answers ? shuffleArray([...question.answers]) : [],
       };
     });
 
-    // 2. Tách riêng câu hỏi đọc (có passageId) và câu hỏi riêng lẻ (không có passageId)
     const groupedQuestions = {};
-    const shuffledQuestions = []; // chứa câu hỏi không có passageId (câu hỏi riêng lẻ)
+    const shuffledQuestions = [];
 
     for (const question of allShuffled) {
       if (question.passageId) {
@@ -167,13 +251,11 @@ export const joinedExam = async (req, res) => {
       }
     }
 
-    // 3. Lấy các passage tương ứng theo passageId
     const passageIds = Object.keys(groupedQuestions);
     const passages = await Promise.all(
       passageIds.map((id) => Passage.findById(id))
     );
 
-    // 4. Tạo mảng readingQuestionsArray chứa: { passageInfo, questions }
     const readingQuestionsArray = passageIds.map((id) => {
       return {
         passageInfo: passages.find((p) => p._id.toString() === id),
@@ -181,20 +263,18 @@ export const joinedExam = async (req, res) => {
       };
     });
 
-    // Đảo thứ tự bài nghe và câu hỏi của từng bài nghe
-    const shuffledListeningExams = exam.listeningExams.map((listeningExam) => {
+    const shuffledListeningExams = (exam.listeningExams || []).map((listeningExam) => {
       return {
         ...listeningExam.toObject(),
-        questions: shuffleArray(listeningExam.questions).map(
+        questions: shuffleArray([...(listeningExam.questions || [])]).map(
           (listeningQuestion) => ({
             ...listeningQuestion.toObject(),
-            options: shuffleArray(listeningQuestion.options),
+            options: listeningQuestion.options ? shuffleArray([...listeningQuestion.options]) : [],
           })
         ),
       };
     });
 
-    // Tạo kết quả mới với thời gian kết thúc dựa trên thời lượng của đề thi
     const endTime = new Date();
     endTime.setMinutes(endTime.getMinutes() + exam.duration);
 
@@ -209,6 +289,8 @@ export const joinedExam = async (req, res) => {
     });
 
     await result.save();
+    
+    console.log(`✅ Created new result: ${result._id} for exam: ${exam._id}`);
     userLog(req, "Join Exam", `User joined exam with ID: ${req.params.examId}`);
 
     res.status(200).json({
@@ -222,6 +304,7 @@ export const joinedExam = async (req, res) => {
       resultId: result._id,
     });
   } catch (error) {
+    console.error("❌ Error in joinedExam:", error);
     userLog(req, "Join Exam", `Error joining exam: ${error.message}`);
     res.status(500).json({ code: 500, message: "Lỗi khi tham gia đề thi." });
   }
@@ -241,7 +324,11 @@ export const getListeningExams = async (req, res) => {
       .limit(limitItems)
       .skip(skip);
 
-    userLog(req, "View Listening Exams", `User accessed listening exams list on page ${currentPage} with limit ${limitItems}`);
+    userLog(
+      req,
+      "View Listening Exams",
+      `User accessed listening exams list on page ${currentPage} with limit ${limitItems}`
+    );
     res.status(200).json({
       code: 200,
       listeningExams,
@@ -252,7 +339,11 @@ export const getListeningExams = async (req, res) => {
       hasNextPage: currentPage < totalPage,
     });
   } catch (error) {
-    userLog(req, "View Listening Exams", `Error viewing listening exams: ${error.message}`);
+    userLog(
+      req,
+      "View Listening Exams",
+      `Error viewing listening exams: ${error.message}`
+    );
     res.status(400).json({ code: 400, message: error.message });
   }
 };
@@ -269,10 +360,18 @@ export const detailListeningExam = async (req, res) => {
       return res.status(404).json({ message: "Listening exam not found" });
     }
 
-    userLog(req, "View Listening Exam Detail", `User viewed listening exam detail for slug: ${slug}`);
+    userLog(
+      req,
+      "View Listening Exam Detail",
+      `User viewed listening exam detail for slug: ${slug}`
+    );
     res.status(200).json({ code: 200, listeningExam });
   } catch (error) {
-    userLog(req, "View Listening Exam Detail", `Error viewing listening exam detail: ${error.message}`);
+    userLog(
+      req,
+      "View Listening Exam Detail",
+      `Error viewing listening exam detail: ${error.message}`
+    );
     res.status(400).json({ code: 400, message: error.message });
   }
 };
@@ -312,7 +411,11 @@ export const joinListeningExam = async (req, res) => {
 
     await result.save();
 
-    userLog(req, "Join Listening Exam", `User joined listening exam with ID: ${req.params.examId}`);
+    userLog(
+      req,
+      "Join Listening Exam",
+      `User joined listening exam with ID: ${req.params.examId}`
+    );
     res.status(200).json({
       code: 200,
       title: listeningExam.title,
@@ -322,7 +425,11 @@ export const joinListeningExam = async (req, res) => {
       resultId: result._id,
     });
   } catch (error) {
-    userLog(req, "Join Listening Exam", `Error joining listening exam: ${error.message}`);
+    userLog(
+      req,
+      "Join Listening Exam",
+      `Error joining listening exam: ${error.message}`
+    );
     res
       .status(500)
       .json({ code: 500, message: "Error joining listening exam." });
@@ -368,10 +475,18 @@ export const calculateListeningExamScore = async (req, res) => {
     result.isCompleted = true;
     await result.save();
 
-    userLog(req, "Calculate Listening Exam Score", `User calculated score for result ID: ${resultId}`);
+    userLog(
+      req,
+      "Calculate Listening Exam Score",
+      `User calculated score for result ID: ${resultId}`
+    );
     res.status(200).json({ code: 200, score, correctAnswer, wrongAnswer });
   } catch (error) {
-    userLog(req, "Calculate Listening Exam Score", `Error calculating score: ${error.message}`);
+    userLog(
+      req,
+      "Calculate Listening Exam Score",
+      `Error calculating score: ${error.message}`
+    );
     res.status(500).json({ code: 500, message: "Error calculating score." });
   }
 };

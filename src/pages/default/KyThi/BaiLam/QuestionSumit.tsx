@@ -9,7 +9,6 @@ export type UserAnswer = {
   questionId: string;
   selectedAnswerId?: string;
   userAnswer?: string[];
-  qu;
 };
 
 type QuestionComponentProps = {
@@ -45,10 +44,10 @@ const QuestionSubmit: React.FC<QuestionComponentProps> = ({
     questionId: string,
     selectedAnswerId: string
   ) => {
-    if (viewOnly) return; // Disable interaction if viewOnly
+    if (viewOnly) return;
     const newAnswer: UserAnswer = { questionId, selectedAnswerId };
     setLocalAnswer(newAnswer);
-    onAnswerChange({ ...newAnswer, questionType }); // Include questionType
+    onAnswerChange(newAnswer); // ✅ KHÔNG gửi questionType
   };
 
   const handleFillBlankInputChange = (
@@ -56,7 +55,7 @@ const QuestionSubmit: React.FC<QuestionComponentProps> = ({
     index: number,
     value: string
   ) => {
-    if (viewOnly) return; // Disable interaction if viewOnly
+    if (viewOnly) return;
     let currentUserAnswers: string[] = localAnswer.userAnswer
       ? [...localAnswer.userAnswer]
       : new Array(question.answers ? question.answers.length : 0).fill("");
@@ -66,14 +65,14 @@ const QuestionSubmit: React.FC<QuestionComponentProps> = ({
       userAnswer: currentUserAnswers,
     };
     setLocalAnswer(newAnswer);
-    onAnswerChange({ ...newAnswer, questionType }); // Include questionType
+    onAnswerChange(newAnswer); // ✅ KHÔNG gửi questionType
   };
 
   const handleTrueFalseChange = (questionId: string, value: string) => {
-    if (viewOnly) return; // Disable interaction if viewOnly
+    if (viewOnly) return;
     const newAnswer: UserAnswer = { questionId, userAnswer: [value] };
     setLocalAnswer(newAnswer);
-    onAnswerChange({ ...newAnswer, questionType }); // Include questionType
+    onAnswerChange(newAnswer); // ✅ KHÔNG gửi questionType
   };
 
   const renderFillInBlankContent = () => {

@@ -13,6 +13,7 @@ import {
   TeamOutlined,
   HistoryOutlined,
   TrophyOutlined,
+  SoundOutlined,
 } from "@ant-design/icons";
 import "./Detail.css";
 
@@ -23,13 +24,19 @@ export const DetailExam = () => {
   const [exam, setExam] = useState<Exam | null>(null);
   const [questionCount, setQuestionCount] = useState<number>(0);
   const [isPracticed, setIsPracticed] = useState(false);
+  const [readingCount, setReadingCount] = useState<number>(0); // ✅ Thêm state
+  const [listeningCount, setListeningCount] = useState<number>(0); // ✅ Thêm state
   const navigate = useNavigate();
 
   const fetchExam = async () => {
     const response = await ExamAPIStudent.getDetailExam(_id ?? "");
     if (response.code === 200) {
       setExam(response.exam);
-      setQuestionCount(response.exam.questions.length);
+
+      // ✅ Backend đã tính sẵn
+      setQuestionCount(response.exam.totalQuestions);
+      setReadingCount(response.exam.readingCount || 0);
+      setListeningCount(response.exam.listeningCount || 0);
       setIsPracticed(response.exam.hasDone);
     }
   };
@@ -37,10 +44,36 @@ export const DetailExam = () => {
   const handleJoinExam = async () => {
     if (exam?._id) {
       try {
-        await ExamAPIStudent.joinExam(exam._id);
-        navigate("/KyThi/BaiLam/");
-      } catch (error) {
-        console.error("Error joining exam:", error);
+        console.log("📌 Joining exam with _id:", exam._id);
+
+        // ✅ FIX: Clear localStorage trước khi join
+        localStorage.removeItem("ongoingExamId");
+        localStorage.removeItem("ongoingResultId");
+
+        const response = await ExamAPIStudent.joinExam(exam._id);
+
+        console.log("✅ Join response:", response);
+
+        if (response.code === 200) {
+          // ✅ Lưu exam mới vào localStorage
+          localStorage.setItem("ongoingExamId", exam._id);
+          localStorage.setItem("ongoingResultId", response.resultId);
+
+          navigate("/KyThi/BaiLam/");
+        }
+      } catch (error: any) {
+        console.error("❌ Error joining exam:", error);
+        console.error("Error response:", error.response);
+
+        const errorMessage = error.response?.data?.message || "Lỗi khi tham gia đề thi.";
+
+        if (error.response?.status === 500) {
+          alert(`Lỗi server: ${errorMessage}`);
+        } else if (error.response?.status === 404) {
+          alert("Đề thi không tồn tại hoặc đã bị xóa.");
+        } else {
+          alert(errorMessage);
+        }
       }
     }
   };
@@ -83,6 +116,35 @@ export const DetailExam = () => {
           <AntText className="hero-subtitle">
             Đề thi trắc nghiệm tiếng Anh THPT
           </AntText>
+
+          {/* ✅ Thêm tags ngay dưới subtitle */}
+          <div
+            style={{
+              display: "flex",
+              gap: "12px",
+              marginTop: "16px",
+              justifyContent: "center",
+            }}
+          >
+            {readingCount > 0 && (
+              <Tag
+                icon={<BookOutlined />}
+                color="blue"
+                style={{ fontSize: "14px", padding: "6px 12px" }}
+              >
+                Reading: {readingCount} câu
+              </Tag>
+            )}
+            {listeningCount > 0 && (
+              <Tag
+                icon={<SoundOutlined />}
+                color="green"
+                style={{ fontSize: "14px", padding: "6px 12px" }}
+              >
+                Listening: {listeningCount} câu
+              </Tag>
+            )}
+          </div>
         </div>
       </div>
 
@@ -97,7 +159,7 @@ export const DetailExam = () => {
               </div>
               <div className="stat-content">
                 <div className="stat-value">{questionCount}</div>
-                <div className="stat-label">Câu hỏi</div>
+                <div className="stat-label">Tổng câu hỏi</div>
               </div>
             </div>
           </Col>

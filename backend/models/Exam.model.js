@@ -41,5 +41,10 @@ const ExamSchema = new mongoose.Schema({
   ], // Add this line
 });
 
+// ✅ FIX: Thêm index để query nhanh hơn
+ExamSchema.index({ slug: 1 }); // Index cho slug
+ExamSchema.index({ createdBy: 1, isPublic: 1 }); // Index cho filter
+ExamSchema.index({ createdAt: -1 }); // Index cho sort
+
 const Exam = mongoose.model("Exam", ExamSchema);
 export default Exam;

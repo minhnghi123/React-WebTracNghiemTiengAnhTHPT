@@ -32,6 +32,8 @@ import {
   ClockCircleOutlined,
   QuestionCircleOutlined,
   CheckCircleOutlined,
+  CloseCircleOutlined, // ✅ Thêm import này
+  MinusCircleOutlined, // ✅ Thêm import này
   TrophyOutlined,
   PlayCircleOutlined,
   YoutubeFilled,
@@ -99,18 +101,47 @@ const BaiLam: React.FC = () => {
   useEffect(() => {
     const fetchExamDetails = async () => {
       try {
+        setLoading(true);
+        
+        console.log("📌 Fetching incomplete exam...");
+        
         const response = await ResultAPI.getInCompletedExam();
+        
         if (response.code === 200 && response.results) {
-          setExamDetails(response.results);
+          const examData = response.results;
+          
+          console.log("✅ Loaded exam:", examData.examId._id, examData.examId.title);
+          
+          // ✅ FIX: Update localStorage với exam mới nhất
+          localStorage.setItem("ongoingExamId", examData.examId._id);
+          localStorage.setItem("ongoingResultId", examData._id);
+          
+          setExamDetails(examData);
 
-          // Group questions by passageId
-          const questions = [
-            ...(response.results.examId.questions || []),
-            ...(response.results.examId.listeningExams?.flatMap(
-              (le: any) => le.questions || []
-            ) || []),
-          ];
-          const grouped = questions.reduce(
+          // ✅ FIX: Tách riêng listening questions và reading questions
+          const listeningQuestionIds = new Set();
+          
+          // Collect all listening question IDs
+          if (examData.examId?.listeningExams) {
+            examData.examId.listeningExams.forEach((le: any) => {
+              if (le.questions) {
+                le.questions.forEach((q: any) => {
+                  listeningQuestionIds.add(q._id);
+                });
+              }
+            });
+          }
+          
+          console.log("📌 Listening question IDs:", Array.from(listeningQuestionIds));
+
+          // ✅ Group CHỈ reading questions (lọc bỏ listening questions)
+          const readingQuestions = (examData.examId.questions || []).filter(
+            (q: any) => !listeningQuestionIds.has(q._id)
+          );
+          
+          console.log("📌 Reading questions count:", readingQuestions.length);
+
+          const grouped = readingQuestions.reduce(
             (acc: Record<string, any[]>, question: any) => {
               const passageId =
                 question.passageId?._id || question.passageId || "no-passage";
@@ -120,13 +151,41 @@ const BaiLam: React.FC = () => {
             },
             {}
           );
+          
+          console.log("📌 Grouped questions:", Object.keys(grouped).map(key => ({
+            passageId: key,
+            count: grouped[key].length
+          })));
+          
           setGroupedQuestions(grouped);
 
-          const endTime = new Date(response.results.endTime);
+          const endTime = new Date(examData.endTime);
           endTimeRef.current = endTime;
+        } else {
+          console.warn("⚠️ No incomplete exam found");
+          
+          // ✅ Clear localStorage
+          localStorage.removeItem("ongoingExamId");
+          localStorage.removeItem("ongoingResultId");
+          
+          alert("Không có bài thi nào đang làm dở. Vui lòng chọn một đề thi mới.");
+          setTimeout(() => {
+            window.location.href = "/ky-thi";
+          }, 1500);
         }
       } catch (error) {
-        console.error("Error fetching exam details:", error);
+        console.error("❌ Error fetching exam details:", error);
+        
+        // ✅ Clear localStorage khi có lỗi
+        localStorage.removeItem("ongoingExamId");
+        localStorage.removeItem("ongoingResultId");
+        
+        alert("Lỗi khi tải đề thi. Vui lòng thử lại.");
+        setTimeout(() => {
+          window.location.href = "/ky-thi";
+        }, 1500);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -405,45 +464,57 @@ const BaiLam: React.FC = () => {
 
     const unansweredQuestions = getUnansweredQuestions();
 
+    console.log("📌 Submitting exam with data:");
+    console.log("- Answers:", answers);
+    console.log("- Listening Answers:", listeningAnswers);
+    console.log("- Unanswered Questions:", unansweredQuestions);
+
+    // ✅ FIX: Lấy questionType từ examDetails thay vì groupedQuestions
     const enrichedAnswers = answers.map((ans) => {
-      const question = Object.values(groupedQuestions)
-        .flat()
-        .find((q) => q._id === ans.questionId);
+      // Tìm trong reading questions
+      const question = examDetails.examId.questions?.find(
+        (q: any) => q._id === ans.questionId
+      );
+      
       return {
         questionId: ans.questionId,
-        selectedAnswerId: ans.selectedAnswerId,
-        userAnswer: ans.userAnswer,
-        questionType: question?.questionType || "",
+        selectedAnswerId: ans.selectedAnswerId || null,
+        userAnswer: ans.userAnswer || null,
       };
     });
 
+    // ✅ FIX: Lấy questionType từ listeningExams
     const enrichedListeningAnswers = listeningAnswers.map((ans) => {
-      const question = Object.values(groupedQuestions)
-        .flat()
-        .find((q) => q._id === ans.questionId);
+      // Tìm trong listening exams
+      const question = examDetails.examId.listeningExams
+        ?.flatMap((le: any) => le.questions || [])
+        .find((q: any) => q._id === ans.questionId);
+      
       return {
         questionId: ans.questionId,
-        selectedAnswerId: ans.selectedAnswerId,
-        userAnswer: ans.userAnswer,
-        questionType: question?.questionType || "",
+        selectedAnswerId: ans.selectedAnswerId || null,
+        userAnswer: ans.userAnswer || null,
       };
     });
 
-    const questionTypes = [
-      ...enrichedAnswers.map((ans) => ans.questionType),
-      ...enrichedListeningAnswers.map((ans) => ans.questionType),
-    ];
+    console.log("📌 Enriched data:");
+    console.log("- Enriched Answers:", enrichedAnswers);
+    console.log("- Enriched Listening Answers:", enrichedListeningAnswers);
 
     const submitAnswer: SubmitAnswer = {
       resultId: examDetails._id,
       answers: enrichedAnswers,
       listeningAnswers: enrichedListeningAnswers,
       unansweredQuestions,
-      questionTypes,
     };
+
+    console.log("📌 Final submit data:", submitAnswer);
 
     try {
       const response = await ResultAPI.submitAnswer(submitAnswer);
+      
+      console.log("✅ Submit response:", response);
+      
       if (response.code === 200) {
         setExamresult(response);
         setSuggestedQuestions(response.suggestionQuestion);
@@ -452,10 +523,8 @@ const BaiLam: React.FC = () => {
         setAlertCount(0);
         setIsSubmitModalVisible(false);
 
-        // ✅ FIX: Đảm bảo scroll xuống result section
-        // Đợi React re-render xong
+        // ✅ Scroll to result section
         setTimeout(() => {
-          // Method 1: Scroll bằng scrollIntoView
           const resultSection = document.getElementById("result-section");
           if (resultSection) {
             resultSection.scrollIntoView({
@@ -464,9 +533,8 @@ const BaiLam: React.FC = () => {
             });
           }
 
-          // Method 2: Fallback nếu method 1 không work
           if (resultSectionRef.current) {
-            const yOffset = -20; // Offset từ top
+            const yOffset = -20;
             const element = resultSectionRef.current;
             const y =
               element.getBoundingClientRect().top +
@@ -478,11 +546,15 @@ const BaiLam: React.FC = () => {
               behavior: "smooth",
             });
           }
-        }, 1000); // Tăng delay lên 1 giây để đảm bảo DOM đã render
+        }, 1000);
       }
-    } catch (error) {
-      console.error("Error submitting exam:", error);
-      showAlertModal("Đã xảy ra lỗi khi nộp bài.");
+    } catch (error: any) {
+      console.error("❌ Error submitting exam:", error);
+      console.error("Error response:", error.response?.data);
+      console.error("Error message:", error.message);
+      
+      const errorMessage = error.response?.data?.message || "Đã xảy ra lỗi khi nộp bài.";
+      showAlertModal(errorMessage);
     }
   };
 
@@ -727,86 +799,83 @@ const BaiLam: React.FC = () => {
     <Layout className="exam-layout-container">
       <Layout className="exam-main-layout">
         <Content className="exam-content-modern">
-          {/* Render Listening Sections */}
-          {examDetails?.examId.listeningExams?.map((le: any, idx: number) =>
-            renderListeningSection(le, idx + 1)
-          )}
+          {loading ? (
+            <div style={{ textAlign: "center", padding: "50px" }}>
+              <Spin size="large" />
+              <p>Đang tải đề thi...</p>
+            </div>
+          ) : (
+            <>
+              {/* ✅ PHẦN 1: Render Listening Sections */}
+              {examDetails?.examId?.listeningExams?.map((le: any, idx: number) =>
+                renderListeningSection(le, idx + 1)
+              )}
 
-          {/* Render Non-Listening Questions */}
-          {Object.keys(groupedQuestions).length > 1 ||
-          !groupedQuestions["no-passage"] ? (
-            Object.keys(groupedQuestions).map((passageId, groupIndex) => {
-              const filteredQuestions = groupedQuestions[passageId].filter(
-                (q) =>
-                  !examDetails?.examId.listeningExams?.some((le: any) =>
-                    le.questions.some((lq: any) => lq._id === q._id)
-                  )
-              );
+              {/* ✅ PHẦN 2: Render Reading Questions (có passageId) */}
+              {Object.keys(groupedQuestions)
+                .filter((passageId) => passageId !== "no-passage") // ← CHỈ lấy questions có passage
+                .map((passageId, groupIndex) => {
+                  const questions = groupedQuestions[passageId];
+                  
+                  if (!questions || questions.length === 0) return null;
 
-              if (filteredQuestions.length === 0) return null;
+                  // ✅ Lấy passage info từ question đầu tiên
+                  const passageContent = questions[0]?.passageId?.content;
+                  
+                  if (!passageContent) {
+                    console.warn(`⚠️ Passage ${passageId} has no content`);
+                    return null;
+                  }
 
-              return (
-                <div key={groupIndex} className="passage-container">
-                  {passageId !== "no-passage" &&
-                    filteredQuestions[0]?.passageId?.content && (
-                      <div className="passage-grid">
-                        <div
-                          className="passage-text"
-                          dangerouslySetInnerHTML={{
-                            __html:
-                              filteredQuestions[0].passageId.content.replace(
-                                /\n/g,
-                                "<br />"
-                              ),
-                          }}
-                        ></div>
+                  return (
+                    <div
+                      key={`passage-${passageId}`}
+                      className="passage-container"
+                      style={{ marginBottom: "32px" }}
+                    >
+                      <Card
+                        style={{
+                          marginBottom: "16px",
+                          borderRadius: "12px",
+                          boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+                        }}
+                      >
+                        <Title level={4} style={{ marginBottom: "16px" }}>
+                          📖 Đoạn văn {groupIndex + 1}
+                        </Title>
+                        
+                        {/* ✅ 2-column layout: Passage bên trái, Questions bên phải */}
+                        <div className="passage-grid">
+                          {/* Passage content */}
+                          <div
+                            className="passage-text"
+                            style={{
+                              padding: "16px",
+                              backgroundColor: "#f9fafb",
+                              borderRadius: "8px",
+                              lineHeight: "1.8",
+                            }}
+                            dangerouslySetInnerHTML={{
+                              __html: passageContent.replace(/\n/g, "<br />"),
+                            }}
+                          />
 
-                        <div className="passage-questions-list">
-                          {filteredQuestions.map((q, idx) => {
-                            const questionIndex = globalQuestionIndex++;
-                            return (
-                              <Card
-                                key={q._id || idx}
-                                ref={(el) => {
-                                  if (el)
-                                    questionRefs.current[questionIndex] = el;
-                                }}
-                                className="question-card-modern"
-                              >
-                                <div className="question-actions">
-                                  <img
-                                    src={errorrIcon}
-                                    alt="Báo lỗi"
-                                    onClick={() => handleReportError(q)}
-                                    className="report-icon"
-                                  />
-                                </div>
-
-                                {q.audio ? (
-                                  <>
-                                    <audio
-                                      controls
-                                      className="audio-player-modern"
-                                    >
-                                      <source
-                                        src={q.audio.filePath}
-                                        type="audio/mpeg"
-                                      />
-                                    </audio>
-                                    <ListeningQuestionSubmit
-                                      question={q}
-                                      questionType={q.questionType || ""}
-                                      onAnswerChange={
-                                        handleListeningAnswerChange
-                                      }
-                                      currentAnswer={listeningAnswers.find(
-                                        (ans) => ans.questionId === q._id
-                                      )}
-                                      viewOnly={!!Examresult}
-                                      questionIndex={questionIndex}
-                                    />
-                                  </>
-                                ) : (
+                          {/* Questions list */}
+                          <div className="passage-questions-list">
+                            {questions.map((q: any, idx: number) => {
+                              const questionIndex = globalQuestionIndex++;
+                              return (
+                                <Card
+                                  key={q._id || `q-${idx}`}
+                                  ref={(el) => {
+                                    if (el) questionRefs.current[questionIndex] = el;
+                                  }}
+                                  className="question-card-modern"
+                                  style={{
+                                    marginBottom: "16px",
+                                    borderRadius: "8px",
+                                  }}
+                                >
                                   <QuestionSubmit
                                     question={q}
                                     questionType={q.questionType || ""}
@@ -818,86 +887,64 @@ const BaiLam: React.FC = () => {
                                     viewOnly={!!Examresult}
                                     questionIndex={questionIndex}
                                   />
-                                )}
-                              </Card>
-                            );
-                          })}
+                                </Card>
+                              );
+                            })}
+                          </div>
                         </div>
-                      </div>
-                    )}
-                </div>
-              );
-            })
-          ) : (
-            <div className="questions-list-single">
-              {groupedQuestions["no-passage"]
-                ?.filter(
-                  (q) =>
-                    !examDetails?.examId.listeningExams?.some((le: any) =>
-                      le.questions.some((lq: any) => lq._id === q._id)
-                    )
-                )
-                .map((q, idx) => {
-                  const questionIndex = globalQuestionIndex++;
-                  return (
-                    <Card
-                      key={q._id || idx}
-                      ref={(el) => {
-                        if (el) questionRefs.current[questionIndex] = el;
-                      }}
-                      className="question-card-modern"
-                    >
-                      <div className="question-actions">
-                        <img
-                          src={errorrIcon}
-                          alt="Báo lỗi"
-                          onClick={() => handleReportError(q)}
-                          className="report-icon"
-                        />
-                      </div>
+                      </Card>
+                    </div>
+                  );
+                })}
 
-                      {q.audio ? (
-                        <>
-                          <audio controls className="audio-player-modern">
-                            <source src={q.audio.filePath} type="audio/mpeg" />
-                          </audio>
-                          <ListeningQuestionSubmit
+              {/* ✅ PHẦN 3: Render Standalone Questions (không có passageId) */}
+              {groupedQuestions["no-passage"] &&
+                groupedQuestions["no-passage"].length > 0 && (
+                  <div className="standalone-questions-section" style={{ marginTop: "32px" }}>
+                    <Title level={4} style={{ marginBottom: "16px" }}>
+                      📝 Câu hỏi riêng lẻ
+                    </Title>
+                    {groupedQuestions["no-passage"].map((q: any, idx: number) => {
+                      const questionIndex = globalQuestionIndex++;
+                      return (
+                        <Card
+                          key={q._id || `standalone-${idx}`}
+                          ref={(el) => {
+                            if (el) questionRefs.current[questionIndex] = el;
+                          }}
+                          className="question-card-modern"
+                          style={{
+                            marginBottom: "16px",
+                            borderRadius: "12px",
+                            boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+                          }}
+                        >
+                          <QuestionSubmit
                             question={q}
                             questionType={q.questionType || ""}
-                            onAnswerChange={handleListeningAnswerChange}
-                            currentAnswer={listeningAnswers.find(
+                            onAnswerChange={handleAnswerChange}
+                            currentAnswer={answers.find(
                               (ans) => ans.questionId === q._id
                             )}
+                            index={questionIndex}
                             viewOnly={!!Examresult}
                             questionIndex={questionIndex}
                           />
-                        </>
-                      ) : (
-                        <QuestionSubmit
-                          question={q}
-                          questionType={q.questionType || ""}
-                          onAnswerChange={handleAnswerChange}
-                          currentAnswer={answers.find(
-                            (ans) => ans.questionId === q._id
-                          )}
-                          index={questionIndex}
-                          viewOnly={!!Examresult}
-                          questionIndex={questionIndex}
-                        />
-                      )}
-                    </Card>
-                  );
-                })}
-            </div>
+                        </Card>
+                      );
+                    })}
+                  </div>
+                )}
+            </>
           )}
 
-          {/* Result Section - ✅ Thêm ID và ref để dễ scroll */}
+          {/* Result Section */}
           {Examresult && (
             <div
               className="result-section-modern"
               ref={resultSectionRef}
               id="result-section"
-              style={{ scrollMarginTop: "20px" }} // ✅ Thêm margin khi scroll
+              style={{ scrollMarginTop: "20px" }}
             >
               <Card className="result-card-main" bordered={false}>
                 <div className="result-header">
@@ -930,16 +977,29 @@ const BaiLam: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="result-stat-card time-card">
-                    <div className="stat-icon-wrapper">
-                      <ClockCircleOutlined />
+                  {/* ✅ FIX: Thêm stat card cho Wrong Answer */}
+                  <div className="result-stat-card wrong-card">
+                    <div className="stat-icon-wrapper" style={{ color: "#ef4444" }}>
+                      <CloseCircleOutlined />
                     </div>
                     <div className="stat-info">
-                      <div className="stat-number">
-                        {examDetails?.examId.duration -
-                          Math.floor(remainingTime / 60)}
+                      <div className="stat-number" style={{ color: "#ef4444" }}>
+                        {Examresult.wrongAnswer}
                       </div>
-                      <div className="stat-label">Phút đã làm</div>
+                      <div className="stat-label">Câu sai</div>
+                    </div>
+                  </div>
+
+                  {/* ✅ FIX: Thêm stat card cho Skipped Questions */}
+                  <div className="result-stat-card skipped-card">
+                    <div className="stat-icon-wrapper" style={{ color: "#9ca3af" }}>
+                      <MinusCircleOutlined />
+                    </div>
+                    <div className="stat-info">
+                      <div className="stat-number" style={{ color: "#9ca3af" }}>
+                        {Examresult.skippedCount || 0}
+                      </div>
+                      <div className="stat-label">Câu bỏ qua</div>
                     </div>
                   </div>
                 </div>
@@ -952,16 +1012,13 @@ const BaiLam: React.FC = () => {
                   <div className="chart-container">
                     {(() => {
                       const correctCount = Examresult.correctAnswer || 0;
+                      const wrongCount = Examresult.wrongAnswer || 0;
+                      const skippedCount = Examresult.skippedCount || 0;
                       const totalQuestions = Examresult.totalQuestion || 0;
-                      const answeredCount =
-                        (Examresult.details?.length || 0) +
-                        (Examresult.listeningQuestions?.length || 0);
-                      const incorrectCount = answeredCount - correctCount;
-                      const skippedCount = totalQuestions - answeredCount;
 
                       const chartData = [
                         { type: "Đúng", value: correctCount },
-                        { type: "Sai", value: incorrectCount },
+                        { type: "Sai", value: wrongCount },
                         { type: "Bỏ qua", value: skippedCount },
                       ];
 
@@ -976,10 +1033,7 @@ const BaiLam: React.FC = () => {
                           position: "bottom" as const,
                           itemName: {
                             formatter: (text: string, item: any) => {
-                              const percentage = (
-                                (item.value / totalQuestions) *
-                                100
-                              ).toFixed(1);
+                              const percentage = ((item.value / totalQuestions) * 100).toFixed(1);
                               return `${text}: ${item.value} (${percentage}%)`;
                             },
                           },

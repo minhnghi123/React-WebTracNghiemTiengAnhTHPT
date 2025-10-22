@@ -1,87 +1,101 @@
 import mongoose from "mongoose";
 
-const ResultSchema = new mongoose.Schema({
-  examId: { type: mongoose.Schema.Types.ObjectId, ref: "Exam", required: true },
-  userId: {
+const QuestionDetailSchema = new mongoose.Schema({
+  questionId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "TaiKhoan",
     required: true,
   },
-  score: { type: Number, required: true },
-  classroomId: { type: mongoose.Schema.Types.ObjectId, ref: "Classroom" },
-  correctAnswer: { type: Number, required: true },
-  wrongAnswer: { type: Number, required: true },
-  questions: [
+  content: {
+    type: String,
+    required: false, // ✅ FIX: Bỏ required vì listening questions dùng questionText
+  },
+  answers: [
     {
-      questionId: {
+      _id: mongoose.Schema.Types.ObjectId,
+      text: String,
+      correctAnswerForBlank: String,
+      isCorrect: Boolean,
+    },
+  ],
+  userAnswers: [
+    {
+      userAnswer: mongoose.Schema.Types.Mixed,
+      answerId: mongoose.Schema.Types.ObjectId,
+      isCorrect: Boolean,
+    },
+  ],
+  selectedAnswerId: mongoose.Schema.Types.ObjectId,
+  correctAnswerForBlank: [String],
+  correctAnswerForTrueFalseNGV: [String],
+  audio: mongoose.Schema.Types.ObjectId,
+  isCorrect: {
+    type: Boolean,
+    default: false,
+  },
+  isSkipped: {
+    type: Boolean,
+    default: false,
+  },
+});
+
+const ResultSchema = new mongoose.Schema(
+  {
+    examId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Exam",
+      required: true,
+    },
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "TaiKhoan",
+      required: true,
+    },
+    score: {
+      type: Number,
+      default: 0,
+    },
+    correctAnswer: {
+      type: Number,
+      default: 0,
+    },
+    wrongAnswer: {
+      type: Number,
+      default: 0,
+    },
+    questions: [QuestionDetailSchema],
+    listeningQuestions: [QuestionDetailSchema],
+    suggestionQuestion: [
+      {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Question",
-        required: true,
       },
-      content: { type: String, required: true, default: " " },
-      answers: [
-        {
-          _id: { type: mongoose.Schema.Types.ObjectId, required: true },
-          text: { type: String },
-          correctAnswerForBlank: { type: String },
-          isCorrect: { type: Boolean, required: true },
-        },
-      ],
-      selectedAnswerId: { type: mongoose.Schema.Types.ObjectId },
-      userAnswers: [
-        {
-          userAnswer: { type: String },
-          answerId: { type: mongoose.Schema.Types.ObjectId, ref: "Answer" },
-          isCorrect: { type: Boolean, default: false },
-        },
-      ],
-      correctAnswerForTrueFalseNGV: [{ type: String }],
-      isCorrect: { type: Boolean, required: true },
-      isSkipped: { type: Boolean, default: false }, // Thêm field isSkipped
+    ],
+    wrongAnswerByKnowledge: {
+      type: Map,
+      of: Number,
+      default: {},
     },
-  ],
-  listeningQuestions: [
-    {
-      questionId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "ListeningQuestion",
-        required: true,
-      },
-      content: { type: String, required: true, default: " " },
-      answers: [
-        {
-          _id: { type: mongoose.Schema.Types.ObjectId, required: true },
-          text: { type: String },
-          correctAnswerForBlank: { type: String },
-          isCorrect: { type: Boolean, required: true },
-        },
-      ],
-      selectedAnswerId: { type: mongoose.Schema.Types.ObjectId },
-      userAnswers: [
-        {
-          userAnswer: { type: String },
-          answerId: { type: mongoose.Schema.Types.ObjectId, ref: "Answer" },
-          isCorrect: { type: Boolean, default: false },
-        },
-      ],
-      correctAnswerForTrueFalseNGV: [{ type: String }],
-      isCorrect: { type: Boolean, required: true },
-      isSkipped: { type: Boolean, default: false }, // Thêm field isSkipped
+    answerDetail: {
+      type: String,
+      default: "",
     },
-  ],
-  createdAt: { type: Date, default: Date.now },
-  isDeleted: { type: Boolean, default: false },
-  suggestionQuestion: {
-    type: Array,
-    default: [],
+    isCompleted: {
+      type: Boolean,
+      default: false,
+    },
+    endTime: {
+      type: Date,
+      required: true,
+    },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
   },
-  wrongAnswerByKnowledge: {
-    type: Object,
-    default: {},
-  },
-  isCompleted: { type: Boolean, default: false },
-  endTime: { type: Date },
-});
+  {
+    timestamps: true,
+  }
+);
 
 const Result = mongoose.model("Result", ResultSchema);
 export default Result;

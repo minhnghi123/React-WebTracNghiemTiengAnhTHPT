@@ -48,7 +48,11 @@ export const getAllExams = async (req, res) => {
     // Đếm tổng số đề thi thỏa mãn bộ lọc
     const total = await Exam.countDocuments(filter);
     // Phản hồi thành công
-    userLog(req, "Fetch Exams", "Fetched all exams with filters and pagination.");
+    userLog(
+      req,
+      "Fetch Exams",
+      "Fetched all exams with filters and pagination."
+    );
     return res.status(200).json({
       success: true,
       message: "Lấy danh sách đề thi thành công!",
@@ -93,7 +97,11 @@ export const getExamDetail = async (req, res) => {
     }
 
     // Phản hồi thành công với thông tin đề thi
-    userLog(req, "Fetch Exam Detail", `Fetched details for exam with slug: ${req.params.slug}`);
+    userLog(
+      req,
+      "Fetch Exam Detail",
+      `Fetched details for exam with slug: ${req.params.slug}`
+    );
     return res.status(200).json({
       success: true,
       message: "Lấy thông tin đề thi thành công!",
@@ -133,7 +141,11 @@ export const toggleExamVisibility = async (req, res) => {
     await exam.save();
 
     // Phản hồi thành công
-    userLog(req, "Toggle Exam Visibility", `Toggled visibility for exam with ID: ${req.params.id}`);
+    userLog(
+      req,
+      "Toggle Exam Visibility",
+      `Toggled visibility for exam with ID: ${req.params.id}`
+    );
     return res.status(200).json({
       success: true,
       message: `Đề thi đã được ${
@@ -226,7 +238,19 @@ export const createExam = async (req, res) => {
 // [PATCH]: teacher/exam/update/:slug
 export const updateExam = async (req, res) => {
   try {
-    const { slug } = req.params; // Lấy slug từ URL
+    const { slug } = req.params;
+
+    // ✅ FIX: Validate slug
+    if (!slug || slug === 'undefined' || slug === '[object Object]') {
+      console.error("❌ Invalid slug received:", slug);
+      return res.status(400).json({
+        success: false,
+        message: "Slug không hợp lệ!",
+      });
+    }
+
+    console.log("📌 Updating exam with slug:", slug);
+
     const {
       title,
       description,
@@ -236,9 +260,9 @@ export const updateExam = async (req, res) => {
       startTime,
       endTime,
       listeningExams,
-      class: examClass, // Add this line
-      topic, // Add this line
-      knowledge, // Add this line
+      class: examClass,
+      topic,
+      knowledge,
     } = req.body;
 
     if (startTime && endTime && new Date(startTime) >= new Date(endTime)) {
@@ -260,14 +284,13 @@ export const updateExam = async (req, res) => {
         startTime,
         endTime,
         listeningExams,
-        class: examClass, // Add this line
-        topic: topic || [], // Add this line
-        knowledge: knowledge || [], // Add this line
+        class: examClass,
+        topic: topic || [],
+        knowledge: knowledge || [],
       },
-      { new: true, runValidators: true } // Trả về tài liệu sau khi cập nhật
+      { new: true, runValidators: true }
     );
 
-    // Nếu không tìm thấy đề thi, trả về lỗi 404
     if (!updatedExam) {
       return res.status(404).json({
         success: false,
@@ -275,7 +298,6 @@ export const updateExam = async (req, res) => {
       });
     }
 
-    // Phản hồi thành công
     userLog(req, "Update Exam", `Updated exam with slug: ${req.params.slug}`);
     return res.status(200).json({
       success: true,
@@ -283,7 +305,7 @@ export const updateExam = async (req, res) => {
       data: updatedExam,
     });
   } catch (error) {
-    // Xử lý lỗi server
+    console.error("❌ Error updating exam:", error);
     return res.status(500).json({
       success: false,
       message: "Lỗi server! Không thể cập nhật đề thi.",
@@ -368,7 +390,11 @@ export const setExamSchedule = async (req, res) => {
     }
 
     // Phản hồi thành công
-    userLog(req, "Set Exam Schedule", `Set schedule for exam with ID: ${req.params.id}`);
+    userLog(
+      req,
+      "Set Exam Schedule",
+      `Set schedule for exam with ID: ${req.params.id}`
+    );
     return res.status(200).json({
       success: true,
       message: "Lịch thi đã được cập nhật thành công!",
@@ -983,7 +1009,11 @@ export const importExamFromExcel = async (req, res) => {
 
       await newExam.save();
 
-      userLog(req, "Import Exam from Excel", "Imported exam from an Excel file.");
+      userLog(
+        req,
+        "Import Exam from Excel",
+        "Imported exam from an Excel file."
+      );
       return res.status(200).json({
         success: true,
         message: "Import exam successfully!",
@@ -1119,7 +1149,11 @@ export const importExamFromExcel = async (req, res) => {
       });
       await newExam.save();
 
-      userLog(req, "Import Exam from Excel", "Imported exam from an Excel file.");
+      userLog(
+        req,
+        "Import Exam from Excel",
+        "Imported exam from an Excel file."
+      );
       return res.status(200).json({
         success: true,
         message: "Import exam successfully (only questions)!",
