@@ -1,6 +1,6 @@
 services:
   frontend:
-    build: 
+    build:
       context: .
       dockerfile: Dockerfile.fe
       args:
@@ -15,16 +15,18 @@ services:
       - "80"
     networks:
       - webnet
+    restart: always
     env_file:
       - .env
     depends_on:
       - backend
 
   backend:
-    build: 
+    build:
       context: .
       dockerfile: Dockerfile.be
     image: aliennguyenn/p2nenglish-be:latest
+    restart: always
     expose:
       - "5000"
     networks:
@@ -49,6 +51,7 @@ services:
       context: .
       dockerfile: Dockerfile.proxy
     image: aliennguyenn/p2nenglish-proxy:latest
+    restart: always
     ports:
       - "80:80"
     depends_on:
