@@ -65,6 +65,8 @@ indexClient(app);
 indexTeacher(app);
 indexAdmin(app);
 
+console.log("Fixing CI/CD for backend ");
+
 app.use((req, res, next) => {
   res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
   next();
