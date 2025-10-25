@@ -66,7 +66,7 @@ export const Home: React.FC = () => {
             </h1>
             <p className="hero-description">
               Học tập thông minh, nâng cao kỹ năng với hệ thống đề thi chuẩn
-              hóa, kho tài liệu phong phú và cộng đồng học viên năng động.
+              hóa, kho tài liệu phong phú và cộng đồng học viên năng động.OK!
             </p>
             <div className="hero-buttons">
               <AppLink to={isLoggedIn ? "/KyThi" : "/Login"}>
@@ -128,7 +128,11 @@ export const Home: React.FC = () => {
           <Col xs={24} sm={12} md={8}>
             <Card className="stat-card" bordered={false}>
               <div className="stat-icon-wrapper">
-                <span className="stat-icon-svg" role="img" aria-label="students">
+                <span
+                  className="stat-icon-svg"
+                  role="img"
+                  aria-label="students"
+                >
                   ⭐
                 </span>
               </div>
